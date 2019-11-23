@@ -6,11 +6,14 @@ package com.ssm.promotion.core.util.enums;
 
 public enum ManagerType {
     //
+//    SuperManager("SuperManager", 1000),
+//    SpManager("SpManager", 500),
+//    SpMember("SpMember", 100),
+//    CommonMember("CommonMember", 0);
     SuperManager("超级管理员", 1000),
     SpManager("渠道管理员", 500),
     SpMember("渠道成员", 100),
     CommonMember("普通成员", 0);
-
 
     private String name;
     private int id;

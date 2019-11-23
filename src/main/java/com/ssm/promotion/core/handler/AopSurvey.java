@@ -28,6 +28,25 @@ public class AopSurvey {
     @Resource
     UserService service;
 
+    /**
+     * 转换int列表
+     */
+    public static List<Integer> convertIntList(String str) {
+        String[] strs = str.split(StringUtil.COMMA);
+        if (strs.length > 0) {
+            List<Integer> intList = new ArrayList<>();
+            for (String string : strs) {
+                int func = Integer.parseInt(string);
+                if (intList.contains(func)) {
+                    continue;
+                }
+                intList.add(func);
+            }
+            return intList;
+        }
+        return null;
+    }
+
     private void verifyMethod(JoinPoint pjp) throws Exception {
         //参数
         Object[] obj = pjp.getArgs();
@@ -129,6 +148,8 @@ public class AopSurvey {
             case "getTotalUser":
             case "addUser":
             case "deleteUser":
+            case "getFuncList":
+            case "getFuncById":
                 type = FunctionType.AccountManagement;
                 break;
             default:
@@ -156,6 +177,8 @@ public class AopSurvey {
             case "getTotalUser":
             case "addUser":
             case "deleteUser":
+            case "getFuncList":
+            case "getFuncById":
                 result = true;
                 break;
             default:
@@ -187,7 +210,6 @@ public class AopSurvey {
         return result;
     }
 
-
     /**
      * 过滤
      */
@@ -198,24 +220,5 @@ public class AopSurvey {
             result = true;
         }
         return result;
-    }
-
-    /**
-     * 转换int列表
-     */
-    public static List<Integer> convertIntList(String str) {
-        String[] strs = str.split(StringUtil.COMMA);
-        if (strs.length > 0) {
-            List<Integer> intList = new ArrayList<>();
-            for (String string : strs) {
-                int func = Integer.parseInt(string);
-                if (intList.contains(func)) {
-                    continue;
-                }
-                intList.add(func);
-            }
-            return intList;
-        }
-        return null;
     }
 }

@@ -22,8 +22,8 @@
     <![endif]-->
     <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <script src="/js/login.js"></script>
-    <script src="/js/common.js"></script>
+    <script src="${pageContext.request.contextPath}/js/login.js"></script>
+    <script src="${pageContext.request.contextPath}/js/common.js"></script>
 </head>
 
 <body class="gray-bg">
@@ -31,7 +31,7 @@
 <div class="middle-box text-center loginscreen  animated fadeInDown">
     <div>
         <div>
-            <h1 class="logo-name">13</h1>
+            <h1 class="logo-name">指 悦</h1>
         </div>
         <h3>欢迎使用 指悦游戏后台</h3>
 
@@ -46,16 +46,15 @@
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 
-            <button type="button" class="btn btn-primary block full-width m-b" onclick="javascript:login();">
+            <button type="button" class="btn btn-primary block full-width m-b" onclick="login();">
                 登 录
             </button>
 
             <p class="text-muted text-center">
-                <a href="##" onclick="javascript:adminlogin.reset();return false;">
+                <a href="##" onclick="adminlogin.reset();return false;">
                     <small>重置</small>
                 </a>
             </p>
-
         </form>
     </div>
 </div>

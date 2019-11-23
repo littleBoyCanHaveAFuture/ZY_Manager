@@ -5,6 +5,8 @@ import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.entity.User;
+import com.ssm.promotion.core.entity.UserFunc;
+import com.ssm.promotion.core.service.UserFuncService;
 import com.ssm.promotion.core.service.UserService;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;
 import com.ssm.promotion.core.util.MD5Util;
@@ -26,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.ssm.promotion.core.util.enums.ManagerType.*;
-
 /**
  * @author 1034683568@qq.com
  * @project_name perfect-ssm
@@ -36,10 +36,12 @@ import static com.ssm.promotion.core.util.enums.ManagerType.*;
 @Controller
 @RequestMapping("/users")
 public class UserController {
-    @Resource
-    private UserService userService;
     // 日志文件
     private static final Logger log = Logger.getLogger(UserController.class);
+    @Resource
+    private UserService userService;
+    @Resource
+    private UserFuncService userFuncService;
     /**
      * 自动注入request
      */
@@ -231,5 +233,27 @@ public class UserController {
         }
         log.info("request: article/delete , ids: " + ids);
         return ResultGenerator.genSuccessResult();
+    }
+
+    /**
+     * 修改
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getFuncList", method = RequestMethod.POST)
+    @ResponseBody
+    public List<UserFunc> getFuncList() throws Exception {
+        Integer userId = getUserId();
+//        if (userId == null) {
+//            return ResultGenerator.genRelogin();
+//        }
+
+        List<UserFunc> userFuncList = userFuncService.getFuncList(userId);
+
+        log.info("request: user/getFuncList , user: " + userId);
+
+        return userFuncList;
+
     }
 }

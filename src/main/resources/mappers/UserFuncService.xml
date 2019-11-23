@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ssm.promotion.core.dao.UserFuncDao">
+
+    <resultMap id="funcResult" type="com.ssm.promotion.core.entity.UserFunc">
+        <result property="id" column="id"/>
+        <result property="parent" column="parent"/>
+        <result property="name" column="name"/>
+        <result property="webId" column="webId"/>
+        <result property="url" column="url"/>
+    </resultMap>
+
+    <sql id="select_func_column">
+        SELECT id,
+               parent,
+               name,
+               webId,
+               url
+        FROM zy_func
+    </sql>
+
+    <select id="getFuncById" parameterType="int" resultMap="funcResult">
+        <include refid="select_func_column"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="getFuncList" resultMap="funcResult">
+        <include refid="select_func_column"/>
+        ORDER BY id
+    </select>
+</mapper>

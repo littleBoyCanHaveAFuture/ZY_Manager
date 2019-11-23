@@ -1,28 +1,34 @@
 function setCookie(name, value) {
     var Days = 30;
-    var exp = new Date();
-    exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
-    document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+    var d = new Date();
+    d.setTime(d.getTime() + (Days * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toGMTString();
+    document.cookie = name + "=" + value + "; " + expires;
 }
 
-function getCookie(name) {
-    var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
-    if (arr === document.cookie.match(reg))
-        return unescape(arr[2]);
-    else
-        return null;
+function getCookies(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+    }
+    return "";
 }
+
 
 function delCookie(name) {
     var exp = new Date();
     exp.setTime(exp.getTime() - 1);
-    var cval = getCookie(name);
+    var cval = getCookies(name);
     if (cval != null)
         document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
 }
 
-function checkCookie() {
-    if (getCookie("userName") == null || getCookie("roleName") == null) {
+
+function checkCookies() {
+    console.log("checkCookie");
+    if (getCookies("userName") == null || getCookies("roleName") == null) {
         alert("未登录!");
         window.location.href = "login.jsp";
     }

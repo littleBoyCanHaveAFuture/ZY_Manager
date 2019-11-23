@@ -1,5 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
+<%
+    Cookie[] cookies = request.getCookies();
+    String username = "";
+    String roleName = "";
+    if (cookies != null) {
+        for (Cookie tmp : cookies) {
+            if (tmp != null) {
+//                System.out.println(tmp.getName() + ":" + tmp.getValue());
+                if (("userName").equals(tmp.getName())) {
+                    username = tmp.getValue();
+                }
+                if (("roleName").equals(tmp.getName())) {
+                    roleName = tmp.getValue();
+                }
+            }
+        }
+    }
+%>
 <!DOCTYPE html PUBLIC "-//W3C//Dtd HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -16,8 +34,9 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
+
     <script type="text/javascript">
-        checkCookie();
+        checkCookies();
         var url;
 
         function addTab(url, text, iconCls) {
@@ -63,27 +82,29 @@
                     });
         }
     </script>
+
 <body class="easyui-layout">
 <div region="north" style="height: 78px;background-color: #ffff">
     <table width="100%">
         <tr>
-            <td width="50%"></td>
+            <td width="50%">
+            </td>
             <td valign="bottom" style="font-size: 20px;color:#8B8B8B;font-family: '楷体',serif;"
                 align="right" width="50%">
-                <span style="font-size: small; ">
-                    <strong>当前管理员：</strong>#{getCookie("userName")}
-                </span>【管理员】
+                <font size="3">&nbsp;&nbsp;<strong>当前用户：</strong><%=username%>
+                </font>【<%=roleName%>】
             </td>
-
         </tr>
         <tr>
-            <td width="50%"></td>
+            <td width="50%">
             <td valign="bottom" style="font-size: 20px;color:#8B8B8B;font-family: '楷体',serif;"
                 align="right" width="50%">
-                <a href="javascript:logout()"
-                   class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-exit'" style="width: 150px;"> 安全退出
+                <a href="javascript:logout()" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-exit'"
+                   style="width: 150px;">
+                    安全退出
                 </a>
             </td>
+
         </tr>
     </table>
 </div>
@@ -145,9 +166,9 @@
                class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">
                 管理员列表
             </a>
-            <a href="javascript:logout()" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-exit'"
-               style="width: 150px;">
-                安全退出
+            <a href="javascript:openTab(' 测试','selecttest.jsp','icon-lxr')"
+               class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">
+                测试
             </a>
         </div>
 

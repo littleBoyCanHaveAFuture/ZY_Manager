@@ -26,6 +26,29 @@ $(function () {
             $.messager.alert("ERROR！", "查询失败");
         }
     });
+    // initDoubleChoice();
+    //权限复选下拉框 初始化
+    $.ajax({
+        //获取下拉
+        url: "/users/getFuncList",
+        type: "post",
+        async: false,
+        data: {},
+        dataType: "json",
+        success: function (combobox) {//动态设置玩家渠道下拉列表
+            for (var int = 0; int < combobox.length; int++) {
+                $("#authority").append("<option value='" + combobox[int].id + "'>" + combobox[int].name + "</option>");
+            }
+        }
+    });
+    $("#authority").multipleSelect({
+        placeholder: "请选择",
+        width: 500,
+        multiple: true,
+        multipleWidth: 150
+
+    });
+    $('select').multipleSelect()
 });
 var url = "${pageContext.request.contextPath}/users";
 var method;
@@ -83,6 +106,7 @@ function deleteUser() {
 function openUserAddDialog() {
     $("#dlg").dialog("open").dialog("setTitle", "添加用户信息");
     method = "POST";
+
 }
 
 function saveUser() {
@@ -140,15 +164,22 @@ function openUserModifyDialog() {
     $('#fm').form('load', row);
     $("#password").val("******");
     $("#userId").val(row.id);
+
     method = "PUT";
 }
 
 function resetValue() {
     $("#userName").val("");
+    $("#roleName").val("");
+    $("#mamagerLv").val("");
+    $("#agents").val("");
+    $("#spId").val("");
     $("#password").val("");
+    $("#func").val("");
 }
 
 function closeUserDialog() {
+    console.log("close");
     $("#dlg").dialog("close");
     resetValue();
 }
@@ -167,4 +198,84 @@ function relogin() {
                 parent.location.href = "../login.jsp";
             }
         });
+}
+
+var rankNameData = [
+    // {key: "所有", value: -1},
+    {key: "10000 ", value: 10000},
+    {key: "20000 ", value: 20000},
+    {key: "30000 ", value: 30000},
+    {key: "40000 ", value: 40000},
+    {key: "50000 ", value: 50000},
+    {key: "60000 ", value: 60000},
+];
+
+//给复选框赋值
+function initDoubleChoice() {
+    var t = document.getElementById("addUserTable");
+    if (rankNameData.length > 0) {
+        var r = t.insertRow(t.rows.length);//创建新的行
+        var c = r.insertCell();//创建新的列
+        c.innerHTML = "开放模块：";
+
+        for (var i = 0; i < rankNameData.length; i++) {
+            //tr
+            if (i % 4 === 0) {
+                var r = t.insertRow(t.rows.length);//创建新的行
+            }
+            //td
+            var c = r.insertCell(); 			   //创建新的列
+            c.innerHTML = "<input type=checkbox value='" + rankNameData[i].value + "' name=checks onclick=oneChoice()>" + rankNameData[i].key;
+            // $("#rankType").append("<option value='" + rankNameData[i].value + "'>" + rankNameData[i].key + "</option>");
+            $("#rankType").append("<option >" + "<input type=checkbox value='" + rankNameData[i].value + "' name=checks onclick=oneChoice()>" + rankNameData[i].key + "</option>");
+        }
+    } else {
+        var r = t.insertRow();
+        var c = r.insertCell();
+        c.innerHTML = "暂无主题列表";
+    }
+    // document.getElementById('addUserTable').appendChild(t);
+}
+
+//声明函数
+function beginGet() {
+    //首先我们要得到多选框中有一些什么样的值
+    var elementsByName = document.getElementsByName;
+    var date = elementsByName("save_mamagerLv");
+    //然后我们去得到这个多选框的长度
+    //使用字符串数组，用于存放选择好了的数据
+    var str = "";
+    for (var i = 0; i < date.length; i++) {
+        if (date[i].checked === true) {
+
+            str += date[i].value;//这个是获取多选框中的值
+            if (i !== date.length - 1) {
+                str += ",";
+            }
+        }
+    }
+}
+
+//下拉选复选框单选事件
+function oneChoice() {
+    var obj = $('[name="checks"]');
+    var check_val = [];
+    for (k in obj) {
+        if (obj[k].checked && obj[k].value !== "0")
+            check_val.push(obj[k].value);
+    }
+    console.log(check_val);
+    // $('[name="save_func"]').val()
+}
+
+$("#authority").multipleSelect({
+    placeholder: "请选择",
+    width: 500,
+    multiple: true,
+    multipleWidth: 150
+
+});
+
+function show() {
+    $("#col-sm-10").show();
 }
