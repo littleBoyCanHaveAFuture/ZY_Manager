@@ -145,11 +145,15 @@
                     }
                     console.log(id);
                     console.log(name);
-                    $("#qqq").append("<optgroup label='" + name[0] + "'>");
+                    var selects = "";
+                    // $("#qqq").append("<optgroup label='" + name[0] + "'>");
                     for (var i = 1; i < num; i++) {
-                        $("#qqq").append("<option value='" + id[i] + "'>" + name[i] + "</option>");
+                        // $("#qqq").append("<option value='" + id[i] + "'>" + name[i] + "</option>");
+                        selects += "<option value='" + id[i] + "'>" + name[i] + "</option>";
                     }
-                    $("#qqq").append("</optgroup>");
+                    // $("#qqq").append("</optgroup>");
+                    $("#qqq").append("<optgroup label='" + name[0] + "'>" + selects + "</optgroup>");
+
                     start = end;
                 }
             }
