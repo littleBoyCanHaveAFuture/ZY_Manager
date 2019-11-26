@@ -1,21 +1,15 @@
 package com.ssm.promotion.core.service.impl;
 
-import java.util.HashMap;
+import com.ssm.promotion.core.dao.UserDao;
+import com.ssm.promotion.core.entity.User;
+import com.ssm.promotion.core.service.UserService;
+import com.ssm.promotion.core.util.AntiXssUtil;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
-
-import com.ssm.promotion.core.common.ResultGenerator;
-import com.ssm.promotion.core.entity.User;
-import com.ssm.promotion.core.util.AntiXssUtil;
-import lombok.Data;
-import org.springframework.stereotype.Service;
-
-import com.ssm.promotion.core.dao.UserDao;
-import com.ssm.promotion.core.service.UserService;
 
 /**
  * 此路径和 aop 的路径分开
@@ -24,6 +18,8 @@ import com.ssm.promotion.core.service.UserService;
 @Service("userService")
 public class UserServiceImpl implements UserService {
     private static Map<Integer, User> managerMap = new ConcurrentHashMap<>();
+    @Resource
+    private UserDao userDao;
 
     public static User getUser(Integer userId) {
         return managerMap.get(userId);
@@ -36,9 +32,6 @@ public class UserServiceImpl implements UserService {
     public void removeManager(Integer userId) {
         managerMap.remove(userId);
     }
-
-    @Resource
-    private UserDao userDao;
 
     @Override
     public User login(User user) {
@@ -53,6 +46,12 @@ public class UserServiceImpl implements UserService {
     public List<User> findUser(Map<String, Object> map, Integer userId) {
         List<User> result = userDao.findUsers(map);
         return result;
+    }
+
+    @Override
+    public Long getTotalSameUser(Map<String, Object> map, Integer userId) {
+        Long res = userDao.getTotalSameUser(map);
+        return res;
     }
 
     @Override

@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Hello, Multiple Select!</title>
 
-    <%--    <link rel="stylesheet" href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css">--%>
-    <%--    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>--%>
-    <%--    <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>--%>
+    <%--        <link rel="stylesheet" href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css">--%>
+    <%--        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>--%>
+    <%--        <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>--%>
 
 
     <link rel="stylesheet" type="text/css"
@@ -28,87 +28,69 @@
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
-    <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/userManager.js"></script>
 
     <style>
         select {
-            width: 50%;
+            width: 20%;
         }
     </style>
 </head>
 <body>
-<!-- Single Select -->
-<label>
-    <select>
-        <option value="1">January</option>
-        <option value="2">February</option>
-        <option value="3">March</option>
-        <option value="4">April</option>
-        <option value="5">May</option>
-        <option value="6">June</option>
-        <option value="7">July</option>
-        <option value="8">August</option>
-        <option value="9">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-    </select>
-</label>
+<button id="setSelectsBtn" class="btn btn-secondary">SetSelects</button>
+<button id="getSelectsBtn" class="btn btn-secondary">GetSelects</button>
+<table id=addUserTable cellspacing="8px">
+    <tr>
+        <td>用户名：</td>
+        <td>
+            <label for="save_userName"></label>
+            <input type="text" id="save_userName" name="userName" class="easyui-validatebox" required="true"/>
+            <span style="color: red; ">*</span>
+            <input type="hidden" id="userId" value="0">
+        </td>
+    </tr>
+    <tr>
+        <td>密码：</td>
+        <td>
+            <label for="save_password"></label>
+            <input type="text" id="save_password" name="" class="easyui-validatebox" required="false"/>
+        </td>
+    </tr>
+    <tr>
+        <td>管理员权限：</td>
+        <td>
+            <label for="save_mamagerLv"></label>
+            <%--                    <input type="text" id="save_mamagerLv" name="mamagerLv" class="easyui-validatebox" required="true"/>--%>
+            <input type="radio" id="save_mamagerLv" name="mamagerLv" value="1000" checked/>超级管理员
+            <input type="radio" id="save_mamagerLv" name="mamagerLv" value="500" checked/>渠道管理员
+            <input type="radio" id="save_mamagerLv" name="mamagerLv" value="100" checked/>渠道成员
+            <input type="radio" id="save_mamagerLv" name="mamagerLv" value="0" checked/>普通成员
+        </td>
+    </tr>
+    <tr>
+        <td>渠道id：</td>
+        <td>
+            <label for="save_agents"></label>
+            <input type="text" id="save_agents" name="" class="easyui-validatebox" required="false"/>
+        </td>
+    </tr>
+    <tr>
+        <td>模块权限：</td>
+        <td>
+            <select title="选择模块" multiple="multiple" name="ddd" size="5" id="qqq">
+            </select>
+        </td>
+    </tr>
 
-<!-- Multiple Select -->
-<label>
-    <select multiple="multiple">
-        <option value="1">January</option>
-        <option value="2">February</option>
-        <option value="3">March</option>
-        <option value="4">April</option>
-        <option value="5">May</option>
-        <option value="6">June</option>
-        <option value="7">July</option>
-        <option value="8">August</option>
-        <option value="9">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-    </select>
-</label>
-<div class="form-group row">
-    <label class="col-sm-2">
-        Multiple Select
-    </label>
+    <tr>
+        <td><a href="javascript:saveUsers()" class="easyui-linkbutton" iconCls="icon-ok">保存</a></td>
+        <td><a href="javascript:custom_close()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+    </tr>
 
-    <div class="col-sm-10">
-        <select multiple="multiple" class="multiple-select">
-            <optgroup label="Group 1">
-                <option value="1">Option 1</option>
-                <option value="2">Option 2</option>
-                <option value="3">Option 3</option>
-            </optgroup>
-            <optgroup label="Group 2">
-                <option value="4">Option 4</option>
-                <option value="5">Option 5</option>
-                <option value="6">Option 6</option>
-            </optgroup>
-            <optgroup label="Group 3">
-                <option value="7">Option 7</option>
-                <option value="8">Option 8</option>
-                <option value="9">Option 9</option>
-            </optgroup>
-        </select>
-    </div>
-</div>
-<div class="col-sm-10">
-    <label class="qqq">
-        模块权限：
-    </label>
-    <select title="选择模块" multiple="multiple" name="ddd" size="10" id="qqq">
-        <%--    <select multiple="multiple" class="multiple-select" id="qqq">--%>
-        <tr></tr>
-    </select>
-</div>
+</table>
+
 
 <script type="text/javascript">
+    var $select = $('select');
     $(function () {
         // 初始化内容 先加载完列表
         $.ajax({
@@ -146,27 +128,100 @@
                     console.log(id);
                     console.log(name);
                     var selects = "";
-                    // $("#qqq").append("<optgroup label='" + name[0] + "'>");
                     for (var i = 1; i < num; i++) {
-                        // $("#qqq").append("<option value='" + id[i] + "'>" + name[i] + "</option>");
-                        selects += "<option value='" + id[i] + "'>" + name[i] + "</option>";
+                        selects += "<option id=save_func value='" + id[i] + "'>" + name[i] + "</option>";
                     }
-                    // $("#qqq").append("</optgroup>");
-                    $("#qqq").append("<optgroup label='" + name[0] + "'>" + selects + "</optgroup>");
-
+                    // $("#qqq").append("<optgroup label='" + name[0] + "'>" + selects + "</optgroup>");
+                    $("#qqq").append(selects);
                     start = end;
                 }
             }
         });
-        $('select').multipleSelect()
+
         $("#qqq").multipleSelect({
             placeholder: "请选择",
             width: 250,
             multiple: true,
             multipleWidth: 150,
         });
-    })
+        // $('select').multipleSelect();
+
+    });
+    $('#setSelectsBtn').click(function () {
+        $select.multipleSelect('setSelects', [1, 3])
+    });
+
+    $('#getSelectsBtn').click(function () {
+        alert('Selected values: ' + $select.multipleSelect('getSelects'));
+        alert('Selected texts: ' + $select.multipleSelect('getSelects', 'text'))
+    });
+
+    function saveUsers() {
+        console.log("saveUser");
+        var userName = $("#save_userName").val();
+        var password = $("#save_password").val();
+        var managerLv = $("#save_mamagerLv").val();
+        var agents = $("#save_agents").val();
+        var func = parseToString();
+        var id = $("#userId").val();
+        var data = {
+            "userName": userName,
+            "password": password,
+            "func": func,
+            "managerLv": managerLv,
+            "agents": agents
+        };
+        console.log(data);
+        $.ajax({
+            url: "/users/addUser",
+            type: "post",//方法类型
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+            dataType: "json",//预期服务器返回的数据类型
+            async: false,
+            success: function (result) {
+                console.log(result);//打印服务端返回的数据
+                if (result.resultCode === 200) {
+                    $.messager.alert("系统提示", "保存成功");
+                    $("#dlg").dialog("close");
+                    $("#dg").datagrid("reload");
+                    resetValue();
+                } else if (result.resultCode === 501) {
+                    relogin();
+                } else {
+                    $.messager.alert("系统提示", "操作失败");
+                    $("#dlg").dialog("close");
+                    resetValue();
+                }
+            },
+            error: function () {
+                $.messager.alert("系统提示", "操作失败");
+            }
+        });
+    }
+
+    function parseToString() {
+        var func = $select.multipleSelect('getSelects');
+        var res = "";
+        var first = false;
+        for (k in func) {
+            if (first) {
+                res += ",";
+            } else if (!first) {
+                first = true;
+            }
+            res += func[k];
+        }
+        console.log(res);
+        return res;
+    }
+
+    function custom_close() {
+        window.opener = null;
+        window.open('', '_self');
+        window.close();
+        window.location.href = "userManage.jsp";
+    }
 </script>
 
 </body>
-</html>

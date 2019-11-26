@@ -31,9 +31,20 @@ public class ResultGenerator {
         result.setMessage(message);
         return result;
     }
+
     public static Result genRelogin() {
         Result result = new Result();
         result.setResultCode(Constants.RESULT_CODE_SERVER_RELOGIN);
+        return result;
+    }
+
+    public static Result genFailResults(String message) {
+        Result result = new Result();
+        result.setResultCode(Constants.RESULT_CODE_FAIL);
+        if (message == null || message.length() < 1) {
+            message = DEFAULT_FAIL_MESSAGE;
+        }
+        result.setMessage(message);
         return result;
     }
 }

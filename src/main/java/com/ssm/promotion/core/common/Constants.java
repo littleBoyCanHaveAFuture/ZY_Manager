@@ -11,5 +11,6 @@ public class Constants {
     public static final int RESULT_CODE_SERVER_RELOGIN = 501;//重新登录
     public static final String ARTICLE_CACHE_KEY = "perfect-ssm:article:";//文章key
     public static final String PICTURE_CACHE_KEY = "perfect-ssm:picture:";//图片key
+    public static final int RESULT_CODE_FAIL = 600;
 
 }

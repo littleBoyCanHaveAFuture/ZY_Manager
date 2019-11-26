@@ -162,6 +162,16 @@ public class UserController {
             return ResultGenerator.genRelogin();
         }
         User currUser = UserServiceImpl.getUser(userId);
+
+        //参数校验
+        if (user.getUserName() == null) {
+            return ResultGenerator.genFailResults("用户名为空");
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("userName", user.getUserName());
+        if (userService.getTotalSameUser(map, userId) > 0) {
+            return ResultGenerator.genFailResults("用户名重复");
+        }
         //用户权限
         ManagerType currType = ManagerType.pareseTo(currUser.getManagerLv());
         ManagerType addype = ManagerType.pareseTo(user.getManagerLv());
@@ -199,8 +209,26 @@ public class UserController {
         if (userId == null) {
             return ResultGenerator.genRelogin();
         }
-        String MD5pwd = MD5Util.MD5Encode(user.getPassword(), "UTF-8");
+        User currUser = UserServiceImpl.getUser(userId);
+        if (currUser == null) {
+            return ResultGenerator.genRelogin();
+        }
+        String MD5pwd = null;
+        if (user.getPassword() != null && !user.getPassword().equals("******")) {
+            MD5pwd = MD5Util.MD5Encode(user.getPassword(), "UTF-8");
+        }
+        if (user.getId() == null) {
+            return ResultGenerator.genFailResult("FAIL");
+        }
+        if (user.getManagerLv() == null) {
+            return ResultGenerator.genFailResult("FAIL");
+        }
+        if (!ManagerType.canAddMemberInteger(currUser.getManagerLv(), user.getManagerLv())) {
+            return ResultGenerator.genFailResults("权限错误，无法添加");
+        }
         user.setPassword(MD5pwd);
+        user.setRoleName(ManagerType.pareseTo(user.getManagerLv()).getName());
+        System.out.println("user:" + user.toString());
         int resultTotal = userService.updateUser(user, userId);
         log.info("request: user/update , user: " + user.toString());
         if (resultTotal > 0) {

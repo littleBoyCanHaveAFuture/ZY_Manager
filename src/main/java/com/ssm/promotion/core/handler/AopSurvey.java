@@ -150,6 +150,7 @@ public class AopSurvey {
             case "deleteUser":
             case "getFuncList":
             case "getFuncById":
+            case "getTotalSameUser":
                 type = FunctionType.AccountManagement;
                 break;
             default:
@@ -179,6 +180,7 @@ public class AopSurvey {
             case "deleteUser":
             case "getFuncList":
             case "getFuncById":
+            case "getTotalSameUser":
                 result = true;
                 break;
             default:

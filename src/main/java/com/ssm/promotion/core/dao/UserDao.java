@@ -59,4 +59,6 @@ public interface UserDao {
      * @return
      */
     public int deleteUser(Integer id);
+
+    Long getTotalSameUser(Map<String, Object> map);
 }

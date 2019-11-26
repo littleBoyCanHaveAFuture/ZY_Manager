@@ -58,23 +58,26 @@
     <update id="updateUser" parameterType="User">
         update ssm_user
         <set>
-            <if test="userName!=null and userName!='' ">
-                user_name=#{userName}
+            <if test="userName!=null and userName!=''">
+                user_name=#{userName},
             </if>
             <if test="password!=null and password!='' ">
-                AND password=#{password}
+                password=#{password},
+            </if>
+            <if test="roleName!=null and roleName!=''  ">
+                role_name=#{roleName},
             </if>
             <if test="func!=null and func!='' ">
-                AND func=#{func}
+                func=#{func},
             </if>
-            <if test="managerLv!=null and managerLv!='' ">
-                AND manager_lv=#{managerLv}
+            <if test="managerLv!=null  ">
+                manager_lv=#{managerLv},
             </if>
             <if test="spId!=null and spId!='' ">
-                AND spId=#{spId}
+                spId=#{spId},
             </if>
             <if test="agents!=null and agents!='' ">
-                AND agents=#{agents}
+                agents=#{agents}
             </if>
         </set>
         where id=#{id}
@@ -84,4 +87,12 @@
         delete from ssm_user
         where id=#{id}
     </delete>
+    <select id="getTotalSameUser" parameterType="Map" resultType="long">
+        select count(*) from ssm_user
+        <where>
+            <if test="userName!=null and userName!='' ">
+                AND user_name=#{userName}
+            </if>
+        </where>
+    </select>
 </mapper> 

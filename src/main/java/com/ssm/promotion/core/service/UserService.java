@@ -1,9 +1,9 @@
 package com.ssm.promotion.core.service;
 
+import com.ssm.promotion.core.entity.User;
+
 import java.util.List;
 import java.util.Map;
-
-import com.ssm.promotion.core.entity.User;
 
 /**
  * @author 1034683568@qq.com
@@ -26,6 +26,16 @@ public interface UserService {
      * @return
      */
     public List<User> findUser(Map<String, Object> map, Integer userId);
+
+    /**
+     * 判断是否有该用户
+     *
+     * @param map
+     * @param userId 当前操作的玩家id
+     * @return
+     */
+    public Long getTotalSameUser(Map<String, Object> map, Integer userId);
+
 
     /**
      * @param map

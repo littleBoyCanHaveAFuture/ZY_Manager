@@ -36,6 +36,7 @@ public class User {
                 ", func=" + func +
                 ", manager_lv=" + managerLv +
                 ", spId=" + spId +
+                ", agents=" + agents +
                 "]";
     }
 
