@@ -1,7 +1,5 @@
 package com.ssm.promotion.core.util;
 
-import org.apache.commons.lang.time.DateUtils;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +14,7 @@ import java.util.List;
 public class DateUtil {
     private static final long DAY_MILLIS = 86400000L;
     private static final String FORMAT_YYMMDD = "yyyyMMdd";
+    private static final String JS_FORMAT_YYMMDD = "MM/dd/yyyy HH:mm";
 
     public static String formatDate(Date date, String format) {
         String result = "";
@@ -66,9 +65,21 @@ public class DateUtil {
         return null;
     }
 
-    public static void main(String[] args) {
-        Date end = new Date();
-        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
-        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
+    public static String formatJsTime(String startTime) throws Exception {
+        System.out.println(startTime);
+        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
+        return formatDate(d, FORMAT_YYMMDD);
+    }
+
+    public static void main(String[] args) throws Exception {
+//        Date end = new Date();
+//        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
+//        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
+
+
+        String startTime = "12/01/2019 00:00";
+        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
+        String ss = formatDate(d, FORMAT_YYMMDD);
+        System.out.println(ss);
     }
 }

@@ -128,16 +128,19 @@ public class RedisKeyBody {
             //时间 yyyyMMdd
             bodys.append(DATE).append(COLON);
             bodys.append(day);
+            bodys.append(NUMBER_SIGN);
         } else if ("-1".equals(times)) {
 
         } else {
             bodys.append(COLON);
             bodys.append(DATE).append(COLON);
             bodys.append(times);
+            bodys.append(NUMBER_SIGN);
         }
         return bodys.toString();
     }
 
+    //不能混用
     public static String appendBodyTail(String body, String tail) throws Exception {
         StringBuilder bodys = new StringBuilder();
         bodys.append(body);

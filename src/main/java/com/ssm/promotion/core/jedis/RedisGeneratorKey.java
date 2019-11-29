@@ -45,7 +45,7 @@ public class RedisGeneratorKey {
         //头
         key.append(header).append(COLON);
         //身
-        key.append(body).append(NUMBER_SIGN);
+        key.append(body);
 
         System.out.println(key.toString());
         return key.toString();

@@ -75,17 +75,28 @@ public class JedisRechargeCache {
             Pipeline pipeline = jds.pipelined();
             //时间遍历
             for (String times : timeList) {
-                String key = RedisKeyBody.appendBodyTimes(keyBody, times);
-                key = RedisKeyBody.appendBodyTail(key, keyTail);
+                String key = RedisKeyBody.appendBodyTimes(keyBody, times) + keyTail;
+
+                System.out.println("getDayZScore key:member-->" + key + "  " + member);
+
+//                byte[] skey = SerializeUtil.serialize(key);
+//                byte[] smember = SerializeUtil.serialize(member);
+                //test
+                if (!jds.exists(key)) {
+                    jds.zadd(key, 0, member);
+                }
                 pipeline.zscore(key, member);
             }
             List<Object> res = pipeline.syncAndReturnAll();
             Map<String, Double> map = new LinkedHashMap<>();
             for (int i = 0; i < timeList.size(); i++) {
                 String times = timeList.get(i);
-                Double nums = (double) res.get(i);
-                map.put(times, nums);
-                System.out.println("getZScore key:value" + times + ":" + nums);
+                Object num = res.get(i);
+                if (num != null) {
+                    Double nums = Double.parseDouble(num.toString());
+                    map.put(times, nums);
+//                    System.out.println("getDayZScore key:value" + times + ":" + nums);
+                }
             }
             return map;
         } catch (Exception e) {
@@ -106,9 +117,15 @@ public class JedisRechargeCache {
 
             String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
 
-            byte[] skey = SerializeUtil.serialize(key);
-            byte[] smember = SerializeUtil.serialize(member);
-            return jds.zscore(skey, smember);
+//            byte[] skey = SerializeUtil.serialize(key);
+//            byte[] smember = SerializeUtil.serialize(member);
+            System.out.println("getZscore key:member-->" + key + " " + member);
+
+            //test
+            jds.zadd(key, 1D, member);
+
+
+            return jds.zscore(key, member);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -132,8 +149,13 @@ public class JedisRechargeCache {
             Pipeline pipeline = jds.pipelined();
             //时间遍历
             for (String times : timeList) {
-                String key = RedisKeyBody.appendBodyTimes(keyBody, times);
-                key = RedisKeyBody.appendBodyTail(key, keyTail);
+                String key = RedisKeyBody.appendBodyTimes(keyBody, times) + keyTail;
+
+                System.out.println("getDayBitmapCount key:" + key);
+                //test
+                if (!jds.exists(key)) {
+                    jds.setbit(key, 10000000L, true);
+                }
                 pipeline.bitcount(key);
             }
 
@@ -142,9 +164,9 @@ public class JedisRechargeCache {
             Map<String, Double> map = new LinkedHashMap<>();
             for (int i = 0; i < timeList.size(); i++) {
                 String times = timeList.get(i);
-                Double nums = (double) res.get(i);
+                Double nums = Double.parseDouble(res.get(i).toString());
                 map.put(times, nums);
-                System.out.println("getDayBitmapCount key:value" + times + ":" + nums);
+//                System.out.println("getDayBitmapCount key:value" + times + ":" + nums);
             }
             return map;
         } catch (Exception e) {
@@ -159,6 +181,7 @@ public class JedisRechargeCache {
     /**
      * redis 管道
      * 获取 bitset
+     * 可能为空
      */
     public BitSet getBitSet(String keyBody, String keyTail) {
         Jedis jds = null;
@@ -168,14 +191,25 @@ public class JedisRechargeCache {
             jds.select(DB_INDEX);
 
             BitSet all = new BitSet();
-
             String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
 
             byte[] skey = SerializeUtil.serialize(key);
-            BitSet users = BitSet.valueOf(jds.get(skey));
-            all.or(users);
 
-            return all;
+            //test
+            if (!jds.exists(skey)) {
+                jds.setbit(skey, 10000000L, true);
+            }
+            byte[] value = jds.get(skey);
+
+
+            System.out.println("getBitSet key:" + key);
+
+            if (value != null || value.length > 0) {
+                BitSet users = BitSet.valueOf(value);
+                all.or(users);
+                return all;
+            }
+            return null;
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -199,8 +233,12 @@ public class JedisRechargeCache {
             BitSet all = new BitSet();
 
             String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
-
-            byte[] skey = SerializeUtil.serialize(key);
+            System.out.println("getBitSetCount key:" + key);
+//            byte[] skey = SerializeUtil.serialize(key);
+            //test
+            if (!jds.exists(key)) {
+                jds.setbit(key, 10000000L, true);
+            }
             return jds.bitcount(key);
 
         } catch (Exception e) {
@@ -228,10 +266,21 @@ public class JedisRechargeCache {
             Pipeline pipeline = jds.pipelined();
 
             for (String times : timeList) {
-                String destkey = RedisKeyBody.appendBodyTimes(destKey, times);
-                destkey = RedisKeyBody.appendBodyTail(destkey, destBodyTail);
-                String srckey = RedisKeyBody.appendBodyTimes(srcKey, times);
-                srckey = RedisKeyBody.appendBodyTail(srckey, destBodyTail);
+                String srckey = RedisKeyBody.appendBodyTimes(srcKey, times) + srcBodyTail;
+                String destkey = RedisKeyBody.appendBodyTimes(destKey, times) + destBodyTail;
+
+
+                System.out.println("getDayBitopAnd srckey:" + srckey);
+                System.out.println("getDayBitopAnd destkey:" + destkey);
+
+                //test
+                if (!jds.exists(destkey)) {
+                    jds.setbit(destkey, 1000000L, true);
+                }
+                if (!jds.exists(srckey)) {
+                    jds.setbit(srckey, 1000000L, true);
+                }
+
                 //每天的 新增创角去除滚服 账号数目
                 pipeline.bitop(BitOP.AND, destkey, srckey);
             }
@@ -239,7 +288,7 @@ public class JedisRechargeCache {
             Map<String, Double> map = new LinkedHashMap<>();
             for (int i = 0; i < timeList.size(); i++) {
                 String times = timeList.get(i);
-                Double nums = (double) res.get(i);
+                Double nums = Double.parseDouble(res.get(i).toString());
                 map.put(times, nums);
                 System.out.println("getDayBitopAnd key:value" + times + ":" + nums);
             }

@@ -51,7 +51,12 @@ public class RechargeSummary {
      * :当日创建新角色的账号数目/所有账号的数目
      */
     public Double createAccountRate;
-
+    /**
+     * 创号转化率
+     * :忠诚用户数量：本周登陆3次以上（当天重复登陆算1次），最高角色等级超过15级，在线时长超过14小时的帐号
+     * :转化率：上周登录的用户在本周转化为忠诚用户的比例
+     */
+    public Double createAccountTransRate;
     /**
      * 活跃玩家
      * :当日上线的玩家账号数目
@@ -123,6 +128,21 @@ public class RechargeSummary {
      * : 当日注册并且充值的玩家支付金额数目/当日注册并且充值的玩家账号数目
      */
     public int registeredPaymentARPU;
+//分服
+    /**
+     * 服务器id
+     */
+    public int serverId;
+    /**
+     * 开服天数
+     */
+    public int openDay;
+
+    /**
+     * 新增玩家
+     */
+    public int newaddplayer;
+
 
 //    分服概况\分渠道
     /**
@@ -134,6 +154,7 @@ public class RechargeSummary {
      * 累计创角
      */
     public double totalCreateRole;
+
 
     /**
      * 累计充值人数
@@ -170,6 +191,7 @@ public class RechargeSummary {
                 "newAddCreateRole:" + newAddCreateRole + "\n" +
                 "newAddCreateRoleRemoveOld:" + newAddCreateRoleRemoveOld + "\n" +
                 "createAccountRate:" + createAccountRate + "\n" +
+                "createAccountTransRate:" + createAccountTransRate +
                 "activePlayer:" + activePlayer + "\n" +
                 "rechargeTimes:" + rechargeTimes + "\n" +
                 "rechargeNumber:" + rechargeNumber + "\n" +
@@ -181,6 +203,7 @@ public class RechargeSummary {
                 "nofPayment:" + nofPayment + "\n" +
                 "registeredPayers:" + registeredPayers + "\n" +
                 "registeredPayment:" + registeredPayment + "\n" +
+                "serverId:" + serverId +
                 "totalPayment:" + totalPayment + "\n" +
                 "totalCreateRole:" + totalCreateRole + "\n" +
                 "totalRechargeNums:" + totalRechargeNums + "\n" +

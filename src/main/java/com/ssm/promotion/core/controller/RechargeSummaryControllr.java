@@ -1,9 +1,12 @@
 package com.ssm.promotion.core.controller;
 
+import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.ResponseUtil;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,7 +44,7 @@ public class RechargeSummaryControllr {
     }
 
 
-    @RequestMapping(value = "/searchRechargeSummary", method = RequestMethod.GET)
+    @RequestMapping(value = "/searchRechargeSummary", method = RequestMethod.POST)
     @ResponseBody
     public void searchRechargeSummary(Integer type,
                                       Integer gameId, Integer serverId, Integer spId,
@@ -62,40 +65,62 @@ public class RechargeSummaryControllr {
         map.put("startTime", startTime);
         map.put("endTime", endTime);
 
-        if (type == 3) {
-            //游戏分渠道查看数据
-            //需要参数 gameId serverId
-            //查询渠道
-            if (gameId == null || serverId == null) {
+        System.out.println("start:" + System.currentTimeMillis());
+        List<RechargeSummary> list = null;
+        switch (type) {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3: {
+                //游戏分渠道查看数据
+                //需要参数 gameId serverId
+                //查询渠道
+                if (gameId == null || serverId == null || gameId == -1 || serverId == -1) {
 //                ResponseUtil.
-                return;
-            }
-            List<String> spidStrList = new LinkedList<>();
-            List<Integer> spidIntList = new LinkedList<>();
-            List<String> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
-            for (String spidList : serverInfos) {
-                if (spidList.contains(",")) {
-                    String[] spilt = spidList.split(",");
-                    for (String spid : spilt) {
-                        if (!spidIntList.contains(spid)) {
-                            spidIntList.add(Integer.parseInt(spid));
-                        }
-                        spidStrList.add(spid);
-                    }
-                } else {
-                    Integer spid = Integer.parseInt(spidList);
-                    if (!spidIntList.contains(spid)) {
-                        spidIntList.add(spid);
-                    }
-                    spidStrList.add(spidList);
+                    break;
                 }
-            }
-            if (spidStrList.size() == 0) {
-                return;
-            }
-            List<RechargeSummary> list = this.rechargeSummaryServices.getRechargeSummary(map, spidStrList, userId);
-        }
+                List<String> spidStrList = new LinkedList<>();
+                List<Integer> spidIntList = new LinkedList<>();
+                List<String> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
+                for (String spidList : serverInfos) {
+                    if (spidList.contains(",")) {
+                        String[] spilt = spidList.split(",");
+                        for (String spid : spilt) {
+                            if (!spidIntList.contains(spid)) {
+                                spidIntList.add(Integer.parseInt(spid));
+                            }
+                            spidStrList.add(spid);
+                        }
+                    } else {
+                        Integer spid = Integer.parseInt(spidList);
+                        if (!spidIntList.contains(spid)) {
+                            spidIntList.add(spid);
+                        }
+                        spidStrList.add(spidList);
+                    }
+                }
+                if (spidStrList.size() == 0) {
+                    break;
+                }
 
+                //查询redis
+                list = this.rechargeSummaryServices.getRechargeSummary(map, spidStrList, userId);
+            }
+            break;
+            default:
+                break;
+        }
+        System.out.println("end:" + System.currentTimeMillis());
+        JSONObject result = new JSONObject();
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        result.put("rows", jsonArray);
+        result.put("total", list == null ? 0 : list.size());
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+
+        System.out.println("request: rechargeSummary/searchRechargeSummary , map: " + result.toString());
+        log.info("request: rechargeSummary/searchRechargeSummary , map: " + map.toString());
 
     }
 }

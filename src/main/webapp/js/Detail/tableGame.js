@@ -9,25 +9,7 @@ function exportToLocal() {
     // $('#dg').datagrid('print', 'DataGrid'); // print the datagrid
 }
 
-function search() {
-    $("#ActivePlayer").val();
-    $("#Recharge_Times").val();
-    $("#Recharge_Number").val();
-    $("#Recharge_Payment").val();
-    $("#ActivePayRate").val();
-    $("#ARPU_Paid").val();
-    $("#ARPU_Active").val();
-    $("#NOF_Payers").val();
-    $("#NOF_Payment").val();
-    $("#Registered_Payers").val();
-    $("#Registered_Payment").val();
-    $("#Registered_Payment_ARPU").val();
-
-    $("#data").val();
-    $("#NA_CreateAccount").val();
-    $("#NA_CreateRole").val();
-    $("#NA_CreateRole_ReomveOld").val();
-    $("#CreateAccount_Rate").val();
+function search(type) {
 
     $.ajax({
         //获取下拉
@@ -59,62 +41,60 @@ function relogin() {
 
 function initTableColumns() {
     $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
-    let frozenColumns = [];
     let activeColumns = [];
     let commonResult = {
-        "活跃玩家": "ActivePlayer",
-        "充值次数": "Recharge_Times",
-        "充值人数": "Recharge_Number",
-        "充值金额": "Recharge_Payment",
-        "活跃付费率": "ActivePayRate",
-        "付费ARPU": "ARPU_Paid",
-        "活跃ARPU": "ARPU_Active",
-        "当日首次付费人数": "NOF_Payers",
-        "当日首次付费金额": "NOF_Payment",
-        "注册付费人数": "Registered_Payers",
-        "注册付费金额": "Registered_Payment",
-        "注册付费ARPU": "Registered_Payment_ARPU"
+        "日期": "date",
+        // "服务器": "serverId",
+        // "渠道id": "spId",
+        // "开服天数": "openDay",
+        // "新增玩家": "newaddplayer",
+        "新增创号": "newAddCreateAccount",
+        "新增创角": "newAddCreateRole",
+        "新增创角去除滚服": "newAddCreateRoleRemoveOld",
+        "创角率": "createAccountRate",
+        // "创号转化率":"createAccountTransRate",
 
+        "活跃玩家": "activePlayer",
+        "充值次数": "rechargeTimes",
+        "充值人数": "rechargeNumber",
+        "充值金额": "RechargePayment",
+        "活跃付费率": "activePayRate",
+        "付费ARPU": "paidARPU",
+        "活跃ARPU": "activeARPU",
+        "当日首次付费人数": "nofPayers",
+        "当日首次付费金额": "nofPayment",
+        "注册付费人数": "registeredPayers",
+        "注册付费金额": "registeredPayment",
+        "注册付费ARPU": "registeredPaymentARPU",
+//分服
+//     "累计充值": "totalPayment",
+//     "累计创角": "totalCreateRole",
+//     "累计充值人数": "totalRechargeNums",
+//     "总付费率": "totalRechargeRates",
+//渠道
+//     "注收比": "zhushoubi",
+//     "新增注收比": "addzhushoubi"
     };
-    let activeResult = {
-        "headers": [
-            {
-                "日期": "data",
-                "新增创号": "NA_CreateAccount",
-                "新增创角": "NA_CreateRole",
-                "新增创角去除滚服": "NA_CreateRole_ReomveOld",
-                "创角率": "CreateAccount_Rate"
-            }
-        ], "bodys": [
-            // {"name": "LNG", "count": "50000", "Jan": "20000", "Feb": "30000"}
-        ]
-    };
+
     $.each(commonResult, function (index, value) {
         let column = {};
         column["field"] = value;
         column["title"] = index;
         column["align"] = 'center';
         column["width"] = 50;
-        frozenColumns.push(column);
+        activeColumns.push(column);
     });
 
-    $.each(activeResult.headers[0], function (index, value) {
-        let column = {};
-        column["field"] = value;
-        column["title"] = index;
-        column["align"] = 'center';
-        column["width"] = 50;
-        activeColumns.push(column);//当需要formatter的时候自己添加就可以了,原理就是拼接字符串.
-    });
     let dg = $("#dg");
     let opts = dg.datagrid('options');
     let pager = dg.datagrid('getPager');
 
     dg.datagrid({
         frozenColumns: [[]], columns: [
-            activeColumns.concat(frozenColumns)
+            activeColumns
         ],
-    }).datagrid('loadData', activeResult.bodys);
+    });
+    // .datagrid('loadData', activeResult.bodys);
 
 }
 
@@ -141,7 +121,7 @@ function initGameList() {
             $.messager.alert("ERROR！", "获取游戏列表出错");
         }
     });
-};
+}
 
 function initServerList(type) {
     let gameId = $('#save_gameId').val();
@@ -190,9 +170,4 @@ function initServerList(type) {
             $.messager.alert("ERROR！", "获取游戏列表出错");
         }
     });
-}
-
-function search() {
-    let s = $('#save_serverId').val();
-    console.log("ssssssss:" + s);
 }

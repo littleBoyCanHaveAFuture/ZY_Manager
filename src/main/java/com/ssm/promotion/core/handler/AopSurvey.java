@@ -92,6 +92,7 @@ public class AopSurvey {
             case NONE:
                 break;
             case GameDetail:
+                isFuncs = containGameDetail(signature, allFuncsList);
                 break;
             case PlayerInfo:
                 break;
@@ -135,6 +136,8 @@ public class AopSurvey {
         FunctionType type = FunctionType.NONE;
 
         switch (signature) {
+            case "containGameDetail":
+                type = FunctionType.GameDetail;
             case "getServerList":
             case "addServer":
             case "updateServer":
@@ -169,6 +172,25 @@ public class AopSurvey {
         }
         log.info("AopSurvey:  checkType = " + type + " operation >>>> " + signature);
         return type;
+    }
+
+    /**
+     * 账号管理权限
+     */
+    private boolean containGameDetail(String signature, List<Integer> allFuncsList) {
+        if (allFuncsList.contains(FunctionType.GameDetail.getId())) {
+            return true;
+        }
+        boolean result = false;
+        //详细权限
+        switch (signature) {
+            case "getRechargeSummary":
+                result = true;
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     /**

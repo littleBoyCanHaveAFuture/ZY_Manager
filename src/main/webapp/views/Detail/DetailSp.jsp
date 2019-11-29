@@ -26,7 +26,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/datagrid-export/datagrid-export.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/GameDetail/GameDetailTotal.js"></script>
+            src="${pageContext.request.contextPath}/js/Detail/tableSp.js"></script>
 </head>
 <body style="margin:1px;">
 
