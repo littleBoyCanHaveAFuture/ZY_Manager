@@ -36,4 +36,14 @@ public interface ServerListDao {
      * 有登录地址的
      */
     Long getTotalServers(Map<String, Object> map);
+
+    /**
+     * 不同的渠道id
+     */
+    List<String> selectDistinctSpId(Map<String, Object> map);
+
+    /**
+     * 不同的区服id
+     */
+    List<String> selectDistinctServerId(Map<String, Object> map);
 }

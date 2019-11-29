@@ -35,7 +35,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public int addArticle(Article article) {
+    public int addArticle(Article article,Integer userId) {
         if (article.getArticleTitle() == null || article.getArticleContent() == null || getTotalArticle(null) > 90 || article.getArticleContent().length() > 50000) {
             return 0;
         }

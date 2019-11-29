@@ -29,7 +29,7 @@ public interface ArticleService {
 	 * @param article
 	 * @return
 	 */
-	public int addArticle(Article article);
+	public int addArticle(Article article,Integer userId);
 
 	/**
 	 * 修改文章

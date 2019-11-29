@@ -1,6 +1,12 @@
 package com.ssm.promotion.core.util.enums;
 
 /**
+ * 管理员权限
+ * 1.最高管理员 可以查看修改所有成员      1000
+ * 2.渠道管理员 可以查看修改所有同渠道的  500
+ * 3.渠道普通成员 只能查看自己           100
+ * 4.普通成员                          0
+
  * @author tgzwmkkkk
  */
 

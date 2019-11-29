@@ -140,6 +140,17 @@ public class AopSurvey {
             case "updateServer":
             case "delServer":
             case "getTotalServers":
+
+            case "getRechargeSummary":
+            case "getGameList":
+            case "getDistinctServerInfo":
+                //文章
+            case "findArticle":
+            case "getTotalArticle":
+            case "addArticle":
+            case "updateArticle":
+            case "deleteArticle":
+            case "findById":
                 type = FunctionType.ServerManagement;
                 break;
             case "login":
@@ -204,6 +215,16 @@ public class AopSurvey {
             case "updateServer":
             case "delServer":
             case "getTotalServers":
+            case "getRechargeSummary":
+            case "getGameList":
+            case "getDistinctServerInfo":
+                //文章
+            case "findArticle":
+            case "getTotalArticle":
+            case "addArticle":
+            case "updateArticle":
+            case "deleteArticle":
+            case "findById":
                 result = true;
                 break;
             default:

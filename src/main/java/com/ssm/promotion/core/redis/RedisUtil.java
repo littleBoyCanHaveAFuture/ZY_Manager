@@ -5,7 +5,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by 13 on 2017/12/4.
+ * @author 13
+ * @date 2017/12/4
  */
 @Component
 public class RedisUtil {
@@ -23,7 +24,8 @@ public class RedisUtil {
     }
 
     public void init() {
-        template = SpringUtil.getBean("redisTemplate");//RedisCacheConfig中定义了
+        //RedisCacheConfig中定义了
+        template = SpringUtil.getBean("redisTemplate");
         cache = new RedisCache(CACHE_NAME, CACHE_NAME.getBytes(), template, EXPIRE_TIME);
     }
 

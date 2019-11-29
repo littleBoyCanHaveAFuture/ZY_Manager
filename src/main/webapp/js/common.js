@@ -28,7 +28,9 @@ function delCookie(name) {
 
 function checkCookies() {
     console.log("checkCookie");
-    if (getCookies("userName") == null || getCookies("roleName") == null) {
+    let userName = getCookies("userName");
+    let roleName = getCookies("roleName");
+    if (userName == null || userName === "" || roleName == null || roleName === "") {
         alert("未登录!");
         window.location.href = "login.jsp";
     }

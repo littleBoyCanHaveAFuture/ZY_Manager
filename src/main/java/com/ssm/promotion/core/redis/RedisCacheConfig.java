@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * Created by 13 on 2017/12/4.
+ *
+ * @author 13
+ * @date 2017/12/4
  */
 @Component
 @EnableCaching
@@ -25,11 +27,11 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     public JedisConnectionFactory redisConnectionFactory() {
         JedisConnectionFactory redisConnectionFactory = new JedisConnectionFactory();
         //ip地址
-        redisConnectionFactory.setHostName("127.0.0.1");
+        redisConnectionFactory.setHostName("47.101.44.31");
         //端口号
-        redisConnectionFactory.setPort(17779);
+        redisConnectionFactory.setPort(6379);
         //redis登录密码
-        redisConnectionFactory.setPassword("ILfr6LTKhpNJ0x5i");
+        redisConnectionFactory.setPassword("50558b3dc9aa68a");
         //database 默认是16个，不设置的话默认为0
         redisConnectionFactory.setDatabase(2);
         return redisConnectionFactory;

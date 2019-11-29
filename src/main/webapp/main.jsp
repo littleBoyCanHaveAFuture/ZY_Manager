@@ -17,6 +17,9 @@
             }
         }
     }
+    if(username.isEmpty()||roleName.isEmpty()){
+
+    }
 %>
 <!DOCTYPE html PUBLIC "-//W3C//Dtd HTML 4.01 Transitional//EN">
 <html>

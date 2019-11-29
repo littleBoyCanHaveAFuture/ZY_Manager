@@ -1,7 +1,6 @@
 package com.ssm.promotion.core.util;
 
 
-import com.ssm.promotion.core.controller.UserController;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -14,7 +13,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class StringUtil {
-    private static final Logger log = Logger.getLogger(StringUtil.class);// 日志文件
     public static final String EMPTY = "";
     public static final String SPACE = " ";
     public static final String ENTER = "\n";
@@ -36,6 +34,7 @@ public class StringUtil {
     public static final String WAVE = "~";
     public static final String TOP_POINT = "`";
     public static final String QUOTE = "\"";
+    public static final String NUMBER_SIGN = "#";
     public static final String BRACKETS1_LEFT = "(";
     public static final String BRACKETS1_RIGHT = ")";
     public static final String BRACKETS2_LEFT = "[";
@@ -44,6 +43,7 @@ public class StringUtil {
     public static final String BRACKETS3_RIGHT = "}";
     public static final Character[] CHINESE_DIGIT = new Character[]{'零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'};
     public static final String CHARSET_UTF8 = "UTF-8";
+    private static final Logger log = Logger.getLogger(StringUtil.class);// 日志文件
     private static final char[] HEX_DIGITS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     public StringUtil() {
@@ -324,26 +324,6 @@ public class StringUtil {
         return sb.toString();
     }
 
-    public String getValidNameThrowMsg(String name, int lenMin, int lenMax, Collection<String> badWordList) throws Exception {
-        String valid = getValidLenStr(name, lenMin, lenMax);
-        if (valid == null) {
-            throw new Exception("名称长度范围必须在" + lenMin + "~" + lenMax);
-        } else {
-            Iterator var6 = badWordList.iterator();
-
-            String badWord;
-            do {
-                if (!var6.hasNext()) {
-                    return valid;
-                }
-
-                badWord = (String) var6.next();
-            } while (!valid.contains(badWord));
-
-            throw new Exception("名称中含有禁用词汇");
-        }
-    }
-
     public static Map<Character, Integer> getCharNumMap(String str) throws Exception {
         Map<Character, Integer> charMap = new HashMap();
         char[] var2 = str.toCharArray();
@@ -388,7 +368,6 @@ public class StringUtil {
         return false;
     }
 
-
     /**
      * @param str
      * @return
@@ -422,6 +401,26 @@ public class StringUtil {
             return "%" + str + "%";
         } else {
             return null;
+        }
+    }
+
+    public String getValidNameThrowMsg(String name, int lenMin, int lenMax, Collection<String> badWordList) throws Exception {
+        String valid = getValidLenStr(name, lenMin, lenMax);
+        if (valid == null) {
+            throw new Exception("名称长度范围必须在" + lenMin + "~" + lenMax);
+        } else {
+            Iterator var6 = badWordList.iterator();
+
+            String badWord;
+            do {
+                if (!var6.hasNext()) {
+                    return valid;
+                }
+
+                badWord = (String) var6.next();
+            } while (!valid.contains(badWord));
+
+            throw new Exception("名称中含有禁用词汇");
         }
     }
 }

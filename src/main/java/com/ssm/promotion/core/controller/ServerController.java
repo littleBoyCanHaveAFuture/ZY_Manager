@@ -5,7 +5,9 @@ import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.entity.ServerInfo;
+import com.ssm.promotion.core.entity.Servername;
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.service.ServerNameService;
 import com.ssm.promotion.core.util.ResponseUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -31,9 +33,9 @@ public class ServerController {
     private static final Logger log = Logger.getLogger(ServerController.class);
     @Resource
     private ServerListService serverService;
-    /**
-     * 自动注入request
-     */
+    @Resource
+    private ServerNameService gameService;
+
     @Autowired
     private HttpServletRequest request;
 
@@ -50,7 +52,7 @@ public class ServerController {
     public void getServerList(@RequestParam(value = "page", required = false) String page,
                               @RequestParam(value = "rows", required = false) String rows,
                               Integer gameId, Integer serverId, String spId,
-                              HttpServletRequest req, HttpServletResponse response) throws Exception {
+                              HttpServletResponse response) throws Exception {
         System.out.println("getServerList:");
         Integer userId = getUserId();
         if (userId == null) {
@@ -69,6 +71,7 @@ public class ServerController {
         map.put("spId", spId);
 
         List<ServerInfo> serverInfos = serverService.getServerList(map, userId);
+
         Long total = serverService.getTotalServers(map, userId);
 
         JSONObject result = new JSONObject();
@@ -78,7 +81,7 @@ public class ServerController {
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
         ResponseUtil.write(response, result);
-
+        System.out.println("request: server/getServerList , map: " + result.toString());
         log.info("request: server/getServerList , map: " + map.toString());
     }
 
@@ -150,5 +153,63 @@ public class ServerController {
 
         log.info("request: article/delete , ids: " + ids);
         return ResultGenerator.genSuccessResult();
+    }
+
+    /**
+     * 查询服务器列表
+     */
+    @RequestMapping(value = "/getGameList", method = RequestMethod.GET)
+    public void getGameList(HttpServletResponse response) throws Exception {
+        System.out.println("getGameList:");
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+
+        List<Servername> serverInfos = gameService.getGameList(userId);
+
+        JSONObject result = new JSONObject();
+        JSONArray jsonArray = JSONArray.fromObject(serverInfos);
+        result.put("rows", jsonArray);
+        result.put("total", serverInfos.size());
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameList , map: " + result.toString());
+    }
+
+    /**
+     * 查询不同的区服和渠道
+     */
+    @RequestMapping(value = "/getDistinctServerInfo", method = RequestMethod.POST)
+    public void getDistinctServerInfo(Integer gameId, Integer serverId,
+                                      String spId, Integer type,
+                                      HttpServletResponse response) throws Exception {
+        System.out.println("getDistinctServerInfo:");
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        Map<String, Object> map = new HashMap<>(6);
+        map.put("gameId", gameId);
+        map.put("serverId", serverId);
+        map.put("spId", spId);
+
+        List<String> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
+
+        JSONObject result = new JSONObject();
+        JSONArray jsonArray = JSONArray.fromObject(serverInfos);
+        result.put("rows", jsonArray);
+        result.put("total", serverInfos.size());
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+        System.out.println("request: server/getGameList , map: " + result.toString());
+        log.info("request: server/getGameList , map: " + result.toString());
     }
 }

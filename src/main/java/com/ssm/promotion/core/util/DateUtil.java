@@ -1,7 +1,12 @@
 package com.ssm.promotion.core.util;
 
+import org.apache.commons.lang.time.DateUtils;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author 1034683568@qq.com
@@ -9,6 +14,8 @@ import java.util.Date;
  * @date 2017-3-1
  */
 public class DateUtil {
+    private static final long DAY_MILLIS = 86400000L;
+    private static final String FORMAT_YYMMDD = "yyyyMMdd";
 
     public static String formatDate(Date date, String format) {
         String result = "";
@@ -32,5 +39,36 @@ public class DateUtil {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(date);
+    }
+
+    public static String getCurrentDayStr() throws Exception {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
+        return sdf.format(date);
+    }
+
+    public static List<String> getDateStr(String startTime, String endTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
+        List<String> dateList = new ArrayList<>();
+        if (!"".equals(startTime) && !"".equals(endTime)) {
+            try {
+                long start = sdf.parse(startTime).getTime();
+                long end = sdf.parse(endTime).getTime();
+                int n = (int) ((end - start) / DAY_MILLIS);
+                for (int i = 0; i <= n; i++) {
+                    dateList.add(sdf.format(start + DAY_MILLIS * i));
+                }
+                return dateList;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Date end = new Date();
+        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
+        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
     }
 }

@@ -29,7 +29,8 @@
     <tr>
         <th field="cb" checkbox="true" align="center"></th>
         <th field="id" width="70" align="center" hidden="true">编号</th>
-        <th field="gameId" width="70" align="center">游戏id</th>
+        <th field="gameId" width="70" align="center" hidden="true">游戏id</th>
+        <th field="gamename" width="70" align="center">游戏名</th>
         <th field="serverId" width="70" align="center">服务器id</th>
         <th field="spId" width="150" align="center">渠道id</th>
         <th field="loginUrl" width="300" align="center">登录地址</th>
@@ -40,15 +41,14 @@
 <div id="sp">
     <div>
         游戏名:
+        <label for="gameid"></label>
         <select id="gameid" data-options="editable:false,panelHeight:'auto'"
                 style="width:90px;margin-right: 35px;">
             <option value="-1" selected="selected">请选择</option>
-            <option value="0">捕鱼</option>
-            <option value="1">打飞机</option>
-            <option value="2">传奇</option>
-            <option value="3">Dota</option>
         </select>
+
         服务器区服:
+        <label for="serverid"></label>
         <select id="serverid" data-options="editable:false,panelHeight:'auto'"
                 style="width:90px;margin-right: 35px;">
             <option value="-1" selected="selected">请选择</option>
@@ -56,15 +56,14 @@
             <option value="2">2区</option>
             <option value="3">3区</option>
         </select>
+
         渠道id:
+        <label for="spid"></label>
         <select id="spid" data-options="editable:false,panelHeight:'auto'"
                 style="width:90px;margin-right: 35px;">
             <option value="-1" selected="selected">请选择</option>
-            <option value="1000">渠道1000</option>
-            <option value="1001">渠道1001</option>
-            <option value="1002">渠道1002</option>
-            <option value="2000">渠道2000</option>
         </select>
+
         <button onclick="loadServerListTab()" class="easyui-linkbutton">查询</button>
     </div>
     <div>
@@ -96,6 +95,7 @@
                            missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">
                 </td>
             </tr>
+
             <tr>
                 <td>服务器id</td>
                 <td>

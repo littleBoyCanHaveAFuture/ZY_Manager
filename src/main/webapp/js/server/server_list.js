@@ -1,39 +1,15 @@
 // 初始化内容 先加载完列表
 $(function () {
-    var gameId = null;
-    var serverId = null;
-    var spId = null;
-    $.ajax({
-        url: "/server/getServerList",
-        type: "post",
-        data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": 1, "rows": 10},
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                result = {
-                    total: result.total,
-                    rows: result.rows
-                }
-                if (result.total === 0) {
-                    $.messager.alert("系统提示", "查询成功 无数据");
-                }
-                $("#serverTable").datagrid("loadData", result);
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "查询失败");
-        }
-    });
-
+    initFirstPage();
+    initSelectList();
+    initServerList(1);
+    initServerList(2);
 });
 //初始化内容 下一页按钮
 $(function () {// 初始化内容
-    var dg = $("#serverTable");
-    var opts = dg.datagrid('options');
-    var pager = dg.datagrid('getPager');
+    let dg = $("#serverTable");
+    let opts = dg.datagrid('options');
+    let pager = dg.datagrid('getPager');
     pager.pagination({
         // pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页
         pageList: [5, 10, 15],//可以设置每页记录条数的列表 　　　　　　　　　　　　 //pageSize都会变回设置的值
@@ -60,12 +36,16 @@ var type;
 
 //查询服务器
 function loadServerListTab() {
-    var pageNumber = $("#serverTable").datagrid('options').pageNumber;
-    var pageSize = $("#serverTable").datagrid('options').pageSize;
+    let dg = $("#serverTable");
+    let opts = dg.datagrid('options');
+    let pager = dg.datagrid('getPager');
 
-    var gameId = $("#gameid").val();
-    var serverId = $("#serverid").val();
-    var spId = $("#spid").val();
+    let pageNumber = opts.pageNumber;
+    let pageSize = opts.pageSize;
+
+    let gameId = $("#gameid").val();
+    let serverId = $("#serverid").val();
+    let spId = $("#spid").val();
     if (gameId === "" || gameId === undefined) {
         gameId = -1;
     }
@@ -109,49 +89,6 @@ function loadServerListTab() {
     });
 }
 
-//页面过滤器
-function pagerFilter(data) {
-    if (typeof data.length == 'number' && typeof data.splice == 'function') {    // is array
-        data = {
-            total: data.length,
-            rows: data
-        }
-    }
-    var dg = $(this);
-    var opts = dg.datagrid('options');
-    var pager = dg.datagrid('getPager');
-    pager.pagination({
-        pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页
-        pageList: [5, 10, 15],//可以设置每页记录条数的列表 　　　　　　　　　　　　 //pageSize都会变回设置的值
-        beforePageText: '第',//页数文本框前显示的汉字
-        afterPageText: '页    共 {pages} 页',
-        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
-        onChangePageSize: function () {
-        },
-        onSelectPage: function (pageNum, pageSize) {
-            console.log("onSelectPage");
-            console.log(pageNum);
-            console.log(pageSize);
-
-            opts.pageNumber = pageNum;
-            opts.pageSize = pageSize;
-            pager.pagination('refresh', {
-                pageNumber: pageNum,
-                pageSize: pageSize
-            });
-            // dg.datagrid('loadData', data);
-        }
-    });
-    if (!data.originalRows) {
-        data.originalRows = (data.rows);
-    }
-    var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);
-    var end = start + parseInt(opts.pageSize);
-    data.rows = (data.originalRows.slice(start, end));
-    return data;
-}
-
-
 // 打开dialog 添加渠道
 function openServerDialog() {
     type = 1;
@@ -161,17 +98,17 @@ function openServerDialog() {
 //打开dialog 修改服务器
 function openServerModifyDialog() {
     type = 2;
-    var selectedRows = $("#serverTable").datagrid('getSelections');
-    var row = selectedRows[0];
+    let selectedRows = $("#serverTable").datagrid('getSelections');
+    let row = selectedRows[0];
     if (selectedRows.length !== 1) {
         $.messager.alert("系统提示", "请选择一条要编辑的数据！");
         return;
     }
-    var dataId = row.id;
-    var gameId = row.gameId;
-    var serverId = row.serverId;
-    var spId = row.spId;
-    var loginUrl = row.loginUrl;
+    let dataId = row.id;
+    let gameId = row.gameId;
+    let serverId = row.serverId;
+    let spId = row.spId;
+    let loginUrl = row.loginUrl;
 
 
     $("#dlg").dialog({
@@ -198,13 +135,13 @@ function saveServerType() {
 //保存
 function saveServer() {
 
-    var gameId = $("#save_gameid").val();
-    var serverId = $("#save_serverid").val();
-    var spId = $("#save_spid").val();
-    var loginUrl = $("#save_loginurl").val();
+    let gameId = $("#save_gameid").val();
+    let serverId = $("#save_serverid").val();
+    let spId = $("#save_spid").val();
+    let loginUrl = $("#save_loginurl").val();
 
     console.log("id" + gameid);
-    var data = {"gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl};
+    let data = {"gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl};
     $.ajax({
         url: "/server/addServer",
         type: "post",
@@ -235,11 +172,11 @@ function saveServer() {
 
 //修改数据
 function updateServer() {
-    var dataId = $("#save_id").val();
-    var gameId = $("#save_gameid").val();
-    var serverId = $("#save_serverid").val();
-    var spId = $("#save_spid").val();
-    var loginUrl = $("#save_loginurl").val();
+    let dataId = $("#save_id").val();
+    let gameId = $("#save_gameid").val();
+    let serverId = $("#save_serverid").val();
+    let spId = $("#save_spid").val();
+    let loginUrl = $("#save_loginurl").val();
 
     var data = {"id": dataId, "gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl};
     console.log(data);
@@ -287,18 +224,18 @@ function resetValue() {
 
 //删除服务器
 function deleteServer() {
-    var selectedRows = $("#serverTable").datagrid('getSelections');
+    let selectedRows = $("#serverTable").datagrid('getSelections');
     if (selectedRows.length === 0) {
         $.messager.alert("系统提示", "请选择要删除的数据！");
         return;
     }
-    var strIds = [];
+    let strIds = [];
     for (var i = 0; i < selectedRows.length; i++) {
         strIds.push(selectedRows[i].id);
     }
-    var ids = strIds.join(",");
-    var length = selectedRows.length;
-    $.messager.confirm("系统提示", "您确认要删除这<font color=red>" + length + "</font>条数据吗？",
+    let ids = strIds.join(",");
+    let length = selectedRows.length;
+    $.messager.confirm("系统提示", "您确认要删除这" + "<font color=red>" + length + "</font>" + "条数据吗？",
         function (r) {
             if (r) {
                 $.ajax({
@@ -328,6 +265,111 @@ function deleteServer() {
 
 }
 
+function initFirstPage() {
+    let gameId = null;
+    let serverId = null;
+    let spId = null;
+    $.ajax({
+        url: "/server/getServerList",
+        type: "post",
+        data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": 1, "rows": 10},
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                console.log("www" + result);
+                result = {
+                    total: result.total,
+                    rows: result.rows
+                }
+                if (result.total === 0) {
+                    $.messager.alert("系统提示", "查询成功 无数据");
+                }
+                $("#serverTable").datagrid("loadData", result);
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "查询失败");
+        }
+    });
+}
+
+//下拉菜单
+function initSelectList() {
+    console.log("initSelectList");
+    //游戏id
+    $.ajax({
+        //获取下拉
+        url: "/server/getGameList",
+        type: "get",
+        async: false,
+        dataType: "json",
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                let select_gameId = $("#gameid");
+                select_gameId.find("option").remove();
+                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                for (let res = 0; res < result.total; res++) {
+                    // console.log("<option value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
+                    select_gameId.append("<option value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
+                }
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "获取游戏列表出错");
+        }
+    });
+}
+
+function initServerList(type) {
+    let gameId = $('#gameid').val();
+    let serverId = $("#serverid").val();
+    let spId = $("#spid").val();
+
+    let data = {
+        "gameId": gameId,
+        "serverId": serverId,
+        "spId": spId,
+        "type": type
+    };
+    $.ajax({
+        //获取下拉
+        url: "/server/getDistinctServerInfo",
+        type: "post",
+        data: data,
+        async: false,
+        dataType: "json",
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                console.log(result);
+                if (type === 1) {
+                    let select_serverId = $("#serverid");
+                    select_serverId.find("option").remove();
+                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
+                } else {
+                    let select_spId = $("#spid");
+                    select_spId.find("option").remove();
+                    select_spId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
+                }
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "获取游戏列表出错");
+        }
+    });
+}
 
 //登录超时 重新返回到登录界面
 function relogin() {

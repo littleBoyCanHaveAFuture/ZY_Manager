@@ -6,7 +6,6 @@ import com.ssm.promotion.core.service.ServerListService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int addServer(ServerInfo server,Integer userid) {
+    public int addServer(ServerInfo server, Integer userid) {
         if (server.getGameId() == null || server.getServerId() == null || server.getSpId() == null) {
             return 0;
         }
@@ -35,7 +34,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int updateServer(ServerInfo server,Integer userid) {
+    public int updateServer(ServerInfo server, Integer userid) {
         if (server.getGameId() == null || server.getServerId() == null || server.getSpId() == null) {
             return 0;
         }
@@ -43,7 +42,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int delServer(Integer id,Integer userid) {
+    public int delServer(Integer id, Integer userid) {
         if (id < 0) {
             return -1;
         }
@@ -51,7 +50,18 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public Long getTotalServers(Map<String, Object> map,Integer userid) {
+    public Long getTotalServers(Map<String, Object> map, Integer userid) {
         return serverListdao.getTotalServers(map);
+    }
+
+    @Override
+    public List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userid) {
+        List<String> res;
+        if (type == 1) {
+            res = serverListdao.selectDistinctServerId(map);
+        } else {
+            res = serverListdao.selectDistinctSpId(map);
+        }
+        return res;
     }
 }

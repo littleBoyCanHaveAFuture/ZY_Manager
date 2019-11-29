@@ -11,11 +11,14 @@ import com.ssm.promotion.core.util.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,14 @@ public class ArticleController {
     private static final Logger log = Logger.getLogger(ArticleController.class);// 日志文件
     @Resource
     private ArticleService articleService;
+    @Autowired
+    private HttpServletRequest request;
+
+    private Integer getUserId() {
+        HttpSession session = request.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+        return userId;
+    }
 
     /**
      * 查找相应的数据集合
@@ -117,11 +128,15 @@ public class ArticleController {
     @ResponseBody
     public Result save(@RequestBody Article article)
             throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            return ResultGenerator.genRelogin();
+        }
         int resultTotal = 0;
 
         article.setArticleCreateDate(DateUtil.getCurrentDateStr());
 
-        resultTotal = articleService.addArticle(article);
+        resultTotal = articleService.addArticle(article, userId);
 
         log.info("request: article/save , " + article.toString());
 

@@ -11,6 +11,7 @@
         <result property="regState" column="regState"/>
         <result property="loginState" column="loginState"/>
         <result property="loginUrl" column="loginUrl"/>
+        <result property="gamename" column="gamename"/>
     </resultMap>
 
     <sql id="select_user_column">
@@ -20,7 +21,8 @@
 			spId,
 			regState,
 			loginState,
-			loginUrl
+			loginUrl,
+			gamename
 		FROM zy_serverlist
 	</sql>
     <!--   与 selectServers where 条件一致-->
@@ -82,5 +84,26 @@
         where id=#{id}
     </delete>
 
+    <select id="selectDistinctSpId" parameterType="map" resultType="string">
+        select distinct spId
+        from zy_serverlist
+        <where>
+            <if test="gameId != null and gameId != -1 ">
+                gameId = #{gameId}
+            </if>
+            <if test="serverId != null and  serverId != -1 ">
+                AND serverId = #{serverId}
+            </if>
+        </where>
+    </select>
 
+    <select id="selectDistinctServerId" parameterType="map" resultType="string">
+        select distinct serverId
+        from zy_serverlist
+        <where>
+            <if test="gameId != null and gameId != -1 ">
+                gameId = #{gameId}
+            </if>
+        </where>
+    </select>
 </mapper>

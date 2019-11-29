@@ -11,25 +11,30 @@ public interface ServerListService {
      * 获取 服务器列表
      */
 
-    public List<ServerInfo> getServerList(Map<String, Object> map,Integer userid);
+    public List<ServerInfo> getServerList(Map<String, Object> map, Integer userid);
 
     /**
      * 添加服务器
      */
-    public int addServer(ServerInfo server,Integer userid);
+    public int addServer(ServerInfo server, Integer userid);
 
     /**
      * 修改服务器
      */
-    public int updateServer(ServerInfo server,Integer userid);
+    public int updateServer(ServerInfo server, Integer userid);
 
     /**
      * 删除服务器
      */
-    public int delServer(Integer id,Integer userid);
+    public int delServer(Integer id, Integer userid);
 
     /**
      * 服务器总数
      */
-    Long getTotalServers(Map<String, Object> map,Integer userid);
+    Long getTotalServers(Map<String, Object> map, Integer userid);
+
+    /**
+     * 不同的区服渠道
+     */
+    List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userid);
 }
