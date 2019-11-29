@@ -14,6 +14,9 @@ public class RedisKeyTail {
     public static final String GAME_ACCOUNT_HAS_ROLE = "GA_SRole";
     public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "GA_SRole";
     public static final String GAME_ACCOUNT_ALL_NUMS = "totalAccount";
+    /**
+     * 活跃玩家
+     */
     public static final String ACTIVE_PLAYERS = "activePlayers";
     public static final String RECHARGE_ACCOUNT = "RechargeAccount";
     public static final String RECHARGE_ACCOUNT_NA_CA = "RechargeAccount_NA_CA";

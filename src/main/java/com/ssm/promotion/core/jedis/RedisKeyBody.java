@@ -77,4 +77,73 @@ public class RedisKeyBody {
         System.out.println("generatorBody body:" + body.toString());
         return body.toString();
     }
+
+    public static StringBuilder genBody(Integer type, Integer gameId, Integer serverId, String spId) {
+        if (type < 1 || type > 3) {
+            return null;
+        }
+        StringBuilder body = new StringBuilder();
+        if (type == 3) {
+            if (gameId == null || serverId == null || spId.isEmpty()) {
+                return null;
+            }
+            //到渠道
+            //游戏id
+            body.append(GAME_ID).append(COLON);
+            body.append(gameId).append(COLON);
+            //区服id
+            body.append(SERVER_ID).append(COLON);
+            body.append(serverId).append(COLON);
+            //渠道id
+            body.append(SP_ID).append(COLON);
+            body.append(spId);
+        } else if (type == 2) {
+            if (gameId == null || serverId == null) {
+                return null;
+            }
+            //到区服
+            //游戏id
+            body.append(GAME_ID).append(COLON);
+            body.append(gameId).append(COLON);
+            //区服id
+            body.append(SERVER_ID).append(COLON);
+            body.append(serverId);
+        } else {
+            if (gameId == null) {
+                return null;
+            }
+            //到游戏
+            body.append(GAME_ID).append(COLON);
+            body.append(gameId);
+        }
+        return body;
+    }
+
+    public static String appendBodyTimes(String body, String times) throws Exception {
+        StringBuilder bodys = new StringBuilder();
+        bodys.append(body);
+        if (times.isEmpty()) {
+            String day = DateUtil.getCurrentDayStr();
+            bodys.append(COLON);
+            //时间 yyyyMMdd
+            bodys.append(DATE).append(COLON);
+            bodys.append(day);
+        } else if ("-1".equals(times)) {
+
+        } else {
+            bodys.append(COLON);
+            bodys.append(DATE).append(COLON);
+            bodys.append(times);
+        }
+        return bodys.toString();
+    }
+
+    public static String appendBodyTail(String body, String tail) throws Exception {
+        StringBuilder bodys = new StringBuilder();
+        bodys.append(body);
+        bodys.append(NUMBER_SIGN);
+        bodys.append(tail);
+        return bodys.toString();
+    }
+
 }

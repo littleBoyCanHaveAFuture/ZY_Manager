@@ -66,11 +66,10 @@ public class RechargeSummaryControllr {
             //游戏分渠道查看数据
             //需要参数 gameId serverId
             //查询渠道
-            Map<String, Object> maps = new HashMap<>(6);
-            map.put("gameId", gameId);
-            map.put("serverId", serverId);
-            map.put("spId", spId);
-
+            if (gameId == null || serverId == null) {
+//                ResponseUtil.
+                return;
+            }
             List<String> spidStrList = new LinkedList<>();
             List<Integer> spidIntList = new LinkedList<>();
             List<String> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
@@ -90,6 +89,9 @@ public class RechargeSummaryControllr {
                     }
                     spidStrList.add(spidList);
                 }
+            }
+            if (spidStrList.size() == 0) {
+                return;
             }
             List<RechargeSummary> list = this.rechargeSummaryServices.getRechargeSummary(map, spidStrList, userId);
         }

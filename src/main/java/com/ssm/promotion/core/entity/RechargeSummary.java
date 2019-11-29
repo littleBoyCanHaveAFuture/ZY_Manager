@@ -79,19 +79,19 @@ public class RechargeSummary {
      * 活跃付费率
      * :当日充值的玩家账号数目/当日上线的玩家账号数目
      */
-    public int activePayRate;
+    public double activePayRate;
 
     /**
      * 付费ARPU
      * :当日充值总额/当日充值的玩家账号数目
      */
-    public int paidARPU;
+    public double paidARPU;
 
     /**
      * 活跃ARPU
      * :当日充值总额/当日上线的玩家账号数目
      */
-    public int activeARPU;
+    public double activeARPU;
 
     /**
      * 当日首次付费人数
@@ -128,22 +128,22 @@ public class RechargeSummary {
     /**
      * 累计充值
      */
-    public int totalPayment;
+    public double totalPayment;
 
     /**
      * 累计创角
      */
-    public int totalCreateRole;
+    public double totalCreateRole;
 
     /**
      * 累计充值人数
      */
-    public int totalRechargeNums;
+    public double totalRechargeNums;
 
     /**
      * 总付费率
      */
-    public int totalRechargeRates;
+    public double totalRechargeRates;
 
 //    分渠道概况
     /**
@@ -153,13 +153,41 @@ public class RechargeSummary {
     /**
      * 注收比
      */
-    public Double zhushoubi;
+    public double zhushoubi;
 
     /**
      * 新增注收比
      */
-    public Double addzhushoubi;
+    public double addzhushoubi;
 
     public RechargeSummary() {
+    }
+
+    @Override
+    public String toString() {
+        String objectS = "date:" + date + "\n" +
+                "newAddCreateAccount:" + newAddCreateAccount + "\n" +
+                "newAddCreateRole:" + newAddCreateRole + "\n" +
+                "newAddCreateRoleRemoveOld:" + newAddCreateRoleRemoveOld + "\n" +
+                "createAccountRate:" + createAccountRate + "\n" +
+                "activePlayer:" + activePlayer + "\n" +
+                "rechargeTimes:" + rechargeTimes + "\n" +
+                "rechargeNumber:" + rechargeNumber + "\n" +
+                "rechargePayment:" + rechargePayment + "\n" +
+                "activePayRate:" + activePayRate + "\n" +
+                "paidARPU:" + paidARPU + "\n" +
+                "activeARPU:" + activeARPU + "\n" +
+                "nofPayers:" + nofPayers + "\n" +
+                "nofPayment:" + nofPayment + "\n" +
+                "registeredPayers:" + registeredPayers + "\n" +
+                "registeredPayment:" + registeredPayment + "\n" +
+                "totalPayment:" + totalPayment + "\n" +
+                "totalCreateRole:" + totalCreateRole + "\n" +
+                "totalRechargeNums:" + totalRechargeNums + "\n" +
+                "totalRechargeRates:" + totalRechargeRates + "\n" +
+                "spId:" + spId + "\n" +
+                "zhushoubi:" + zhushoubi + "\n" +
+                "addzhushoubi:" + addzhushoubi + "\n";
+        return objectS;
     }
 }

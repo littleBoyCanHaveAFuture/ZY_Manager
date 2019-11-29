@@ -19,6 +19,7 @@ public class JedisRechargeCache {
     private static final int DB_INDEX = 2;
     private jedisManager jedisManager;
 
+
     public jedisManager getJedisManager() {
         return jedisManager;
     }
@@ -29,185 +30,42 @@ public class JedisRechargeCache {
     }
 
 
-//bitmap
+    //zscore
+    //充值次数:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "paytimes"
+    //充值人数:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "accountnumbers"
+    //充值金额:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "payamounts"
+    //当日首次付费金额： ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "firstamounts"
+    //注册付费金额：    ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "amounts_NA_CA"
+    //累计充值金额：    ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}#RechargeTotalInfo" {value} "ACC_amounts"
+    //累计充值人数:     ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}#RechargeTotalInfo" {value} "ACC_playernumbers"
+
+    //累计创角:        ZADD "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}#AccountInfo" {value} "ACC_CR"
+
+    //getbit
+
+    //bittop and
+
+    //bitcount
+    //新增创号-<yyMMdd,账号数目>L SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#NA_CA" {account_Id}
+    //新增创角-<yyMMdd,账号数目>: SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#NA_CR {account_Id}
+    //所有账号的数目:            SETBIT "UserInfo:gid:{gid}#totalAccount" {account_Id}
+    //活跃玩家 的账号数目:       SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#activePlayers" {account_id}
+    //当日首次付费人数:         SETBIT "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeAccount" {account_id}
+    //注册付费人数:            SETBIT "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeAccount_NA_CA" {account_id}
+
+    //get all bitmap
+    //所有账号
+    //活跃玩家
+
 
     /**
-     * 获取
-     * 1.每日新增创号 的账号数目
-     * 2.所有账号 的账号数目
-     */
-    public Map<String, Integer> getDaySignUp(Integer gameId, Integer serverId, String spId,
-                                             List<String> timeList) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-            Pipeline pipeline = jds.pipelined();
-            //遍历这段时间的每一天
-            for (String times : timeList) {
-                String key = RedisGeneratorKey.getKeySignUp(gameId, serverId, spId, 1, times);
-                System.out.println("getDaySignUp key:" + key);
-                pipeline.bitcount(key);
-            }
-            List<Object> res = pipeline.syncAndReturnAll();
-            Map<String, Integer> timeCAMap = new LinkedHashMap<>();
-            for (int i = 0; i < timeList.size(); i++) {
-                String times = timeList.get(i);
-                int nums = (int) res.get(i);
-                timeCAMap.put(timeList.get(i), (int) res.get(i));
-                System.out.println("getDaySignUp key:value" + times + ":" + nums);
-            }
-            return timeCAMap;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 获取
-     * 所有账号 的账号
-     */
-    public BitSet getGameAccount(Integer gameId, Integer serverId, String spId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            BitSet all = new BitSet();
-            String key = RedisGeneratorKey.getKeySignUp(gameId, serverId, spId, 2, "-1");
-            byte[] skey = SerializeUtil.serialize(key);
-            BitSet users = BitSet.valueOf(jds.get(skey));
-            all.or(users);
-
-            return all;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 获取
-     * 新增创角 的账号数目
+     * redis 管道
+     * 查询每一天的分数
      *
-     * @return 每天的新增创号数目
+     * @param timeList 时间列表-yyyyMMdd
+     * @return 返回值 map(yyyyMMdd, score)
      */
-    public Map<String, Integer> getDayNewAddCreateRole(Integer gameId, Integer serverId, String spId,
-                                                       List<String> timeList) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-            Pipeline pipeline = jds.pipelined();
-            //遍历这段时间的每一天
-            for (String times : timeList) {
-                String key = RedisGeneratorKey.getKeyLoginIn(gameId, serverId, spId, 1, times);
-                pipeline.bitcount(key);
-            }
-            List<Object> res = pipeline.syncAndReturnAll();
-            Map<String, Integer> timeCRMap = new LinkedHashMap<>();
-            for (int i = 0; i < timeList.size(); i++) {
-                String times = timeList.get(i);
-                int nums = (int) res.get(i);
-                timeCRMap.put(timeList.get(i), (int) res.get(i));
-                System.out.println("getDayNewAddCreateRole key:value" + times + ":" + nums);
-            }
-            return timeCRMap;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 获取
-     * 活跃玩家
-     */
-    public BitSet getGameActiveAccount(Integer gameId, Integer serverId, String spId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            BitSet all = new BitSet();
-            String key = RedisGeneratorKey.getKeyEnterGame(gameId, serverId, spId, "-1");
-            byte[] skey = SerializeUtil.serialize(key);
-            BitSet users = BitSet.valueOf(jds.get(skey));
-            all.or(users);
-
-            return all;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 获取
-     * 新增创角去除滚服 的账号数目
-     */
-    public Map<String, Integer> getDayNewAddCreateRoleRemoveOld(Integer gameId, Integer serverId, String spId,
-                                                                List<String> timeList) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-            Pipeline pipeline = jds.pipelined();
-            //遍历这段时间的每一天
-            for (String times : timeList) {
-                //新增创角 的账号
-                String destKey = RedisGeneratorKey.getKeyLoginIn(gameId, serverId, spId, 1, times);
-                //创建过角色 的账号
-                String srcKey = RedisGeneratorKey.getKeyLoginIn(gameId, serverId, spId, 3, "-1");
-                //每天的 新增创角去除滚服 账号数目
-                pipeline.bitop(BitOP.AND, destKey, srcKey);
-            }
-            List<Object> res = pipeline.syncAndReturnAll();
-            Map<String, Integer> timeCRROMap = new LinkedHashMap<>();
-            for (int i = 0; i < timeList.size(); i++) {
-                String times = timeList.get(i);
-                int nums = (int) res.get(i);
-                timeCRROMap.put(times, nums);
-                System.out.println("getDayNewAddCreateRoleRemoveOld key:value" + times + ":" + nums);
-            }
-            return timeCRROMap;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 获取
-     * SortedSet
-     * 充值次数\充值人数\充值金额\当日首次付费金额\注册付费金额
-     *
-     * @return 每天的新增创号数目
-     */
-    public Map<String, Integer> getDayRechargeSortedSet(Integer gameId, Integer serverId, String spId,
-                                                        Integer KeyType,Integer MemberType,
-                                                        List<String> timeList) {
+    public Map<String, Double> getDayZScore(String keyBody, String keyTail, String member, List<String> timeList) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -215,25 +73,21 @@ public class JedisRechargeCache {
             jds.select(DB_INDEX);
 
             Pipeline pipeline = jds.pipelined();
-            //遍历这段时间的每一天
+            //时间遍历
             for (String times : timeList) {
-                //KeyType = 1 MemberType = 1\2\3\4\5
-                //充值次数\充值人数\充值金额\当日首次付费金额\注册付费金额
-                //KeyType = 2 MemberType = 6\7
-                //累计充值金额\累计充值人数
-                String key = RedisGeneratorKey.getKeyRecharge(gameId, serverId, spId, KeyType, times);
-                String member = RedisGeneratorKey.getKeyRechargeMember(MemberType);
+                String key = RedisKeyBody.appendBodyTimes(keyBody, times);
+                key = RedisKeyBody.appendBodyTail(key, keyTail);
                 pipeline.zscore(key, member);
             }
             List<Object> res = pipeline.syncAndReturnAll();
-            Map<String, Integer> timeRechargeMap = new LinkedHashMap<>();
+            Map<String, Double> map = new LinkedHashMap<>();
             for (int i = 0; i < timeList.size(); i++) {
                 String times = timeList.get(i);
-                int nums = (int) res.get(i);
-                timeRechargeMap.put(times, nums);
-                System.out.println("getDayNewAddCreateRoleRemoveOld key:value" + times + ":" + nums);
+                Double nums = (double) res.get(i);
+                map.put(times, nums);
+                System.out.println("getZScore key:value" + times + ":" + nums);
             }
-            return timeRechargeMap;
+            return map;
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -243,66 +97,111 @@ public class JedisRechargeCache {
         return null;
     }
 
-
-    /**
-     * bitmap 存入id
-     *
-     * @param setKey
-     * @param value
-     */
-    public void setVByBitmap(String setKey, long offset, boolean value) {
+    public Double getZscore(String keyBody, String keyTail, String member) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
-            jds = jedisManager.getJedis();
+            jds = this.jedisManager.getJedis();
             jds.select(DB_INDEX);
-            jds.setbit(setKey, offset, value);
+
+            String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
+
+            byte[] skey = SerializeUtil.serialize(key);
+            byte[] smember = SerializeUtil.serialize(member);
+            return jds.zscore(skey, smember);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
         } finally {
             returnResource(jds, isBroken);
         }
+        return null;
     }
 
     /**
-     * bitmap 是否包含该id
-     *
-     * @param key    键值
-     * @param offset 用户id、账号id 等纯数字
-     * @return String 0/1查询成功 -1失败
+     * redis 管道
+     * 获取 bitmap 数目
      */
-    public String getVByBitmap(String key, long offset) {
+    public Map<String, Double> getDayBitmapCount(String keyBody, String keyTail, List<String> timeList) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
-            boolean res = jds.getbit(key, offset);
-            if (res) {
-                return "1";
-            } else {
-                return "0";
+
+            Pipeline pipeline = jds.pipelined();
+            //时间遍历
+            for (String times : timeList) {
+                String key = RedisKeyBody.appendBodyTimes(keyBody, times);
+                key = RedisKeyBody.appendBodyTail(key, keyTail);
+                pipeline.bitcount(key);
             }
+
+            List<Object> res = pipeline.syncAndReturnAll();
+
+            Map<String, Double> map = new LinkedHashMap<>();
+            for (int i = 0; i < timeList.size(); i++) {
+                String times = timeList.get(i);
+                Double nums = (double) res.get(i);
+                map.put(times, nums);
+                System.out.println("getDayBitmapCount key:value" + times + ":" + nums);
+            }
+            return map;
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
         } finally {
             returnResource(jds, isBroken);
         }
-        return "-1";
+        return null;
     }
 
     /**
-     * bitmap 参数个数
+     * redis 管道
+     * 获取 bitset
      */
-    public int getSizeByBitmap(String key) {
+    public BitSet getBitSet(String keyBody, String keyTail) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
-            return (int) (long) jds.bitcount(key);
+
+            BitSet all = new BitSet();
+
+            String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
+
+            byte[] skey = SerializeUtil.serialize(key);
+            BitSet users = BitSet.valueOf(jds.get(skey));
+            all.or(users);
+
+            return all;
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    /**
+     * redis 管道
+     * 获取 bitset
+     */
+    public Long getBitSetCount(String keyBody, String keyTail) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            BitSet all = new BitSet();
+
+            String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
+
+            byte[] skey = SerializeUtil.serialize(key);
+            return jds.bitcount(key);
 
         } catch (Exception e) {
             isBroken = true;
@@ -310,10 +209,50 @@ public class JedisRechargeCache {
         } finally {
             returnResource(jds, isBroken);
         }
-        return -1;
+        return null;
     }
 
-//  sorted set
+    /**
+     * redis 管道
+     * 获取
+     * 查询 2个 bitmap 相同 数据的数量
+     */
+    public Map<String, Double> getDayBitopAnd(String destKey, String srcKey,
+                                              String destBodyTail, String srcBodyTail,
+                                              List<String> timeList) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            Pipeline pipeline = jds.pipelined();
+
+            for (String times : timeList) {
+                String destkey = RedisKeyBody.appendBodyTimes(destKey, times);
+                destkey = RedisKeyBody.appendBodyTail(destkey, destBodyTail);
+                String srckey = RedisKeyBody.appendBodyTimes(srcKey, times);
+                srckey = RedisKeyBody.appendBodyTail(srckey, destBodyTail);
+                //每天的 新增创角去除滚服 账号数目
+                pipeline.bitop(BitOP.AND, destkey, srckey);
+            }
+            List<Object> res = pipeline.syncAndReturnAll();
+            Map<String, Double> map = new LinkedHashMap<>();
+            for (int i = 0; i < timeList.size(); i++) {
+                String times = timeList.get(i);
+                Double nums = (double) res.get(i);
+                map.put(times, nums);
+                System.out.println("getDayBitopAnd key:value" + times + ":" + nums);
+            }
+            return map;
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
 
     /**
      * sorted set
