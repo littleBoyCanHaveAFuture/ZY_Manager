@@ -78,7 +78,7 @@ public class RedisKeyBody {
         return body.toString();
     }
 
-    public static StringBuilder genBody(Integer type, Integer gameId, Integer serverId, String spId) {
+    public static String genBody(Integer type, Integer gameId, Integer serverId, String spId) {
         if (type < 1 || type > 3) {
             return null;
         }
@@ -116,7 +116,11 @@ public class RedisKeyBody {
             body.append(GAME_ID).append(COLON);
             body.append(gameId);
         }
-        return body;
+        if (body.length() != 0) {
+            return body.toString();
+        } else {
+            return null;
+        }
     }
 
     public static String appendBodyTimes(String body, String times) throws Exception {

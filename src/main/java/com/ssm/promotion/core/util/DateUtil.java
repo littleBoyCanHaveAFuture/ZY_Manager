@@ -16,6 +16,30 @@ public class DateUtil {
     private static final String FORMAT_YYMMDD = "yyyyMMdd";
     private static final String JS_FORMAT_YYMMDD = "MM/dd/yyyy HH:mm";
 
+    /**
+     * 转化时间
+     * 并获取这段时间的所有天数
+     */
+    public static List<String> transTimes(String startTimes, String endTimes) throws Exception {
+        startTimes = formatJsTime(startTimes);
+        endTimes = formatJsTime(endTimes);
+
+        List<String> timeList = new ArrayList<>();
+        if (startTimes.equals(endTimes)) {
+            timeList.add(startTimes);
+        } else {
+            timeList = DateUtil.getDateStr(startTimes, endTimes);
+        }
+        if (timeList != null) {
+            timeList.forEach(day -> {
+                if (day != null && !day.isEmpty()) {
+                    System.out.println("day:" + day);
+                }
+            });
+        }
+        return timeList;
+    }
+
     public static String formatDate(Date date, String format) {
         String result = "";
         SimpleDateFormat sdf = new SimpleDateFormat(format);
@@ -24,7 +48,6 @@ public class DateUtil {
         }
         return result;
     }
-
 
     public static Date formatString(String str, String format) throws Exception {
         if (StringUtil.isEmpty(str)) {

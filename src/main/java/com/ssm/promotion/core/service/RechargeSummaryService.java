@@ -13,7 +13,15 @@ public interface RechargeSummaryService {
 
     //    public void getRechargeSummary(HttpServletRequest request, Integer managerId);
 
-    public List<RechargeSummary> getRechargeSummary(Map<String, Object> map, List<String> spIdList, Integer userId) throws Exception;
+    /**
+     * 充值汇总
+     *
+     * @param map          http参数
+     * @param serverIdList 区服查询 区服-渠道列表
+     * @param spIdList     分渠道查询 游戏-渠道列表
+     * @param userId       当前操作者id
+     */
+    public List<RechargeSummary> getRechargeSummary(Map<String, Object> map, Map<Integer, List<String>> serverIdList, List<String> spIdList, Integer userId) throws Exception;
 //
 //    public List<RechargeSummaryVo> getPutInData(String spIds, String startTime, String endTime, Integer managerId);
 //

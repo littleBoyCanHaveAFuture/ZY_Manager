@@ -19,17 +19,19 @@ function search() {
     let spId = $("#save_spId").val();//此处逗号会产生问题
     let startTime = $("#save_startTime").val();
     let endTime = $("#save_endTime").val();
+    let spIdstrs = new Array(); //定义一数组
+    spIdstrs = spId.replace(/,/g, "|");
     let data = {
         "type": 3,
         "gameId": gameId,
         "serverId": serverId,
-        "spId": spId,
+        "spId": spIdstrs,
         "startTime": startTime,
         "endTime": endTime
     };
     console.log("gameId:" + gameId);
     console.log("serverId:" + serverId);
-    console.log("spId:" + spId);
+    console.log("spId:" + spIdstrs);
     console.log("startTime:" + startTime);
     console.log("endTime:" + endTime);
 

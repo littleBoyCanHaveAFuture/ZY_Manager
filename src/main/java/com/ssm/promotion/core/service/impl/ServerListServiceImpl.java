@@ -20,7 +20,7 @@ public class ServerListServiceImpl implements ServerListService {
 
     @Override
     public List<ServerInfo> getServerList(Map<String, Object> map, Integer userId) {
-//        map.entrySet().forEach((k) -> System.out.println("getServerList--->" + k.getKey() + ":" + k.getValue()));
+    //  map.entrySet().forEach((k) -> System.out.println("getServerList--->" + k.getKey() + ":" + k.getValue()));
 
         return serverListdao.selectServers(map);
     }

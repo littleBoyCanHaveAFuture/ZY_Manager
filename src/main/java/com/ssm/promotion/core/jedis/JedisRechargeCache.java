@@ -234,6 +234,7 @@ public class JedisRechargeCache {
 
             String key = RedisKeyBody.appendBodyTail(keyBody, keyTail);
             System.out.println("getBitSetCount key:" + key);
+
 //            byte[] skey = SerializeUtil.serialize(key);
             //test
             if (!jds.exists(key)) {
