@@ -45,7 +45,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             }
             case 3: {
                 //渠道概况
-                return this.setSpRs(gameId, serverIdList, timeList);
+                return this.setSpRs(gameId, serverId, spIdList, timeList);
             }
             default:
                 break;
@@ -112,14 +112,14 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
     }
 
     /**
-     * 生成区服汇总
+     * 生成渠道汇总
      *
-     * @param gameId       游戏id
-     * @param serverIdList 服务器-渠道Map
-     * @param timeList     时间列表 yyyyMMdd
+     * @param gameId   游戏id
+     * @param serverId 服务器id
+     * @param timeList 时间列表 yyyyMMdd
      */
-    public List<RechargeSummary> setSpRs(Integer gameId, Map<Integer, List<String>> serverIdList, List<String> timeList) throws Exception {
-        List<RechargeSummary> serverRsList = this.setServerRs(gameId, serverId, spIdList, timeList);
+    public List<RechargeSummary> setSpRs(Integer gameId, Integer serverId, List<String> spIdList, List<String> timeList) throws Exception {
+        List<RechargeSummary> serverRsList = this.serchSpRs(gameId, serverId, spIdList, timeList);
         for (RechargeSummary rs : serverRsList) {
             rs.calculate(3);
         }
