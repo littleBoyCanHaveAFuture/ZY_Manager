@@ -19,7 +19,7 @@ public class JedisRechargeCache {
     private static final int DB_INDEX = 2;
     private jedisManager jedisManager;
 
-    private boolean test = true;
+    private boolean test = false;
 
     public jedisManager getJedisManager() {
         return jedisManager;
