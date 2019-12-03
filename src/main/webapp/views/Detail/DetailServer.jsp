@@ -64,12 +64,12 @@
         <label for="save_startTime"></label>
         <span style="color: blue;margin-left:50px">开始时间:</span>
         <input class="easyui-datetimebox" id="save_startTime" name="startTime"
-               data-options="required:true,showSeconds:false" value="12/01/2019 00:00" style="width:150px">
+               data-options="required:true,showSeconds:false" style="width:150px">
 
         <label for="save_endTime"></label>
         <span style="color: blue;margin-left:50px">结束时间:</span>
         <input class="easyui-datetimebox" id="save_endTime" name="endTime"
-               data-options="required:true,showSeconds:false" value="12/01/2019 00:00" style="width:150px">
+               data-options="required:true,showSeconds:false" style="width:150px">
 
         <a href="javascript:search(3)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>

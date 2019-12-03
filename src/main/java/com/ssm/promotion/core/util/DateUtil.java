@@ -14,7 +14,7 @@ import java.util.List;
 public class DateUtil {
     private static final long DAY_MILLIS = 86400000L;
     private static final String FORMAT_YYMMDD = "yyyyMMdd";
-    private static final String JS_FORMAT_YYMMDD = "MM/dd/yyyy HH:mm";
+    private static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
 
     /**
      * 转化时间
@@ -100,7 +100,7 @@ public class DateUtil {
 //        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
 
 
-        String startTime = "12/01/2019 00:00";
+        String startTime = "2019-12-01 10:47";
         Date d = formatString(startTime, JS_FORMAT_YYMMDD);
         String ss = formatDate(d, FORMAT_YYMMDD);
         System.out.println(ss);

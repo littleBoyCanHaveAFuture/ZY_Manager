@@ -5,10 +5,17 @@
        default-lazy-init="false">
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-        <property name="maxIdle" value="100"/><!-- 最大闲置 -->
+        <property name="maxTotal" value="200"/>    <!--  资源池中最大连接数      -->
+        <property name="maxIdle" value="200"/><!-- 最大闲置 -->
         <property name="minIdle" value="10"/><!-- 最小闲置 -->
-        <property name="testOnBorrow" value="true"/><!-- 可以获取 -->
-        <!--        <property name="testOnReturn" value="true"/>-->
+        <property name="maxWaitMillis" value="2000"/><!-- 当资源池连接用尽后，调用者的最大等待时间(单位为毫秒)-->
+        <property name="testOnBorrow" value="true"/><!-- 向资源池借用连接时是否做连接有效性检测(ping)，无效连接会被移除-->
+        <property name="testOnReturn" value="false"/><!--向资源池归还连接时是否做连接有效性检测(ping)，无效连接会被移除-->
+        <property name="jmxEnabled" value="true"/><!-- 是否开启jmx监控，可用于监控-->
+        <property name="testWhileIdle" value="true"/><!-- 是否开启jmx监控，可用于监控-->
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/><!--   空闲资源的检测周期(单位为毫秒)     -->
+        <property name="minEvictableIdleTimeMillis" value="60000"/><!--  资源池中资源最小空闲时间(单位为毫秒)，达到此值后空闲资源将被移除      -->
+
     </bean>
     <!-- redis 配置,也可以把配置挪到properties配置文件中,再读取 -->
     <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
@@ -16,8 +23,9 @@
         <!-- 端口，默认6379 -->
         <constructor-arg index="2" value="6379" name="port" type="int"/>
         <constructor-arg index="3" value="5000" name="timeout" type="int"/>
-        <constructor-arg index="1" value="47.101.44.31" name="host" type="java.lang.String"/>
-        <constructor-arg index="4" value="50558b3dc9aa68a" name="password" type="java.lang.String"/>
+        <constructor-arg index="1" value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"
+                         name="host" type="java.lang.String"/>
+        <constructor-arg index="4" value="ppB7xnDF6pQdZRZp" name="password" type="java.lang.String"/>
 
     </bean>
     <!--

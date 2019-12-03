@@ -20,7 +20,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
     @Override
     public List<RechargeSummary> getRechargeSummary(Map<String, Object> map,
-                                                    Map<Integer, List<String>> serverIdList,
+                                                    Map<Integer, List<String>> serverIdMap,
                                                     List<String> spIdList,
                                                     Integer userId) throws Exception {
         int type = Integer.parseInt(map.get("type").toString());
@@ -37,11 +37,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         switch (type) {
             case 1: {
                 //全服概况
-                return this.setGameRs(gameId, serverIdList, timeList);
+                return this.setGameRs(gameId, serverIdMap, timeList);
             }
             case 2: {
                 //分服概况
-                return this.setServerRs(gameId, serverIdList, timeList);
+                return this.setServerRs(gameId, serverIdMap, timeList);
             }
             case 3: {
                 //渠道概况
@@ -55,6 +55,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
     /**
      * 生成全服汇总
+     * 游戏 -所有日期
      *
      * @param gameId       游戏id
      * @param serverIdList 服务器-渠道Map
@@ -62,29 +63,38 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
      */
     public List<RechargeSummary> setGameRs(Integer gameId, Map<Integer, List<String>> serverIdList, List<String> timeList) throws Exception {
         //该游戏全区统计
-        List<RechargeSummary> serverRsList = new ArrayList<>();
-        //
+        Map<String, RechargeSummary> totalMap = new LinkedHashMap<>();
+        //遍历区服
         for (Map.Entry<Integer, List<String>> entry : serverIdList.entrySet()) {
             Integer serverId = entry.getKey();
             List<String> spIdList = entry.getValue();
 
-            RechargeSummary serverRs = new RechargeSummary();
             //同区服-所有渠道 时间排序的结果
-            List<RechargeSummary> rsList = this.setGameTimeRs(gameId, serverId, spIdList, timeList);
-
-            for (RechargeSummary rs : rsList) {
-                serverRs.add(rs);
+            Map<String, RechargeSummary> timeRsMap = this.setGameTimeRs(gameId, serverId, spIdList, timeList);
+            //查询结果 放入 totalMap 中
+            for (String times : timeRsMap.keySet()) {
+                RechargeSummary timeRs = timeRsMap.get(times);
+                if (!totalMap.containsKey(times)) {
+                    totalMap.put(times, timeRs);
+                } else {
+                    RechargeSummary totalRs = totalMap.get(times);
+                    totalRs.add(timeRs);
+                }
             }
-            serverRs.calculate(1);
-
-            //该区服结果
-            serverRsList.add(serverRs);
         }
-        return serverRsList;
+        for (String times : totalMap.keySet()) {
+            RechargeSummary totalRs = totalMap.get(times);
+            totalRs.setDate(times);
+            totalRs.calculate(1);
+        }
+
+        //该区服结果
+        return new ArrayList<>(totalMap.values());
     }
 
     /**
      * 生成区服汇总
+     * 游戏-所有区服
      *
      * @param gameId       游戏id
      * @param serverIdList 服务器-渠道Map
@@ -104,6 +114,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             for (RechargeSummary rs : rsList) {
                 serverRs.add(rs);
             }
+            serverRs.setServerId(serverId);
             serverRs.calculate(2);
             //该区服结果
             serverRsList.add(serverRs);
@@ -113,6 +124,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
     /**
      * 生成渠道汇总
+     * 游戏-区服-所有渠道
      *
      * @param gameId   游戏id
      * @param serverId 服务器id
@@ -134,9 +146,9 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
      * @param spIdList 渠道列表
      * @param timeList 时间列表 yyyyMMdd
      */
-    public List<RechargeSummary> setGameTimeRs(Integer gameId, Integer serverId,
-                                               List<String> spIdList,
-                                               List<String> timeList) throws Exception {
+    public Map<String, RechargeSummary> setGameTimeRs(Integer gameId, Integer serverId,
+                                                      List<String> spIdList,
+                                                      List<String> timeList) throws Exception {
         Map<String, RechargeSummary> map = new LinkedHashMap<>();
         for (String time : timeList) {
             RechargeSummary timeRS = new RechargeSummary();
@@ -176,7 +188,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(userGSSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
             //新增创角去除滚服
-            Map<String, Double> timecrroMap = cache.getDayBitopAnd(userGSSKey, userGSSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
+            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(userGSSKey, userGSSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
             //创角率
 
             //活跃玩家
@@ -213,12 +225,12 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 }
                 //新增创角去除滚服
                 if (timecrroMap.containsKey(time)) {
-                    rs.setNewAddCreateRoleRemoveOld(rs.getNewAddCreateRoleRemoveOld() + timecrroMap.get(time).intValue());
+                    rs.setNewAddCreateRoleRemoveOld(rs.getNewAddCreateRoleRemoveOld() + timecrroMap.get(time));
                 }
 
                 //活跃玩家
                 if (timeActiveAccountMap.containsKey(time)) {
-                    rs.setActivePlayer(rs.getActivePlayer() + timecrroMap.get(time).intValue());
+                    rs.setActivePlayer(rs.getActivePlayer() + timecrroMap.get(time));
                 }
                 //充值次数
                 if (timeRechargeTimesMap.containsKey(time)) {
@@ -255,11 +267,12 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 //注册付费ARPU
             }
         }
-        return (List<RechargeSummary>) map.values();
+        return map;
     }
 
     /**
-     * 生成渠道汇总
+     * 查询redis
+     * 渠道汇总
      * 根据渠道合并数据
      *
      * @param gameId   游戏id
@@ -303,7 +316,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
             //新增创角去除滚服
-            Map<String, Double> timecrroMap = cache.getDayBitopAnd(usergssKey, usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
+            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(usergssKey, usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
             //创角率
             //创号转化率
 
@@ -343,32 +356,32 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             RechargeSummary rs = new RechargeSummary();
 
             //新增创号
-            rs.setNewAddCreateAccount(this.mapAddInt(timecaMap));
+            rs.setNewAddCreateAccount(this.mapAddToInt(timecaMap));
             //新增创角
-            rs.setNewAddCreateRole(this.mapAddInt(timecrMap));
+            rs.setNewAddCreateRole(this.mapAddToInt(timecrMap));
             //新增创角去除滚服
             rs.setNewAddCreateRoleRemoveOld(this.mapAddInt(timecrroMap));
             //创号转化率
             rs.setCreateAccountTransRate(0D);
 
             //活跃玩家
-            rs.setActivePlayer(this.mapAddInt(timeActiveAccountMap));
+            rs.setActivePlayer(this.mapAddToInt(timeActiveAccountMap));
             //充值次数
-            rs.setRechargeTimes(this.mapAddInt(timeRechargeTimesMap));
+            rs.setRechargeTimes(this.mapAddToInt(timeRechargeTimesMap));
             //充值人数
-            rs.setRechargeNumber(this.mapAddInt(timeRechargeAccountsMap));
+            rs.setRechargeNumber(this.mapAddToInt(timeRechargeAccountsMap));
             //充值金额
-            rs.setRechargePayment(this.mapAddInt(timeRechargeAmountsMap));
+            rs.setRechargePayment(this.mapAddToInt(timeRechargeAmountsMap));
             //活跃付费率
             //付费ARPU
             //当日首次付费金额
-            rs.setNofPayment(this.mapAddInt(timeRechargeFirstPayersMap));
+            rs.setNofPayment(this.mapAddToInt(timeRechargeFirstPayersMap));
             //当日首次付费人数
-            rs.setNofPayers(this.mapAddInt(timefraMap));
+            rs.setNofPayers(this.mapAddToInt(timefraMap));
             //注册付费人数
-            rs.setRegisteredPayers(this.mapAddInt(timeRegisteredPayersAccountMap));
+            rs.setRegisteredPayers(this.mapAddToInt(timeRegisteredPayersAccountMap));
             //注册付费金额
-            rs.setRegisteredPayment(this.mapAddInt(timeRegisteredPaymentMap));
+            rs.setRegisteredPayment(this.mapAddToInt(timeRegisteredPaymentMap));
             //注册付费ARPU
 
             //服务器id
@@ -379,11 +392,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             rs.setNewaddplayer(0);
 
             //累计充值金额
-            rs.setTotalPayment(timeTotalPayment == null ? 0D : timeTotalPayment);
+            rs.setTotalPayment(timeTotalPayment == null ? 0 : (int) (double) timeTotalPayment);
             //累计创角
-            rs.setTotalCreateRole(timeTotalCreateRole == null ? 0D : timeTotalCreateRole);
+            rs.setTotalCreateRole(timeTotalCreateRole == null ? 0 : (int) (double) timeTotalCreateRole);
             //累计充值人数
-            rs.setTotalRechargeNums(timeTotalRechargeNums == null ? 0D : timeTotalRechargeNums);
+            rs.setTotalRechargeNums(timeTotalRechargeNums == null ? 0 : (int) (double) timeTotalRechargeNums);
             //总付费率
 
             System.out.println("timeTotalPayment:" + timeTotalPayment);
@@ -407,7 +420,20 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
      * value值累加
      * 返回int
      */
-    public int mapAddInt(Map<String, Double> map) {
+    public int mapAddInt(Map<String, Integer> map) {
+        double total = 0L;
+        for (Integer d : map.values()) {
+            total += d;
+        }
+        return (int) total;
+    }
+
+    /**
+     * Map<String, Double>
+     * value值累加
+     * 返回int
+     */
+    public int mapAddToInt(Map<String, Double> map) {
         double total = 0L;
         for (Double d : map.values()) {
             total += d;

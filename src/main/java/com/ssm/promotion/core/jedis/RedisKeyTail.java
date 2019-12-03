@@ -9,10 +9,23 @@ public class RedisKeyTail {
      * bitmap
      * namespace
      */
+    /**
+     * 当日新建账号
+     */
     public static final String NEW_ADD_CREATE_ACCOUNT = "NA_CA";
+    /**
+     * 当日新建角色
+     */
     public static final String NEW_ADD_CREATE_ROLE = "NA_CR";
+    /**
+     * 创建了账号的账号
+     */
     public static final String GAME_ACCOUNT_HAS_ROLE = "GA_SRole";
-    public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "GA_SRole";
+    /**
+     * 创建了多个角色的账号
+     */
+    public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "GA_MRole";
+    /***/
     public static final String GAME_ACCOUNT_ALL_NUMS = "totalAccount";
     /**
      * 活跃玩家

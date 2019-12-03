@@ -35,6 +35,11 @@ public interface ServerListService {
 
     /**
      * 不同的区服渠道
+     *
+     * @param type 同游戏
+     *             1 不同区服
+     *             2 不同渠道
      */
+
     List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userid);
 }

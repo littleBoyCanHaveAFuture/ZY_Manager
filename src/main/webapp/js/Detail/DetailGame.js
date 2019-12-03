@@ -1,7 +1,7 @@
 $(function () {
     initTableColumns();
     initGameList();
-
+    // $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
 });
 
 function exportToLocal() {
@@ -9,16 +9,53 @@ function exportToLocal() {
     // $('#dg').datagrid('print', 'DataGrid'); // print the datagrid
 }
 
-function search(type) {
+function search() {
+    let gameId = $("#save_gameId").val();
+    let serverId = $("#save_serverId").val();
+    let spId = $("#save_spId").val();//此处逗号会产生问题
+    let startTime = $("#save_startTime").val();
+    let endTime = $("#save_endTime").val();
+    let spIdstrs = new Array(); //定义一数组
+    spIdstrs = spId.replace(/,/g, "|");
+    let data = {
+        "type": 1,
+        "gameId": gameId,
+        "serverId": serverId,
+        "spId": spIdstrs,
+        "startTime": startTime,
+        "endTime": endTime
+    };
+    console.log("gameId:" + gameId);
+    console.log("serverId:" + serverId);
+    console.log("spId:" + spIdstrs);
+    console.log("startTime:" + startTime);
+    console.log("endTime:" + endTime);
+
 
     $.ajax({
-        //获取下拉
-        url: "",
+        //获取数据
+        url: "/rechargeSummary/searchRechargeSummary",
         type: "post",
-        async: false,
-        data: {},
+        data: data,
         dataType: "json",
-        success: function (combox) {
+        async: false,
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                result = {
+                    total: result.total,
+                    rows: result.rows
+                };
+                if (result.total === 0) {
+                    $.messager.alert("系统提示", "查询成功 无数据");
+                }
+                $("#serverTable").datagrid("loadData", result);
+                // $('#serverTable').datagrid({loadFilter: pagerFilter}).datagrid('loadData', result);
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "查询失败");
         }
     });
 }
@@ -40,7 +77,6 @@ function relogin() {
 }
 
 function initTableColumns() {
-    $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
     let frozenColumns = [];
     let activeColumns = [];
     let commonResult = {

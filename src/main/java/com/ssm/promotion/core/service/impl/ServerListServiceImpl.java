@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * @author Administrator
  */
@@ -20,7 +21,7 @@ public class ServerListServiceImpl implements ServerListService {
 
     @Override
     public List<ServerInfo> getServerList(Map<String, Object> map, Integer userId) {
-    //  map.entrySet().forEach((k) -> System.out.println("getServerList--->" + k.getKey() + ":" + k.getValue()));
+        //  map.entrySet().forEach((k) -> System.out.println("getServerList--->" + k.getKey() + ":" + k.getValue()));
 
         return serverListdao.selectServers(map);
     }
@@ -54,6 +55,11 @@ public class ServerListServiceImpl implements ServerListService {
         return serverListdao.getTotalServers(map);
     }
 
+    /**
+     * @param type 同游戏
+     *             1 不同区服
+     *             2 不同渠道
+     */
     @Override
     public List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userid) {
         List<String> res;

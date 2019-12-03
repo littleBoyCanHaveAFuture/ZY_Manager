@@ -1,24 +1,81 @@
 $(function () {
     initTableColumns();
     initGameList();
-
+    // $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
+    $('#save_startTime').datebox('setValue', formatterDate(new Date(), 0));
+    $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
 });
+
+function formatterDate(date, type) {
+    let day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+    let month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0" + (date.getMonth() + 1);
+    let hor = date.getHours();
+    let min = date.getMinutes();
+    let sec = (date.getSeconds() > 9) ? date.getSeconds() : "0" + date.getSeconds();
+    if (type === 0) {
+        return date.getFullYear() + '-' + month + '-' + "01" + " " + "00" + ":" + "00";
+    } else {
+        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
+    }
+}
 
 function exportToLocal() {
     $('#dg').datagrid('toExcel', 'dg.xls'); // export to excel
     // $('#dg').datagrid('print', 'DataGrid'); // print the datagrid
 }
 
-function search(type) {
+function search() {
+    let gameId = $("#save_gameId").val();
+    let serverId = $("#save_serverId").val();
+    let spId = $("#save_spId").val();//此处逗号会产生问题
+    let startTime = $("#save_startTime").val();
+    let endTime = $("#save_endTime").val();
+    let spIdstrs = new Array(); //定义一数组
+    spIdstrs = spId.replace(/,/g, "|");
+    let data = {
+        "type": 2,
+        "gameId": gameId,
+        "serverId": serverId,
+        "spId": spIdstrs,
+        "startTime": startTime,
+        "endTime": endTime
+    };
+    console.log("gameId:" + gameId);
+    console.log("serverId:" + serverId);
+    console.log("spId:" + spIdstrs);
+    console.log("startTime:" + startTime);
+    console.log("endTime:" + endTime);
+
 
     $.ajax({
-        //获取下拉
-        url: "",
+        //获取数据
+        url: "/rechargeSummary/searchRechargeSummary",
         type: "post",
-        async: false,
-        data: {},
+        data: data,
         dataType: "json",
-        success: function (combox) {
+        async: false,
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                let useTime = result.time;
+                result = {
+                    total: result.total,
+                    rows: result.rows
+                };
+                if (result.total === 0) {
+                    $.messager.alert("系统提示", "查询成功 无数据");
+                } else {
+                    $.messager.alert("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
+                }
+                if (result.total === 0) {
+
+                }
+                $("#dg").datagrid("loadData", result);
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "查询失败");
         }
     });
 }
@@ -40,7 +97,6 @@ function relogin() {
 }
 
 function initTableColumns() {
-    $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
     let activeColumns = [];
     let commonResult = {
         "服务器": "serverId",
@@ -56,7 +112,7 @@ function initTableColumns() {
         "活跃玩家": "activePlayer",
         "充值次数": "rechargeTimes",
         "充值人数": "rechargeNumber",
-        "充值金额": "RechargePayment",
+        "充值金额": "rechargePayment",
         "活跃付费率": "activePayRate",
         "付费ARPU": "paidARPU",
         "活跃ARPU": "activeARPU",

@@ -9,6 +9,7 @@ import com.ssm.promotion.core.entity.Servername;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.service.ServerNameService;
 import com.ssm.promotion.core.util.ResponseUtil;
+import com.ssm.promotion.core.util.ServerInfoUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -201,7 +202,8 @@ public class ServerController {
         map.put("spId", spId);
 
         List<String> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
-
+        serverInfos = ServerInfoUtil.spiltStrList(serverInfos);
+        
         JSONObject result = new JSONObject();
         JSONArray jsonArray = JSONArray.fromObject(serverInfos);
         result.put("rows", jsonArray);

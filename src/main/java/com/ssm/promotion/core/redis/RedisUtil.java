@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * @author 13
  * @date 2017/12/4
  */
-@Component
+//@Component
 public class RedisUtil {
 
     private static final String CACHE_NAME = "perfect-ssm-cache:";
