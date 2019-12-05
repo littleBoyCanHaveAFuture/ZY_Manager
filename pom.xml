@@ -220,6 +220,12 @@
             <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
+        <!--   自动生成id     -->
+        <dependency>
+            <groupId>xyz.downgoon</groupId>
+            <artifactId>snowflake</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
     </dependencies>
 

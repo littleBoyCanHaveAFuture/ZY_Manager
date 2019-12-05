@@ -27,7 +27,6 @@ public class JedisRechargeCache {
 
     public void setJedisManager(jedisManager jedisManager) {
         this.jedisManager = jedisManager;
-        System.out.println("JedisRechargeCache setJedisManager ");
     }
 
     //账号id 一定要唯一
@@ -292,8 +291,9 @@ public class JedisRechargeCache {
      * 获取
      * 查询 2个 bitmap 相同 数据的数量
      */
-    public Map<String, Integer> getDayBitopAnd(String destKey, String srcKey,
-                                               String destBodyTail, String srcBodyTail,
+    public Map<String, Integer> getDayBitopAnd(String destKey, String srcKey1, String srcKey2,
+                                               String destBodyTail,
+                                               String src1BodyTail, String src2BodyTail,
                                                List<String> timeList) {
         Jedis jds = null;
         boolean isBroken = false;
@@ -306,10 +306,11 @@ public class JedisRechargeCache {
                 List<String> tmpTimeList1 = new ArrayList<>();
                 List<String> tmpTimeList2 = new ArrayList<>();
                 for (String times : timeList) {
-                    String srckey = RedisKeyBody.appendBodyTimes(srcKey, times) + srcBodyTail;
                     String destkey = RedisKeyBody.appendBodyTimes(destKey, times) + destBodyTail;
-                    pipeline.exists(srckey);
-                    pipeline.exists(destkey);
+                    String srckey1 = RedisKeyBody.appendBodyTimes(srcKey1, times) + src1BodyTail;
+                    String srckey2 = RedisKeyBody.appendBodyTimes(srcKey2, times) + src2BodyTail;
+                    pipeline.exists(srckey1);
+                    pipeline.exists(srckey2);
                 }
                 List<Object> res = pipeline.syncAndReturnAll();
 
@@ -329,27 +330,28 @@ public class JedisRechargeCache {
                 pipeline.clear();
 
                 for (String times : tmpTimeList1) {
-                    String srckey = RedisKeyBody.appendBodyTimes(srcKey, times) + srcBodyTail;
+                    String srckey = RedisKeyBody.appendBodyTimes(srcKey1, times) + src1BodyTail;
                     pipeline.setbit(srckey, 10L, true);
                 }
                 for (String times : tmpTimeList2) {
-                    String destkey = RedisKeyBody.appendBodyTimes(destKey, times) + destBodyTail;
+                    String destkey = RedisKeyBody.appendBodyTimes(srcKey2, times) + src2BodyTail;
                     pipeline.setbit(destkey, 10L, true);
-
                 }
                 pipeline.sync();
                 pipeline.clear();
             }
 
             for (String times : timeList) {
-                String srckey = RedisKeyBody.appendBodyTimes(srcKey, times) + srcBodyTail;
                 String destkey = RedisKeyBody.appendBodyTimes(destKey, times) + destBodyTail;
+                String srckey1 = RedisKeyBody.appendBodyTimes(srcKey1, times) + src1BodyTail;
+                String srckey2 = RedisKeyBody.appendBodyTimes(srcKey2, times) + src2BodyTail;
 
-                System.out.println("getDayBitopAnd srckey\t" + srckey);
                 System.out.println("getDayBitopAnd destkey\t" + destkey);
+                System.out.println("getDayBitopAnd srckey1\t" + srckey1);
+                System.out.println("getDayBitopAnd srckey2\t" + srckey2);
 
                 //每天的 新增创角去除滚服 账号数目
-                pipeline.bitop(BitOP.AND, destkey, srckey);
+                pipeline.bitop(BitOP.AND, destkey, srckey1, srckey2);
                 pipeline.bitcount(destkey);
             }
 

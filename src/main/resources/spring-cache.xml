@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
        default-lazy-init="false">
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
@@ -42,4 +43,16 @@
     <bean id="JedisRechargeCache" class="com.ssm.promotion.core.jedis.JedisRechargeCache">
         <property name="jedisManager" ref="jedisManager"/>
     </bean>
+    <!--  数据库模板表读取 启动时初始化-->
+    <bean id="TemplateWorker" class="com.ssm.promotion.core.sdk.TemplateWorker" init-method="init">
+    </bean>
+    <!--  随机id生成器-->
+    <bean id="LoginIdGenerator" class="com.ssm.promotion.core.sdk.LoginIdGenerator" init-method="init">
+    <property name="datacenterId" value="1"/><!-- 渠道id -->
+    <property name="workerId" value="1"/><!-- 区服 -->
+</bean>
+    <bean id="AccountWorker" class="com.ssm.promotion.core.sdk.AccountWorker" init-method="AccountWorker">
+
+    </bean>
+
 </beans>

@@ -125,7 +125,6 @@ public class jedisManager {
     }
 
     public void setJedisPool(JedisPool jedisPool) {
-        System.out.println("setJedisPool");
         this.jedisPool = jedisPool;
     }
 

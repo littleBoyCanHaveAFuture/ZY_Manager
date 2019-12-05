@@ -188,7 +188,10 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(userGSSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
             //新增创角去除滚服
-            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(userGSSKey, userGSSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
+            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(
+                    userGSSKey, userGSSKey, userGSSKey,
+                    RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE,
+                    timeList);
             //创角率
 
             //活跃玩家
@@ -316,7 +319,10 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
             //新增创角去除滚服
-            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(usergssKey, usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE, timeList);
+            Map<String, Integer> timecrroMap = cache.getDayBitopAnd(
+                    usergssKey, usergssKey, usergssKey,
+                    RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD, RedisKeyTail.NEW_ADD_CREATE_ROLE, RedisKeyTail.GAME_ACCOUNT_MULTIPLE_ROLE,
+                    timeList);
             //创角率
             //创号转化率
 

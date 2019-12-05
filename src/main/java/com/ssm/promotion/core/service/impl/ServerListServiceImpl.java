@@ -27,7 +27,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int addServer(ServerInfo server, Integer userid) {
+    public int addServer(ServerInfo server, Integer userId) {
         if (server.getGameId() == null || server.getServerId() == null || server.getSpId() == null) {
             return 0;
         }
@@ -35,7 +35,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int updateServer(ServerInfo server, Integer userid) {
+    public int updateServer(ServerInfo server, Integer userId) {
         if (server.getGameId() == null || server.getServerId() == null || server.getSpId() == null) {
             return 0;
         }
@@ -43,7 +43,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int delServer(Integer id, Integer userid) {
+    public int delServer(Integer id, Integer userId) {
         if (id < 0) {
             return -1;
         }
@@ -51,7 +51,7 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public Long getTotalServers(Map<String, Object> map, Integer userid) {
+    public Long getTotalServers(Map<String, Object> map, Integer userId) {
         return serverListdao.getTotalServers(map);
     }
 
@@ -61,7 +61,7 @@ public class ServerListServiceImpl implements ServerListService {
      *             2 不同渠道
      */
     @Override
-    public List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userid) {
+    public List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId) {
         List<String> res;
         if (type == 1) {
             res = serverListdao.selectDistinctServerId(map);
@@ -70,4 +70,17 @@ public class ServerListServiceImpl implements ServerListService {
         }
         return res;
     }
+
+    @Override
+    public boolean isSpCanReg(Map<String, Object> map, Integer userId) {
+//        serverListdao.selectRegStatus(map);
+        return true;
+    }
+
+    @Override
+    public boolean isSpCanLogin(Map<String, Object> map, Integer userId) {
+//        serverListdao.selectLoginStatus(map);
+        return true;
+    }
+
 }

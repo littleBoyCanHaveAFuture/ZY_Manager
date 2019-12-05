@@ -1,13 +1,24 @@
 package com.ssm.promotion.core.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ssm.promotion.core.common.Result;
+import com.ssm.promotion.core.common.ResultGenerator;
+import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.sdk.AccountWorker;
+import com.ssm.promotion.core.sdk.LoginWorker;
+import com.ssm.promotion.core.util.UtilG;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 用来做假数据
@@ -19,54 +30,58 @@ import javax.servlet.http.HttpServletRequest;
  * @date 2019/12/3
  */
 @Controller
-@RequestMapping("/test")
-public class testController {
+@RequestMapping("/ttt")
+public class TtController {
+    private static final Logger log = Logger.getLogger(TtController.class);
     @Autowired
     JedisRechargeCache cache;
+    @Resource
+    LoginWorker loginWorker;
+    @Resource
+    AccountWorker accountWorker;
     @Autowired
-    HttpServletRequest request;
+    private HttpServletRequest request;
+
 
     /**
      * 注册账号
      * SDK 登录接口
-     *
-     * @param appId     易接平台创建的游戏ID，appId
-     *                  请使用URLEncoder编码
-     * @param channelId 易接平台标示的渠道SDK ID
-     *                  请使用URLEncoder编码
-     * @param userId    渠道SDK标示的用户ID
-     *                  请使用URLEncoder编码
-     * @param token     渠道SDK登录完成后的Session ID。
-     *                  请使用URLEncoder编码
      */
-    @RequestMapping(value = "register", method = RequestMethod.GET)
-    public void sdkRegister(String appId,
-                            String channelId,
-                            String userId,
-                            String token) {
-
-
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @ResponseBody
+    public Result sdkRegister(@RequestBody Map<String, String> map) throws Exception {
+        map.put("ip", UtilG.getIpAddress(request));
+        String result = accountWorker.reqRegister(map);
+        return ResultGenerator.genSuccessResult(result);
     }
 
     /**
      * 客户端先请求
      * SDK 登录接口
      *
-     * @param appId     易接平台创建的游戏ID，appId
-     *                  请使用URLEncoder编码
-     * @param channelId 易接平台标示的渠道SDK ID
-     *                  请使用URLEncoder编码
-     * @param userId    渠道SDK标示的用户ID
-     *                  请使用URLEncoder编码
-     * @param token     渠道SDK登录完成后的Session ID。
-     *                  请使用URLEncoder编码
+     * @param appId         指悦平台创建的游戏ID，appId
+     *                      请使用URLEncoder编码
+     * @param channelId     易接平台标示的渠道SDK ID
+     *                      请使用URLEncoder编码
+     * @param channelUserId 渠道SDK标示的用户ID
+     *                      请使用URLEncoder编码
+     * @param
+     * @param token         渠道SDK登录完成后的Session ID。
+     *                      请使用URLEncoder编码
      */
-    @RequestMapping(value = "login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
     public void sdkLogin(String appId,
+                         boolean isChannel,
+                         String name,
+                         String pwd,
                          String channelId,
-                         String userId,
-                         String token) {
-
+                         String channelUserId,
+                         String token) throws Exception {
+        Integer channelid = Integer.parseInt(channelId);
+        Account account = accountWorker.getAccount(channelid, channelUserId, isChannel);
+        if (account == null) {
+            //渠道账号自动注册并登录
+        }
 
     }
 
@@ -74,7 +89,7 @@ public class testController {
      * 游戏登录服务器
      * 验证账号信息
      */
-    @RequestMapping(value = "check", method = RequestMethod.GET)
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
     public void sdkLoginCheck() {
 
 
@@ -90,7 +105,7 @@ public class testController {
      * @param zoneId    角色所在区域唯一标识
      * @param zoneName  角色所在区域名称
      */
-    @RequestMapping(value = "updateroledata", method = RequestMethod.GET)
+    @RequestMapping(value = "/updateroledata", method = RequestMethod.GET)
     public void sdkUpdateRoledata(String context,
                                   String roleId,
                                   String roleName,
@@ -106,7 +121,7 @@ public class testController {
      * 1.创角打点
      * 2.新手指引打点
      */
-    @RequestMapping(value = "setdata", method = RequestMethod.GET)
+    @RequestMapping(value = "/setdata", method = RequestMethod.GET)
     public void sdkSetData() {
 
         JSONObject roleInfo = new JSONObject();
@@ -132,7 +147,7 @@ public class testController {
         roleInfo.put("roleLevelMTime", "54456556");
         //createrole 创建新角色时调用
         //levelup 玩家升级角色时调用
-        // enterServer 选择服务器进入时调用
+        //enterServer 选择服务器进入时调用
         String key;
 
     }
@@ -141,7 +156,7 @@ public class testController {
     /**
      * 退出接口
      */
-    @RequestMapping(value = "updateroledata", method = RequestMethod.GET)
+    @RequestMapping(value = "/exit", method = RequestMethod.GET)
 
     public void sdkExit(String context,
                         String roleId,
@@ -165,7 +180,7 @@ public class testController {
      *                          注意：这里的回调地址可以填也可以为空字串，如果填了则以这里的回调地址为主，如果为空则以易接开发者中心设置的回调地址为准。
      * @param payResultListener 支付回调接口
      */
-    @RequestMapping(value = "updateroledata", method = RequestMethod.GET)
+    @RequestMapping(value = "/pay", method = RequestMethod.GET)
     public void sdkPay(String context,
                        String unitPrice,
                        String itemName,

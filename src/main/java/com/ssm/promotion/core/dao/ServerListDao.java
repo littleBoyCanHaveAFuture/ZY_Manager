@@ -46,4 +46,14 @@ public interface ServerListDao {
      * 不同的区服id
      */
     List<String> selectDistinctServerId(Map<String, Object> map);
+
+    /**
+     * 查询是否可以注册
+     */
+    int selectRegStatus(Map<String, Object> map);
+
+    /**
+     * 查询是否可以登录
+     */
+    int selectLoginStatus(Map<String, Object> map);
 }

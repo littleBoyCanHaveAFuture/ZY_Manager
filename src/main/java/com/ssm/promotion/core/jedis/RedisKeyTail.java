@@ -18,6 +18,10 @@ public class RedisKeyTail {
      */
     public static final String NEW_ADD_CREATE_ROLE = "NA_CR";
     /**
+     * 当日新建角色去除滚服
+     */
+    public static final String NEW_ADD_CREATE_ROLE_RM_OLD = "NA_CR_RM_OLD";
+    /**
      * 创建了账号的账号
      */
     public static final String GAME_ACCOUNT_HAS_ROLE = "GA_SRole";

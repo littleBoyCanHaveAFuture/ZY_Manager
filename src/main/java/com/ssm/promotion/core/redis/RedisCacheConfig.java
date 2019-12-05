@@ -27,13 +27,13 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     public JedisConnectionFactory redisConnectionFactory() {
         JedisConnectionFactory redisConnectionFactory = new JedisConnectionFactory();
         //ip地址
-        redisConnectionFactory.setHostName("47.101.44.31");
+        redisConnectionFactory.setHostName("r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com");
         //端口号
         redisConnectionFactory.setPort(6379);
         //redis登录密码
-        redisConnectionFactory.setPassword("50558b3dc9aa68a");
+        redisConnectionFactory.setPassword("ppB7xnDF6pQdZRZp");
         //database 默认是16个，不设置的话默认为0
-        redisConnectionFactory.setDatabase(2);
+        redisConnectionFactory.setDatabase(1);
         return redisConnectionFactory;
     }
 

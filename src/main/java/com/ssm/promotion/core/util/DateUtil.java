@@ -12,7 +12,23 @@ import java.util.List;
  * @date 2017-3-1
  */
 public class DateUtil {
-    private static final long DAY_MILLIS = 86400000L;
+    public static final long SECOND_MILLIS = 1000L;
+    public static final int MINUTE_SECONDS = 60;
+    public static final int HOUR_MINUTES = 60;
+    public static final int DAY_HOURS = 24;
+    public static final int WEEK_DAYS = 7;
+    public static final int MONTH_DAYS = 30;
+    public static final int YEAR_DAYS = 365;
+    public static final long MINUTE_MILLIS = 60000L;
+    public static final long HOUR_MILLIS = 3600000L;
+    public static final long DAY_MILLIS = 86400000L;
+    public static final long WEEK_MILLIS = 604800000L;
+    public static final long MONTH_MILLIS = 2592000000L;
+    public static final long YEAR_MILLIS = 31536000000L;
+    public static final int HOUR_SECONDS = 3600;
+    public static final int DAY_SECONDS = 86400;
+    public static final int WEEK_SECONDS = 604800;
+
     private static final String FORMAT_YYMMDD = "yyyyMMdd";
     private static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
 

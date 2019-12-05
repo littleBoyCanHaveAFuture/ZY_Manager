@@ -19,10 +19,16 @@ import java.util.List;
 public class AopSurvey {
     private static final Logger log = Logger.getLogger(AopSurvey.class);
     private static List<String> allJumpFuncsList = new ArrayList<>();
+    private static List<String> allJumpFuncMethodList = new ArrayList<>();
 
     static {
-//        allJumpFuncsList.add("com.ssm.promotion.core.service.impl.UserServiceImpl");
         allJumpFuncsList.add("com.ssm.promotion.core.service.impl.PictureServiceImpl");
+        allJumpFuncsList.add("com.ssm.promotion.core.service.impl.AccountServiceImpl");
+        // UserServiceImpl
+        allJumpFuncMethodList.add("login");
+        //ServerListServiceImpl
+        allJumpFuncMethodList.add("isSpCanReg");
+        allJumpFuncMethodList.add("isSpCanLogin");
     }
 
     @Resource
@@ -62,12 +68,13 @@ public class AopSurvey {
         //得到方法名
         System.out.println("function:" + signature);
 
-        if (jump(pjp)) {
+        if (this.jumpInterface(pjp)) {
             return;
         }
-        if (signature.equals("login")) {
+        if (this.jumpMethod(signature)) {
             return;
         }
+
         int len;
         if (obj.length >= 1) {
             len = obj.length - 1;
@@ -147,6 +154,8 @@ public class AopSurvey {
             case "getRechargeSummary":
             case "getGameList":
             case "getDistinctServerInfo":
+            case "isSpCanReg":
+
                 //文章
             case "findArticle":
             case "getTotalArticle":
@@ -240,6 +249,7 @@ public class AopSurvey {
             case "getRechargeSummary":
             case "getGameList":
             case "getDistinctServerInfo":
+            case "isSpCanReg":
                 //文章
             case "findArticle":
             case "getTotalArticle":
@@ -256,12 +266,23 @@ public class AopSurvey {
     }
 
     /**
-     * 过滤
+     * 过滤 impl 接口
      */
-    private boolean jump(JoinPoint joinPoint) {
+    private boolean jumpInterface(JoinPoint joinPoint) {
         boolean result = false;
         String name = joinPoint.getTarget().getClass().getName();
         if (allJumpFuncsList.contains(name)) {
+            result = true;
+        }
+        return result;
+    }
+
+    /**
+     * 过滤 impl 接口
+     */
+    private boolean jumpMethod(String sign) {
+        boolean result = false;
+        if (allJumpFuncMethodList.contains(sign)) {
             result = true;
         }
         return result;

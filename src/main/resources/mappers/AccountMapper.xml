@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.AccountDao">
+    <resultMap type="Account" id="AccountResult">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="pwd" column="pwd"/>
+        <result property="phone" column="phone"/>
+        <result property="createIp" column="createIp"/>
+        <result property="createTime" column="createTime"/>
+        <result property="createDevice" column="createDevice"/>
+        <result property="deviceCode" column="deviceCode"/>
+        <result property="channelId" column="channelId"/>
+        <result property="channelUserId" column="channelUserId"/>
+        <result property="channelUserName" column="channelUserName"/>
+        <result property="channelUserNick" column="channelUserNick"/>
+        <result property="lastLoginTime" column="lastLoginTime"/>
+        <result property="token" column="token"/>
+        <result property="addParam" column="addParam"/>
+    </resultMap>
+    <sql id="select_account_column">
+        SELECT id,
+               name,
+               pwd,
+               phone,
+               createIp,
+               createTime,
+               createDevice,
+               deviceCode,
+               channelId,
+               channelUserId,
+               channelUserName,
+               channelUserNick,
+               lastLoginTime,
+               token,
+               addParam
+        FROM zy_account
+    </sql>
+    <insert id="create" parameterType="Account">
+        insert into
+        zy_account(
+        id,name,pwd,phone,createIp,createTime,
+        createDevice,deviceCode,channelId,channelUserId,channelUserName,
+
+        channelUserNick,lastLoginTime,token,addParam
+        )
+        values( #{id},#{name},#{pwd},#{phone},#{createIp},#{createTime},
+        #{createDevice},#{deviceCode},#{channelId},#{channelUserId},#{channelUserName},
+        #{channelUserNick},#{lastLoginTime},#{token},#{addParam})
+    </insert>
+
+    <select id="getTotalSameDeviceCode" parameterType="String" resultType="int">
+        select count(*) from zy_account
+        <where>
+            <if test="deviceCode!=null and deviceCode!='' ">
+                AND deviceCode=#{deviceCode}
+            </if>
+            <if test="channelId!=null and channelId!='' ">
+                AND channelId=#{channelId}
+            </if>
+        </where>
+    </select>
+
+    <select id="readMaxAccountId" parameterType="int" resultType="int">
+        select max(id) from zy_account
+        where id &lt; #{maxSpid}
+
+    </select>
+    <select id="findAccount" parameterType="Map" resultMap="AccountResult">
+        <include refid="select_account_column"/>
+        <where>
+            <if test="channelId!=null and channelId!='' ">
+                AND channelId = #{channelId}
+            </if>
+            <if test="channelUserId!=null and channelUserId!='' ">
+                AND channelUserId = #{channelUserId}
+            </if>
+        </where>
+    </select>
+    <!--
+
+        <select id="findUsers" parameterType="Map" resultMap="UserResult">
+            select id,user_name,password,role_name,func,manager_lv,spId,agents from ssm_user
+            <where>
+                <if test="userName!=null and userName!='' ">
+                    AND user_name like "%#{userName}%"
+                </if>
+            </where>
+            <choose>
+                &lt;!&ndash;        查自己    &ndash;&gt;
+                <when test="managerLv == null || managerLv =='' || managerLv == 100 ||managerLv == 0 || self == 0">
+                    AND id=#{currUserId}
+                </when>
+                &lt;!&ndash;      查渠道      &ndash;&gt;
+                <when test="managerLv==500 and self == 1">
+                    AND agents=#{agents}
+                </when>
+            </choose>
+            <if test="start!=null and size!=null">
+                limit #{start},#{size}
+            </if>
+        </select>
+
+        <select id="getTotalUser" parameterType="Map" resultType="Long">
+            select count(*) from ssm_user
+            <where>
+                <if test="userName!=null and userName!='' ">
+                    AND user_name like #{userName}
+                </if>
+            </where>
+        </select>
+
+        <insert id="addUser" parameterType="User">
+            insert into ssm_user(user_name,password,role_name,func,manager_lv,spId,agents)
+            values(#{userName},#{password},#{roleName},#{func},#{managerLv},#{spId},#{agents})
+        </insert>
+
+        <update id="updateUser" parameterType="User">
+            update ssm_user
+            <set>
+                <if test="userName!=null and userName!=''">
+                    user_name=#{userName},
+                </if>
+                <if test="password!=null and password!='' ">
+                    password=#{password},
+                </if>
+                <if test="roleName!=null and roleName!=''  ">
+                    role_name=#{roleName},
+                </if>
+                <if test="func!=null and func!='' ">
+                    func=#{func},
+                </if>
+                <if test="managerLv!=null  ">
+                    manager_lv=#{managerLv},
+                </if>
+                <if test="spId!=null and spId!='' ">
+                    spId=#{spId},
+                </if>
+                <if test="agents!=null and agents!='' ">
+                    agents=#{agents}
+                </if>
+            </set>
+            where id=#{id}
+        </update>
+
+        <delete id="deleteUser" parameterType="Integer">
+            delete from ssm_user
+            where id=#{id}
+        </delete>
+ -->
+</mapper> 

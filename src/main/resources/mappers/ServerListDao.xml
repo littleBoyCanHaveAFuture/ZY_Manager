@@ -107,5 +107,30 @@
         </where>
     </select>
 
+    <select id="selectRegStatus" parameterType="map" resultType="integer">
+        select regState from zy_serverlist
+        <where>
+            <if test="gameId != null and gameId != -1 ">
+                gameId = #{gameId}
+            </if>
+            <if test="spId != null and spId != '' and spId !='-1'">
+                AND spId like '%${spId}%'
+            </if>
+        </where>
+    </select>
 
+    <select id="selectLoginStatus" parameterType="map" resultType="integer">
+        select loginState from zy_serverlist
+        <where>
+            <if test="gameId != null and gameId != -1 ">
+                gameId = #{gameId}
+            </if>
+            <if test="serverId != null and  serverId != -1 ">
+                AND serverId = #{serverId}
+            </if>
+            <if test="spId != null and spId != '' and spId !='-1'">
+                AND spId like '%${spId}%'
+            </if>
+        </where>
+    </select>
 </mapper>
