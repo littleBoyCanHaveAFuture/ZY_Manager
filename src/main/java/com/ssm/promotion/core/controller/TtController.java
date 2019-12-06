@@ -1,12 +1,16 @@
 package com.ssm.promotion.core.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.sdk.AccountWorker;
+import com.ssm.promotion.core.sdk.LoginToken;
 import com.ssm.promotion.core.sdk.LoginWorker;
+import com.ssm.promotion.core.util.ResponseUtil;
+import com.ssm.promotion.core.util.StringUtils;
 import com.ssm.promotion.core.util.UtilG;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -46,12 +51,44 @@ public class TtController {
     /**
      * 注册账号
      * SDK 登录接口
+     *
+     * @param map username      指悦账户名
+     *            pwd           指悦账号密码
+     *            phone         手机号
+     *            deviceCode
+     *            imei
+     *            channelId     渠道id
+     *            channelUid    渠道账号id
+     *            channelUname  渠道账号名称
+     *            channelUnick  渠道账号昵称
+     *            addparm       额外参数
+     *            appId         游戏id
+     *            auto          是否渠道自动注册
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public Result sdkRegister(@RequestBody Map<String, String> map) throws Exception {
+        System.out.println("register:" + map.toString());
+
+        //参数校验
+        for (String key : map.keySet()) {
+            if (map.get(key) == null) {
+                if (!key.equals("phone") || !key.equals("deviceCode") || !key.equals("imei")) {
+                    JSONObject result = new JSONObject();
+                    result.put("err", "参数非法");
+                    return ResultGenerator.genSuccessResult(result);
+                }
+            }
+        }
+        //获取ip
         map.put("ip", UtilG.getIpAddress(request));
-        String result = accountWorker.reqRegister(map);
+        //注册账号
+        JSONObject result = accountWorker.reqRegister(map);
+        if (result.get("status").equals("1")) {
+            //注册成功
+            //存到redis
+            cache.register(map);
+        }
         return ResultGenerator.genSuccessResult(result);
     }
 
@@ -59,40 +96,112 @@ public class TtController {
      * 客户端先请求
      * SDK 登录接口
      *
-     * @param appId         指悦平台创建的游戏ID，appId
-     *                      请使用URLEncoder编码
-     * @param channelId     易接平台标示的渠道SDK ID
-     *                      请使用URLEncoder编码
-     * @param channelUserId 渠道SDK标示的用户ID
-     *                      请使用URLEncoder编码
-     * @param
-     * @param token         渠道SDK登录完成后的Session ID。
-     *                      请使用URLEncoder编码
+     * @param map appId             指悦平台创建的游戏ID，appId      请使用URLEncoder编码
+     *            isChannel
+     *            name
+     *            pwd
+     *            channelId         平台标示的渠道SDK ID       请使用URLEncoder编码
+     *            channelUserId     渠道SDK标示的用户ID
      */
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public void sdkLogin(String appId,
-                         boolean isChannel,
-                         String name,
-                         String pwd,
-                         String channelId,
-                         String channelUserId,
-                         String token) throws Exception {
-        Integer channelid = Integer.parseInt(channelId);
-        Account account = accountWorker.getAccount(channelid, channelUserId, isChannel);
-        if (account == null) {
-            //渠道账号自动注册并登录
-        }
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ResponseBody
+    public void sdkLogin(@RequestBody Map<String, Object> map,
+                         HttpServletResponse response) throws Exception {
+
+        int appid = Integer.parseInt(map.get("appId").toString());
+        int channelid = Integer.parseInt(map.get("channelId").toString());
+        boolean isChannel = Boolean.parseBoolean(map.get("isChannel").toString());
+
+        JSONObject result = new JSONObject();
+
+        do {
+            Account account = accountWorker.getAccount(map);
+            if (account == null) {
+                if (isChannel) {
+                    //渠道账号自动注册并登录
+                    result.put("err", "指悦账号不存在，请前往注册！");
+                    result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                    break;
+                }
+            }
+            int accountId = account.getId();
+            if (!loginWorker.isWhiteCanLogin(accountId, "")) {
+
+            }
+
+            if (!loginWorker.isSpCanLogin(appid, channelid)) {
+
+            }
+            //获取账号成功 发送token
+            String loginToken = loginWorker.getGameInfo(accountId, appid);
+            String sign = StringUtils.getBASE64(appid + loginToken + accountId);
+
+            result.put("appid", appid);
+            result.put("token", loginToken);
+            result.put("uid", accountId);
+            result.put("sign", sign);
+            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        } while (false);
+
+        ResponseUtil.write(response, result);
+
+        System.out.println("request: ttt/login , map: " + result.toString());
 
     }
 
     /**
      * 游戏登录服务器
      * 验证账号信息
+     *
+     * @param appId 指悦平台创建的游戏ID，appId
+     *              请使用URLEncoder编码
+     * @param token 随机字符串
+     *              请使用URLEncoder编码
+     * @param uid   玩家指悦账号id
+     *              请使用URLEncoder编码
+     * @param sign  签名数据：md5 (appId+token+uid)
+     *              请使用URLEncoder编码
+     * @return 接口返回：表示用户已登录，其他表示未登陆。
+     * 0 验证通过
+     * 1 token错误
+     * 2签名错误
      */
     @RequestMapping(value = "/check", method = RequestMethod.GET)
-    public void sdkLoginCheck() {
+    @ResponseBody
+    public void sdkLoginCheck(String appId,
+                              String token,
+                              String uid,
+                              String sign,
+                              HttpServletResponse response) throws Exception {
+        JSONObject result = new JSONObject();
+        do {
+            System.out.println(appId);
+            System.out.println(token);
+            System.out.println(uid);
+            System.out.println(sign);
 
 
+            if (appId == null || token == null || uid == null || sign == null) {
+                result.put("status", Constants.SDK_PARAM);
+                break;
+            }
+            int accountId = Integer.parseInt(uid);
+
+            if (!LoginToken.check(accountId, token)) {
+                //token 非法
+                result.put("status", Constants.SDK_LOGIN_FAIL_TOKEN);
+                break;
+            }
+            String tmpSign = StringUtils.getBASE64(appId + token + accountId);
+            if (!tmpSign.equals(sign)) {
+                result.put("status", Constants.SDK_LOGIN_FAIL_SIGN);
+                break;
+            }
+            result.put("status", Constants.SDK_LOGIN_SUCCESS);
+            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        } while (false);
+
+        ResponseUtil.write(response, result);
     }
 
     /**
@@ -155,15 +264,21 @@ public class TtController {
 
     /**
      * 退出接口
+     * 指悦账号
+     * ：退出游戏
+     *
+     * @param appId     游戏id
+     * @param serverId  区服id
+     * @param channelId 渠道id
+     * @param roleId    角色id
      */
     @RequestMapping(value = "/exit", method = RequestMethod.GET)
-
-    public void sdkExit(String context,
-                        String roleId,
-                        String roleName,
-                        String roleLevel,
-                        String zoneId,
-                        String zoneName) {
+    public void sdkExit(String appId,
+                        String serverId,
+                        String channelId,
+                        String roleId) {
+        //查询redis
+        //查询数据库
 
     }
 
@@ -190,4 +305,20 @@ public class TtController {
                        String payResultListener) {
 
     }
+
+    /**
+     * 充值校验
+     */
+    @RequestMapping(value = "/paycheck", method = RequestMethod.GET)
+    public void sdkPayCheck(String context,
+                            String unitPrice,
+                            String itemName,
+                            String count,
+                            String callBackInfo,
+                            String callBackUrl,
+                            String payResultListener) {
+
+    }
+
+
 }

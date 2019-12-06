@@ -1,16 +1,8 @@
 package com.ssm.promotion.core.sdk;
 
-import com.alibaba.fastjson.JSONObject;
-import com.ssm.promotion.core.entity.Account;
-import com.ssm.promotion.core.service.AccountService;
-import com.ssm.promotion.core.service.ServerListService;
-import com.ssm.promotion.core.util.StringUtil;
+import com.ssm.promotion.core.util.enums.ServiceType;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author song minghua
@@ -19,6 +11,42 @@ import java.util.Map;
 @Component
 public class LoginWorker {
     private static final Logger log = Logger.getLogger(LoginWorker.class);
+    /**
+     * 0关闭白名单，所有玩家可进。
+     * 1开启白名单， 仅白名单列表玩家可进
+     */
+    public static int whiteListState = 0;
 
+
+    /**
+     * 登陆校验
+     * ：白名单玩家
+     * 是否白名单状态，且玩家是否在白名单中
+     */
+    public boolean isWhiteCanLogin(int accountId, String channelUid) {
+        if (LoginWorker.whiteListState == 1) {
+//            List<CacheWhiteList.Builder> list = this.whiteListTao.select(param);
+//            if (!list.isEmpty() && list.get(NumberUtil.ZERO).getState() == 0) {
+//                return false;
+//            } else {
+//                return true;
+//            }
+        }
+        return true;
+    }
+
+    /**
+     * 某游戏-某渠道
+     * 用户是否可登录
+     */
+    public boolean isSpCanLogin(int appId, int channelId) {
+        return true;
+    }
+
+    public String getGameInfo(int accountId, int appId) {
+        //生成token
+
+        return LoginToken.getToken(accountId, appId, ServiceType.LOGIN);
+    }
 
 }

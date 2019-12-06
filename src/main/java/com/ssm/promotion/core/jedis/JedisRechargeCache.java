@@ -31,32 +31,58 @@ public class JedisRechargeCache {
 
     //账号id 一定要唯一
     //zscore
-    //充值次数:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "paytimes"
-    //充值人数:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "accountnumbers"
-    //充值金额:         ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {value} "payamounts"
-    //当日首次付费金额： ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "firstamounts"
-    //注册付费金额：    ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "amounts_NA_CA"
-    //累计充值金额：    ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}#RechargeTotalInfo" {value} "ACC_amounts"
-    //累计充值人数:     ZADD "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}#RechargeTotalInfo" {value} "ACC_playernumbers"
+    //充值次数:         ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeInfo" {value} "paytimes"
+    //充值人数:         ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeInfo" {value} "accountnumbers"
+    //充值金额:         ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeInfo" {value} "payamounts"
+    //当日首次付费金额： ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "firstamounts"
+    //注册付费金额：    ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeInfo" {amounts} "amounts_NA_CA"
+    //累计充值金额：    ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}#RechargeTotalInfo" {value} "ACC_amounts"
+    //累计充值人数:     ZADD "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}#RechargeTotalInfo" {value} "ACC_playernumbers"
 
-    //累计创角:        ZADD "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}#AccountInfo" {value} "ACC_CR"
+    //累计创角:        ZADD "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#AccountInfo" {value} "ACC_CR"
 
     //getbit
 
     //bittop and
 
     //bitcount
-    //新增创号-<yyMMdd,账号数目>L SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#NA_CA" {account_Id}
-    //新增创角-<yyMMdd,账号数目>: SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#NA_CR {account_Id}
+    //新增创号-<yyMMdd,账号数目>L SETBIT "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#NA_CA" {account_Id}
+    //新增创角-<yyMMdd,账号数目>: SETBIT "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#NA_CR {account_Id}
     //所有账号的数目:            SETBIT "UserInfo:gid:{gid}#totalAccount" {account_Id}
-    //活跃玩家 的账号数目:       SETBIT "UserInfo:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#activePlayers" {account_id}
-    //当日首次付费人数:         SETBIT "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeAccount" {account_id}
+    //活跃玩家 的账号数目:       SETBIT "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#activePlayers" {account_id}
+    //当日首次付费人数:         SETBIT "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RechargeAccount" {account_id}
     //注册付费人数:            SETBIT "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RechargeAccount_NA_CA" {account_id}
 
     //get all bitmap
     //所有账号
     //活跃玩家
 
+    /**
+     * redis 管道
+     * 注册账号
+     */
+    public void register(Map<String, String> map) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            Pipeline pipeline = jds.pipelined();
+            Integer gameId = Integer.parseInt(map.get("gameId"));
+            Integer serverId = Integer.parseInt(map.get("serverId"));
+            String spId = map.get("channelId");
+            //渠道自动注册账号 记录
+            String gssKey = RedisKeyBody.genBody(3, gameId, serverId, spId);
+
+            List<Object> res = pipeline.syncAndReturnAll();
+
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
 
     /**
      * redis 管道

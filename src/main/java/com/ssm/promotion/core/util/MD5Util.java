@@ -8,21 +8,38 @@ import java.security.MessageDigest;
  * @date 2017-3-1
  */
 public class MD5Util {
+    private static final String HEX_DIGITS[] = {
+            "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "a", "b",
+            "c", "d", "e", "f"};
 
-    private static final String hexDigits[] = {"0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
-    private static MessageDigest md5 = null;
-
-    static {
+    /**
+     * MD5编码
+     *
+     * @param codingContent 要编码的内容
+     * @return MD5编码之后的内容
+     */
+    public static String md5(String codingContent) {
         try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (Throwable var1) {
-
+            byte[] btInput = codingContent.getBytes();
+            // 获得MD5摘要算法的 MessageDigest 对象
+            MessageDigest mdInst = MessageDigest.getInstance("MD5");
+            // 使用指定的字节更新摘要
+            mdInst.update(btInput);
+            // 获得密文
+            byte[] md = mdInst.digest();
+            // 把密文转换成十六进制的字符串形式
+            int j = md.length;
+            String str = "";
+            for (int i = 0; i < j; i++) {
+                byte byte0 = md[i];
+                str += HEX_DIGITS[byte0 >>> 4 & 0xf] + HEX_DIGITS[byte0 & 0xf];
+            }
+            return str;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-    }
-
-    public MD5Util() {
     }
 
     private static String byteArrayToHexString(byte b[]) {
@@ -41,32 +58,29 @@ public class MD5Util {
         }
         int d1 = n / 16;
         int d2 = n % 16;
-        return hexDigits[d1] + hexDigits[d2];
+        return HEX_DIGITS[d1] + HEX_DIGITS[d2];
     }
 
-    public static String MD5Encode(String origin, String charsetname) {
+    /**
+     * MD5编码
+     *
+     * @param codingContent 要编码的内容
+     * @param coding        编码
+     * @return MD5编码之后的内容
+     */
+    public static String md5Encode(String codingContent, String coding) {
         String resultString = null;
         try {
-            resultString = new String(origin);
+            resultString = new String(codingContent);
             MessageDigest md = MessageDigest.getInstance("MD5");
-            if (charsetname == null || "".equals(charsetname)) {
+            if (coding == null || "".equals(coding)) {
                 resultString = byteArrayToHexString(md.digest(resultString.getBytes()));
             } else {
-                resultString = byteArrayToHexString(md.digest(resultString.getBytes(charsetname)));
+                resultString = byteArrayToHexString(md.digest(resultString.getBytes(coding)));
             }
         } catch (Exception exception) {
         }
         return resultString;
-    }
-
-    public static String made(String str) {
-        String strOrg = str;
-        if (str == null) {
-            strOrg = "";
-        }
-
-        md5.update(strOrg.getBytes());
-        return StringUtil.toHexString(md5.digest());
     }
 
 

@@ -13,4 +13,8 @@ public class Constants {
     public static final String PICTURE_CACHE_KEY = "perfect-ssm:picture:";//图片key
     public static final int RESULT_CODE_FAIL = 600;
 
+    public static final int SDK_LOGIN_SUCCESS = 0;  // 验证成功
+    public static final int SDK_LOGIN_FAIL_TOKEN = 1;  // 验证失败 token错误
+    public static final int SDK_LOGIN_FAIL_SIGN = 2;  // 验证失败 签名错误
+    public static final int SDK_PARAM = 3;  // 验证失败 参数错误
 }

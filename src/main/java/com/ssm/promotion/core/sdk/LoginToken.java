@@ -42,23 +42,31 @@ public class LoginToken {
 
     /**
      * 创建一个注册的新令牌
+     *
+     * @param accountId   指悦账号id
+     * @param gameId      游戏id
+     * @param serviceType 服务类型
      */
-    public static String getToken(Integer userId, String gameId, ServiceType serviceType) {
-        synchronized (userId) {
-            LoginToken loginToken = tokenMap.get(userId);
+    public static String getToken(Integer accountId, Integer gameId, ServiceType serviceType) {
+        synchronized (tokenMap) {
+            LoginToken loginToken = tokenMap.get(accountId);
             long now = System.currentTimeMillis();
             if (loginToken == null) {
                 loginToken = new LoginToken();
-                loginToken.userId = userId;
+                loginToken.userId = accountId;
 
-                StringBuilder sb = new StringBuilder().
-                        append(serviceType.getId()).append(StringUtil.COLON).
-                        append(userId.longValue()).append(gameId).
+                StringBuilder sb = new StringBuilder();
+                sb.append(serviceType.getId()).append(StringUtil.COLON).
+                        append(accountId.longValue()).
+                        append(gameId).
                         append(now);
-
-                String token = MD5Util.made(sb.toString());
+                //此处加密可以使用特定的 key 增加安全性
+                String token = MD5Util.md5(sb.toString());
                 sb.setLength(0);
-                sb.append(serviceType.getId()).append(StringUtil.COLON).append(token);
+
+                sb.append(serviceType.getId()).append(StringUtil.COLON).
+                        append(token);
+
                 loginToken.token = sb.toString();
 
                 tokenMap.put(loginToken.userId, loginToken);
@@ -70,9 +78,12 @@ public class LoginToken {
 
     /**
      * 验证令牌
+     *
+     * @param accountId 账号id
+     * @param token     token
      */
-    public static boolean check(int userId, String token) {
-        LoginToken loginToken = tokenMap.remove(userId);
+    public static boolean check(int accountId, String token) {
+        LoginToken loginToken = tokenMap.remove(accountId);
         return loginToken != null && loginToken.token.equals(token);
     }
 

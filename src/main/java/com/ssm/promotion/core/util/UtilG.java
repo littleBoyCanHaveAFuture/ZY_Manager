@@ -43,6 +43,11 @@ public class UtilG {
         return ip;
     }
 
+    /**
+     * 数字
+     * 每三位用逗号隔开
+     * 表示
+     */
     public static String formatTosepara(int data) {
         DecimalFormat df = new DecimalFormat(",###,###");
         return df.format(data);

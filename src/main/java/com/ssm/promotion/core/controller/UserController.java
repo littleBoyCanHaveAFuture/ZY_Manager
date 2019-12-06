@@ -65,7 +65,7 @@ public class UserController {
     @ResponseBody
     public Result login(User user, HttpServletRequest request) {
         try {
-            String mD5pwd = MD5Util.MD5Encode(user.getPassword(), "UTF-8");
+            String mD5pwd = MD5Util.md5Encode(user.getPassword(), "UTF-8");
             user.setPassword(mD5pwd);
         } catch (Exception e) {
             user.setPassword("");
@@ -177,7 +177,7 @@ public class UserController {
         ManagerType addype = ManagerType.pareseTo(user.getManagerLv());
 
         int resultTotal = 0;
-        String mD5pwd = MD5Util.MD5Encode(user.getPassword(), "UTF-8");
+        String mD5pwd = MD5Util.md5Encode(user.getPassword(), "UTF-8");
         user.setPassword(mD5pwd);
         user.setRoleName(currType.getName());
         User.setClientSpid(user);
@@ -215,7 +215,7 @@ public class UserController {
         }
         String MD5pwd = null;
         if (user.getPassword() != null && !user.getPassword().equals("******")) {
-            MD5pwd = MD5Util.MD5Encode(user.getPassword(), "UTF-8");
+            MD5pwd = MD5Util.md5Encode(user.getPassword(), "UTF-8");
         }
         if (user.getId() == null) {
             return ResultGenerator.genFailResult("FAIL");

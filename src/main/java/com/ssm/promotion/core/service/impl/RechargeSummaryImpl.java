@@ -143,6 +143,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
      * 根据日期合并数据
      *
      * @param gameId   游戏id
+     * @param serverId 游戏区服id
      * @param spIdList 渠道列表
      * @param timeList 时间列表 yyyyMMdd
      */
@@ -275,10 +276,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
     /**
      * 查询redis
-     * 渠道汇总
+     * 分渠道汇总
      * 根据渠道合并数据
      *
      * @param gameId   游戏id
+     * @param serverId 游戏区服id
      * @param spIdList 渠道列表
      * @param timeList 时间列表 yyyyMMdd
      */

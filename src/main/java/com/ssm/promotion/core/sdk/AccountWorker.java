@@ -59,7 +59,7 @@ public class AccountWorker {
     /**
      * 注册账号
      */
-    public String reqRegister(Map<String, String> map) throws Exception {
+    public JSONObject reqRegister(Map<String, String> map) throws Exception {
         JSONObject reply = new JSONObject();
         do {
             //全部数据
@@ -76,8 +76,9 @@ public class AccountWorker {
             String channelUserNick = map.get("channelUnick");
 
             String addparm = map.get("addparm");
-            String gameId = map.get("gameId");
+            String gameId = map.get("appId");
             String auto = map.get("auto");
+
 
             Map<String, Object> tmp = new HashMap<>(6);
             tmp.put("gameId", gameId);
@@ -100,24 +101,37 @@ public class AccountWorker {
                     break;
                 }
             }
-            if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
-                reply.put("err", "用户名长度不对！");
-            }
-            //名称合法
-            if (!StringUtil.isValidUsername(username)) {
-                //Todo
-                reply.put("err", "用户名格式不合法！");
+            //封禁ip
+            if (TemplateWorker.hasBanIp(ip)) {
+                TemplateWorker.addBanIp(ip);
+                reply.put("err", "玩家ip已被封禁");
                 break;
             }
-            // 能包含敏感词
-            if (TemplateWorker.hasBad(username)) {
-                reply.put("err", "用户名包含敏感词！");
-                break;
+            if (!auto.equals("1")) {
+                if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
+                    reply.put("err", "用户名长度不对！");
+                    break;
+                }
+                //名称合法
+                if (!StringUtil.isValidUsername(username)) {
+                    //Todo
+                    reply.put("err", "用户名格式不合法！");
+                    break;
+                }
+                // 能包含敏感词
+                if (TemplateWorker.hasBad(username)) {
+                    reply.put("err", "用户名包含敏感词！");
+                    break;
+                }
+                if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
+                    reply.put("err", "密码长度不对");
+                    break;
+                }
             }
-            if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
-                reply.put("err", "密码长度不对");
-                break;
-            }
+
+            //检查渠道id和渠道用户id是否存在
+
+            //创建账号
             Account account = this.createAccount(map);
             if (account == null) {
                 reply.put("err", "注册失败");
@@ -129,17 +143,7 @@ public class AccountWorker {
                     break;
                 }
             }
-            int accountId = account.getId();
-            if (this.isWhiteCanLogin(accountId, "")) {
-                reply.put("err", "白名单");
-                break;
-            }
-            //封禁ip
-            if (TemplateWorker.hasBanIp(ip)) {
-                TemplateWorker.addBanIp(ip);
-                reply.put("err", "玩家ip已被封禁");
-                break;
-            }
+
 //            String token = LoginToken.getToken(accountId, gameId, ServiceType.LOGIN);
 //            if (token == null || token.length() == 0) {
 //                reply.put("err", "token生成失败");
@@ -150,17 +154,14 @@ public class AccountWorker {
 //                reply.put("ip", "");
 //            }
             reply.put("message", "注册成功");
+            reply.put("status", 1);
+            //注册成功 相关数据存入redis
 
         } while (false);
 
 
-        return reply.toString();
+        return reply;
     }
-
-    private boolean isWhiteCanLogin(int accountId, String s) {
-        return false;
-    }
-
 
     /**
      * 此设备号的用户 是否可以创建账号
@@ -248,10 +249,7 @@ public class AccountWorker {
     /**
      * 根据渠道和玩家所在渠道编号获取user
      */
-    public Account getAccount(Integer channelId, String channelUserId, boolean isSp) throws Exception {
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("channelId", channelId);
-        map.put("channelUserId", channelUserId);
+    public Account getAccount(Map<String, Object> map) throws Exception {
         List<Account> list = accountService.findUser(map);
         if (list.isEmpty()) {
             return null;

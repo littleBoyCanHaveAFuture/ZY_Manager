@@ -17,7 +17,7 @@
             }
         }
     }
-    if(username.isEmpty()||roleName.isEmpty()){
+    if (username.isEmpty() || roleName.isEmpty()) {
 
     }
 %>
@@ -115,7 +115,8 @@
 <div region="center">
     <div class="easyui-tabs" fit="true" border="false" id="tabs">
         <div title="首页" data-options="iconCls:'icon-home'">
-            <img src="${pageContext.request.contextPath}/images/home.jpg" alt="">
+            <img src="${pageContext.request.contextPath}/images/home.jpg"
+                 alt="">
         </div>
     </div>
 </div>
@@ -123,6 +124,15 @@
 <div region="west" style="width: 200px;height:500px;" title="导航菜单"
      split="true">
     <div class="easyui-accordion">
+        <div title="测试----->"
+             data-options="selected:true,iconCls:'icon-wenzhangs'"
+             style="padding: 10px;height:10px;">
+            <a href="javascript:openTab('注册、登录、支付','test/test.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">测试
+            </a>
+        </div>
         <div title="游戏概况"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
              style="padding: 10px;height:10px;">
