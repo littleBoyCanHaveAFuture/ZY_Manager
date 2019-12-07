@@ -19,6 +19,9 @@ public class RechargeSummary {
     /**
      * 新增创号
      * :当日新注册账号的账号数目，且进入游戏
+     * 条件：
+     * 1.注册官方账号
+     * 2.渠道账号首次登录任意游戏
      */
     public int newAddCreateAccount;
 

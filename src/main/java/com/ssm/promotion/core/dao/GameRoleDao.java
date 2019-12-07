@@ -3,7 +3,6 @@ package com.ssm.promotion.core.dao;
 import com.ssm.promotion.core.entity.GameRole;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,4 +60,11 @@ public interface GameRoleDao {
 //    public int deleteGameRole(Integer id);
 //
 //    Long getTotalSameGameRole(Map<String, Object> map);
+
+    /**
+     * 创建角色
+     */
+    void create(GameRole GameRole);
+
+    int updateGameRole(Map<String, Object> map);
 }

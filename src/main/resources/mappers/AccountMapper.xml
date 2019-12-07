@@ -71,7 +71,7 @@
     <select id="findAccount" parameterType="Map" resultMap="AccountResult">
         <include refid="select_account_column"/>
         <choose>
-            <when test="isChannel == null || isChannel==false ">
+            <when test="isChannel == null || isChannel=='false' ">
                 <where>
                     <if test="name!=null and name!='' ">
                         AND name = #{name}
@@ -84,7 +84,7 @@
                         AND channelId = #{channelId}
                     </if>
                     <if test="channelUserId!=null and channelUserId!='' ">
-                        AND channelUserId = #{channelUserId}
+                        AND channelUserId = #{channelUid}
                     </if>
                 </where>
             </otherwise>

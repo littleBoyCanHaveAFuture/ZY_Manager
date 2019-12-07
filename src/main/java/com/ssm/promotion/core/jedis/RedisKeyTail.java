@@ -29,12 +29,18 @@ public class RedisKeyTail {
      * 创建了多个角色的账号
      */
     public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "GA_MRole";
-    /***/
+    /**
+     * 该游戏所有的账号(渠道、官方)
+     */
     public static final String GAME_ACCOUNT_ALL_NUMS = "totalAccount";
     /**
      * 活跃玩家
      */
     public static final String ACTIVE_PLAYERS = "activePlayers";
+    /**
+     * 在线账号
+     */
+    public static final String ONLINE_PLAYERS = "activePlayers";
     public static final String RECHARGE_ACCOUNT = "RechargeAccount";
     public static final String RECHARGE_ACCOUNT_NA_CA = "RechargeAccount_NA_CA";
     /**

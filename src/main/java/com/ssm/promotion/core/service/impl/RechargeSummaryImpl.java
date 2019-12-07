@@ -293,11 +293,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         //总结：每个渠道的记录
 
         //gid:{gid}:sid:{sid}
-        String gsKey = RedisKeyBody.genBody(2, gameId, serverId, null);
+        String gsKey = String.format("gid:%d:sid:%d", gameId, serverId);
         //gid:{gid}
-        String gkey = RedisKeyBody.genBody(1, gameId, serverId, null);
-        //精确到游戏
-        String userGKey = RedisGeneratorKey.genKeyTail(RedisKeyHeader.USER_INFO, gkey);
+        String gkey = String.format("gid:%d", gameId);
+        //精确到游戏 gid:{gid}#{tail}
+        String userGKey = String.format("gid:%d#%s", gameId, RedisKeyHeader.USER_INFO);
 
         //--所有账号
         // BitSet allAccount = cache.getBitSet(usergKey, RedisKeyTail.GAME_ACCOUNT_ALL_NUMS);
@@ -306,18 +306,16 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         //活跃玩家
         //  BitSet activeAccount = cache.getBitSet(usergKey, RedisKeyTail.ACTIVE_PLAYERS);
 
-
         for (String spId : spIdList) {
-            //gid:{gid}:sid:{sid}:spid:{spid}
-            String gssKey = RedisKeyBody.genBody(3, gameId, serverId, spId);
-
-            //精确到游戏-区服-渠道
-            String usergssKey = RedisGeneratorKey.genKeyTail(RedisKeyHeader.USER_INFO, gssKey);
-            String activegssKey = RedisGeneratorKey.genKeyTail(RedisKeyHeader.ACTIVE_PLAYERS_INFO, gssKey);
+            //{type}:spid:{spid}:gid:{gid}:sid:{sid}
+            //精确到渠道-游戏-区服
+            String usergssKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.USER_INFO, spId, gameId, serverId);
+            String activegssKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
 
             //<yyMMdd,Double>
             //新增创号
             Map<String, Double> timecaMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ACCOUNT, timeList);
+
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
             //新增创角去除滚服

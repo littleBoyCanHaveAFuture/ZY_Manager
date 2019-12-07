@@ -10,6 +10,7 @@ import static com.ssm.promotion.core.util.StringUtil.NUMBER_SIGN;
  * @date 2019/11/28
  */
 public class RedisKeyBody {
+    public static final String OFFICIAL = "official";
     public static final String GAME_ID = "gid";
     public static final String SERVER_ID = "sid";
     public static final String SP_ID = "spid";
@@ -153,4 +154,16 @@ public class RedisKeyBody {
         return bodys.toString();
     }
 
+    /**
+     * 生成Redis键值主体
+     *
+     * @param type
+     * @param spId     渠道id
+     * @param gameId   游戏id
+     * @param serverId 区服id
+     */
+    public static String genKeyBody(Integer type, String spId, Integer gameId, Integer serverId) {
+        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
+        return s;
+    }
 }

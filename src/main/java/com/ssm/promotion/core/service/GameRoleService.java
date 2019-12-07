@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.service;
 
 import com.ssm.promotion.core.entity.Account;
+import com.ssm.promotion.core.entity.GameRole;
 import org.springframework.dao.DataAccessException;
 
 import java.util.List;
@@ -10,19 +11,15 @@ import java.util.Map;
  * @author song minghua
  * @date 2019/12/4
  */
-public interface AccountService {
+public interface GameRoleService {
     /**
-     * 创建账号
+     * 创建角色
      *
-     * @param Account
+     * @param gameRole
      * @return
      */
-    public void createAccount(Account Account) throws DataAccessException;
+    public void createGameRole(GameRole gameRole) throws DataAccessException;
 
-    /**
-     * 查询相同设备码账号条数
-     */
-    int getTotalSameDeviceCode(String deviceCode, int channelId);
 
     int readMaxAccountId(int maxSpid);
 
@@ -32,6 +29,7 @@ public interface AccountService {
      * @param map
      * @return
      */
-    public List<Account> findUser(Map<String, String> map);
+    public List<Account> findUser(Map<String, Object> map);
 
+    int updateGameRole(Map<String, Object> map);
 }

@@ -39,7 +39,7 @@ public interface AccountDao {
      * @param map
      * @return
      */
-    List<Account> findAccount(Map<String, Object> map);
+    List<Account> findAccount(Map<String, String> map);
 
 //    /**
 //     * @param map

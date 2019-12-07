@@ -68,7 +68,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findUser(Map<String, Object> map) {
+    public List<Account> findUser(Map<String, String> map) {
         return accountDao.findAccount(map);
     }
 }

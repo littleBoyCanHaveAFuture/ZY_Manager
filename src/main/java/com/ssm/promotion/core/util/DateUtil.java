@@ -79,6 +79,10 @@ public class DateUtil {
         return sdf.format(date);
     }
 
+    /**
+     * 当天日期
+     * yyyyMMdd
+     */
     public static String getCurrentDayStr() throws Exception {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
@@ -115,10 +119,14 @@ public class DateUtil {
 //        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
 //        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
 
-
-        String startTime = "2019-12-01 10:47";
-        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
-        String ss = formatDate(d, FORMAT_YYMMDD);
-        System.out.println(ss);
+//
+//        String startTime = "2019-12-01 10:47";
+//        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
+//        String ss = formatDate(d, FORMAT_YYMMDD);
+//        System.out.println(ss);
+        Integer gameId = 1;
+        Integer serverId = 1;
+        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
+        System.out.println(s);
     }
 }

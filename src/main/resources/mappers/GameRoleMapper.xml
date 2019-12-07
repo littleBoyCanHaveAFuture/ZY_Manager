@@ -10,15 +10,46 @@
         <result property="channelId" column="channelId"/>
         <result property="gameId" column="gameId"/>
         <result property="serverId" column="serverId"/>
+        <result property="createTime" column="createTime"/>
         <result property="lastLoginTime" column="lastLoginTime"/>
+        <result property="name" column="name"/>
+        <result property="balance" column="balance"/>
         <result property="param" column="param"/>
 
     </resultMap>
-    <select id="create" parameterType="GameRole" resultMap="GameRoleResult">
+    <insert id="create" parameterType="GameRole">
         insert into
-        zy_role(accountId,roleId,channelId,gameId,serverId,lastLoginTime,param)
-        values(#{accountId},#{roleId},#{channelId},#{gameId},#{serverId},#{lastLoginTime},#{param})
-    </select>
+        zy_role(accountId,roleId,channelId,gameId,serverId,createTime,lastLoginTime,name,balance,param)
+        values(#{accountId},#{roleId},#{channelId},#{gameId},#{serverId},#{createTime},#{lastLoginTime},#{name},#{balance},#{param})
+    </insert>
+    <update id="updateGameRole" parameterType="map">
+        update zy_role
+        <set>
+            <if test="lastLoginTime!=null and lastLoginTime!='' ">
+                lastLoginTime=#{lastLoginTime},
+            </if>
+            <if test="name!=null and name!=''  ">
+                param=#{name},
+            </if>
+            <if test="balance!=null and balance!=''  ">
+                param=#{balance},
+            </if>
+            <if test="param!=null and param!=''  ">
+                param=#{param},
+            </if>
+        </set>
+        <where>
+            <if test="roleId!=null and roleId!=''">
+                and channelId=#{roleId}
+            </if>
+            <if test="gameId!=null and gameId!=''">
+                and channelId=#{gameId}
+            </if>
+            <if test="serverId!=null and serverId!=''">
+                and channelId=#{serverId}
+            </if>
+        </where>
+    </update>
     <!--
 
         <select id="findUsers" parameterType="Map" resultMap="UserResult">

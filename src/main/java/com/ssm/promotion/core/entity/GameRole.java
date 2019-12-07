@@ -39,11 +39,23 @@ public class GameRole {
      * 游戏区服id
      */
     Integer serverId;
-
+    /**
+     * 创建时间
+     */
+    long createTime;
     /**
      * 最后一次登录时间
      */
-    String lastLoginTime;
+    long lastLoginTime;
+    /**
+     * 昵称
+     */
+    String name;
+    /**
+     * 游戏币余额
+     */
+    String balance;
+
     /**
      * 自定义参数
      */

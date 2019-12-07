@@ -143,16 +143,62 @@ public class AccountWorker {
                     break;
                 }
             }
+            map.put("accountId", account.getId().toString());
+            reply.put("message", "注册成功");
+            reply.put("status", 1);
+            //注册成功 相关数据存入redis
 
-//            String token = LoginToken.getToken(accountId, gameId, ServiceType.LOGIN);
-//            if (token == null || token.length() == 0) {
-//                reply.put("err", "token生成失败");
-//                break;
-//            } else {
-//                reply.put("accountId", account.getId());
-//                reply.put("token", token);
-//                reply.put("ip", "");
-//            }
+        } while (false);
+
+
+        return reply;
+    }
+
+    /**
+     * 注册账号
+     */
+    public JSONObject channelAutoRegister(Map<String, String> map) throws Exception {
+        JSONObject reply = new JSONObject();
+        do {
+            //全部数据
+            String channelId = map.get("channelId");
+            String gameId = map.get("appId");
+            String ip = map.get("ip");
+
+            Map<String, Object> tmp = new HashMap<>(6);
+            tmp.put("gameId", gameId);
+            tmp.put("spId", channelId);
+
+            //某游戏 是否开放注册
+            if (!serverService.isSpCanReg(tmp, -1)) {
+                //返回结果
+                reply.put("err", "未开放注册");
+                break;
+            }
+
+            //封禁ip
+            if (TemplateWorker.hasBanIp(ip)) {
+                TemplateWorker.addBanIp(ip);
+                reply.put("err", "玩家ip已被封禁");
+                break;
+            }
+
+            //检查渠道id和渠道用户id是否存在
+
+            //创建账号
+            Account account = this.createAccount(map);
+            if (account == null) {
+                reply.put("err", "注册失败");
+                break;
+            }
+            if (account.getId() < AccountWorker.USERID_BEGIN) {
+                if (account.getId() == -2) {
+                    reply.put("err", "账号名重复");
+                    break;
+                }
+            }
+
+            map.put("accountId", account.getId().toString());
             reply.put("message", "注册成功");
             reply.put("status", 1);
             //注册成功 相关数据存入redis
@@ -249,7 +295,17 @@ public class AccountWorker {
     /**
      * 根据渠道和玩家所在渠道编号获取user
      */
-    public Account getAccount(Map<String, Object> map) throws Exception {
+    public Account getAccount(Map<String, String> map) {
+        boolean isChannel = Boolean.parseBoolean(map.get("isChannel"));
+        if (isChannel) {
+            if (map.get("channelId").isEmpty() || map.get("channelUid").isEmpty()) {
+                return null;
+            }
+        } else {
+            if (map.get("name").isEmpty() || map.get("pwd").isEmpty()) {
+                return null;
+            }
+        }
         List<Account> list = accountService.findUser(map);
         if (list.isEmpty()) {
             return null;
