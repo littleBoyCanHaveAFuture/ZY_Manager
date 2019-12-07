@@ -309,12 +309,13 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         for (String spId : spIdList) {
             //{type}:spid:{spid}:gid:{gid}:sid:{sid}
             //精确到渠道-游戏-区服
+            String userSGKey = String.format("%s:spid:%s:gid:%d", RedisKeyHeader.USER_INFO, spId, gameId);
             String usergssKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.USER_INFO, spId, gameId, serverId);
             String activegssKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
 
             //<yyMMdd,Double>
             //新增创号
-            Map<String, Double> timecaMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ACCOUNT, timeList);
+            Map<String, Double> timecaMap = cache.getDayBitmapCount(userSGKey, RedisKeyTail.NEW_ADD_CREATE_ACCOUNT, timeList);
 
             //新增创角
             Map<String, Double> timecrMap = cache.getDayBitmapCount(usergssKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);

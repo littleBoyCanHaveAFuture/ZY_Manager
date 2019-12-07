@@ -40,12 +40,12 @@ public class RedisKeyTail {
     /**
      * 在线账号
      */
-    public static final String ONLINE_PLAYERS = "activePlayers";
+    public static final String ONLINE_PLAYERS = "onlinePlayers";
     public static final String RECHARGE_ACCOUNT = "RechargeAccount";
     public static final String RECHARGE_ACCOUNT_NA_CA = "RechargeAccount_NA_CA";
     /**
-     * sorted set
-     * namespace
+     * 有序集合
+     * 账号信息 1.累计创角 GAME_ACCUMULATION_CREATE_ROLE
      */
     public static final String ACCOUNT_INFO = "AccountInfo";
     /**

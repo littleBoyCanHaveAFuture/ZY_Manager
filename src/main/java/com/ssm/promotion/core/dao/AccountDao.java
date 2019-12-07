@@ -41,20 +41,22 @@ public interface AccountDao {
      */
     List<Account> findAccount(Map<String, String> map);
 
+    /**
+     * 实体修改
+     *
+     * @param Account
+     * @return
+     */
+    public int updateAccount(Map<String, Object> map);
+
+
 //    /**
 //     * @param map
 //     * @return
 //     */
 //    public Long getTotalAccount(Map<String, Object> map);
 //
-//    /**
-//     * 实体修改
-//     *
-//     * @param Account
-//     * @return
-//     */
-//    public int updateAccount(Account Account);
-//
+
 //    /**
 //     * 添加用户
 //     *
@@ -72,5 +74,5 @@ public interface AccountDao {
 //    public int deleteAccount(Integer id);
 //
 
-
+    List<Integer> exist(Map<String, String> map);
 }

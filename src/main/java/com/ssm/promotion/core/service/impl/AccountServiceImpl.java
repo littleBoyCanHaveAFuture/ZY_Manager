@@ -58,7 +58,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int getTotalSameDeviceCode(String deviceCode, int channelId) {
+    public int getTotalSameDeviceCode(String deviceCode, Integer channelId) {
+
         return accountDao.getTotalSameDeviceCode(deviceCode, channelId);
     }
 
@@ -70,5 +71,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<Account> findUser(Map<String, String> map) {
         return accountDao.findAccount(map);
+    }
+
+    @Override
+    public void updateAccount(Map<String, Object> map) {
+        accountDao.updateAccount(map);
+    }
+
+    @Override
+    public int exist(Map<String, String> map) {
+        return accountDao.exist(map).size();
     }
 }

@@ -61,18 +61,18 @@ public class TtController {
      * 注册账号
      * SDK 登录接口
      *
-     * @param map username      指悦账户名
-     *            pwd           指悦账号密码
-     *            phone         手机号
-     *            deviceCode
-     *            imei
+     * @param map auto          自动注册(限渠道账号,无需账号密码)*
+     *            appId         游戏id*
      *            channelId     渠道id*
      *            channelUid    渠道账号id*
      *            channelUname  渠道账号名称*
      *            channelUnick  渠道账号昵称*
+     *            username      指悦账户名
+     *            pwd           指悦账号密码
+     *            phone         手机号
+     *            deviceCode
+     *            imei
      *            addparm       额外参数
-     *            appId         游戏id*
-     *            auto          是否渠道自动注册(无需账号密码)*
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
@@ -80,12 +80,24 @@ public class TtController {
         System.out.println("register:" + map.toString());
 
         //参数校验
-        for (String key : map.keySet()) {
-            if (map.get(key) == null) {
-                if (!key.equals("phone") || !key.equals("deviceCode") || !key.equals("imei")) {
-                    JSONObject result = new JSONObject();
-                    result.put("err", "参数非法");
-                    return ResultGenerator.genSuccessResult(result);
+        if (Boolean.parseBoolean(map.get("auto"))) {
+            for (String key : map.keySet()) {
+                if (StringUtils.isBlank(map.get(key))) {
+                    if (key.equals("appId") || key.equals("channelId") || key.equals("channelUid")) {
+                        JSONObject result = new JSONObject();
+                        result.put("err", "参数非法:" + key + "为空");
+                        return ResultGenerator.genSuccessResult(result);
+                    }
+                }
+            }
+        } else {
+            for (String key : map.keySet()) {
+                if (StringUtils.isBlank(map.get(key))) {
+                    if (key.equals("appId") || key.equals("username") || key.equals("pwd")) {
+                        JSONObject result = new JSONObject();
+                        result.put("err", "参数非法:" + key + "为空");
+                        return ResultGenerator.genSuccessResult(result);
+                    }
                 }
             }
         }
@@ -93,20 +105,16 @@ public class TtController {
         map.put("ip", UtilG.getIpAddress(request));
         //注册账号
         JSONObject result = accountWorker.reqRegister(map);
-        if (result.get("status").equals("1")) {
+        if (result.getString("status").equals("1")) {
             //注册成功
             //存到redis
-            /*
-                新增创号
-                1.注册官方账号
-                2.渠道账号首次登录任意游戏
-             */
             cache.register(map);
         }
         return ResultGenerator.genSuccessResult(result);
     }
 
     /**
+     * 指悦账号登录
      * 客户端先请求
      * SDK 登录接口
      *
@@ -154,8 +162,10 @@ public class TtController {
 
             //数据库
             //设置账号登录时间
-            //todo
-
+            Map<String, Object> tmap = new HashMap<>();
+            tmap.put("id", accountId);
+            tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
+            accountWorker.updateLoginTime(tmap);
 
         } while (false);
 
@@ -166,7 +176,7 @@ public class TtController {
     }
 
     /**
-     * 游戏登录服务器
+     * 指悦账号登录验证
      * 验证账号信息
      *
      * @param appId 指悦平台创建的游戏ID，appId
@@ -178,9 +188,9 @@ public class TtController {
      * @param sign  签名数据：md5 (appId+token+uid)
      *              请使用URLEncoder编码
      * @return 接口返回：表示用户已登录，其他表示未登陆。
-     * 0 验证通过
-     * 1 token错误
-     * 2签名错误
+     * 0    验证通过
+     * 1    token错误
+     * 2    签名错误
      */
     @RequestMapping(value = "/check", method = RequestMethod.GET)
     @ResponseBody
@@ -243,8 +253,13 @@ public class TtController {
      *              roleCTime       单位为秒，创建角色的时间
      *              roleLevelMTime  单位为秒，角色等级变化时间
      */
-    @RequestMapping(value = "/setdata", method = RequestMethod.GET)
-    public void sdkSetData(String key, String value) {
+    @RequestMapping(value = "/setdata", method = RequestMethod.POST)
+    @ResponseBody
+    public void sdkSetData(@RequestBody Map<String, String> map,
+                           HttpServletResponse response) throws Exception {
+        System.out.println("setdata:" + map.toString());
+        String key = map.get("key");
+        String value = map.get("value");
         JSONObject roleInfo = JSONObject.parseObject(value);
 
         System.out.println(roleInfo.toJSONString());
@@ -258,23 +273,29 @@ public class TtController {
         String roleName = roleInfo.getString("roleName");
         BigInteger balance = roleInfo.getBigInteger("balance");
 
-        Map<String, String> map = new HashMap<>();
-        map.put("isChannel", "true");
-        map.put("channelId", channelId);
-        map.put("channelUid", channelUid);
-        Account account = accountWorker.getAccount(map);
+        if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
+            return;
+        }
+
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("isChannel", "true");
+        map1.put("channelId", channelId);
+        map1.put("channelUid", channelUid);
+        Account account = accountWorker.getAccount(map1);
         if (account == null) {
-            log.error("account is null\t" + map.toString());
+            log.error("account is null\t" + map1.toString());
             return;
         }
         if (key.equals("createrole")) {
+            //role 同渠道游戏区服不能重复
             //创建角色
             GameRole gameRole = new GameRole();
+            gameRole.setAccountId(account.getId());
             gameRole.setRoleId(roleId);
             gameRole.setChannelId(channelUid);
             gameRole.setGameId(gameId);
             gameRole.setServerId(serverId);
-            gameRole.setCreateTime((long) roleCTime * 1000);
+            gameRole.setCreateTime((long) roleCTime );
             gameRole.setLastLoginTime(0L);
             gameRole.setName(roleName);
             //插入mysql
@@ -284,6 +305,7 @@ public class TtController {
         } else if (key.equals("levelup")) {
             Map<String, Object> lmap = new HashMap<>();
             lmap.put("roleId", roleId);
+            lmap.put("channelId", channelId);
             lmap.put("gameId", gameId);
             lmap.put("serverId", serverId);
             lmap.put("name", roleName);
@@ -294,16 +316,19 @@ public class TtController {
         } else if (key.equals("enterServer")) {
             Map<String, Object> tmap = new HashMap<>();
             tmap.put("roleId", roleId);
+            tmap.put("channelId", channelId);
             tmap.put("gameId", gameId);
             tmap.put("serverId", serverId);
-            tmap.put("lastLoginTime", System.currentTimeMillis());
+            tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
             tmap.put("name", roleName);
             tmap.put("balance", balance);
             //更新mysql
             gameRoleWorker.updateGameRole(tmap);
 
         }
-
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
 
     }
 
@@ -322,7 +347,7 @@ public class TtController {
                              String serverId,
                              String channelId,
                              String channelUid,
-                             String roleId) {
+                             String roleId, HttpServletResponse response) throws Exception {
         //查询redis
         //查找角色的指悦账号
         Map<String, String> map = new HashMap<>(3);
@@ -335,11 +360,21 @@ public class TtController {
         cache.enterGame(appId, serverId, channelId, accountId);
         //查询mysql
         //设置角色登录时间
+        Map<String, Object> tmap = new HashMap<>();
+        tmap.put("roleId", roleId);
+        tmap.put("channelId", channelId);
+        tmap.put("gameId", appId);
+        tmap.put("serverId", serverId);
+        tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
+        gameRoleWorker.updateGameRole(tmap);
         //todo
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
     }
 
     /**
-     * 退出接口
+     * 退出游戏
      * 指悦账号
      * ：退出游戏
      *
@@ -350,11 +385,11 @@ public class TtController {
      * @param roleId     角色id
      */
     @RequestMapping(value = "/exit", method = RequestMethod.GET)
-    public void sdkExit(String appId,
-                        String serverId,
-                        String channelId,
-                        String channelUid,
-                        String roleId) throws Exception {
+    public void sdkExitGame(String appId,
+                            String serverId,
+                            String channelId,
+                            String channelUid,
+                            String roleId, HttpServletResponse response) throws Exception {
         //查找角色的指悦账号
         Map<String, String> map = new HashMap<>(3);
         map.put("isChannel", "true");
@@ -373,7 +408,19 @@ public class TtController {
 
         //查询mysql
         //统计玩家在线时间并存储到redis
+        Map<String, Object> tmap = new HashMap<>();
+        tmap.put("roleId", roleId);
+        tmap.put("channelId", channelId);
+        tmap.put("gameId", appId);
+        tmap.put("serverId", serverId);
+        String logintime = gameRoleWorker.getLastLoginTime(tmap);
+        System.out.println("logintime:" + logintime);
+        //计算时间
+//        DateUtil
         //todo
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
     }
 
     /**

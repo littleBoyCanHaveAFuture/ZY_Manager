@@ -9,6 +9,7 @@ import com.ssm.promotion.core.util.NumberUtil;
 import com.ssm.promotion.core.util.RandomUtil;
 import com.ssm.promotion.core.util.StringUtil;
 import lombok.Data;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Component
 @Data
 public class AccountWorker {
     /**
@@ -77,7 +79,7 @@ public class AccountWorker {
 
             String addparm = map.get("addparm");
             String gameId = map.get("appId");
-            String auto = map.get("auto");
+            Boolean auto = Boolean.parseBoolean(map.get("auto"));
 
 
             Map<String, Object> tmp = new HashMap<>(6);
@@ -88,16 +90,22 @@ public class AccountWorker {
             if (!serverService.isSpCanReg(tmp, -1)) {
                 //返回结果
                 reply.put("err", "未开放注册");
+                reply.put("status", 0);
                 break;
             }
-
-            int deviceSize = this.getDeviceCreateAccount(deviceCode, Integer.parseInt(channelId));
+            int spid = 0;
+            if (!channelId.isEmpty()) {
+                spid = Integer.parseInt(channelId);
+            }
+            int deviceSize = this.getDeviceCreateAccount(deviceCode, spid);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {
                     reply.put("err", "设备码非法");
+                    reply.put("status", 0);
                     break;
                 } else if (deviceSize == 20) {
                     reply.put("err", "已到达设备创建账号最大数量");
+                    reply.put("status", 0);
                     break;
                 }
             }
@@ -105,46 +113,61 @@ public class AccountWorker {
             if (TemplateWorker.hasBanIp(ip)) {
                 TemplateWorker.addBanIp(ip);
                 reply.put("err", "玩家ip已被封禁");
+                reply.put("status", 0);
                 break;
             }
-            if (!auto.equals("1")) {
+            //账号密码注册
+            if (!auto) {
                 if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
                     reply.put("err", "用户名长度不对！");
+                    reply.put("status", 0);
                     break;
                 }
                 //名称合法
                 if (!StringUtil.isValidUsername(username)) {
                     //Todo
                     reply.put("err", "用户名格式不合法！");
+                    reply.put("status", 0);
                     break;
                 }
                 // 能包含敏感词
                 if (TemplateWorker.hasBad(username)) {
                     reply.put("err", "用户名包含敏感词！");
+                    reply.put("status", 0);
                     break;
                 }
                 if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
                     reply.put("err", "密码长度不对");
+                    reply.put("status", 0);
                     break;
                 }
             }
 
             //检查渠道id和渠道用户id是否存在
-
+            if (accountService.exist(map) > 0) {
+                reply.put("err", "渠道账号已经存在");
+                reply.put("status", 0);
+                break;
+            }
             //创建账号
             Account account = this.createAccount(map);
             if (account == null) {
                 reply.put("err", "注册失败");
+                reply.put("status", 0);
                 break;
             }
             if (account.getId() < AccountWorker.USERID_BEGIN) {
                 if (account.getId() == -2) {
                     reply.put("err", "账号名重复");
+                    reply.put("status", 0);
                     break;
                 }
             }
             map.put("accountId", account.getId().toString());
+
             reply.put("message", "注册成功");
+            reply.put("account", account.getName());
+            reply.put("pwd", account.getPwd());
             reply.put("status", 1);
             //注册成功 相关数据存入redis
 
@@ -214,7 +237,7 @@ public class AccountWorker {
      *
      * @return int:0,可以创建|>0,不能
      */
-    public int getDeviceCreateAccount(String deviceCode, int spId) {
+    public int getDeviceCreateAccount(String deviceCode, Integer spId) {
         if (!StringUtil.isValid(deviceCode)) {
             return 10;
         }
@@ -245,10 +268,10 @@ public class AccountWorker {
 
         String addparm = map.get("addparm");
         String gameId = map.get("gameId");
-        String auto = map.get("auto");
+        boolean auto = Boolean.parseBoolean(map.get("auto"));
 
         Account account = new Account();
-        if (auto.equals("1")) {
+        if (auto) {
             account.setName(RandomUtil.rndStr(10, true));
             account.setPwd(RandomUtil.rndStr(6, false));
         } else {
@@ -311,5 +334,12 @@ public class AccountWorker {
             return null;
         }
         return list.get(NumberUtil.ZERO);
+    }
+
+    /**
+     * 账号登录时间
+     */
+    public void updateLoginTime(Map<String, Object> map) {
+        accountService.updateAccount(map);
     }
 }

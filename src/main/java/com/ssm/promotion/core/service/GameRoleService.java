@@ -1,6 +1,5 @@
 package com.ssm.promotion.core.service;
 
-import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.entity.GameRole;
 import org.springframework.dao.DataAccessException;
 
@@ -29,7 +28,15 @@ public interface GameRoleService {
      * @param map
      * @return
      */
-    public List<Account> findUser(Map<String, Object> map);
+    public List<GameRole> findUser(Map<String, Object> map);
 
+    /**
+     * 更新用户数据
+     */
     int updateGameRole(Map<String, Object> map);
+
+    /**
+     * 返回最近登录时间
+     */
+    String getLastLoginTime(Map<String, Object> map);
 }

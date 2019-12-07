@@ -22,7 +22,7 @@ public interface AccountService {
     /**
      * 查询相同设备码账号条数
      */
-    int getTotalSameDeviceCode(String deviceCode, int channelId);
+    int getTotalSameDeviceCode(String deviceCode, Integer channelId);
 
     int readMaxAccountId(int maxSpid);
 
@@ -33,5 +33,16 @@ public interface AccountService {
      * @return
      */
     public List<Account> findUser(Map<String, String> map);
+
+    /**
+     * 更新数据
+     */
+    public void updateAccount(Map<String, Object> map);
+
+    /**
+     * 查询相同渠道号
+     */
+    public int exist(Map<String, String> map);
+
 
 }

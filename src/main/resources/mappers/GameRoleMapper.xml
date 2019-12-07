@@ -38,18 +38,21 @@
                 param=#{param},
             </if>
         </set>
-        <where>
-            <if test="roleId!=null and roleId!=''">
-                and channelId=#{roleId}
-            </if>
-            <if test="gameId!=null and gameId!=''">
-                and channelId=#{gameId}
-            </if>
-            <if test="serverId!=null and serverId!=''">
-                and channelId=#{serverId}
-            </if>
-        </where>
+        where
+        channelId=#{roleId} and
+        channelId=#{channelId} and
+        gameId=#{gameId} and
+        serverId=#{serverId}
     </update>
+
+    <select id="getLastLoginTime" parameterType="Map" resultType="string">
+        select lastLoginTime from zy_role
+        where
+        channelId=#{roleId} and
+        channelId=#{channelId} and
+        gameId=#{gameId} and
+        serverId=#{serverId}
+    </select>
     <!--
 
         <select id="findUsers" parameterType="Map" resultMap="UserResult">

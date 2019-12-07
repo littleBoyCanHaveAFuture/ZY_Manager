@@ -24,6 +24,7 @@ public class AopSurvey {
     static {
         allJumpFuncsList.add("com.ssm.promotion.core.service.impl.PictureServiceImpl");
         allJumpFuncsList.add("com.ssm.promotion.core.service.impl.AccountServiceImpl");
+        allJumpFuncsList.add("com.ssm.promotion.core.service.impl.GameRoleServiceImpl");
         // UserServiceImpl
         allJumpFuncMethodList.add("login");
         //ServerListServiceImpl

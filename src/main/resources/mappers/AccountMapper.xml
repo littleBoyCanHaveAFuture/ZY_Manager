@@ -89,7 +89,27 @@
                 </where>
             </otherwise>
         </choose>
+    </select>
 
+    <update id="updateAccount" parameterType="map">
+        update zy_account
+        <set>
+            <if test="lastLoginTime!=null and lastLoginTime!=''">
+                lastLoginTime=#{lastLoginTime},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    <select id="exist" parameterType="map" resultType="int">
+        select id from zy_account
+        <where>
+            <if test="channelId!=null and channelId!='' ">
+                AND channelId = #{channelId}
+            </if>
+            <if test="channelUid!=null and channelUid!='' ">
+                AND channelUserId = #{channelUid}
+            </if>
+        </where>
     </select>
     <!--
 

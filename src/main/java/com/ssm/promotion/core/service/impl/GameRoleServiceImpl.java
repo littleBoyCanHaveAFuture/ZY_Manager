@@ -1,7 +1,6 @@
 package com.ssm.promotion.core.service.impl;
 
 import com.ssm.promotion.core.dao.GameRoleDao;
-import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.service.GameRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,12 +45,22 @@ public class GameRoleServiceImpl implements GameRoleService {
     }
 
     @Override
-    public List<Account> findUser(Map<String, Object> map) {
+    public List<GameRole> findUser(Map<String, Object> map) {
         return null;
     }
 
     @Override
     public int updateGameRole(Map<String, Object> map) {
         return gameRoleDao.updateGameRole(map);
+    }
+
+    @Override
+    public String getLastLoginTime(Map<String, Object> map) {
+        List<String> res = gameRoleDao.getLastLoginTime(map);
+        if (res.size() > 0) {
+            return res.get(0);
+        }
+
+        return null;
     }
 }

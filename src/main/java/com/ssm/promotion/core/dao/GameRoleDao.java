@@ -3,6 +3,7 @@ package com.ssm.promotion.core.dao;
 import com.ssm.promotion.core.entity.GameRole;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,4 +68,6 @@ public interface GameRoleDao {
     void create(GameRole GameRole);
 
     int updateGameRole(Map<String, Object> map);
+
+    List<String> getLastLoginTime(Map<String, Object> map);
 }
