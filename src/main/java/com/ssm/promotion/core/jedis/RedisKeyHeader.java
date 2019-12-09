@@ -7,4 +7,5 @@ package com.ssm.promotion.core.jedis;
 public class RedisKeyHeader {
     public static final String USER_INFO = "UserInfo";
     public static final String ACTIVE_PLAYERS_INFO = "API";
+    public static final String RS_INFO = "RS";
 }

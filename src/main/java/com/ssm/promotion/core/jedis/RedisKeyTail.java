@@ -68,5 +68,8 @@ public class RedisKeyTail {
      * 当日累积充值信息
      */
     public static final String RECHARGE_TOTAL_INFO = "RechargeTotalInfo";
-
+    /**
+     * 存储充值汇总查询结果
+     */
+    public static final String RECHARGE_SUMMARY = "RechargeSummary";
 }

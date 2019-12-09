@@ -88,6 +88,7 @@
         <a href="javascript:exportPayRecord()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
+
 </div>
 
 </body>

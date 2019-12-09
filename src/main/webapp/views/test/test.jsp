@@ -15,7 +15,10 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
-
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff" bgcolor="#7fffd4">
@@ -32,8 +35,31 @@
 
 <div id="sp">
     <div>
-        官方
+        <a href="javascript:initGameList()" class="easyui-linkbutton" style=""
+           iconCls=" icon-search" plain="true">查询游戏</a>
+        <a href="javascript:initServerList(1)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询区服</a>
+        <a href="javascript:initServerList(2)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询渠道</a>
     </div>
+    <label for="save_gameId"></label>
+    <span style="color: blue; ">游戏:</span>
+    <select title="选择游戏" id="save_gameId" name="gameId">
+        <option value="-1" selected="selected">请选择</option>
+    </select>
+
+    <label for="save_serverId"></label>
+    <span style="color: blue; margin-left:50px">区服:</span>
+    <select title="选择区服" id="save_serverId" name="serverId">
+        <option value="-1" selected="selected">请选择</option>
+    </select>
+
+    <label for="save_spId"></label>
+    <span style="color: blue;margin-left:50px ">渠道:</span>
+    <select title="选择渠道" id="save_spId" name="spId">
+        <option value="-1" selected="selected">请选择</option>
+    </select>
+
     <div>
         <label for="username">用户名：</label>
         <input type="text" id="username" size="20" oninput="myFunction()"/>
@@ -45,18 +71,18 @@
         渠道
     </div>
     <div>
-        <label for="channelId">渠道id：</label>
-        <input type="text" id="channelId" size="20" onkeydown=""/>
+<%--        <label for="channelId">渠道id：</label>--%>
+<%--        <input type="text" id="channelId" size="20" onkeydown=""/>--%>
 
         <label for="channelUserId">用户id：</label>
         <input type="text" id="channelUserId" size="20" onkeydown=""/>
     </div>
 
     <div>
-        <label for="appId">游戏id*</label>
-        <input type="text" id="appId" size="20" onkeydown=""/>
-        <label for="serverId">游戏区服</label>
-        <input type="text" id="serverId" size="20" onkeydown=""/>
+<%--        <label for="appId">游戏id*</label>--%>
+<%--        <input type="text" id="appId" size="20" onkeydown=""/>--%>
+<%--        <label for="serverId">游戏区服</label>--%>
+<%--        <input type="text" id="serverId" size="20" onkeydown=""/>--%>
     </div>
     <div>
         <label for="auto">渠道自动注册</label>
@@ -126,10 +152,14 @@
     function register() {
         let username = $("#username").val();
         let password = $("#password").val();
-        let channelId = $("#channelId").val();
+        // let channelId = $("#channelId").val();
         let channelUid = $("#channelUserId").val();
-        let appId = $("#appId").val();
-        let serverId = $("#serverId").val();
+        // let appId = $("#appId").val();
+        // let serverId = $("#serverId").val();
+
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
 
         let auto = $("#auto").val();
         console.log("auto：" + auto);
@@ -193,11 +223,15 @@
     }
 
     function login() {
-        let appId = $("#appId").val();
+        // let appId = $("#appId").val();
         let isChannel = $("#isChannel").val();
         let password = $("#password").val();
-        let channelId = $("#channelId").val();
+        // let channelId = $("#channelId").val();
         let channelUid = $("#channelUserId").val();
+
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
 
         console.log(appId);
         console.log(isChannel);
@@ -241,11 +275,13 @@
     }
 
     function logincheck() {
-        let appId = t_appid;
+        // let appId = t_appid;
         let token = t_token;
         let uid = t_uid;
         let sign = t_sign;
-
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
 
         let data = "?appId=" + appId + "&token=" + token + "&uid=" + uid + "&sign=" + sign;
         let url = "/ttt/check" + data;
@@ -269,10 +305,14 @@
     }
 
     function entergame() {
-        let appId = t_appid;
-        let serverId = $("#serverId").val();
-        let channelId = $("#channelId").val();
+        // let appId = t_appid;
+        // let serverId = $("#serverId").val();
+        // let channelId = $("#channelId").val();
         let channelUserId = $("#channelUserId").val();
+
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
 
         t_channelId = channelId;
         t_channelUid = channelUserId;
@@ -302,10 +342,14 @@
     }
 
     function exitgame() {
-        let appId = t_appid;
-        let serverId = $("#serverId").val();
-        let channelId = $("#channelId").val();
+        // let appId = t_appid;
+        // let serverId = $("#serverId").val();
+        // let channelId = $("#channelId").val();
         let channelUserId = $("#channelUserId").val();
+
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
 
         let data = "?appId=" + appId +
             "&serverId=" + serverId +
@@ -333,13 +377,13 @@
     }
 
     function cretaterole() {
-
-        let appId = t_appid;
-        let serverId = $("#serverId").val();
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
         let key = "createrole";
 
         let value = {
-            "channelId": t_channelId,
+            "channelId": channelId,
             "channelUid": t_channelUid,
             "appId": appId,
             "roleId": "1",
@@ -351,7 +395,7 @@
             "vip": 0,
             "partyName": "",
             "roleCTime": 0,
-            "roleLevelMTime":0
+            "roleLevelMTime": 0
         };
         let ss = JSON.stringify(value);
         let data = {
@@ -381,6 +425,96 @@
     function pay() {
 
     }
+
+    function initGameList() {
+        $.ajax({
+            //获取下拉
+            url: "/server/getGameList",
+            type: "get",
+            async: false,
+            dataType: "json",
+            success: function (result) {
+                if (result.resultCode === 501) {
+                    relogin();
+                } else if (result.resultCode === 200) {
+                    let select_gameId = $("#save_gameId");
+                    select_gameId.find("option").remove();
+                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_gameId.append("<option  value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
+                    }
+                }
+            },
+            error: function () {
+                $.messager.alert("ERROR！", "获取游戏列表出错");
+            }
+        });
+    }
+
+    function initServerList(type) {
+        let gameId = $('#save_gameId').val();
+        let serverId = $("#save_serverId").val();
+        let spId = $("#save_spId").val();
+
+        let data = {
+            "gameId": gameId,
+            "serverId": serverId,
+            "spId": spId,
+            "type": type
+        };
+        // console.log("data " + gameId);
+        // console.log("data " + serverId);
+        // console.log("data " + spId);
+        $.ajax({
+            //获取下拉
+            url: "/server/getDistinctServerInfo",
+            type: "post",
+            data: data,
+            async: false,
+            dataType: "json",
+            success: function (result) {
+                if (result.resultCode === 501) {
+                    relogin();
+                } else if (result.resultCode === 200) {
+                    // console.log(result);
+                    if (type === 1) {
+                        let select_serverId = $("#save_serverId");
+                        select_serverId.find("option").remove();
+                        select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                        for (let res = 0; res < result.total; res++) {
+                            select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                        }
+                    } else {
+                        let select_spId = $("#save_spId");
+                        select_spId.find("option").remove();
+                        select_spId.append("<option value=-1 selected=selected>请选择</option>");
+                        for (let res = 0; res < result.total; res++) {
+                            select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                        }
+                    }
+                }
+            },
+            error: function () {
+                $.messager.alert("ERROR！", "获取游戏列表出错");
+            }
+        });
+    }
+    //登录超时 重新返回到登录界面
+    function relogin() {
+        // 登录失效
+        console.log("登录失效");
+        $.messager.confirm(
+            "系统提示",
+            "登录超时！",
+            function (r) {
+                if (r) {
+                    delCookie("userName");
+                    delCookie("roleName");
+                    parent.location.href = "../../login.jsp";
+                }
+            });
+    }
+
 </script>
 
 </body>

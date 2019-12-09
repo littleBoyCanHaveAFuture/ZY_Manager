@@ -32,6 +32,10 @@ public class GameRole {
      */
     String channelId;
     /**
+     * 渠道用户id
+     */
+    String channelUid;
+    /**
      * 游戏id
      */
     String gameId;

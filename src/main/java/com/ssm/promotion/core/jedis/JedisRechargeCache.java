@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.jedis;
 
 
+import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.SerializeUtil;
 import org.apache.log4j.Logger;
@@ -9,6 +10,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.util.*;
+
+import static com.ssm.promotion.core.jedis.RedisKeyHeader.RS_INFO;
 
 public class JedisRechargeCache {
     private static final Logger log = Logger.getLogger(JedisRechargeCache.class);
@@ -44,10 +47,6 @@ public class JedisRechargeCache {
 
     //累计创角:        ZADD "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#AccountInfo" {value} "GAME_ACCUMULATION_CREATE_ROLE"
 
-    //getbit
-
-    //bittop and
-
     //bitcount
     //新增创号                  SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NEW_ADD_CREATE_ACCOUNT" {account_Id}
     //新增创角                  SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NA_CR {account_Id}
@@ -60,6 +59,36 @@ public class JedisRechargeCache {
     //创建过角色的账号          SETBIT "UserInfo:spid:{spid}:gid:{gid}#GAME_ACCOUNT_HAS_ROLE" {account_id}
     //新增创角去除滚服           SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NA_CR_RM_OLD {account_Id}
 
+
+    public void setRechargeSummary(List<RechargeSummary> rsList, List<String> timelist, Integer type) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            Pipeline pipeline = jds.pipelined();
+            if (type == 1) {
+                for (RechargeSummary rs : rsList) {
+                    Double yyyyMMdd = 0D;
+                    String yyyyMM = rs.getDate();
+                    String key = RS_INFO + ":date:" + yyyyMM + "#" + RedisKeyTail.RECHARGE_SUMMARY;
+                    pipeline.zadd(key, yyyyMMdd, rs.toString());
+                }
+            } else if (type == 2) {
+
+            } else if (type == 3) {
+
+            }
+
+
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
 
     /**
      * redis 管道
@@ -88,7 +117,7 @@ public class JedisRechargeCache {
                 //新增创号：渠道-游戏-日期
                 key1 = userSGKey + ":date:" + currday + "#" + RedisKeyTail.NEW_ADD_CREATE_ACCOUNT;
                 //渠道-该游戏所有账号 渠道-游戏
-                key2 = userSGKey + RedisKeyTail.GAME_ACCOUNT_ALL_NUMS;
+                key2 = userSGKey + "#" + RedisKeyTail.GAME_ACCOUNT_ALL_NUMS;
             } else {
                 //渠道-游戏
                 String userOffcialKey = String.format("%s:%s:gid:%d", RedisKeyHeader.USER_INFO, RedisKeyBody.OFFICIAL, gameId);
@@ -364,7 +393,6 @@ public class JedisRechargeCache {
             System.out.println("isRegister:" + isRegister);
 
             pipeline.clear();
-
 
 
             pipeline.zadd(key2, payamounts, RedisKey.GAME_ACCUMULATION_RECHARGE_AMOUNTS);

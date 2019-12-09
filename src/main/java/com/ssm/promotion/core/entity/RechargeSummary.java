@@ -1,5 +1,6 @@
 package com.ssm.promotion.core.entity;
 
+import com.ssm.promotion.core.util.UtilG;
 import lombok.Data;
 
 /**
@@ -42,7 +43,7 @@ public class RechargeSummary {
      * 创角率
      * :当天新增创角/当天新增创号
      */
-    public Double createAccountRate;
+    public double createAccountRate;
 
 
     /**
@@ -50,7 +51,7 @@ public class RechargeSummary {
      * :忠诚用户数量：本周登陆3次以上（当天重复登陆算1次），最高角色等级超过15级，在线时长超过14小时的帐号
      * :转化率：上周登录的用户在本周转化为忠诚用户的比例
      */
-    public Double createAccountTransRate;
+    public double createAccountTransRate;
 
     //通用
     /**
@@ -213,30 +214,77 @@ public class RechargeSummary {
      * 2.ARPU
      */
     public void calculate(Integer type) {
-/*
-      //活跃付费率
-        this.setActivePayRate((double) this.rechargeNumber / this.activePlayer * 100);
-        //付费ARPU
-        this.setPaidARPU((double) this.rechargePayment / this.rechargeNumber * 100);
-        //活跃ARPU
-        this.setActiveARPU((double) this.rechargePayment / this.activePlayer * 100);
+        this.createAccountRate = 0D;
+        this.createAccountTransRate = 0D;
+        this.activePayRate = 0D;
+        this.paidARPU = 0D;
+        this.activeARPU = 0D;
+        this.registeredPaymentARPU = 0D;
+        this.totalRechargeRates = 0D;
+        this.zhushoubi = 0D;
+        this.addzhushoubi = 0D;
 
+        //活跃付费率
+        if (this.activePlayer == 0) {
+            this.setActivePayRate(0);
+        } else {
+            this.setActivePayRate((double) this.rechargeNumber / this.activePlayer * 100);
+        }
+        //付费ARPU
+        if (this.rechargeNumber == 0) {
+            this.setPaidARPU(0);
+        } else {
+            this.setPaidARPU((double) this.rechargePayment / this.rechargeNumber * 100);
+        }
+        //活跃ARPU
+        if (this.activePlayer == 0) {
+            this.setActiveARPU(0);
+        } else {
+            this.setActiveARPU((double) this.rechargePayment / this.activePlayer * 100);
+        }
         //注册付费ARPU
-        this.setRegisteredPaymentARPU((double) this.rechargePayment / this.registeredPayers);
+        if (this.registeredPayers == 0) {
+            this.setRegisteredPaymentARPU(0);
+        } else {
+            this.setRegisteredPaymentARPU((double) this.rechargePayment / this.registeredPayers);
+        }
+
 
         if (type == 1) {
             //创角率
-            this.setCreateAccountRate((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+            if (this.newAddCreateAccount == 0) {
+                this.setCreateAccountRate(0);
+            } else {
+                this.setCreateAccountRate(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+            }
         } else {
             //总付费率
-
+            if (this.totalRechargeRates == 0) {
+                this.setTotalRechargeRates(0);
+            } else {
+//                this.setTotalRechargeRates((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+            }
             if (type == 3) {
                 //创号转化率
+                if (this.createAccountTransRate == 0) {
+                    this.setCreateAccountTransRate(0);
+                } else {
+//                    this.setCreateAccountTransRate((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+                }
                 //注收比
+                if (this.zhushoubi == 0) {
+                    this.setZhushoubi(0);
+                } else {
+//                    this.setZhushoubi((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+                }
                 //新增注收比
+                if (this.addzhushoubi == 0) {
+                    this.setAddzhushoubi(0);
+                } else {
+//                    this.setAddzhushoubi((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+                }
             }
         }
-*/
     }
 
     /**

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class StringUtil {
     public static final String EMPTY = "";
@@ -402,6 +403,11 @@ public class StringUtil {
         } else {
             return null;
         }
+    }
+
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
     }
 
     public String getValidNameThrowMsg(String name, int lenMin, int lenMax, Collection<String> badWordList) throws Exception {

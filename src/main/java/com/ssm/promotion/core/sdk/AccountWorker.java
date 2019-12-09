@@ -319,16 +319,7 @@ public class AccountWorker {
      * 根据渠道和玩家所在渠道编号获取user
      */
     public Account getAccount(Map<String, String> map) {
-        boolean isChannel = Boolean.parseBoolean(map.get("isChannel"));
-        if (isChannel) {
-            if (map.get("channelId").isEmpty() || map.get("channelUid").isEmpty()) {
-                return null;
-            }
-        } else {
-            if (map.get("name").isEmpty() || map.get("pwd").isEmpty()) {
-                return null;
-            }
-        }
+
         List<Account> list = accountService.findUser(map);
         if (list.isEmpty()) {
             return null;

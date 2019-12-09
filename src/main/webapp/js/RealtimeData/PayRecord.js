@@ -160,12 +160,12 @@ function initServerList(type) {
             } else if (result.resultCode === 200) {
                 // console.log(result);
                 if (type === 1) {
-                    // let select_serverId = $("#save_serverId");
-                    // select_serverId.find("option").remove();
-                    // select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    // for (let res = 0; res < result.total; res++) {
-                    //     select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    // }
+                    let select_serverId = $("#save_serverId");
+                    select_serverId.find("option").remove();
+                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
                 } else {
                     let select_spId = $("#pay_player_channel");
                     select_spId.find("option").remove();

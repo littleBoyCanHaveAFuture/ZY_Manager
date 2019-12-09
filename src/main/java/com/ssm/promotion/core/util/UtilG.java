@@ -52,4 +52,9 @@ public class UtilG {
         DecimalFormat df = new DecimalFormat(",###,###");
         return df.format(data);
     }
+
+    public static double format2point(double data) {
+        DecimalFormat df = new DecimalFormat("#.0000");
+        return Double.parseDouble(df.format(data));
+    }
 }

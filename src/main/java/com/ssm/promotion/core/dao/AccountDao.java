@@ -39,7 +39,7 @@ public interface AccountDao {
      * @param map
      * @return
      */
-    List<Account> findAccount(Map<String, String> map);
+    List<Account> findAccountSp(Map<String, String> map);
 
     /**
      * 实体修改
@@ -75,4 +75,6 @@ public interface AccountDao {
 //
 
     List<Integer> exist(Map<String, String> map);
+
+    List<Account> findAccountOF(Map<String, String> map);
 }

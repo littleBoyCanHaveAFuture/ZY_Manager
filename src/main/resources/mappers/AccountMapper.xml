@@ -67,29 +67,19 @@
         where id &lt; #{maxSpid}
 
     </select>
-    <select id="findAccount" parameterType="Map" resultMap="AccountResult">
+    <select id="findAccountSp" parameterType="map" resultMap="AccountResult">
         <include refid="select_account_column"/>
-        <choose>
-            <when test="isChannel == null || isChannel=='false' ">
-                <where>
-                    <if test="name!=null and name!='' ">
-                        AND name = #{name}
-                    </if>
-                </where>
-            </when>
-            <otherwise>
-                <where>
-                    <if test="channelId!=null and channelId!='' ">
-                        AND channelId = #{channelId}
-                    </if>
-                    <if test="channelUserId!=null and channelUserId!='' ">
-                        AND channelUserId = #{channelUid}
-                    </if>
-                </where>
-            </otherwise>
-        </choose>
+        where
+        channelId = #{channelId}
+        and
+        channelUserId = #{channelUid}
     </select>
 
+    <select id="findAccountOF" parameterType="map" resultMap="AccountResult">
+        <include refid="select_account_column"/>
+        where
+        name=#{name}
+    </select>
     <update id="updateAccount" parameterType="map">
         update zy_account
         <set>
@@ -111,4 +101,4 @@
         </where>
     </select>
 
-</mapper> 
+</mapper>

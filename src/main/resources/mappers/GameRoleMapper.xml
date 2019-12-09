@@ -8,6 +8,7 @@
         <result property="accountId" column="accountId"/>
         <result property="roleId" column="roleId"/>
         <result property="channelId" column="channelId"/>
+        <result property="channelUid" column="channelUid"/>
         <result property="gameId" column="gameId"/>
         <result property="serverId" column="serverId"/>
         <result property="createTime" column="createTime"/>
@@ -21,6 +22,7 @@
                accountId,
                roleId,
                channelId,
+               channelUid,
                gameId,
                serverId,
                createTime,
@@ -32,8 +34,8 @@
     </sql>
     <insert id="create" parameterType="GameRole">
         insert into
-        zy_role(accountId,roleId,channelId,gameId,serverId,createTime,lastLoginTime,name,balance,param)
-        values(#{accountId},#{roleId},#{channelId},#{gameId},#{serverId},#{createTime},#{lastLoginTime},#{name},#{balance},#{param})
+        zy_role(accountId,roleId,channelId,channelUid,gameId,serverId,createTime,lastLoginTime,name,balance,param)
+        values(#{accountId},#{roleId},#{channelId},#{channelUid},#{gameId},#{serverId},#{createTime},#{lastLoginTime},#{name},#{balance},#{param})
     </insert>
     <update id="updateGameRole" parameterType="map">
         update zy_role
@@ -80,6 +82,9 @@
             </if>
             <if test="serverId!=null and serverId!=''  ">
                 and serverId=#{serverId}
+            </if>
+            <if test="channelUid!=null and channelUid!=''  ">
+                and channelUid=#{channelUid}
             </if>
         </where>
     </select>

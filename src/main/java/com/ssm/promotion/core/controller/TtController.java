@@ -277,6 +277,7 @@ public class TtController {
         BigInteger balance = roleInfo.getBigInteger("balance");
 
         if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
+            System.out.println("数据为空");
             return;
         }
 
@@ -295,7 +296,8 @@ public class TtController {
             GameRole gameRole = new GameRole();
             gameRole.setAccountId(account.getId());
             gameRole.setRoleId(roleId);
-            gameRole.setChannelId(channelUid);
+            gameRole.setChannelId(channelId);
+            gameRole.setChannelUid(channelUid);
             gameRole.setGameId(gameId);
             gameRole.setServerId(serverId);
             gameRole.setCreateTime((long) roleCTime);

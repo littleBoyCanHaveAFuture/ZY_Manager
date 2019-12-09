@@ -70,7 +70,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> findUser(Map<String, String> map) {
-        return accountDao.findAccount(map);
+        boolean isChannel = Boolean.parseBoolean(map.get("isChannel"));
+        if (isChannel) {
+            if (map.get("channelId").isEmpty() || map.get("channelUid").isEmpty()) {
+                return null;
+            }
+            return accountDao.findAccountSp(map);
+        } else {
+            if (map.get("name").isEmpty() || map.get("pwd").isEmpty()) {
+                return null;
+            }
+            return accountDao.findAccountOF(map);
+        }
     }
 
     @Override

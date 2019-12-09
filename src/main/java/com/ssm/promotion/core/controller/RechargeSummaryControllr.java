@@ -7,6 +7,7 @@ import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.ServerInfoUtil;
+import com.ssm.promotion.core.util.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -79,10 +80,10 @@ public class RechargeSummaryControllr {
         map.put("endTime", endTime);
 
         long s = System.currentTimeMillis();
-
         System.out.println("start:" + s);
 
         List<RechargeSummary> list = this.getGameRechargeSummary(map, userId);
+        System.out.println("request: rechargeSummary/searchRechargeSummary , map: " + list.toString());
 
         long e = System.currentTimeMillis();
         System.out.println("end:" + e);
@@ -91,14 +92,13 @@ public class RechargeSummaryControllr {
         JSONObject result = new JSONObject();
         JSONArray jsonArray = JSONArray.fromObject(list);
         result.put("rows", jsonArray);
-        result.put("total", list == null ? 0 : list.size());
+        result.put("total", list.size());
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         result.put("time", new DecimalFormat("0.00").format((double) (e - s) / 1000));
         ResponseUtil.write(response, result);
 
         System.out.println("request: rechargeSummary/searchRechargeSummary , map: " + result.toString());
         log.info("request: rechargeSummary/searchRechargeSummary , map: " + map.toString());
-
 
     }
 
@@ -109,6 +109,7 @@ public class RechargeSummaryControllr {
         int type = Integer.parseInt(map.get("type").toString());
         int gameId = Integer.parseInt(map.get("gameId").toString());
         int serverId = Integer.parseInt(map.get("serverId").toString());
+        String spId = map.get("spId").toString();
         switch (type) {
             case 1:
             case 2: {
@@ -144,6 +145,12 @@ public class RechargeSummaryControllr {
                 if (spidStrList.size() == 0) {
                     break;
                 }
+                if (!spId.contains(",") && !StringUtil.isInteger(spId)) {
+                    //不能转数字
+                } else if (spidStrList.contains(spId)) {
+                    spidStrList.clear();
+                    spidStrList.add(spId);
+                }
                 //查询redis
                 return this.rechargeSummaryServices.getRechargeSummary(map, null, spidStrList, userId);
             }
@@ -170,7 +177,7 @@ public class RechargeSummaryControllr {
     }
 
     /**
-     * type = 2
+     * case = 3
      * 查询该游戏所有渠道id
      */
     public List<String> getSpIdList(Map<String, Object> map, Integer userId) {
@@ -185,7 +192,7 @@ public class RechargeSummaryControllr {
      * @return map(serverId, List < Spid >)
      */
     public Map<Integer, List<String>> getServerSpIdList(Map<String, Object> searchMap, List<Integer> serverIdList, Integer userId) {
-        //获取的List 需要排重
+        //对应渠道List 需要排重
         Map<Integer, List<String>> serverIdMap = this.getServerSpMap(searchMap, serverIdList, userId);
         if (serverIdMap.isEmpty()) {
             return null;
