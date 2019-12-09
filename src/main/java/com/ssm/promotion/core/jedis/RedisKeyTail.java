@@ -27,6 +27,8 @@ public class RedisKeyTail {
     public static final String GAME_ACCOUNT_HAS_ROLE = "GA_SRole";
     /**
      * 创建了多个角色的账号
+     * 数据会一直更新
+     * 新增创角去除滚服：需要当天之前的数据
      */
     public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "GA_MRole";
     /**
@@ -41,7 +43,17 @@ public class RedisKeyTail {
      * 在线账号
      */
     public static final String ONLINE_PLAYERS = "onlinePlayers";
+    /**
+     * 付费玩家
+     */
     public static final String RECHARGE_ACCOUNT = "RechargeAccount";
+    /**
+     * 付费玩家
+     */
+    public static final String RECHARGE_ACCOUNT_M = "RechargeAccountMutiple";
+    /**
+     * 注册付费玩家
+     */
     public static final String RECHARGE_ACCOUNT_NA_CA = "RechargeAccount_NA_CA";
     /**
      * 有序集合

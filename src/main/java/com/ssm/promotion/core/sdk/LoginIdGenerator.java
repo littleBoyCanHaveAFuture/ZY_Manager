@@ -47,6 +47,9 @@ public class LoginIdGenerator {
         }
     }
 
+    /**
+     * 随机数字
+     */
     public long getRandomId() {
         synchronized (idPool) {
             if (idPool.size() < 10) {

@@ -22,6 +22,7 @@ public class RedisKey {
      * 当日首次付费金额
      */
     public static final String RECHARGE_FIRST_AMOUNTS = "firstamounts";
+
     /**
      * 注册付费金额
      */

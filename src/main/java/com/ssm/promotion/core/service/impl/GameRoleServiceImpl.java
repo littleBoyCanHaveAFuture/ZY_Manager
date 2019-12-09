@@ -46,7 +46,7 @@ public class GameRoleServiceImpl implements GameRoleService {
 
     @Override
     public List<GameRole> findUser(Map<String, Object> map) {
-        return null;
+        return gameRoleDao.findGamerole(map);
     }
 
     @Override

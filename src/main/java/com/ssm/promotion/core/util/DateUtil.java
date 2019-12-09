@@ -2,6 +2,10 @@ package com.ssm.promotion.core.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +35,21 @@ public class DateUtil {
 
     private static final String FORMAT_YYMMDD = "yyyyMMdd";
     private static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
+
+    // 获得某天最小时间 2017-10-15 00:00:00
+    public static Date getStartOfDay(Date date) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+        LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
+        return Date.from(startOfDay.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static long getEndTimestamp() {
+        // TODO 自动生成的方法存根
+        long now = System.currentTimeMillis() / SECOND_MILLIS;
+        long daySecond = 60 * 60 * 24;
+        long dayTime = now - (now + 8 * 60 * 60) % daySecond;
+        return dayTime + daySecond;
+    }
 
     /**
      * 转化时间
@@ -124,9 +143,10 @@ public class DateUtil {
 //        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
 //        String ss = formatDate(d, FORMAT_YYMMDD);
 //        System.out.println(ss);
-        Integer gameId = 1;
-        Integer serverId = 1;
-        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
-        System.out.println(s);
+//        Integer gameId = 1;
+//        Integer serverId = 1;
+//        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
+//        System.out.println(s);
+        System.out.println(DateUtil.getEndTimestamp());
     }
 }

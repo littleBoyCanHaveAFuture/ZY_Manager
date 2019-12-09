@@ -39,4 +39,5 @@ public interface GameRoleService {
      * 返回最近登录时间
      */
     String getLastLoginTime(Map<String, Object> map);
+
 }

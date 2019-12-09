@@ -155,6 +155,11 @@
         <div title="实时数据"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
              style="padding: 10px;height:10px;">
+            <a href="javascript:openTab('订单记录','RealtimeData/PayRecord.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">订单记录
+            </a>
 
         </div>
         <div title="玩家信息"

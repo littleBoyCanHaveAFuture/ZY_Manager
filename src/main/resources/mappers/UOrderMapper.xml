@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.UOrderDao">
+    <resultMap type="UOrder" id="orderRecordResult">
+        <result property="orderID" column="orderID"/>
+        <result property="appID" column="appID"/>
+        <result property="channelID" column="channelID"/>
+        <result property="userID" column="userID"/>
+        <result property="username" column="username"/>
+        <result property="productID" column="productID"/>
+        <result property="productName" column="productName"/>
+        <result property="productDesc" column="productDesc"/>
+        <result property="money" column="money"/>
+        <result property="realMoney" column="realMoney"/>
+        <result property="currency" column="currency"/>
+        <result property="roleID" column="roleID"/>
+        <result property="roleName" column="roleName"/>
+        <result property="serverID" column="serverID"/>
+        <result property="serverName" column="serverName"/>
+        <result property="state" column="state"/>
+        <result property="channelOrderID" column="channelOrderID"/>
+        <result property="extension" column="extension"/>
+        <result property="createdTime" column="createdTime"/>
+        <result property="sdkOrderTime" column="sdkOrderTime"/>
+        <result property="completeTime" column="completeTime"/>
+        <result property="notifyUrl" column="notifyUrl"/>
+    </resultMap>
+
+    <sql id="select_payRecord_column">
+        SELECT orderID,
+               appID,
+               channelID,
+               channelOrderID,
+               completeTime,
+               createdTime,
+               currency,
+               extension,
+               money,
+               notifyUrl,
+               productDesc,
+               productID,
+               productName,
+               realMoney,
+               roleID,
+               roleName,
+               sdkOrderTime,
+               serverID,
+               serverName,
+               state,
+               userID,
+               username
+        FROM zy_order
+    </sql>
+
+    <select id="getUOrderList" parameterType="map" resultMap="orderRecordResult">
+        <include refid="select_payRecord_column"/>
+        <where>
+            <if test="orderID !=null and orderID != ''">
+                orderID = #{orderID}
+            </if>
+            <if test="appID!=null and appID!='' ">
+                AND appID = #{appID}
+            </if>
+            <if test="channelID!=null and channelID!='' ">
+                AND channelID = #{channelID}
+            </if>
+            <if test="roleID!=null and roleID!='' ">
+                AND roleID = #{roleID}
+            </if>
+            <if test="channelOrderID!=null and channelOrderID!='' ">
+                AND channelOrderID = #{channelOrderID}
+            </if>
+            <if test="state!=null and state!='' ">
+                AND state = #{state}
+            </if>
+            <if test="createdTime!=null and createdTime!=''">
+                AND createdTime >= #{createdTime}
+            </if>
+            <if test="completeTime!=null and completeTime!=''">
+                AND completeTime &lt;= #{completeTime}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <!--   与 selectServers where 条件一致-->
+    <select id="getTotalUorders" parameterType="map" resultType="Long">
+        select count(*) from zy_order
+        <where>
+            <if test="orderID !=null and orderID != ''">
+                orderID = #{orderID}
+            </if>
+            <if test="appID!=null and appID!='' ">
+                AND appID = #{appID}
+            </if>
+            <if test="channelID!=null and channelID!='' ">
+                AND channelID = #{channelID}
+            </if>
+            <if test="roleID!=null and roleID!='' ">
+                AND roleID = #{roleID}
+            </if>
+            <if test="channelOrderID!=null and channelOrderID!='' ">
+                AND channelOrderID = #{channelOrderID}
+            </if>
+            <if test="state!=null and state!='' ">
+                AND state = #{state}
+            </if>
+            <if test="createdTime!=null and createdTime!=''">
+                AND createdTime >= #{createdTime}
+            </if>
+            <if test="completeTime!=null and completeTime!=''">
+                AND completeTime &lt;= #{completeTime}
+            </if>
+        </where>
+    </select>
+
+
+    <insert id="save" parameterType="UOrder">
+        insert into zy_order(
+        orderID, appID, channelID, channelOrderID, completeTime, createdTime, currency, extension,
+        money, notifyUrl, productDesc, productID, productName, realMoney, roleID, roleName, sdkOrderTime, serverID,
+        serverName, state, userID, username
+        )
+        VALUES
+        (
+        #{orderID},#{appID},#{channelID},#{channelOrderID},#{completeTime},#{createdTime},#{currency},#{extension},
+        #{money},#{notifyUrl},#{productDesc}, #{productID},#{productName},#{realMoney},#{roleID},#{roleName},
+        #{sdkOrderTime}, #{serverID},
+        #{serverName},#{state},#{userID},#{username}
+        )
+    </insert>
+
+    <select id="get" resultType="com.ssm.promotion.core.entity.UOrder">
+
+    </select>
+
+    <delete id="delete">
+
+    </delete>
+
+</mapper>

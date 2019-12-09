@@ -107,6 +107,7 @@ public class AopSurvey {
             case DataAnalysis:
                 break;
             case LiveData:
+                isFuncs = containLiveData(signature, allFuncsList);
                 break;
             case GMFunction:
                 break;
@@ -123,6 +124,7 @@ public class AopSurvey {
         log.info("AopSurvey:  employeeId=" + userId + " operation >>>> " + signature);
         this.funcThrowRuntimeException(isFuncs, signature);
     }
+
 
     /**
      * 没有此权限抛异常
@@ -146,6 +148,11 @@ public class AopSurvey {
         switch (signature) {
             case "containGameDetail":
                 type = FunctionType.GameDetail;
+                break;
+            case "getPayOrderList":
+            case "getTotalPayRecords":
+                type = FunctionType.LiveData;
+                break;
             case "getServerList":
             case "addServer":
             case "updateServer":
@@ -195,6 +202,23 @@ public class AopSurvey {
         //详细权限
         switch (signature) {
             case "getRechargeSummary":
+                result = true;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    private boolean containLiveData(String signature, List<Integer> allFuncsList) {
+        if (allFuncsList.contains(FunctionType.LiveData.getId())) {
+            return true;
+        }
+        boolean result = false;
+        //详细权限
+        switch (signature) {
+            case "getPayOrderList":
+            case "getTotalServers":
                 result = true;
                 break;
             default:

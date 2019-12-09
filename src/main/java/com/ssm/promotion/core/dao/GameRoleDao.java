@@ -70,4 +70,6 @@ public interface GameRoleDao {
     int updateGameRole(Map<String, Object> map);
 
     List<String> getLastLoginTime(Map<String, Object> map);
+
+    List<GameRole> findGamerole(Map<String, Object> map);
 }

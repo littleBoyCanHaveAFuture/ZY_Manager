@@ -5,6 +5,7 @@ import com.ssm.promotion.core.service.GameRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,4 +28,9 @@ public class GameRoleWorker {
     public String getLastLoginTime(Map<String, Object> map) {
         return gameRoleService.getLastLoginTime(map);
     }
+
+    public List<GameRole> findGamerole(Map<String, Object> map) {
+        return gameRoleService.findUser(map);
+    }
+
 }
