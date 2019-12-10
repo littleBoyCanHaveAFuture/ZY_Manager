@@ -1,9 +1,11 @@
 package com.ssm.promotion.core.sdk;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.dao.UOrderDao;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.util.EncryptUtils;
+import com.ssm.promotion.core.util.enums.PayState;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -49,16 +51,24 @@ public class UOrderManager {
                                 String productDesc, String productID, String productName,
                                 String serverID, String serverName, Integer status,
                                 String roleID, String roleName) throws Exception {
-        if (status < -2 || status > 4) {
+        if (status < PayState.STATE_CANCEL || status > PayState.PRDER_SIGN_ERROR) {
             return null;
         }
+        JSONObject object = JSONObject.parseObject(extension);
+        Integer realMoney = object.containsKey("realMoney") ? object.getInteger("realMoney") : null;
+        Long completeTime = object.containsKey("completeTime") ? object.getLong("completeTime") : null;
+        String sdkOrderTime = object.containsKey("sdkOrderTime") ? object.getString("sdkOrderTime") : null;
+
         UOrder order = new UOrder();
 
         order.setOrderID(loginIdGenerator.getRandomId());
         order.setAppID(Integer.parseInt(role.getGameId()));
         order.setChannelID(Integer.parseInt(role.getChannelId()));
         order.setChannelOrderID(channelOrderID);
-//        order.setCompleteTime();
+        if (status == PayState.STATE_SUCCESS || status == PayState.STATE_PAY_DONE) {
+            order.setCompleteTime(new Date(completeTime));
+        }
+
 
         order.setCreatedTime(new Date());
         order.setCurrency("RMB");
@@ -69,8 +79,8 @@ public class UOrderManager {
         order.setProductDesc(productDesc);
         order.setProductID(productID);
         order.setProductName(productName);
-//        order.setRealMoney();
-//        order.setSdkOrderTime();
+        order.setRealMoney(realMoney);
+        order.setSdkOrderTime(sdkOrderTime);
 
         order.setServerID(serverID);
         order.setServerName(serverName);
@@ -81,8 +91,8 @@ public class UOrderManager {
         order.setRoleID(roleID);
         order.setRoleName(roleName);
 
-        orderDao.save(order);
-
+        int res = orderDao.save(order);
+        System.out.println("saveOrder:" + res);
         return order;
     }
 

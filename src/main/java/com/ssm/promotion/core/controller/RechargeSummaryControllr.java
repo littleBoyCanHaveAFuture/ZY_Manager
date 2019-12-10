@@ -5,6 +5,7 @@ import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.entity.ServerInfo;
 import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.ServerInfoUtil;
 import com.ssm.promotion.core.util.StringUtil;
@@ -68,8 +69,23 @@ public class RechargeSummaryControllr {
             return;
         }
         //检测数据
+        if (type == null || type > 3 || type < 1) {
+            return;
+        }
         if (gameId == null || gameId == -1) {
             return;
+        }
+        if (serverId == null) {
+            return;
+        }
+        if (spId == null) {
+            return;
+        }
+        if (startTime.isEmpty()) {
+            startTime = DateUtil.getCurrentDateStr();
+        }
+        if (endTime.isEmpty()) {
+            endTime = DateUtil.getCurrentDateStr();
         }
         Map<String, Object> map = new HashMap<>(6);
         map.put("type", type);
@@ -83,7 +99,6 @@ public class RechargeSummaryControllr {
         System.out.println("start:" + s);
 
         List<RechargeSummary> list = this.getGameRechargeSummary(map, userId);
-        System.out.println("request: rechargeSummary/searchRechargeSummary , map: " + list.toString());
 
         long e = System.currentTimeMillis();
         System.out.println("end:" + e);
@@ -145,8 +160,8 @@ public class RechargeSummaryControllr {
                 if (spidStrList.size() == 0) {
                     break;
                 }
-                if (!spId.contains(",") && !StringUtil.isInteger(spId)) {
-                    //不能转数字
+                if (!StringUtil.isInteger(spId) || spId.equals("-1")) {
+                    //不能转数字 或者 -1 则查询所有区服
                 } else if (spidStrList.contains(spId)) {
                     spidStrList.clear();
                     spidStrList.add(spId);

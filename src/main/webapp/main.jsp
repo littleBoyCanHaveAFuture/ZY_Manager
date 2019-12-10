@@ -160,7 +160,11 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">订单记录
             </a>
-
+            <a href="javascript:openTab('实时充值','RealtimeData/RealtimeLinePayRecord.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">实时充值
+            </a>
         </div>
         <div title="玩家信息"
              data-options="selected:true,iconCls:'icon-wenzhangs'"

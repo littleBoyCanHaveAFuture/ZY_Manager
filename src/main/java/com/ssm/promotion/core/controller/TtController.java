@@ -278,6 +278,11 @@ public class TtController {
 
         if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
             System.out.println("数据为空");
+            System.out.println("roleId:" + roleId);
+            System.out.println("channelId:" + channelId);
+            System.out.println("channelUid:" + channelUid);
+            System.out.println("gameId:" + gameId);
+            System.out.println("serverId:" + serverId);
             return;
         }
 
@@ -333,6 +338,7 @@ public class TtController {
         }
         JSONObject result = new JSONObject();
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        result.put("roleId", roleId);
         ResponseUtil.write(response, result);
 
     }
@@ -480,7 +486,10 @@ public class TtController {
      * @param roleLevel      玩家等级
      * @param serverID       玩家所在的服务器ID
      * @param serverName     玩家所在的服务器名称
-     * @param extension      额外参数
+     * @param extension      额外参数 json
+     *                       realMoney //单位 分，渠道SDK支付回调通知返回的金额，记录，留作查账
+     *                       completeTime //订单创建时间
+     *                       sdkOrderTime //渠道SDK那边订单交易时间
      * @param status         订单状态
      * @param notifyUrl      支付回调通知的游戏服地址
      * @param signType       签名算法， RSA|MD5
@@ -544,11 +553,11 @@ public class TtController {
         result.put("state", StateCode.CODE_SUCCESS);
         ResponseUtil.write(response, result);
 
+        System.out.println("status:" + status);
         //redis
         //充值成功
         if (status == PayState.STATE_SUCCESS || status == PayState.STATE_PAY_DONE) {
             cache.reqpay(role.getGameId(), serverID, role.getChannelId(), userID, money);
         }
-
     }
 }

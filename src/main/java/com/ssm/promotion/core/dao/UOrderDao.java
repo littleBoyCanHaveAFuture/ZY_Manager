@@ -16,7 +16,7 @@ public interface UOrderDao {
 
     public UOrder get(long orderID);
 
-    void save(UOrder order);
+    int save(UOrder order);
 
     void delete(UOrder order);
 

@@ -72,4 +72,21 @@ public class RedisKeyTail {
      * 存储充值汇总查询结果
      */
     public static final String RECHARGE_SUMMARY = "RechargeSummary";
+
+    /**
+     * 实时数据 过期时间 一个月
+     * 充值金额
+     */
+    public static final String REALTIME_RECHARGE_AMOUNTS = "RRA";
+    /**
+     * 实时数据 过期时间 一个月
+     * 在线玩家
+     * 1.玩家进入游戏 总在线玩家
+     */
+    public static final String REALTIME_ONLINE_ACCOUNTS = "ROA";
+    /**
+     * 实时数据 过期时间 一个月
+     * 新增玩家
+     */
+    public static final String REALTIME_ADD_Roles = "RAR";
 }

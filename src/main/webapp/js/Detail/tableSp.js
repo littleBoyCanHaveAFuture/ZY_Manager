@@ -28,9 +28,9 @@ function exportToLocal() {
 function search() {
     let gameId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
-    let spId = $("#save_spId").val();//此处逗号会产生问题
-    let startTime = $("#save_startTime").val();
-    let endTime = $("#save_endTime").val();
+    let spId = $("#save_spId").val();
+    let startTime = $("#save_startTime").datetimebox("getValue");
+    let endTime = $("#save_endTime").datetimebox("getValue");
     let spIdstrs = spId.replace(/,/g, "|");
     let data = {
         "type": 3,

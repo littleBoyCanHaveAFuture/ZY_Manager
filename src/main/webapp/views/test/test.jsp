@@ -35,15 +35,22 @@
 
 <div id="sp">
     <div>
-        <a href="javascript:initGameList()" class="easyui-linkbutton" style=""
+        <a href="javascript:initServerList(2)" class="easyui-linkbutton"
+           iconCls=" icon-search" plain="true">查询渠道</a>
+        <a href="javascript:initGameList()" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询游戏</a>
         <a href="javascript:initServerList(1)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询区服</a>
-        <a href="javascript:initServerList(2)" class="easyui-linkbutton" style="margin-left:50px"
-           iconCls=" icon-search" plain="true">查询渠道</a>
+
     </div>
+    <label for="save_spId"></label>
+    <span style="color: blue; ">渠道:</span>
+    <select title="选择渠道" id="save_spId" name="spId">
+        <option value="-1" selected="selected">请选择</option>
+    </select>
+
     <label for="save_gameId"></label>
-    <span style="color: blue; ">游戏:</span>
+    <span style="color: blue;margin-left:50px  ">游戏:</span>
     <select title="选择游戏" id="save_gameId" name="gameId">
         <option value="-1" selected="selected">请选择</option>
     </select>
@@ -54,11 +61,6 @@
         <option value="-1" selected="selected">请选择</option>
     </select>
 
-    <label for="save_spId"></label>
-    <span style="color: blue;margin-left:50px ">渠道:</span>
-    <select title="选择渠道" id="save_spId" name="spId">
-        <option value="-1" selected="selected">请选择</option>
-    </select>
 
     <div>
         <label for="username">用户名：</label>
@@ -71,19 +73,10 @@
         渠道
     </div>
     <div>
-<%--        <label for="channelId">渠道id：</label>--%>
-<%--        <input type="text" id="channelId" size="20" onkeydown=""/>--%>
-
         <label for="channelUserId">用户id：</label>
         <input type="text" id="channelUserId" size="20" onkeydown=""/>
     </div>
 
-    <div>
-<%--        <label for="appId">游戏id*</label>--%>
-<%--        <input type="text" id="appId" size="20" onkeydown=""/>--%>
-<%--        <label for="serverId">游戏区服</label>--%>
-<%--        <input type="text" id="serverId" size="20" onkeydown=""/>--%>
-    </div>
     <div>
         <label for="auto">渠道自动注册</label>
         <select id="auto">
@@ -101,6 +94,10 @@
         </select>
     </div>
     <div>
+        <label for="channelUserId">角色id：</label>
+        <input type="text" id="roleId" size="20" onkeydown=""/>
+    </div>
+    <div>
         <label>-------------功能---------------</label>
     </div>
     <div>
@@ -116,6 +113,20 @@
         <a href="javascript:exitgame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
     </div>
     <div>
+        <div>
+            <label for="oderid">订单号：</label>
+            <input type="text" id="oderid" size="20" onkeydown=""/>
+        </div>
+        <label for="payRecord_state">&nbsp;支付状态:</label>
+        <select title="选择订单状态" id="payRecord_state">
+            <option value="-2">支付取消</option>
+            <option value="-1">支付失败</option>
+            <option value="0">创建未支付</option>
+            <option value="1">支付成功</option>
+            <option value="2">交易完成</option>
+            <option value="3">未支付(有效)</option>
+            <option value="4">未支付(已调起)</option>
+        </select>
         <a href="javascript:pay()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值</a>
         <a href="javascript:pay()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">充值校验</a>
     </div>
@@ -134,12 +145,13 @@
     </div>
 
 </div>
+
+
 <script type="text/javascript">
     var t_appid;
     var t_token;
     var t_uid;
     var t_sign;
-    let t_account;
     let t_pwd;
     let t_channelId;
     let t_channelUid;
@@ -208,7 +220,7 @@
                     if (result.data.status != 1) {
                         $.messager.alert("注册失败：", result.data.err);
                     } else {
-                        t_account = result.data.account;
+                        t_uid = result.data.account;
                         t_pwd = result.data.pwd;
                         let ss = "账号:" + result.data.account + "\n密码：" + result.data.pwd;
                         $.messager.alert("注册成功：", ss);
@@ -242,7 +254,7 @@
         let data = {
             "appId": appId,
             "isChannel": isChannel,
-            "name": t_account,
+            "name": t_uid,
             "pwd": t_pwd,
             "channelId": channelId,
             "channelUid": channelUid
@@ -268,8 +280,8 @@
                     logincheck();
                 }
             },
-            error: function () {
-                $.messager.alert("系统提示", "操作失败");
+            error: function (result) {
+                $.messager.alert("系统提示", result.err);
             }
         });
     }
@@ -313,7 +325,7 @@
         let appId = $("#save_gameId").val();
         let serverId = $("#save_serverId").val();
         let channelId = $("#save_spId").val();
-
+        let roleId = $("#roleId").val();
         t_channelId = channelId;
         t_channelUid = channelUserId;
 
@@ -321,7 +333,7 @@
             "&serverId=" + serverId +
             "&channelId=" + channelId +
             "&channelUid=" + channelUserId +
-            "&roleId=" + "";
+            "&roleId=" + roleId;
         let url = "/ttt/enter" + data;
         console.log("entergame:" + url);
 
@@ -381,12 +393,12 @@
         let serverId = $("#save_serverId").val();
         let channelId = $("#save_spId").val();
         let key = "createrole";
-
+        let roleId = $("#roleId").val();
         let value = {
             "channelId": channelId,
             "channelUid": t_channelUid,
             "appId": appId,
-            "roleId": "1",
+            "roleId": roleId,
             "roleName": "roleName",
             "roleLevel": 0,
             "zoneId": serverId,
@@ -413,7 +425,7 @@
             success: function (result) {
                 console.log("result：" + result.status);
                 if (result.resultCode === 200) {
-                    $.messager.alert("系统提示", result.status);
+                    $.messager.alert("角色id", result.roleId);
                 }
             },
             error: function () {
@@ -423,7 +435,95 @@
     }
 
     function pay() {
+        let channelUserId = $("#channelUserId").val();
+        let appId = $("#save_gameId").val();
+        let serverId = $("#save_serverId").val();
+        let channelId = $("#save_spId").val();
+        let roleId = $("#roleId").val();
+        let order_status = $("#payRecord_state").val();
 
+
+        let userID = t_uid;// 指悦账号id
+        let channelOrderID = $("#oderid").val();// 渠道订单号
+        let productID = "1";//   当前商品ID
+        let productName = "测试1";// 商品名称
+        let productDesc = "0.0.1";//  游戏版本
+        let money = "600";//  单位 分
+        let roleID = roleId;//   玩家在游戏服中的角色ID
+        let roleName = "测试账号1";//  玩家在游戏服中的角色名称
+        let roleLevel = "1";//   玩家等级
+        let serverID = serverId;//   玩家所在的服务器ID
+        let serverName = "111";//  玩家所在的服务器名称
+        let extension;//   额外参数
+        let status = order_status;//    订单状态
+        let notifyUrl;//    支付回调通知的游戏服地址
+        let signType;//   签名算法， RSA|MD5
+        let sign;//    RSA签名
+
+        if (status == 1 || status == 2) {
+            extension = {
+                "realMoney": 600,
+                "completeTime": "",
+                "sdkOrderTime": ""
+            }
+        }
+        let data =
+            "?userID=" + userID +
+            "&channelOrderID=" + channelOrderID +
+            "&productID=" + productID +
+            "&productName=" + productName +
+            "&productDesc=" + productDesc +
+            "&money=" + money +
+            "&roleID=" + roleID +
+            "&roleName=" + roleName +
+            "&roleLevel=" + roleLevel +
+            "&serverID=" + serverID +
+            "&serverName=" + serverName +
+            "&extension=" + extension +
+            // "&extension=" + encodeURIComponent(JSON.stringify(extension)) +
+            "&status=" + status +
+            "&notifyUrl=" + notifyUrl +
+            "&signType=" + signType +
+            "&sign=" + sign;
+        let jsondata = {
+            "userID": userID,
+            "channelOrderID": channelOrderID,
+            "productID": productID,
+            "productName": productName,
+            "productDesc": productDesc,
+            "money": money,
+            "roleID": roleID,
+            "roleName": roleName,
+            "roleLevel": roleLevel,
+            "serverID": serverID,
+            "serverName": serverName,
+            "extension": JSON.stringify(extension),
+            "status": status,
+            "notifyUrl": notifyUrl,
+            "signType": signType,
+            "sign": sign
+        }
+
+
+        let url = "/ttt/payInfo" + data;
+        console.log("payInfo:" + url);
+
+        $.ajax({
+            url: url,
+            type: "get",
+            // data: JSON.stringify(jsondata),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                console.log("result：" + result.state);
+                if (result.resultCode === 200) {
+                    $.messager.alert("系统提示", result.state);
+                }
+            },
+            error: function () {
+                $.messager.alert("系统提示", "操作失败");
+            }
+        });
     }
 
     function initGameList() {
@@ -499,6 +599,7 @@
             }
         });
     }
+
     //登录超时 重新返回到登录界面
     function relogin() {
         // 登录失效

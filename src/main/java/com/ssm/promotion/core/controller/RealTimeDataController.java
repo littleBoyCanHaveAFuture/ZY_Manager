@@ -1,17 +1,18 @@
 package com.ssm.promotion.core.controller;
 
 import com.ssm.promotion.core.common.Constants;
-import com.ssm.promotion.core.entity.*;
+import com.ssm.promotion.core.entity.PageBean;
+import com.ssm.promotion.core.entity.UOrder;
+import com.ssm.promotion.core.entity.User;
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.sdk.UOrderManager;
 import com.ssm.promotion.core.service.PayRecordService;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;
-import com.ssm.promotion.core.util.EncryptUtils;
+import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.ServerInfoUtil;
-import com.ssm.promotion.core.util.enums.StateCode;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,9 +25,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -37,11 +37,12 @@ import java.util.Map;
 @RequestMapping("/realtime")
 public class RealTimeDataController {
     private static final Logger log = Logger.getLogger(RealTimeDataController.class);
+    @Autowired
+    JedisRechargeCache cache;
     @Resource
     private PayRecordService payRecordService;
     @Resource
     private UOrderManager orderManager;
-
     @Autowired
     private HttpServletRequest request;
 
@@ -98,6 +99,64 @@ public class RealTimeDataController {
         log.info("request: realtime/getPayRecord , map: " + param.toString());
     }
 
+    /**
+     * 实时数据
+     */
+    @RequestMapping(value = "/realtimedata", method = RequestMethod.POST)
+    @ResponseBody
+    public void getRealTimeData(String spId, Integer gameId, Integer serverId,
+                                String starttime, String endttime,
+                                HttpServletResponse response) throws Exception {
+        System.out.println("realtimedata:");
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        JSONObject result = new JSONObject();
+        do {
+            if (spId == null || gameId == null || serverId == null) {
+                result.put("err", "参数非法");
+                result.put("resultCode", Constants.SDK_PARAM);
+                break;
+            }
+            if (spId == "-1" || gameId == -1 || serverId == -1) {
+                result.put("err", "请选择区服");
+                result.put("resultCode", Constants.SDK_PARAM);
+                break;
+            }
+            if (starttime == null || endttime == null) {
+                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYMMDDmmss);
+                endttime = DateUtil.getCurrentDateStr();
+            }
+            List<String> timeDaylist = DateUtil.transTimes(starttime, endttime);
+            if (timeDaylist.size() != 1) {
+                result.put("err", "请选择同一天的数据");
+                result.put("resultCode", Constants.SDK_PARAM);
+                break;
+            }
+            List<String> timeMinlist = DateUtil.getDateMinStr(starttime, endttime);
+            List<Integer> newadd = new ArrayList<>();
+            List<Integer> online = new ArrayList<>();
+            List<Double> money = new ArrayList<>();
+
+
+            cache.getRealtimeData(spId, gameId, serverId, timeDaylist.get(0), timeMinlist, newadd, online, money);
+
+            result.put("newadd", newadd);
+            result.put("onlines", online);
+            result.put("money", money);
+            result.put("times", timeMinlist);
+            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        } while (false);
+
+        ResponseUtil.write(response, result);
+
+        System.out.println("request: realtime/realtimedata , map: " + result.toString());
+
+        log.info("request: realtime/realtimedata , map: " + result.toString());
+    }
 
 
 }

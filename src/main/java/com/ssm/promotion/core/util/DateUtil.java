@@ -1,5 +1,7 @@
 package com.ssm.promotion.core.util;
 
+import org.apache.commons.lang.time.DateUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -33,8 +36,10 @@ public class DateUtil {
     public static final int DAY_SECONDS = 86400;
     public static final int WEEK_SECONDS = 604800;
 
-    private static final String FORMAT_YYMMDD = "yyyyMMdd";
-    private static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
+    public static final String FORMAT_YYMMDD = "yyyyMMdd";
+    public static final String FORMAT_YYMMDDmm = "yyyyMMddHHmm";
+    public static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
+    public static final String FORMAT_YYMMDDmmss = "yyyy-MM-dd HH:mm:ss";
 
     // 获得某天最小时间 2017-10-15 00:00:00
     public static Date getStartOfDay(Date date) {
@@ -49,6 +54,38 @@ public class DateUtil {
         long daySecond = 60 * 60 * 24;
         long dayTime = now - (now + 8 * 60 * 60) % daySecond;
         return dayTime + daySecond;
+    }
+
+
+    /**
+     * 获取上n个小时整点小时时间
+     *
+     * @param date
+     * @return
+     */
+    public static String getLastHourTime(Date date, int n) {
+        Calendar ca = Calendar.getInstance();
+        ca.set(Calendar.MINUTE, 0);
+        ca.set(Calendar.SECOND, 0);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        ca.set(Calendar.HOUR_OF_DAY, ca.get(Calendar.HOUR_OF_DAY) - n);
+        date = ca.getTime();
+        return sdf.format(date);
+    }
+
+    /**
+     * 获取当前时间的整点小时时间
+     *
+     * @param date
+     * @return
+     */
+    public static String getCurrHourTime(Date date) {
+        Calendar ca = Calendar.getInstance();
+        ca.set(Calendar.MINUTE, 0);
+        ca.set(Calendar.SECOND, 0);
+        date = ca.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        return sdf.format(date);
     }
 
     /**
@@ -92,9 +129,26 @@ public class DateUtil {
         return sdf.parse(str);
     }
 
+    public static String getCurrentMinuteStr() throws Exception {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        return sdf.format(date);
+    }
+
+    /**
+     * 获取yyyyMMddmm 时间字符串
+     *
+     * @param amount 分钟
+     */
+    public static String getCurrentMinuteStr(int amount) throws Exception {
+        Date date = DateUtils.addMinutes(new Date(), amount);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        return sdf.format(date);
+    }
+
     public static String getCurrentDateStr() throws Exception {
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
         return sdf.format(date);
     }
 
@@ -108,6 +162,10 @@ public class DateUtil {
         return sdf.format(date);
     }
 
+    /**
+     * YYMMDD
+     * 天数
+     */
     public static List<String> getDateStr(String startTime, String endTime) {
         SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
         List<String> dateList = new ArrayList<>();
@@ -127,6 +185,37 @@ public class DateUtil {
         return null;
     }
 
+    /**
+     * 24h制
+     * yyyyMMDDmm 年-月-日-小时-分钟格式的时间
+     *
+     * @param startTime
+     * @param endTime
+     */
+    public static List<String> getDateMinStr(String startTime, String endTime) {
+        List<String> dateList = new ArrayList<>();
+        SimpleDateFormat sdfin = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        SimpleDateFormat sdfout = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            try {
+                long start = sdfin.parse(startTime).getTime();
+                long end = sdfin.parse(endTime).getTime();
+
+                long stage = MINUTE_MILLIS ;
+
+                int n = (int) ((end - start) / stage);
+
+                for (int i = 0; i <= n; i++) {
+                    dateList.add(sdfout.format(start + stage * i));
+                }
+                return dateList;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     public static String formatJsTime(String startTime) throws Exception {
         System.out.println(startTime);
         Date d = formatString(startTime, JS_FORMAT_YYMMDD);
@@ -134,10 +223,17 @@ public class DateUtil {
     }
 
     public static void main(String[] args) throws Exception {
-//        Date end = new Date();
+        Date end = new Date();
 //        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
-//        getDateStr(formatDate(start, "yyyyMMdd"), formatDate(end, "yyyyMMdd"));
+        Date start = DateUtils.addHours(new Date(), -1);
 
+        System.out.println("start:" + start.getTime());
+        System.out.println("end:" + end.getTime());
+        List<String> res = getDateMinStr(formatDate(start, FORMAT_YYMMDDmmss), formatDate(end, FORMAT_YYMMDDmmss));
+        res.forEach(System.out::println);
+
+        String s = DateUtil.getCurrHourTime(end);
+        System.out.println(s);
 //
 //        String startTime = "2019-12-01 10:47";
 //        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
@@ -147,6 +243,6 @@ public class DateUtil {
 //        Integer serverId = 1;
 //        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
 //        System.out.println(s);
-        System.out.println(DateUtil.getEndTimestamp());
+//        System.out.println(DateUtil.getCurrentMinuteStr());
     }
 }

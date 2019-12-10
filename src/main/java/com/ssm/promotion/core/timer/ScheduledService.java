@@ -1,12 +1,16 @@
 package com.ssm.promotion.core.timer;
 
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.sdk.LoginToken;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author songminghua
@@ -19,6 +23,13 @@ public class ScheduledService {
      * 速率 单位s
      */
     private static final int rate = 60;
+    /**
+     * <渠道,游戏-区服>
+     */
+    private static Map<String, String> map = new HashMap<>();
+
+    @Autowired
+    JedisRechargeCache cache;
 
     public static Date stampForDate(long timestamp) {
         return new Date(timestamp);
@@ -47,5 +58,27 @@ public class ScheduledService {
         log.info(System.getProperty("file.encoding"));
         LoginToken.cleanInvalid(System.currentTimeMillis());
     }
+//服务器启动时 可以检查一遍
 
+    /**
+     * 每分钟整点触发一次
+     * 1.秒（0~59）
+     * 2.分钟（0~59）
+     * 3.小时（0~23）
+     * 4.天（月）（0~31，但是你需要考虑你月的天数）
+     * 5.月（0~11）
+     * 6.天（星期）（1~7 1=SUN 或 SUN，MON，TUE，WED，THU，FRI，SAT）
+     * 7.年份（1970－2099）
+     */
+    @Scheduled(cron = "10 * * * * ?")
+    public void redis() {
+        //reids 统计在线
+        cache.setRealtimeData();
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void redisOffline() {
+        //reids 将前一天的在线玩家数据转移
+        cache.setOfflineData();
+    }
 }

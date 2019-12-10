@@ -275,6 +275,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
     public List<RechargeSummary> serchSpRs(Integer gameId, Integer serverId,
                                            List<String> spIdList,
                                            List<String> timeList) throws Exception {
+        System.out.println(timeList.toString());
         List<RechargeSummary> rsList = new LinkedList<>();
 
         //每个渠道 {start,end}每天的记录
@@ -338,6 +339,18 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //注收比
             //新增注收比
 
+            printMap(timecaMap, "timecaMap");
+            printMap(timecrMap, "timecrMap");
+            printMap(timecrroMap, "timecrroMap");
+            printMap(timecrroMap, "timecrroMap");
+            printMap(timeActiveAccountMap, "timeActiveAccountMap");
+            printMap(timeRechargeTimesMap, "timeRechargeTimesMap");
+            printMap(timeRechargeAccountsMap, "timeRechargeAccountsMap");
+            printMap(timeRechargeAmountsMap, "timeRechargeAmountsMap");
+            printMap(timeRechargeFirstPayersMap, "timeRechargeFirstPayersMap");
+            printMap(timefraMap, "timefraMap");
+            printMap(timeRegisteredPayersAccountMap, "timeRegisteredPayersAccountMap");
+            printMap(timeRegisteredPaymentMap, "timeRegisteredPaymentMap");
 
             RechargeSummary rs = new RechargeSummary();
 
@@ -458,6 +471,10 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             map.put(times, num1 / num2 * 100);
         }
         return map;
+    }
+
+    public void printMap(Map<String, Double> map, String name) {
+        System.out.println("map:" + name + "----->" + map.toString());
     }
 }
 

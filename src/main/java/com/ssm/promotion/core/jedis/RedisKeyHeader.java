@@ -8,4 +8,8 @@ public class RedisKeyHeader {
     public static final String USER_INFO = "UserInfo";
     public static final String ACTIVE_PLAYERS_INFO = "API";
     public static final String RS_INFO = "RS";
+    /**
+     * 实时数据 过期时间 一个月
+     */
+    public static final String REALTIMEDATA = "realtime";
 }
