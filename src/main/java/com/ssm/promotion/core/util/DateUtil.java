@@ -37,9 +37,9 @@ public class DateUtil {
     public static final int WEEK_SECONDS = 604800;
 
     public static final String FORMAT_YYMMDD = "yyyyMMdd";
-    public static final String FORMAT_YYMMDDmm = "yyyyMMddHHmm";
-    public static final String JS_FORMAT_YYMMDD = "yyyy-MM-dd HH:mm";
-    public static final String FORMAT_YYMMDDmmss = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMAT_YYYYMMddHHmm = "yyyyMMddHHmm";
+    public static final String JS_FORMAT_YYMMDDHHmm = "yyyy-MM-dd HH:mm";
+    public static final String FORMAT_YYYYMMDDHHmmss = "yyyy-MM-dd HH:mm:ss";
 
     // 获得某天最小时间 2017-10-15 00:00:00
     public static Date getStartOfDay(Date date) {
@@ -67,7 +67,7 @@ public class DateUtil {
         Calendar ca = Calendar.getInstance();
         ca.set(Calendar.MINUTE, 0);
         ca.set(Calendar.SECOND, 0);
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
         ca.set(Calendar.HOUR_OF_DAY, ca.get(Calendar.HOUR_OF_DAY) - n);
         date = ca.getTime();
         return sdf.format(date);
@@ -84,13 +84,14 @@ public class DateUtil {
         ca.set(Calendar.MINUTE, 0);
         ca.set(Calendar.SECOND, 0);
         date = ca.getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
         return sdf.format(date);
     }
 
     /**
      * 转化时间
      * 并获取这段时间的所有天数
+     * @return yyyyMMdd
      */
     public static List<String> transTimes(String startTimes, String endTimes) throws Exception {
         startTimes = formatJsTime(startTimes);
@@ -131,7 +132,7 @@ public class DateUtil {
 
     public static String getCurrentMinuteStr() throws Exception {
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
         return sdf.format(date);
     }
 
@@ -142,13 +143,13 @@ public class DateUtil {
      */
     public static String getCurrentMinuteStr(int amount) throws Exception {
         Date date = DateUtils.addMinutes(new Date(), amount);
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
         return sdf.format(date);
     }
 
     public static String getCurrentDateStr() throws Exception {
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDDmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
         return sdf.format(date);
     }
 
@@ -191,17 +192,18 @@ public class DateUtil {
      *
      * @param startTime
      * @param endTime
+     * @return yyyyMMddHHmm
      */
     public static List<String> getDateMinStr(String startTime, String endTime) {
         List<String> dateList = new ArrayList<>();
-        SimpleDateFormat sdfin = new SimpleDateFormat(FORMAT_YYMMDDmmss);
-        SimpleDateFormat sdfout = new SimpleDateFormat(FORMAT_YYMMDDmm);
+        SimpleDateFormat sdfin = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
+        SimpleDateFormat sdfout = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
         if (!startTime.isEmpty() && !endTime.isEmpty()) {
             try {
                 long start = sdfin.parse(startTime).getTime();
                 long end = sdfin.parse(endTime).getTime();
 
-                long stage = MINUTE_MILLIS ;
+                long stage = MINUTE_MILLIS;
 
                 int n = (int) ((end - start) / stage);
 
@@ -218,7 +220,7 @@ public class DateUtil {
 
     public static String formatJsTime(String startTime) throws Exception {
         System.out.println(startTime);
-        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
+        Date d = formatString(startTime, JS_FORMAT_YYMMDDHHmm);
         return formatDate(d, FORMAT_YYMMDD);
     }
 
@@ -229,7 +231,7 @@ public class DateUtil {
 
         System.out.println("start:" + start.getTime());
         System.out.println("end:" + end.getTime());
-        List<String> res = getDateMinStr(formatDate(start, FORMAT_YYMMDDmmss), formatDate(end, FORMAT_YYMMDDmmss));
+        List<String> res = getDateMinStr(formatDate(start, FORMAT_YYYYMMDDHHmmss), formatDate(end, FORMAT_YYYYMMDDHHmmss));
         res.forEach(System.out::println);
 
         String s = DateUtil.getCurrHourTime(end);

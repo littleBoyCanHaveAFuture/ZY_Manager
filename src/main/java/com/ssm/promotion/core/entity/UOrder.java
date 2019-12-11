@@ -13,7 +13,7 @@ public class UOrder {
     private Long orderID;           //订单号
     private Integer appID;          //当前所属游戏ID
     private Integer channelID;      //当前所属渠道ID
-    private Integer userID;         //指悦这边对应的用户ID
+    private Integer userID;         //指悦这边对应的用户账号ID
     private String username;        //指悦这边生成的用户名
     private String productID;       //游戏中商品ID
     private String productName;     //游戏中商品名称
@@ -28,10 +28,52 @@ public class UOrder {
     private Integer state;          //订单状态
     private String channelOrderID;  //渠道SDK对应的订单号
     private String extension;       //扩展数据
-    private Date createdTime;       //订单创建时间
-    private String sdkOrderTime;    //渠道SDK那边订单交易时间
+    private Date createdTime;       //订单本地创建时间
+    private Date sdkOrderTime;      //渠道SDK那边订单交易时间
     private Date completeTime;      //订单完成时间
     private String notifyUrl;       //游戏下单的时候，可以携带notifyUrl过来，作为渠道支付回调时，通知到游戏服务器的地址，没有设置的话，默认走后台游戏管理中配置的固定通知回调地址
+
+    /**
+     * 检查参数 是否相符
+     */
+    public boolean checkParam(String productID, String productName, String productDesc,
+                              int money,
+                              String roleID, String roleName,
+                              String serverID, String serverName, Integer status) {
+        boolean res = false;
+        do {
+            if (!this.productID.equals(productID)) {
+                break;
+            }
+            if (!this.productName.equals(productName)) {
+                break;
+            }
+            if (!this.productDesc.equals(productDesc)) {
+                break;
+            }
+
+            if (this.money != money) {
+                break;
+            }
+
+            if (!this.roleID.equals(roleID)) {
+                break;
+            }
+            if (!this.roleName.equals(roleName)) {
+                break;
+            }
+
+            if (!this.serverID.equals(serverID)) {
+                break;
+            }
+            if (!this.serverName.equals(serverName)) {
+                break;
+            }
+            res = true;
+        } while (false);
+
+        return res;
+    }
 
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();

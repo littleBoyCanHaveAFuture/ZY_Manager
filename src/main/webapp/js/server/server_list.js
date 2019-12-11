@@ -279,7 +279,6 @@ function initFirstPage() {
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
-                console.log("www" + result);
                 result = {
                     total: result.total,
                     rows: result.rows

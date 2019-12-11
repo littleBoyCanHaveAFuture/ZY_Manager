@@ -56,26 +56,29 @@
     <select id="getUOrderList" parameterType="map" resultMap="orderRecordResult">
         <include refid="select_payRecord_column"/>
         <where>
-            <if test="orderID !=null and orderID != ''">
+            <if test="orderID !=null and orderID != ''and appId!='-1'">
                 orderID = #{orderID}
             </if>
-            <if test="appID!=null and appID!='' ">
+            <if test="appID!=null and appID!='' and appID!='-1'">
                 AND appID = #{appID}
             </if>
-            <if test="channelID!=null and channelID!='' ">
+            <if test="channelID!=null and channelID!='' and channelID!='-1'">
                 AND channelID = #{channelID}
             </if>
-            <if test="roleID!=null and roleID!='' ">
+            <if test="roleID!=null and roleID!='' and roleID!='-1'">
                 AND roleID = #{roleID}
             </if>
-            <if test="channelOrderID!=null and channelOrderID!='' ">
+            <if test="channelOrderID!=null and channelOrderID!='' and channelOrderID!='-1'">
                 AND channelOrderID = #{channelOrderID}
             </if>
             <if test="state!=null and state!='' ">
                 AND state = #{state}
             </if>
-            <if test="createdTime!=null and createdTime!=''">
-                AND createdTime >= #{createdTime}
+            <if test="startTime!=null and startTime!=''">
+                AND createdTime >= #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                AND completeTime &lt;= #{endTime}
             </if>
             <if test="completeTime!=null and completeTime!=''">
                 AND completeTime &lt;= #{completeTime}
@@ -85,30 +88,34 @@
             limit #{start},#{size}
         </if>
     </select>
+
     <!--   与 selectServers where 条件一致-->
     <select id="getTotalUorders" parameterType="map" resultType="Long">
         select count(*) from zy_order
         <where>
-            <if test="orderID !=null and orderID != ''">
+            <if test="orderID !=null and orderID != ''and appId!='-1'">
                 orderID = #{orderID}
             </if>
-            <if test="appID!=null and appID!='' ">
+            <if test="appID!=null and appID!='' and appID!='-1'">
                 AND appID = #{appID}
             </if>
-            <if test="channelID!=null and channelID!='' ">
+            <if test="channelID!=null and channelID!='' and channelID!='-1'">
                 AND channelID = #{channelID}
             </if>
-            <if test="roleID!=null and roleID!='' ">
+            <if test="roleID!=null and roleID!='' and roleID!='-1'">
                 AND roleID = #{roleID}
             </if>
-            <if test="channelOrderID!=null and channelOrderID!='' ">
+            <if test="channelOrderID!=null and channelOrderID!='' and channelOrderID!='-1'">
                 AND channelOrderID = #{channelOrderID}
             </if>
             <if test="state!=null and state!='' ">
                 AND state = #{state}
             </if>
-            <if test="createdTime!=null and createdTime!=''">
-                AND createdTime >= #{createdTime}
+            <if test="startTime!=null and startTime!=''">
+                AND createdTime >= #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                AND completeTime &lt;= #{endTime}
             </if>
             <if test="completeTime!=null and completeTime!=''">
                 AND completeTime &lt;= #{completeTime}
@@ -132,12 +139,44 @@
         )
     </insert>
 
-    <select id="get" resultType="com.ssm.promotion.core.entity.UOrder">
+    <select id="get" parameterType="map" resultMap="orderRecordResult">
+        <include refid="select_payRecord_column"/>
+        <where>
+            <if test="appId!=null and appId!='' ">
+                AND appID = #{appId}
+            </if>
+            <if test="channelID!=null and channelID!='' ">
+                AND channelID = #{channelID}
+            </if>
+            <if test="channelOrderID!=null and channelOrderID!='' ">
+                AND channelOrderID = #{channelOrderID}
+            </if>
+
+        </where>
 
     </select>
 
     <delete id="delete">
 
     </delete>
+
+    <update id="update" parameterType="UOrder">
+        update zy_order
+        <set>
+            <if test="realMoney!=null and realMoney!=''  ">
+                realMoney=#{realMoney},
+            </if>
+            <if test="state!=null and state!=''  ">
+                state=#{state},
+            </if>
+            <if test="completeTime!=null and completeTime!=''  ">
+                completeTime=#{completeTime},
+            </if>
+        </set>
+        where
+        appID=#{appID}
+        and channelID= #{channelID}
+        and channelOrderID=#{channelOrderID}
+    </update>
 
 </mapper>

@@ -9,38 +9,38 @@ public class RedisKey {
     /**
      * 充值次数
      */
-    public static final String RECHARGE_TIMES = "paytimes";
+    public static final String RECHARGE_TIMES = "RE_TS";
     /**
      * 充值人数(账号数目)
      */
-    public static final String RECHARGE_PLAYERS = "accountnumbers";
+    public static final String RECHARGE_PLAYERS = "RE_PL";
     /**
      * 充值金额
      */
-    public static final String RECHARGE_AMOUNTS = "payamounts";
+    public static final String RECHARGE_AMOUNTS = "RE_AM";
     /**
      * 当日首次付费金额
      */
-    public static final String RECHARGE_FIRST_AMOUNTS = "firstamounts";
+    public static final String RECHARGE_FIRST_AMOUNTS = "RE_FAM";
 
     /**
      * 注册付费金额
      */
-    public static final String RECHARGE_AMOUNTS_NA_CA = "amounts_NA_CA";
+    public static final String RECHARGE_AMOUNTS_NA_CA = "RE_AM_NA_CA";
 
     /**
      * 累计创角
      */
-    public static final String GAME_ACCUMULATION_CREATE_ROLE = "ACC_CR";
+    public static final String GAME_ACCUMULATION_CREATE_ROLE = "GACC_CR";
 
     /**
      * 累计充值金额
      */
-    public static final String GAME_ACCUMULATION_RECHARGE_AMOUNTS = "ACC_RAM";
+    public static final String GAME_ACCUMULATION_RECHARGE_AMOUNTS = "GACC_RE_AM";
     /**
      * 累计充值人数
      */
-    public static final String GAME_ACCUMULATION_RECHARGE_ACCOUNTS = "ACC_RACC";
+    public static final String GAME_ACCUMULATION_RECHARGE_ACCOUNTS = "GACC_RE_AC";
 
 
 

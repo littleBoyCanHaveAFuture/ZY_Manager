@@ -1,3 +1,4 @@
+var myChart;
 $(function () {
     $('#save_startTime').datebox('setValue', formatterDate(new Date(new Date().getTime() - 60 * 60 * 1000), 1));
     $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
@@ -5,23 +6,16 @@ $(function () {
     getLinesByDate(0);
 });
 
-function formatterDate(date, type) {
-    let day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
-    let month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0" + (date.getMonth() + 1);
-    let hor = date.getHours();
-    let min = date.getMinutes();
-    let sec = (date.getSeconds() > 9) ? date.getSeconds() : "0" + date.getSeconds();
-
-    if (type === 0) {
-        return date.getFullYear() + '-' + month + '-' + day + " " + "00" + ":" + "00";
-    } else {
-        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
+function initChart() {
+    if (myChart != null && myChart !== "" && myChart !== undefined) {
+        myChart.dispose();
     }
+    // 基于准备好的dom，初始化echarts实例
+    myChart = echarts.init(document.getElementById('main'));
 }
 
 function getLinesByDate(type) {
-    // 基于准备好的dom，初始化echarts实例
-    let myChart = echarts.init(document.getElementById('main'));
+    initChart();
     myChart.setOption({
         //图表标题
         title: {
@@ -94,9 +88,12 @@ function getLinesByDate(type) {
         },
         yAxis: [
             {
+                min: 0, //y轴的最小值
+                max: 100, //y轴最大值
+                interval: 10, //值之间的间隔
                 type: 'value',
                 axisLabel: {
-                    formatter: '{value}人'	//控制输出格式
+                    formatter: '{value} 人'	//控制输出格式
                 }
             }
 
@@ -130,15 +127,15 @@ function getLinesByDate(type) {
         return;
     }
     myChart.showLoading();
-    let newadd = [];
-    let online = [];
-    let money = [];
+
 
     let gameId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
     let startTime = $("#save_startTime").datetimebox("getValue");
     let endTime = $("#save_endTime").datetimebox("getValue");
+
+    //endTime 大于当前时间 处理下
 
     let send = {
         "startTime": startTime,
@@ -157,12 +154,19 @@ function getLinesByDate(type) {
         dataType: "json",
         success: function (result) {
             if (result.resultCode === 200) {
+                let newadd = [];
+                let online = [];
+                let money = [];
                 let times = [];
+
                 newadd = result.newadd;
                 online = result.onlines;
                 money = result.money;
                 times = result.times;
 
+                console.info("newadd" + newadd);
+                console.info("online" + online);
+                console.info("money" + money);
                 times = times.map(function (str) {
                     let yyyy = str.substring(0, 4);
                     let MM = str.substring(4, 6);
@@ -171,6 +175,26 @@ function getLinesByDate(type) {
                     let ss = str.substring(10, 12);
                     return yyyy + "-" + MM + "-" + dd + " " + mm + ":" + ss;
                 });
+
+                let maxValue = 2 * getmax([getmax(newadd), getmax(online), getmax(money)]);
+                let ymax = (maxValue === 0) ? 10 : maxValue;
+                if (ymax < 10) {
+                    ymax = 10;
+                } else if (ymax < 50) {
+                    ymax = 50;
+                } else if (ymax < 100) {
+                    ymax = 100;
+                } else if (ymax < 500) {
+                    ymax = 500;
+                } else if (ymax < 1000) {
+                    ymax = 1000;
+                } else if (ymax < 5000) {
+                    ymax = 5000;
+                } else if (ymax < 10000) {
+                    ymax = 10000;
+                }
+                let interval = (maxValue === 0) ? 1 : ymax / 10;
+
                 //隐藏加载动画
                 myChart.hideLoading();
                 //载入数据
@@ -194,7 +218,18 @@ function getLinesByDate(type) {
                             name: '收入',
                             data: money
                         }
-                    ]
+                    ],
+                    yAxis: [
+                        {
+                            min: 0, //y轴的最小值
+                            max: ymax, //y轴最大值
+                            interval: interval, //值之间的间隔
+                            type: 'value',
+                            axisLabel: {
+                                formatter: '{value} 人'	//控制输出格式
+                            }
+                        }
+                    ],
                 });
             } else if (result.resultCode === 501) {
                 relogin();
@@ -247,9 +282,7 @@ function initServerList(type) {
         "spId": spId,
         "type": type
     };
-    // console.log("data " + gameId);
-    // console.log("data " + serverId);
-    // console.log("data " + spId);
+
     $.ajax({
         //获取下拉
         url: "/server/getDistinctServerInfo",
@@ -283,7 +316,9 @@ function initServerList(type) {
             $.messager.alert("ERROR！", "获取游戏列表出错");
         }
     });
-}//登录超时 重新返回到登录界面
+}
+
+//登录超时 重新返回到登录界面
 function relogin() {
     // 登录失效
     console.log("登录失效");

@@ -33,17 +33,12 @@
 <table id="dg" title="注：需要先查询游戏、区服、渠道后方可查询" class="easyui-datagrid" pagination="true" fitcolumns="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#tb">
     <thead>
-    <tr>
-        <th field="cb" checkbox="true" align="center"></th>
-        <th field="id" width="50" align="center">编号</th>
-
-    </tr>
     </thead>
 </table>
 
 <div id="tb" fitcolumns="true">
     <div id="tbs">
-        <label for="payRecordId">订单号:</label>
+        <label for="payRecordId">渠道订单号:</label>
         <input id="payRecordId" type="text" class="easyui-textbox" style="width:105px;height: 20px"/>
 
         <label for="payRecord_playerId">&nbsp;玩家ID:</label>
@@ -64,13 +59,13 @@
         <span style="color: blue;margin-left:50px"></span>
         <label for="payRecord_state">&nbsp;支付状态:</label>
         <select title="选择订单状态" id="payRecord_state">
-            <option value="-2">支付取消</option>
-            <option value="-1">支付失败</option>
-            <option value="0">创建未支付</option>
-            <option value="1">支付成功</option>
-            <option value="2">交易完成</option>
-            <option value="3">未支付(有效)</option>
-            <option value="4">未支付(已调起)</option>
+            <option value="">未选择</option>
+            <option value="0">点开充值界面:未点充值按钮(取消支付)</option>
+            <option value="1">选择充值方式界面:未选择充值方式(取消支付)</option>
+            <option value="2">支付宝微信界面:未支付(取消支付)</option>
+            <option value="3">支付成功:未发货</option>
+            <option value="4" selected="selected">支付成功:已发货(交易完成)</option>
+            <option value="5">支付成功:补单(交易完成)</option>
         </select>
 
         <span style="color: blue;margin-left:50px">开始时间:</span>

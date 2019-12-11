@@ -5,7 +5,8 @@ import com.ssm.promotion.core.dao.UOrderDao;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.util.EncryptUtils;
-import com.ssm.promotion.core.util.enums.PayState;
+import com.ssm.promotion.core.util.StringUtils;
+import com.ssm.promotion.core.util.enums.OrderState;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +25,27 @@ public class UOrderManager {
     @Resource
     private UOrderDao orderDao;
 
-    public UOrder getOrder(long orderID) {
-        return orderDao.get(orderID);
+    /**
+     * @param appId          游戏id
+     * @param channelID      渠道id
+     * @param channelOrderID 渠道订单id
+     */
+    public UOrder getOrder(String appId, String channelID, String channelOrderID) {
+        List<UOrder> orderList = orderDao.get(appId, channelID, channelOrderID);
+        if (orderList.size() >= 1) {
+            return orderList.get(0);
+        }
+        return null;
     }
 
-    public void saveOrder(UOrder order) {
-        orderDao.save(order);
-
+    /**
+     * 只能更新
+     * 1.realMoney
+     * 2.state
+     * 3.completeTime
+     */
+    public void updateOrder(UOrder order) {
+        orderDao.update(order);
     }
 
     public void deleteOrder(UOrder order) {
@@ -41,9 +56,13 @@ public class UOrderManager {
         return orderDao.getUOrderList(map);
     }
 
+    public Long getTotalUorders(Map<String, Object> map) {
+        return orderDao.getTotalUorders(map);
+    }
+
     /**
      * 保存
-     * 生成订单
+     * 生成订单(首先得没有该订单）
      */
     public UOrder generateOrder(GameRole role,
                                 String channelOrderID,
@@ -51,13 +70,28 @@ public class UOrderManager {
                                 String productDesc, String productID, String productName,
                                 String serverID, String serverName, Integer status,
                                 String roleID, String roleName) throws Exception {
-        if (status < PayState.STATE_CANCEL || status > PayState.PRDER_SIGN_ERROR) {
+        if (status < OrderState.STATE_OPEN_SHOP || status > OrderState.STATE_PAY_SUPPLEMENT) {
             return null;
         }
+        Integer realMoney = null;
+        Long completeTime = null;
+        Long sdkOrderTime;
+        if (extension == null) {
+            System.out.println("extension is null");
+            return null;
+        }
+        extension = StringUtils.urlcodeToStr(extension);
         JSONObject object = JSONObject.parseObject(extension);
-        Integer realMoney = object.containsKey("realMoney") ? object.getInteger("realMoney") : null;
-        Long completeTime = object.containsKey("completeTime") ? object.getLong("completeTime") : null;
-        String sdkOrderTime = object.containsKey("sdkOrderTime") ? object.getString("sdkOrderTime") : null;
+
+        sdkOrderTime = object.containsKey("sdkOrderTime") ? object.getLong("sdkOrderTime") : null;
+
+        if (status == OrderState.STATE_PAY_SUCCESS || status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT) {
+            realMoney = object.containsKey("realMoney") ? object.getInteger("realMoney") : null;
+
+            if (status != OrderState.STATE_PAY_SUCCESS) {
+                completeTime = object.containsKey("completeTime") ? object.getLong("completeTime") : null;
+            }
+        }
 
         UOrder order = new UOrder();
 
@@ -65,9 +99,7 @@ public class UOrderManager {
         order.setAppID(Integer.parseInt(role.getGameId()));
         order.setChannelID(Integer.parseInt(role.getChannelId()));
         order.setChannelOrderID(channelOrderID);
-        if (status == PayState.STATE_SUCCESS || status == PayState.STATE_PAY_DONE) {
-            order.setCompleteTime(new Date(completeTime));
-        }
+        order.setCompleteTime(completeTime != null ? new Date(completeTime) : null);
 
 
         order.setCreatedTime(new Date());
@@ -80,7 +112,7 @@ public class UOrderManager {
         order.setProductID(productID);
         order.setProductName(productName);
         order.setRealMoney(realMoney);
-        order.setSdkOrderTime(sdkOrderTime);
+        order.setSdkOrderTime(sdkOrderTime != null ? new Date(sdkOrderTime) : null);
 
         order.setServerID(serverID);
         order.setServerName(serverName);
@@ -125,7 +157,8 @@ public class UOrderManager {
 //
 //        return order;
 //    }
-    public boolean isSignOK(int userID,
+    public boolean isSignOK(int accountID,
+                            String channelOrderID,
                             String productID,
                             String productName,
                             String productDesc,
@@ -136,13 +169,13 @@ public class UOrderManager {
                             String serverID,
                             String serverName,
                             String extension,
+                            Integer status,
                             String notifyUrl,
                             String signType,
-                            String sign,
-                            String channelOrderID) throws UnsupportedEncodingException {
+                            String sign) throws UnsupportedEncodingException {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("userID=").append(userID).append("&")
+        sb.append("accountID=").append(accountID).append("&")
                 .append("channelOrderID=").append(channelOrderID == null ? "" : channelOrderID).append("&")
                 .append("productID=").append(productID == null ? "" : productID).append("&")
                 .append("productName=").append(productName == null ? "" : productName).append("&")
@@ -153,9 +186,10 @@ public class UOrderManager {
                 .append("roleLevel=").append(roleLevel == null ? "" : roleLevel).append("&")
                 .append("serverID=").append(serverID == null ? "" : serverID).append("&")
                 .append("serverName=").append(serverName == null ? "" : serverName).append("&")
-                .append("extension=").append(extension == null ? "" : extension);
+                .append("extension=").append(extension == null ? "" : extension)
+                .append("status=").append(status == null ? "" : status);
 
-        if (!org.apache.commons.lang.StringUtils.isEmpty(notifyUrl)) {
+        if (!StringUtils.isEmpty(notifyUrl)) {
             sb.append("&notifyUrl=").append(notifyUrl);
         }
 

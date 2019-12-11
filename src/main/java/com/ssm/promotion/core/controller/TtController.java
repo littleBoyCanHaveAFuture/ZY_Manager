@@ -15,7 +15,7 @@ import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.StringUtils;
 import com.ssm.promotion.core.util.UtilG;
-import com.ssm.promotion.core.util.enums.PayState;
+import com.ssm.promotion.core.util.enums.OrderState;
 import com.ssm.promotion.core.util.enums.StateCode;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -434,48 +435,48 @@ public class TtController {
         ResponseUtil.write(response, result);
     }
 
-    /**
-     * 定额计费接口
-     *
-     * @param context           上下文Activity
-     * @param unitPrice         游戏道具价格，单位为人民币分
-     * @param itemName          虚拟货币名称(商品名称)
-     *                          注意：虚拟币名称在游戏内一定要确保唯一性！！！！不能出现多个虚拟币名称相同。
-     * @param count             用户选择购买道具界面的默认道具数量。（总价为 count*unitPrice）
-     * @param callBackInfo      由游戏开发者定义传入的字符串，会与支付结果一同发送给游戏服务器，游戏服务器可通过该字段判断交易的详细内容（金额角色等）
-     * @param callBackUrl       将支付结果通知给游戏服务器时的通知地址url，交易结束后，系统会向该url发送http请求，通知交易的结果金额callbackInfo等信息
-     *                          注意：这里的回调地址可以填也可以为空字串，如果填了则以这里的回调地址为主，如果为空则以易接开发者中心设置的回调地址为准。
-     * @param payResultListener 支付回调接口
-     */
-    @RequestMapping(value = "/pay", method = RequestMethod.GET)
-    public void sdkPay(String context,
-                       String unitPrice,
-                       String itemName,
-                       String count,
-                       String callBackInfo,
-                       String callBackUrl,
-                       String payResultListener) {
-
-    }
-
-    /**
-     * 充值校验
-     */
-    @RequestMapping(value = "/paycheck", method = RequestMethod.GET)
-    public void sdkPayCheck(String context,
-                            String unitPrice,
-                            String itemName,
-                            String count,
-                            String callBackInfo,
-                            String callBackUrl,
-                            String payResultListener) {
-
-    }
+//    /**
+//     * 定额计费接口
+//     *
+//     * @param context           上下文Activity
+//     * @param unitPrice         游戏道具价格，单位为人民币分
+//     * @param itemName          虚拟货币名称(商品名称)
+//     *                          注意：虚拟币名称在游戏内一定要确保唯一性！！！！不能出现多个虚拟币名称相同。
+//     * @param count             用户选择购买道具界面的默认道具数量。（总价为 count*unitPrice）
+//     * @param callBackInfo      由游戏开发者定义传入的字符串，会与支付结果一同发送给游戏服务器，游戏服务器可通过该字段判断交易的详细内容（金额角色等）
+//     * @param callBackUrl       将支付结果通知给游戏服务器时的通知地址url，交易结束后，系统会向该url发送http请求，通知交易的结果金额callbackInfo等信息
+//     *                          注意：这里的回调地址可以填也可以为空字串，如果填了则以这里的回调地址为主，如果为空则以易接开发者中心设置的回调地址为准。
+//     * @param payResultListener 支付回调接口
+//     */
+//    @RequestMapping(value = "/pay", method = RequestMethod.GET)
+//    public void sdkPay(String context,
+//                       String unitPrice,
+//                       String itemName,
+//                       String count,
+//                       String callBackInfo,
+//                       String callBackUrl,
+//                       String payResultListener) {
+//
+//    }
+//
+//    /**
+//     * 充值校验
+//     */
+//    @RequestMapping(value = "/paycheck", method = RequestMethod.GET)
+//    public void sdkPayCheck(String context,
+//                            String unitPrice,
+//                            String itemName,
+//                            String count,
+//                            String callBackInfo,
+//                            String callBackUrl,
+//                            String payResultListener) {
+//
+//    }
 
     /**
      * 上报充值数据
      *
-     * @param userID         指悦账号id
+     * @param accountID      指悦账号id
      * @param channelOrderID 渠道订单号
      * @param productID      当前商品ID
      * @param productName    商品名称
@@ -487,9 +488,9 @@ public class TtController {
      * @param serverID       玩家所在的服务器ID
      * @param serverName     玩家所在的服务器名称
      * @param extension      额外参数 json
-     *                       realMoney //单位 分，渠道SDK支付回调通知返回的金额，记录，留作查账
-     *                       completeTime //订单创建时间
-     *                       sdkOrderTime //渠道SDK那边订单交易时间
+     *                       realMoney      //单位 分，渠道SDK支付成功通知返回的金额，记录，留作查账
+     *                       completeTime   //订单创建时间
+     *                       sdkOrderTime   //渠道SDK那边订单交易时间
      * @param status         订单状态
      * @param notifyUrl      支付回调通知的游戏服地址
      * @param signType       签名算法， RSA|MD5
@@ -497,67 +498,115 @@ public class TtController {
      */
     @RequestMapping(value = "/payInfo", method = RequestMethod.GET)
     @ResponseBody
-    public void sdkPayInfo(int userID,
+    public void sdkPayInfo(int accountID,
                            String channelOrderID,
-                           String extension, int money, String notifyUrl,
-                           String productDesc, String productID, String productName,
-                           String serverID, String serverName, Integer status,
-                           String roleID, String roleName,
-                           String signType, String sign,
-                           String roleLevel, HttpServletResponse response) throws Exception {
-        net.sf.json.JSONObject result = new net.sf.json.JSONObject();
+                           String productID,
+                           String productName,
+                           String productDesc,
+                           int money,
+                           String roleID,
+                           String roleName,
+                           String roleLevel,
+                           String serverID,
+                           String serverName,
+                           String extension,
+                           Integer status,
+                           String notifyUrl,
+                           String signType,
+                           String sign,
+                           HttpServletResponse response) throws Exception {
+        System.out.println("ttt/payInfo:");
+        JSONObject result = new JSONObject();
+        do {
+            if (channelOrderID == null) {
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                result.put("state", StateCode.CODE_PARAM_ERROR);
+            }
 
-        Account account = new Account();
-        Map<String, Object> map = new HashMap<>();
-        map.put("accountId", userID);
-        map.put("roleId", roleID);
-        GameRole role = gameRoleWorker.findGamerole(map).get(0);
+            Account account = new Account();
+            Map<String, Object> map = new HashMap<>();
+            map.put("accountId", accountID);
+            map.put("roleId", roleID);
 
-        //1.判断用户存不存在 userId
-        if (role == null) {
-            log.error("the money is not valid. money:" + money);
+            //1.判断用户存不存在 userId
+            List<GameRole> roleList = gameRoleWorker.findGamerole(map);
+            if (roleList.size() == 0) {
+                log.error("the money is not valid. money:" + money);
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                result.put("state", StateCode.CODE_USER_NONE);
+                break;
+            }
+            //角色信息 可以获取 游戏id、渠道id
+            GameRole role = roleList.get(0);
+            System.out.println("role:accountID --->" + role.getAccountId());
+
+            //2.金额合法性
+            if (money < 0) {
+                log.error("the money is not valid. money:" + money);
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                result.put("state", StateCode.CODE_MONEY_ERROR);
+                break;
+            }
+
+            //3.验签
+//            if (!orderManager.isSignOK(accountID, channelOrderID, productID, productName, productDesc, money,
+//                    roleID, roleName, roleLevel, serverID, serverName, extension, status, notifyUrl, signType, sign)) {
+//                log.error("the sign is not valid. sign:" + sign);
+//                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+//                result.put("state", StateCode.CODE_SIGN_ERROR);
+//                break;
+//            }
+
+            //订单是否已经存在
+            boolean isPaySuccess = false;
+            UOrder order = orderManager.getOrder(role.getGameId(), role.getChannelId(), channelOrderID);
+            if (order == null) {
+                System.out.println("order is not exist. generateOrder");
+                order = orderManager.generateOrder(role, channelOrderID, extension, money, notifyUrl,
+                        productDesc, productID, productName, serverID, serverName, status, roleID, roleName);
+                if (order == null) {
+                    result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                    result.put("state", StateCode.CODE_ORDER_ERROR);
+                    break;
+                }
+            } else {
+                boolean is_right = order.checkParam(productID, productName, productDesc, money,
+                        roleID, roleName, serverID, serverName, status);
+                if (!is_right) {
+                    result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                    result.put("state", StateCode.CODE_PARAM_DIFF);
+                    break;
+                }
+                isPaySuccess = (order.getState() == OrderState.STATE_PAY_SUCCESS);
+
+                //更新订单
+                orderManager.updateOrder(order);
+            }
+
             result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            result.put("state", StateCode.CODE_USER_NONE);
-            ResponseUtil.write(response, result);
-        }
-        //2.金额合法性
-        if (money < 0) {
-            log.error("the money is not valid. money:" + money);
-            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            result.put("state", StateCode.CODE_MONEY_ERROR);
-            ResponseUtil.write(response, result);
-            return;
-        }
+            result.put("state", StateCode.CODE_SUCCESS);
 
-        //3.验签
-//        if (!orderManager.isSignOK(userID, productID, productName, productDesc, money, roleID, roleName, roleLevel,
-//                serverID, serverName, extension, notifyUrl, signType, sign, channelOrderID)) {
-//
-//            log.error("the sign is not valid. sign:" + sign);
-//            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-//            result.put("state", StateCode.CODE_SIGN_ERROR);
-//            ResponseUtil.write(response, result);
-//            return;
-//        }
+            System.out.println("status:" + status);
 
-        final UOrder order = orderManager.generateOrder(role, channelOrderID, extension, money, notifyUrl,
-                productDesc, productID, productName, serverID, serverName, status, roleID, roleName);
+            /*
+             * redis
+             * 一个订单-只插入一次-充值成功的时候
+             * 1.订单存在 更新: STATE_PAY_SUCCESS--->STATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
+             * 2.订单不存在 STATE_PAY_SUCCESS/TATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
+             */
+            boolean updateRedis = false;
+            if (isPaySuccess && (status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT)) {
+                updateRedis = true;
+            } else {
+                if (status == OrderState.STATE_PAY_SUCCESS || status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT) {
+                    updateRedis = true;
+                }
+            }
+            if (updateRedis) {
+                cache.reqpay(role.getGameId(), serverID, role.getChannelId(), accountID, money);
+            }
+        } while (false);
 
-        if (order == null) {
-            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            result.put("state", StateCode.CODE_ORDER_ERROR);
-            ResponseUtil.write(response, result);
-            return;
-        }
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-        result.put("state", StateCode.CODE_SUCCESS);
         ResponseUtil.write(response, result);
-
-        System.out.println("status:" + status);
-        //redis
-        //充值成功
-        if (status == PayState.STATE_SUCCESS || status == PayState.STATE_PAY_DONE) {
-            cache.reqpay(role.getGameId(), serverID, role.getChannelId(), userID, money);
-        }
     }
 }

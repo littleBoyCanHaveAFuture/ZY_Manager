@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,9 +58,8 @@ public class RealTimeDataController {
      */
     @RequestMapping(value = "/getPayRecord", method = RequestMethod.POST)
     @ResponseBody
-    public void getServerList(
-            @RequestBody Map<String, Object> param,
-            HttpServletResponse response) throws Exception {
+    public void getServerList(@RequestBody Map<String, Object> param,
+                              HttpServletResponse response) throws Exception {
         System.out.println("getPayRecord:" + param.toString());
 
         Integer userId = getUserId();
@@ -77,19 +77,22 @@ public class RealTimeDataController {
 
         User currUser = UserServiceImpl.getUser(userId);
 
-        List<Integer> spIdlist = new ArrayList<>();
         param.put("spId", ServerInfoUtil.spiltStr(currUser.getSpId()));
 
 //        List<PayRecord> orderList = payRecordService.getPayOrderList(param, userId);
 //        Long total = payRecordService.getTotalPayRecords(param, userId);
+        long start = System.currentTimeMillis();
 
         List<UOrder> orderList = orderManager.getUOrderList(param);
-        Long total = payRecordService.getTotalPayRecords(param, userId);
+        Long total = orderManager.getTotalUorders(param);
+
+        long end = System.currentTimeMillis();
 
         JSONObject result = new JSONObject();
         JSONArray jsonArray = JSONArray.fromObject(orderList);
         result.put("rows", jsonArray);
         result.put("total", total);
+        result.put("time", new DecimalFormat("0.00").format((double) (end - start) / 1000));
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
         ResponseUtil.write(response, result);
@@ -104,8 +107,7 @@ public class RealTimeDataController {
      */
     @RequestMapping(value = "/realtimedata", method = RequestMethod.POST)
     @ResponseBody
-    public void getRealTimeData(String spId, Integer gameId, Integer serverId,
-                                String starttime, String endttime,
+    public void getRealTimeData(String spId, Integer gameId, Integer serverId, String starttime, String endttime,
                                 HttpServletResponse response) throws Exception {
         System.out.println("realtimedata:");
 
@@ -127,7 +129,7 @@ public class RealTimeDataController {
                 break;
             }
             if (starttime == null || endttime == null) {
-                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYMMDDmmss);
+                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYYYMMDDHHmmss);
                 endttime = DateUtil.getCurrentDateStr();
             }
             List<String> timeDaylist = DateUtil.transTimes(starttime, endttime);

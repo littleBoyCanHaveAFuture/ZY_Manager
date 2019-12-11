@@ -41,3 +41,25 @@ function clearCookie() {
     delCookie("roleName");
     window.location.href = "login.jsp";
 }
+
+function formatterDate(date, type) {
+    let day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+    let month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0" + (date.getMonth() + 1);
+    let hor = date.getHours();
+    let min = date.getMinutes();
+    let sec = (date.getSeconds() > 9) ? date.getSeconds() : "0" + date.getSeconds();
+
+    if (type === 0) {
+        return date.getFullYear() + '-' + month + '-' + day + " " + "00" + ":" + "00";
+    } else {
+        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
+    }
+}
+
+function getmax(arr) {
+    let max = arr[0];
+    for (let i = 0; i < arr.length - 1; i++) {
+        max = max < arr[i + 1] ? arr[i + 1] : max
+    }
+    return max;
+}

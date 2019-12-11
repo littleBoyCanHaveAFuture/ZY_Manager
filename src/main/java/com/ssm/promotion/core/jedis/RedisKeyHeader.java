@@ -11,5 +11,5 @@ public class RedisKeyHeader {
     /**
      * 实时数据 过期时间 一个月
      */
-    public static final String REALTIMEDATA = "realtime";
+    public static final String REALTIMEDATA = "RTS";
 }
