@@ -28,8 +28,10 @@ function search() {
     let gameId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
-    let startTime = $("#save_startTime").datetimebox("getValue");;
-    let endTime = $("#save_endTime").datetimebox("getValue");;
+    let startTime = $("#save_startTime").datetimebox("getValue");
+    ;
+    let endTime = $("#save_endTime").datetimebox("getValue");
+    ;
     let spIdstrs = new Array(); //定义一数组
     spIdstrs = spId.replace(/,/g, "|");
     let data = {
@@ -40,11 +42,7 @@ function search() {
         "startTime": startTime,
         "endTime": endTime
     };
-    console.log("gameId:" + gameId);
-    console.log("serverId:" + serverId);
-    console.log("spId:" + spIdstrs);
-    console.log("startTime:" + startTime);
-    console.log("endTime:" + endTime);
+    console.info("data:" + data);
 
 
     $.ajax({
@@ -80,22 +78,6 @@ function search() {
     });
 }
 
-//登录超时 重新返回到登录界面
-function relogin() {
-    // 登录失效
-    console.log("登录失效");
-    $.messager.confirm(
-        "系统提示",
-        "登录超时！",
-        function (r) {
-            if (r) {
-                delCookie("userName");
-                delCookie("roleName");
-                parent.location.href = "../../login.jsp";
-            }
-        });
-}
-
 function initTableColumns() {
     let activeColumns = [];
     let commonResult = {
@@ -112,17 +94,17 @@ function initTableColumns() {
         "活跃玩家": "activePlayer",
         "充值次数": "rechargeTimes",
         "充值人数": "rechargeNumber",
-        "充值金额": "rechargePayment",
+        "充值金额(分)": "rechargePayment",
         "活跃付费率": "activePayRate",
         "付费ARPU": "paidARPU",
         "活跃ARPU": "activeARPU",
         "当日首次付费人数": "nofPayers",
-        "当日首次付费金额": "nofPayment",
+        "当日首次付费金额(分)": "nofPayment",
         "注册付费人数": "registeredPayers",
         "注册付费金额": "registeredPayment",
         "注册付费ARPU": "registeredPaymentARPU",
 //分服
-        "累计充值": "totalPayment",
+        "累计充值(分)": "totalPayment",
         "累计创角": "totalCreateRole",
         "累计充值人数": "totalRechargeNums",
         "总付费率": "totalRechargeRates",
@@ -225,4 +207,20 @@ function initServerList(type) {
             $.messager.alert("ERROR！", "获取游戏列表出错");
         }
     });
+}
+
+//登录超时 重新返回到登录界面
+function relogin() {
+    // 登录失效
+    console.log("登录失效");
+    $.messager.confirm(
+        "系统提示",
+        "登录超时！",
+        function (r) {
+            if (r) {
+                delCookie("userName");
+                delCookie("roleName");
+                parent.location.href = "../../login.jsp";
+            }
+        });
 }

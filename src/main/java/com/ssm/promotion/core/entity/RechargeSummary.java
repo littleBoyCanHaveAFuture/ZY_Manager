@@ -2,6 +2,7 @@ package com.ssm.promotion.core.entity;
 
 import com.ssm.promotion.core.util.UtilG;
 import lombok.Data;
+import net.sf.json.JSONObject;
 
 /**
  * @author song minghua
@@ -169,42 +170,78 @@ public class RechargeSummary {
     public RechargeSummary() {
     }
 
+    public String toJSONString() {
+        JSONObject json = new JSONObject();
+        json.put("date", date);
+        json.put("newAddCreateAccount", newAddCreateAccount);
+
+
+        json.put("newAddCreateRole", newAddCreateRole);
+        json.put("newAddCreateRoleRemoveOld", newAddCreateRoleRemoveOld);
+
+        json.put("createAccountRate", createAccountRate);
+        json.put("createAccountTransRate", createAccountTransRate);
+        json.put("activePlayer", activePlayer);
+        json.put("rechargeTimes", rechargeTimes);
+        json.put("rechargeNumber", rechargeNumber);
+        json.put("rechargePayment", rechargePayment);
+        json.put("activePayRate", activePayRate);
+        json.put("paidARPU", paidARPU);
+        json.put("activeARPU", activeARPU);
+        json.put("nofPayers", nofPayers);
+        json.put("nofPayment", nofPayment);
+        json.put("registeredPayers", registeredPayers);
+        json.put("registeredPayment", registeredPayment);
+        json.put("registeredPaymentARPU", registeredPaymentARPU);
+        json.put("serverId", serverId);
+        json.put("openDay", openDay);
+        json.put("newaddplayer", newaddplayer);
+        json.put("totalPayment", totalPayment);
+        json.put("totalCreateRole", totalCreateRole);
+        json.put("totalRechargeNums", totalRechargeNums);
+        json.put("totalRechargeRates", totalRechargeRates);
+        json.put("spId", spId);
+        json.put("zhushoubi", zhushoubi);
+        json.put("addzhushoubi", addzhushoubi);
+        return json.toString();
+    }
+
     @Override
     public String toString() {
-        String objectS = "date:" + date + "\n" + "\t" +
+        String objectS = "date:" + "\t" + date + "\n" + "\t" +
 
-                "newAddCreateAccount:" + newAddCreateAccount + "\n" + "\t" +
-                "newAddCreateRole:" + newAddCreateRole + "\n" + "\t" +
-                "newAddCreateRoleRemoveOld:" + newAddCreateRoleRemoveOld + "\n" + "\t" +
-                "createAccountRate:" + createAccountRate + "\n" + "\t" +
+                "newAddCreateAccount:" + "\t" + newAddCreateAccount + "\n" + "\t" +
+                "newAddCreateRole:" + "\t" + newAddCreateRole + "\n" + "\t" +
+                "newAddCreateRoleRemoveOld:" + "\t" + newAddCreateRoleRemoveOld + "\n" + "\t" +
+                "createAccountRate:" + "\t" + createAccountRate + "\n" + "\t" +
 
-                "createAccountTransRate:" + createAccountTransRate + "\n" + "\t" +
+                "createAccountTransRate:" + "\t" + createAccountTransRate + "\n" + "\t" +
 
-                "activePlayer:" + activePlayer + "\n" + "\t" +
-                "rechargeTimes:" + rechargeTimes + "\n" + "\t" +
-                "rechargeNumber:" + rechargeNumber + "\n" + "\t" +
-                "rechargePayment:" + rechargePayment + "\n" + "\t" +
-                "activePayRate:" + activePayRate + "\n" + "\t" +
-                "paidARPU:" + paidARPU + "\n" + "\t" +
-                "activeARPU:" + activeARPU + "\n" + "\t" +
-                "nofPayers:" + nofPayers + "\n" + "\t" +
-                "nofPayment:" + nofPayment + "\n" + "\t" +
-                "registeredPayers:" + registeredPayers + "\n" + "\t" +
-                "registeredPayment:" + registeredPayment + "\n" + "\t" +
-                "registeredPaymentARPU" + registeredPaymentARPU + "\n" + "\t" +
+                "activePlayer:" + "\t" + activePlayer + "\n" + "\t" +
+                "rechargeTimes:" + "\t" + rechargeTimes + "\n" + "\t" +
+                "rechargeNumber:" + "\t" + rechargeNumber + "\n" + "\t" +
+                "rechargePayment:" + "\t" + rechargePayment + "\n" + "\t" +
+                "activePayRate:" + "\t" + activePayRate + "\n" + "\t" +
+                "paidARPU:" + "\t" + paidARPU + "\n" + "\t" +
+                "activeARPU:" + "\t" + activeARPU + "\n" + "\t" +
+                "nofPayers:" + "\t" + nofPayers + "\n" + "\t" +
+                "nofPayment:" + "\t" + nofPayment + "\n" + "\t" +
+                "registeredPayers:" + "\t" + registeredPayers + "\n" + "\t" +
+                "registeredPayment:" + "\t" + registeredPayment + "\n" + "\t" +
+                "registeredPaymentARPU" + "\t" + registeredPaymentARPU + "\n" + "\t" +
 
-                "serverId:" + serverId + "\n" + "\t" +
-                "openDay:" + openDay + "\n" + "\t" +
-                "newaddplayer:" + newaddplayer + "\n" + "\t" +
+                "serverId:" + "\t" + serverId + "\n" + "\t" +
+                "openDay:" + "\t" + openDay + "\n" + "\t" +
+                "newaddplayer:" + "\t" + newaddplayer + "\n" + "\t" +
 
-                "totalPayment:" + totalPayment + "\n" + "\t" +
-                "totalCreateRole:" + totalCreateRole + "\n" + "\t" +
-                "totalRechargeNums:" + totalRechargeNums + "\n" + "\t" +
-                "totalRechargeRates:" + totalRechargeRates + "\n" + "\t" +
+                "totalPayment:" + "\t" + totalPayment + "\n" + "\t" +
+                "totalCreateRole:" + "\t" + totalCreateRole + "\n" + "\t" +
+                "totalRechargeNums:" + "\t" + totalRechargeNums + "\n" + "\t" +
+                "totalRechargeRates:" + "\t" + totalRechargeRates + "\n" + "\t" +
 
-                "spId:" + spId + "\n" + "\t" +
-                "zhushoubi:" + zhushoubi + "\n" + "\t" +
-                "addzhushoubi:" + addzhushoubi + "\n";
+                "spId:" + "\t" + spId + "\n" + "\t" +
+                "zhushoubi:" + "\t" + zhushoubi + "\n" + "\t" +
+                "addzhushoubi:" + "\t" + addzhushoubi + "\n";
         return objectS;
     }
 
@@ -228,19 +265,19 @@ public class RechargeSummary {
         if (this.activePlayer == 0) {
             this.setActivePayRate(0);
         } else {
-            this.setActivePayRate((double) this.rechargeNumber / this.activePlayer * 100);
+            this.setActivePayRate(UtilG.format2point((double) this.rechargeNumber / this.activePlayer * 100));
         }
         //付费ARPU
         if (this.rechargeNumber == 0) {
             this.setPaidARPU(0);
         } else {
-            this.setPaidARPU((double) this.rechargePayment / this.rechargeNumber * 100);
+            this.setPaidARPU((double) this.rechargePayment / this.rechargeNumber);
         }
         //活跃ARPU
         if (this.activePlayer == 0) {
             this.setActiveARPU(0);
         } else {
-            this.setActiveARPU((double) this.rechargePayment / this.activePlayer * 100);
+            this.setActiveARPU((double) this.rechargePayment / this.activePlayer);
         }
         //注册付费ARPU
         if (this.registeredPayers == 0) {
@@ -262,26 +299,26 @@ public class RechargeSummary {
             if (this.totalRechargeRates == 0) {
                 this.setTotalRechargeRates(0);
             } else {
-//                this.setTotalRechargeRates((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+//                this.setTotalRechargeRates(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
             }
             if (type == 3) {
                 //创号转化率
                 if (this.createAccountTransRate == 0) {
                     this.setCreateAccountTransRate(0);
                 } else {
-//                    this.setCreateAccountTransRate((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+//                    this.setCreateAccountTransRate(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
                 }
                 //注收比
                 if (this.zhushoubi == 0) {
                     this.setZhushoubi(0);
                 } else {
-//                    this.setZhushoubi((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+//                    this.setZhushoubi(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
                 }
                 //新增注收比
                 if (this.addzhushoubi == 0) {
                     this.setAddzhushoubi(0);
                 } else {
-//                    this.setAddzhushoubi((double) this.newAddCreateRole / this.newAddCreateAccount * 100);
+//                    this.setAddzhushoubi(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
                 }
             }
         }

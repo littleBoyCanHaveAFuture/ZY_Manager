@@ -24,78 +24,6 @@ function exportToLocal() {
     // $('#dg').datagrid('print', 'DataGrid'); // print the datagrid
 }
 
-function search() {
-    let gameId = $("#save_gameId").val();
-    let serverId = $("#save_serverId").val();
-    let spId = $("#save_spId").val();
-    let startTime = $("#save_startTime").datetimebox("getValue");
-    let endTime = $("#save_endTime").datetimebox("getValue");
-    let spIdstrs = new Array(); //定义一数组
-    spIdstrs = spId.replace(/,/g, "|");
-    let data = {
-        "type": 1,
-        "gameId": gameId,
-        "serverId": serverId,
-        "spId": spIdstrs,
-        "startTime": startTime,
-        "endTime": endTime
-    };
-    console.log("gameId:" + gameId);
-    console.log("serverId:" + serverId);
-    console.log("spId:" + spIdstrs);
-    console.log("startTime:" + startTime);
-    console.log("endTime:" + endTime);
-
-
-    $.ajax({
-        //获取数据
-        url: "/rechargeSummary/searchRechargeSummary",
-        type: "post",
-        data: data,
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                let useTime = result.time;
-                result = {
-                    total: result.total,
-                    rows: result.rows
-                };
-                if (result.total === 0) {
-                    $.messager.alert("系统提示", "查询成功 无数据");
-                } else {
-                    $.messager.alert("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
-                }
-                if (result.total === 0) {
-
-                }
-                $("#dg").datagrid("loadData", result);
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "查询失败");
-        }
-    });
-}
-
-//登录超时 重新返回到登录界面
-function relogin() {
-    // 登录失效
-    console.log("登录失效");
-    $.messager.confirm(
-        "系统提示",
-        "登录超时！",
-        function (r) {
-            if (r) {
-                delCookie("userName");
-                delCookie("roleName");
-                parent.location.href = "../../login.jsp";
-            }
-        });
-}
-
 function initTableColumns() {
 
     let activeColumns = [];
@@ -114,14 +42,14 @@ function initTableColumns() {
         "活跃玩家": "activePlayer",
         "充值次数": "rechargeTimes",
         "充值人数": "rechargeNumber",
-        "充值金额": "rechargePayment",
+        "充值金额(分)": "rechargePayment",
         "活跃付费率": "activePayRate",
         "付费ARPU": "paidARPU",
         "活跃ARPU": "activeARPU",
         "当日首次付费人数": "nofPayers",
-        "当日首次付费金额": "nofPayment",
+        "当日首次付费金额(分)": "nofPayment",
         "注册付费人数": "registeredPayers",
-        "注册付费金额": "registeredPayment",
+        "注册付费金额(分)": "registeredPayment",
         "注册付费ARPU": "registeredPaymentARPU",
 //分服
 //     "累计充值": "totalPayment",
@@ -138,7 +66,7 @@ function initTableColumns() {
         column["field"] = value;
         column["title"] = index;
         column["align"] = 'center';
-        column["width"] = 50;
+        // column["width"] = 50;
         activeColumns.push(column);
     });
 
@@ -228,3 +156,79 @@ function initServerList(type) {
         }
     });
 }
+
+//登录超时 重新返回到登录界面
+function relogin() {
+    // 登录失效
+    console.log("登录失效");
+    $.messager.confirm(
+        "系统提示",
+        "登录超时！",
+        function (r) {
+            if (r) {
+                delCookie("userName");
+                delCookie("roleName");
+                parent.location.href = "../../login.jsp";
+            }
+        });
+}
+
+function search() {
+    let gameId = $("#save_gameId").val();
+    let serverId = $("#save_serverId").val();
+    let spId = $("#save_spId").val();
+    let startTime = $("#save_startTime").datetimebox("getValue");
+    let endTime = $("#save_endTime").datetimebox("getValue");
+
+    let data = {
+        "type": 1,
+        "gameId": gameId,
+        "serverId": serverId,
+        "spId": spId.replace(/,/g, "|"),
+        "startTime": startTime,
+        "endTime": endTime
+    };
+    console.info(data);
+
+    $.ajax({
+        //获取数据
+        url: "/rechargeSummary/searchRechargeSummary",
+        type: "post",
+        data: data,
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                let useTime = result.time;
+
+                let rows = result.rows;
+                rows = rows.map(function (row) {
+                    row.date = row.date.substring(0, 4) + "-" + row.date.substring(4, 6) + "-" + row.date.substring(6);
+                    row.createAccountRate = row.createAccountRate + "%";
+                    row.activePayRate = row.activePayRate + "%";
+                    return row;
+                });
+
+                result = {
+                    total: result.total,
+                    rows: result.rows
+                };
+                if (result.total === 0) {
+                    $.messager.alert("系统提示", "查询成功 无数据");
+                } else {
+                    $.messager.alert("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
+                }
+                if (result.total === 0) {
+
+                }
+                $("#dg").datagrid("loadData", result);
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "查询失败");
+        }
+    });
+}
+

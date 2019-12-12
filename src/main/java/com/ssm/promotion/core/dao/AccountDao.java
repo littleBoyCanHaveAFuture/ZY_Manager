@@ -31,7 +31,7 @@ public interface AccountDao {
     /**
      * 查询最大id
      */
-    int readMaxAccountId(@Param("maxSpid") int maxSpid);
+    Integer readMaxAccountId(@Param("maxSpid") int maxSpid);
 
     /**
      * 查找用户列表
@@ -44,7 +44,7 @@ public interface AccountDao {
     /**
      * 实体修改
      *
-     * @param Account
+     * @param map
      * @return
      */
     public int updateAccount(Map<String, Object> map);

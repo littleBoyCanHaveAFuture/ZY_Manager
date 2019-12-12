@@ -65,7 +65,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public int readMaxAccountId(int maxSpid) {
-        return accountDao.readMaxAccountId(maxSpid);
+        Integer count = accountDao.readMaxAccountId(maxSpid);
+        if (count == null) {
+            count = 0;
+        }
+        return count;
     }
 
     @Override

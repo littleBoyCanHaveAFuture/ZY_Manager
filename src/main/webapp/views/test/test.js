@@ -343,7 +343,8 @@ function pay() {
 
     let url = "/ttt/payInfo" + data;
     console.log("payInfo:" + url);
-
+    let stateMsg = [0, "发送成功", 2, 3, 4, 5, "角色不存在", 7, 8, 9,
+        "金额错误", "订单错误", 12, 13, 14, 15, 16, "参数与订单参数不一致", "参数为空或非法", 19];
     $.ajax({
         url: url,
         type: "get",
@@ -353,7 +354,7 @@ function pay() {
         success: function (result) {
             console.log("result：" + result.state);
             if (result.resultCode === 200) {
-                $.messager.alert("系统提示", result.state);
+                $.messager.alert("系统提示", stateMsg[result.state]);
             }
         },
         error: function () {

@@ -79,7 +79,7 @@ public class AccountWorker {
 
             String addparm = map.get("addparm");
             String gameId = map.get("appId");
-            Boolean auto = Boolean.parseBoolean(map.get("auto"));
+            boolean auto = Boolean.parseBoolean(map.get("auto"));
 
 
             Map<String, Object> tmp = new HashMap<>(6);

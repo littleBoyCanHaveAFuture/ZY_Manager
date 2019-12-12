@@ -6,6 +6,10 @@ package com.ssm.promotion.core.jedis;
  */
 public class RedisKey {
 
+
+    public static final String FORMAT_SG = "%s:spid:%s:gid:%d";
+    public static final String FORMAT_SGS = "%s:spid:%s:gid:%d:sid:%d";
+
     /**
      * 充值次数
      */
@@ -41,7 +45,6 @@ public class RedisKey {
      * 累计充值人数
      */
     public static final String GAME_ACCUMULATION_RECHARGE_ACCOUNTS = "GACC_RE_AC";
-
 
 
 }

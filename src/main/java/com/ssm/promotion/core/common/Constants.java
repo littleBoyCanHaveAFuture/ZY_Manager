@@ -1,7 +1,8 @@
 package com.ssm.promotion.core.common;
 
 /**
- * Created by 13 on 2017/6/26.
+ * @author 13
+ * @date 2017/6/26
  */
 public class Constants {
 
@@ -17,4 +18,9 @@ public class Constants {
     public static final int SDK_LOGIN_FAIL_TOKEN = 1;  // 验证失败 token错误
     public static final int SDK_LOGIN_FAIL_SIGN = 2;  // 验证失败 签名错误
     public static final int SDK_PARAM = 3;  // 验证失败 参数错误
+
+    public static final int ERR_RSTYPE = 1;//充值汇总-查询类型-错误
+    public static final int ERR_GAMEID = 2;//充值汇总-游戏id-错误
+    public static final int ERR_SERVERID = 3;//充值汇总-区服id-错误
+    public static final int ERR_SPID = 3;//充值汇总-渠道id-错误
 }

@@ -1,12 +1,16 @@
 package com.ssm.promotion.core.service.impl;
 
 import com.ssm.promotion.core.entity.RechargeSummary;
-import com.ssm.promotion.core.jedis.*;
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.RedisKey;
+import com.ssm.promotion.core.jedis.RedisKeyHeader;
+import com.ssm.promotion.core.jedis.RedisKeyTail;
 import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -29,28 +33,35 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         String startTimes = map.get("startTime").toString();
         String endTimes = map.get("endTime").toString();
 
+        long s = System.currentTimeMillis();
         //时间转化
         List<String> timeList = DateUtil.transTimes(startTimes, endTimes);
-
+        List<RechargeSummary> rsList = null;
         //分游戏、区服、渠道查询
         //查询游戏自己的数据库
         switch (type) {
-            case 1: {
+            case 1:
                 //全服概况
-                return this.setGameRs(gameId, serverIdMap, timeList);
-            }
-            case 2: {
+                rsList = this.setGameRs(gameId, serverIdMap, timeList);
+                break;
+            case 2:
                 //分服概况
-                return this.setServerRs(gameId, serverIdMap, timeList);
-            }
-            case 3: {
+                rsList = this.setServerRs(gameId, serverIdMap, timeList);
+                break;
+            case 3:
                 //渠道概况
-                return this.setSpRs(gameId, serverId, spIdList, timeList);
-            }
+                rsList = this.setSpRs(gameId, serverId, spIdList, timeList);
+                break;
             default:
                 break;
         }
-        return null;
+        long e = System.currentTimeMillis();
+        System.out.println("RS redis use " + new DecimalFormat("0.00").format((double) (e - s) / 1000) + " s");
+
+        //存储查询结果
+
+
+        return rsList;
     }
 
     /**
@@ -161,47 +172,72 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         //每个渠道 {start,end}每天的记录
         //总结：每个渠道的记录
 
-        //gid:{gid}
-        String gkey = RedisKeyBody.genBody(1, gameId, serverId, null);
-        //精确到游戏 UserInfo:gid:{gid}
-        String userGKey = RedisGeneratorKey.genKeyTail(RedisKeyHeader.USER_INFO, gkey);
-
         //同区服-所有渠道
         for (String spId : spIdList) {
-            //gid:{gid}:sid:{sid}:spid:{spid}
-            String userSGKey = String.format("%s:spid:%s:gid:%d", RedisKeyHeader.USER_INFO, spId, gameId);
-            String userSGSKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.USER_INFO, spId, gameId, serverId);
-            String activeSGSKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+            String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, spId, gameId);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
+            String activeSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+
+            long s = System.currentTimeMillis();
+            //新版函数
+            List<String> tailList = new ArrayList<>();
+            Map<String, Map<String, Double>> resultList = new HashMap<>();
 
             //新增创号 渠道-游戏
-            Map<String, Double> timecaMap = cache.getDayBitmapCount(userSGKey, RedisKeyTail.NEW_ADD_CREATE_ACCOUNT, timeList);
-            //新增创角 渠道-游戏-区服-日期
-            Map<String, Double> timecrMap = cache.getDayBitmapCount(userSGSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
             //新增创角去除滚服 渠道-游戏-日期
-            Map<String, Double> timecrroMap = cache.getDayBitmapCount(userSGKey, RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD, timeList);
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD);
 
-            //创角率
+            cache.getDayBitCount(userSGKey, timeList, tailList, resultList);
 
+            Map<String, Double> timecaMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
+            Map<String, Double> timecrroMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD);
+            tailList.clear();
+
+            //新增创角 渠道-游戏-区服-日期
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ROLE);
             //活跃玩家-数目 渠道-游戏-区服
-            Map<String, Double> timeActiveAccountMap = cache.getDayBitmapCount(userSGSKey, RedisKeyTail.ACTIVE_PLAYERS, timeList);
-            //充值次数
-            Map<String, Double> timeRechargeTimesMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_TIMES, timeList);
-            //充值人数
-            Map<String, Double> timeRechargeAccountsMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_PLAYERS, timeList);
-            //充值金额
-            Map<String, Double> timeRechargeAmountsMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_AMOUNTS, timeList);
+            tailList.add(RedisKeyTail.ACTIVE_PLAYERS);
 
-            //活跃付费率
-            //付费ARPU
+            cache.getDayBitCount(userSGSKey, timeList, tailList, resultList);
 
-            //当日首次付费金额
-            Map<String, Double> timeRechargeFirstPayersMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_FIRST_AMOUNTS, timeList);
+            Map<String, Double> timecrMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ROLE);
+            Map<String, Double> timeActiveAccountMap = resultList.get(RedisKeyTail.ACTIVE_PLAYERS);
+            tailList.clear();
+
             //当日首次付费人数
-            Map<String, Double> timefraMap = cache.getDayBitmapCount(activeSGSKey, RedisKeyTail.RECHARGE_ACCOUNT, timeList);
+            tailList.add(RedisKeyTail.RECHARGE_ACCOUNT);
             //注册付费人数
-            Map<String, Double> timeRegisteredPayersAccountMap = cache.getDayBitmapCount(activeSGSKey, RedisKeyTail.RECHARGE_ACCOUNT_NA_CA, timeList);
+            tailList.add(RedisKeyTail.RECHARGE_ACCOUNT_NA_CA);
+
+            cache.getDayBitCount(activeSGSKey, timeList, tailList, resultList);
+
+            Map<String, Double> timefraMap = resultList.get(RedisKeyTail.RECHARGE_ACCOUNT);
+            Map<String, Double> timeRegisteredPayersAccountMap = resultList.get(RedisKeyTail.RECHARGE_ACCOUNT_NA_CA);
+            tailList.clear();
+
+            List<String> memberList = new ArrayList<>();
+            //充值次数
+            memberList.add(RedisKey.RECHARGE_TIMES);
+            //充值人数
+            memberList.add(RedisKey.RECHARGE_PLAYERS);
+            //充值金额
+            memberList.add(RedisKey.RECHARGE_AMOUNTS);
+            //当日首次付费金额
+            memberList.add(RedisKey.RECHARGE_FIRST_AMOUNTS);
             //注册付费金额
-            Map<String, Double> timeRegisteredPaymentMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_AMOUNTS_NA_CA, timeList);
+            memberList.add(RedisKey.RECHARGE_AMOUNTS_NA_CA);
+
+            cache.getDayZScore(activeSGSKey, timeList, RedisKeyTail.RECHARGE_INFO, memberList, resultList);
+
+            Map<String, Double> timeRechargeTimesMap = resultList.get(RedisKey.RECHARGE_TIMES);
+            Map<String, Double> timeRechargeAccountsMap = resultList.get(RedisKey.RECHARGE_PLAYERS);
+            Map<String, Double> timeRechargeAmountsMap = resultList.get(RedisKey.RECHARGE_AMOUNTS);
+            Map<String, Double> timeRechargeFirstPayersMap = resultList.get(RedisKey.RECHARGE_FIRST_AMOUNTS);
+            Map<String, Double> timeRegisteredPaymentMap = resultList.get(RedisKey.RECHARGE_AMOUNTS_NA_CA);
+
+
+            System.out.println("\nuse : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
 
             //时间排序 逐个增加
             for (String time : timeList) {
@@ -254,10 +290,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 }
                 //注册付费金额
                 if (timeRegisteredPaymentMap.containsKey(time)) {
-                    rs.setRegisteredPayers(rs.getRegisteredPayers() + timeRegisteredPaymentMap.get(time).intValue());
+                    rs.setRegisteredPayment(rs.getRegisteredPayment() + timeRegisteredPaymentMap.get(time).intValue());
                 }
                 //注册付费ARPU
             }
+            System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
         }
         return map;
     }
@@ -274,56 +311,77 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
      */
     public List<RechargeSummary> serchSpRs(Integer gameId, Integer serverId,
                                            List<String> spIdList,
-                                           List<String> timeList) throws Exception {
+                                           List<String> timeList) {
         System.out.println(timeList.toString());
         List<RechargeSummary> rsList = new LinkedList<>();
 
         //每个渠道 {start,end}每天的记录
         //总结：每个渠道的记录
 
-        //gid:{gid}:sid:{sid}
-        String gsKey = String.format("gid:%d:sid:%d", gameId, serverId);
-        //gid:{gid}
-        String gkey = String.format("gid:%d", gameId);
-        //精确到游戏 gid:{gid}#{tail}
-        String userGKey = String.format("gid:%d#%s", gameId, RedisKeyHeader.USER_INFO);
-
         for (String spId : spIdList) {
-            //{type}:spid:{spid}:gid:{gid}:sid:{sid}
-            String userSGKey = String.format("%s:spid:%s:gid:%d", RedisKeyHeader.USER_INFO, spId, gameId);
-            String userSGSKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.USER_INFO, spId, gameId, serverId);
-            String activeSGSKey = String.format("%s:spid:%s:gid:%d:sid:%d", RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+            String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, spId, gameId);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
+            String activeSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+
+            long s = System.currentTimeMillis();
+            //新版函数
+            List<String> tailList = new ArrayList<>();
+            Map<String, Map<String, Double>> resultList = new HashMap<>();
 
             //新增创号 渠道-游戏
-            Map<String, Double> timecaMap = cache.getDayBitmapCount(userSGKey, RedisKeyTail.NEW_ADD_CREATE_ACCOUNT, timeList);
-            //新增创角 渠道-游戏-区服-日期
-            Map<String, Double> timecrMap = cache.getDayBitmapCount(userSGSKey, RedisKeyTail.NEW_ADD_CREATE_ROLE, timeList);
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
             //新增创角去除滚服 渠道-游戏-日期
-            Map<String, Double> timecrroMap = cache.getDayBitmapCount(userSGKey, RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD, timeList);
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD);
 
-            //创角率
-            //创号转化率
+            cache.getDayBitCount(userSGKey, timeList, tailList, resultList);
 
+            Map<String, Double> timecaMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
+            Map<String, Double> timecrroMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD);
+            tailList.clear();
+
+            //新增创角 渠道-游戏-区服-日期
+            tailList.add(RedisKeyTail.NEW_ADD_CREATE_ROLE);
             //活跃玩家-数目 渠道-游戏-区服
-            Map<String, Double> timeActiveAccountMap = cache.getDayBitmapCount(userSGSKey, RedisKeyTail.ACTIVE_PLAYERS, timeList);
-            //充值次数
-            Map<String, Double> timeRechargeTimesMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_TIMES, timeList);
-            //充值人数
-            Map<String, Double> timeRechargeAccountsMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_PLAYERS, timeList);
-            //充值金额
-            Map<String, Double> timeRechargeAmountsMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_AMOUNTS, timeList);
+            tailList.add(RedisKeyTail.ACTIVE_PLAYERS);
 
-            //活跃付费率
-            //付费ARPU
+            cache.getDayBitCount(userSGSKey, timeList, tailList, resultList);
 
-            //当日首次付费金额
-            Map<String, Double> timeRechargeFirstPayersMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_FIRST_AMOUNTS, timeList);
+            Map<String, Double> timecrMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ROLE);
+            Map<String, Double> timeActiveAccountMap = resultList.get(RedisKeyTail.ACTIVE_PLAYERS);
+            tailList.clear();
+
             //当日首次付费人数
-            Map<String, Double> timefraMap = cache.getDayBitmapCount(activeSGSKey, RedisKeyTail.RECHARGE_ACCOUNT, timeList);
+            tailList.add(RedisKeyTail.RECHARGE_ACCOUNT);
             //注册付费人数
-            Map<String, Double> timeRegisteredPayersAccountMap = cache.getDayBitmapCount(activeSGSKey, RedisKeyTail.RECHARGE_ACCOUNT_NA_CA, timeList);
+            tailList.add(RedisKeyTail.RECHARGE_ACCOUNT_NA_CA);
+
+            cache.getDayBitCount(activeSGSKey, timeList, tailList, resultList);
+
+            Map<String, Double> timefraMap = resultList.get(RedisKeyTail.RECHARGE_ACCOUNT);
+            Map<String, Double> timeRegisteredPayersAccountMap = resultList.get(RedisKeyTail.RECHARGE_ACCOUNT_NA_CA);
+            tailList.clear();
+
+            List<String> memberList = new ArrayList<>();
+            //充值次数
+            memberList.add(RedisKey.RECHARGE_TIMES);
+            //充值人数
+            memberList.add(RedisKey.RECHARGE_PLAYERS);
+            //充值金额
+            memberList.add(RedisKey.RECHARGE_AMOUNTS);
+            //当日首次付费金额
+            memberList.add(RedisKey.RECHARGE_FIRST_AMOUNTS);
             //注册付费金额
-            Map<String, Double> timeRegisteredPaymentMap = cache.getDayZScore(activeSGSKey, RedisKeyTail.RECHARGE_INFO, RedisKey.RECHARGE_AMOUNTS_NA_CA, timeList);
+            memberList.add(RedisKey.RECHARGE_AMOUNTS_NA_CA);
+
+            cache.getDayZScore(activeSGSKey, timeList, RedisKeyTail.RECHARGE_INFO, memberList, resultList);
+
+            Map<String, Double> timeRechargeTimesMap = resultList.get(RedisKey.RECHARGE_TIMES);
+            Map<String, Double> timeRechargeAccountsMap = resultList.get(RedisKey.RECHARGE_PLAYERS);
+            Map<String, Double> timeRechargeAmountsMap = resultList.get(RedisKey.RECHARGE_AMOUNTS);
+            Map<String, Double> timeRechargeFirstPayersMap = resultList.get(RedisKey.RECHARGE_FIRST_AMOUNTS);
+            Map<String, Double> timeRegisteredPaymentMap = resultList.get(RedisKey.RECHARGE_AMOUNTS_NA_CA);
+
+            System.out.println("\nuse : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
 
             //注册付费ARPU
 
@@ -401,17 +459,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             rs.setTotalRechargeNums(timeTotalRechargeNums == null ? 0 : (int) (double) timeTotalRechargeNums);
             //总付费率
 
-            System.out.println("timeTotalPayment:" + timeTotalPayment);
-            System.out.println("timeTotalCreateRole:" + timeTotalCreateRole);
-            System.out.println("timeTotalRechargeNums:" + timeTotalRechargeNums);
-
             //渠道id
             rs.setSpId(Integer.parseInt(spId));
             //注收比
             //新增注收比
 
-
-            System.out.println("RS : " + rs.toString());
             rsList.add(rs);
         }
         return rsList;

@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -69,7 +68,7 @@
         <label for="save_endTime"></label>
         <span style="color: blue;margin-left:50px">结束时间:</span>
         <input class="easyui-datetimebox" id="save_endTime" name="endTime"
-               data-options="required:true,showSeconds:false"  style="width:150px">
+               data-options="required:true,showSeconds:false" style="width:150px">
 
         <a href="javascript:search()" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>
