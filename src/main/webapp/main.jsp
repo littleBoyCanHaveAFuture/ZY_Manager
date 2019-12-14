@@ -1,24 +1,20 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     Cookie[] cookies = request.getCookies();
     String username = "";
     String roleName = "";
     if (cookies != null) {
         for (Cookie tmp : cookies) {
-            if (tmp != null) {
-//                System.out.println(tmp.getName() + ":" + tmp.getValue());
-                if (("userName").equals(tmp.getName())) {
-                    username = tmp.getValue();
-                }
-                if (("roleName").equals(tmp.getName())) {
-                    roleName = tmp.getValue();
-                }
+            if (tmp == null) {
+                continue;
+            }
+            if (("userName").equals(tmp.getName())) {
+                username = tmp.getValue();
+            }
+            if (("roleName").equals(tmp.getName())) {
+                roleName = tmp.getValue();
             }
         }
-    }
-    if (username.isEmpty() || roleName.isEmpty()) {
-
     }
 %>
 <!DOCTYPE html PUBLIC "-//W3C//Dtd HTML 4.01 Transitional//EN">
@@ -38,53 +34,6 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
 
-    <script type="text/javascript">
-        checkCookies();
-        var url;
-
-        function addTab(url, text, iconCls) {
-            var content = "<iframe frameborder=0 scrolling='auto' style='width:100%;height:100%' " +
-                "src='${pageContext.request.contextPath}/views/" + url + "'></iframe>";
-            $("#tabs").tabs("add", {
-                title: text,
-                iconCls: iconCls,
-                closable: true,
-                content: content
-            });
-        }
-
-        /**
-         * 打开选项卡
-         * @param text  选项卡标题
-         * @param url   请求打开路径
-         * @param icon  选项卡图标
-         */
-        function openTab(text, url, icon) {
-            //判断当前选项卡是否存在
-            if ($('#tabs').tabs('exists', text)) {
-                $("#tabs").tabs("close", text);
-                // addTab(url, text, iconCls);
-                // $("#tabs").tabs("select", text);
-                //如果存在 显示
-                $("#tabs").tabs("select", text);
-            } else {
-                //如果不存在 则新建一个
-                addTab(url, text, icon);
-            }
-        }
-
-        function logout() {
-            $.messager
-                .confirm(
-                    "系统提示",
-                    "您确定要退出系统吗",
-                    function (r) {
-                        if (r) {
-                            clearCookie();
-                        }
-                    });
-        }
-    </script>
 
 <body class="easyui-layout">
 <div region="north" style="height: 78px;background-color: #ffff">
@@ -123,7 +72,7 @@
 
 <div region="west" style="width: 200px;height:500px;" title="导航菜单"
      split="true">
-    <div class="easyui-accordion">
+    <div id="aa" class="easyui-accordion" data-options="multiple:true">
         <div title="测试----->"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
              style="padding: 10px;height:10px;">
@@ -165,6 +114,11 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">实时充值
             </a>
+            <a href="javascript:openTab('实时在线新增','RealtimeData/RealtimeLineActive.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">实时在线新增
+            </a>
         </div>
         <div title="玩家信息"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
@@ -190,11 +144,16 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">服务器列表
             </a>
-            <a href="javascript:openTab('踢人下线','server/server_kickout.jsp','icon-wenzhang')"
+            <a href="javascript:openTab('服务器列表','server/game_list.jsp','icon-wenzhang')"
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
-               style="width: 150px;">踢人下线
+               style="width: 150px;">游戏列表
             </a>
+            <%--            <a href="javascript:openTab('踢人下线','server/server_kickout.jsp','icon-wenzhang')"--%>
+            <%--               class="easyui-linkbutton"--%>
+            <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+            <%--               style="width: 150px;">踢人下线--%>
+            <%--            </a>--%>
         </div>
 
         <div title="账号管理" data-options="iconCls:'icon-item'" style="padding:10px;border:none;">
@@ -202,42 +161,59 @@
                class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">
                 管理员列表
             </a>
-            <a href="javascript:openTab(' 测试','selecttest.jsp','icon-lxr')"
-               class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">
-                测试
-            </a>
-        </div>
-
-        <div title="-------------"
-             data-options="selected:true,iconCls:'icon-wenzhangs'"
-             style="padding: 10px;height:10px;">
-
-        </div>
-
-        <div title="文章管理"
-             data-options="selected:true,iconCls:'icon-wenzhangs'"
-             style="padding: 10px;height:10px;">
-            <a href="javascript:openTab(' 文章管理-ue','articleManage-ue.jsp','icon-wenzhang')"
-               class="easyui-linkbutton"
-               data-options="plain:true,iconCls:'icon-wenzhang'"
-               style="width: 150px;">UEditor
-            </a>
-            <a href="javascript:openTab(' 文章管理-ke','articleManage-ke.jsp','icon-wenzhang')"
-               class="easyui-linkbutton"
-               data-options="plain:true,iconCls:'icon-wenzhang'"
-               style="width: 150px;"> kindEditor(推荐)
-            </a>
-        </div>
-
-        <div title="图片管理" data-options="iconCls:'icon-shouye'"
-             style="padding:10px">
-            <a href="javascript:openTab(' 图片设置','pictureManage.jsp?type=1&grade=1','icon-tupians')"
-               class="easyui-linkbutton"
-               data-options="plain:true,iconCls:'icon-tupian'"
-               style="width: 150px;"> 图片设置</a>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    checkCookies();
+    var url;
+    // $('#aa').accordion({
+    //     multiple: true,
+    //     selected: true
+    // });
 
+    function addTab(url, text, iconCls) {
+        var content = "<iframe frameborder=0 scrolling='auto' style='width:100%;height:100%' " +
+            "src='${pageContext.request.contextPath}/views/" + url + "'></iframe>";
+        $("#tabs").tabs("add", {
+            title: text,
+            iconCls: iconCls,
+            closable: true,
+            content: content
+        });
+    }
+
+    /**
+     * 打开选项卡
+     * @param text  选项卡标题
+     * @param url   请求打开路径
+     * @param icon  选项卡图标
+     */
+    function openTab(text, url, icon) {
+        //判断当前选项卡是否存在
+        if ($('#tabs').tabs('exists', text)) {
+            $("#tabs").tabs("close", text);
+            // addTab(url, text, iconCls);
+            // $("#tabs").tabs("select", text);
+            //如果存在 显示
+            $("#tabs").tabs("select", text);
+        } else {
+            //如果不存在 则新建一个
+            addTab(url, text, icon);
+        }
+    }
+
+    function logout() {
+        $.messager
+            .confirm(
+                "系统提示",
+                "您确定要退出系统吗",
+                function (r) {
+                    if (r) {
+                        clearCookie();
+                    }
+                });
+    }
+</script>
 </body>
 </html>

@@ -1,7 +1,6 @@
 $(function () {
     initTableColumns();
-    initGameList();
-    // $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
+    initSpGameServer(1);
     $('#save_startTime').datebox('setValue', formatterDate(new Date(), 0));
     $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
 });

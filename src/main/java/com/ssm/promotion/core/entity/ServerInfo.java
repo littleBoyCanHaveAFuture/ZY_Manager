@@ -19,7 +19,7 @@ public class ServerInfo {
     /**
      * 渠道id
      */
-    private String spId;
+    private Integer spId;
     /**
      * 渠道id
      */
@@ -45,7 +45,7 @@ public class ServerInfo {
 
     }
 
-    public ServerInfo(Integer id, Integer gameId, Integer serverId, String spId, Integer regState, Integer loginState, String loginUrl) {
+    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl) {
         super();
         this.id = id;
         this.gameId = gameId;
@@ -54,12 +54,9 @@ public class ServerInfo {
         this.regState = regState;
         this.loginState = loginState;
         this.loginUrl = loginUrl;
-        String[] spIdA = spId.split("\\,");
+
         if (spIdList == null) {
             spIdList = new ArrayList<>();
-        }
-        for (String ignored : spIdA) {
-            spIdList.add(Integer.parseInt(spId));
         }
     }
 

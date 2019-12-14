@@ -63,26 +63,27 @@ public class TtController {
      * 注册账号
      * SDK 登录接口
      *
-     * @param map auto          自动注册(限渠道账号,无需账号密码)*
-     *            appId         游戏id*
-     *            channelId     渠道id*
-     *            channelUid    渠道账号id*
-     *            channelUname  渠道账号名称*
-     *            channelUnick  渠道账号昵称*
-     *            username      指悦账户名
-     *            pwd           指悦账号密码
-     *            phone         手机号
-     *            deviceCode
-     *            imei
-     *            addparm       额外参数
+     * @param map boolean     auto          自动注册(限渠道账号,无需username,pwd)
+     *            int         appId         游戏id*
+     *            int         channelId     渠道id*
+     *            string      channelUid    渠道账号id*
+     *            string      channelUname  渠道账号登录名*
+     *            string      channelUnick  渠道账号昵称*
+     *            string      username      指悦账户名(为空即可)
+     *            string      pwd           指悦账号密码(为空即可)
+     *            string      phone         手机号*
+     *            string      deviceCode    硬件设备号*
+     *            string      imei          国际移动设备识别码
+     *            string      addparm       额外参数(为空即可)
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public Result sdkRegister(@RequestBody Map<String, String> map) throws Exception {
         System.out.println("register:" + map.toString());
 
+        boolean auto = Boolean.parseBoolean(map.get("auto"));
         //参数校验
-        if (Boolean.parseBoolean(map.get("auto"))) {
+        if (auto) {
             for (String key : map.keySet()) {
                 if (StringUtils.isBlank(map.get(key))) {
                     if (key.equals("appId") || key.equals("channelId") || key.equals("channelUid")) {
@@ -108,8 +109,7 @@ public class TtController {
         //注册账号
         JSONObject result = accountWorker.reqRegister(map);
         if (result.getString("status").equals("1")) {
-            //注册成功
-            //存到redis
+            //注册成功 相关数据存入redis
             cache.register(map);
         }
         return ResultGenerator.genSuccessResult(result);
@@ -120,8 +120,8 @@ public class TtController {
      * 客户端先请求
      * SDK 登录接口
      *
-     * @param map appId             指悦平台创建的游戏ID*      请使用URLEncoder编码
-     *            isChannel         是否渠道登录*             渠道登录可以不输入(name pwd),非渠道登录必须输入(name pwd)
+     * @param map isChannel         是否渠道登录*             渠道登录可以不输入(name pwd),非渠道登录必须输入(name pwd)
+     *            appId             指悦平台创建的游戏ID*      请使用URLEncoder编码
      *            channelId         平台标示的渠道SDKID       请使用URLEncoder编码
      *            channelUid        渠道SDK标示的用户ID       请使用URLEncoder编码
      *            name              指悦账号名称
@@ -264,84 +264,99 @@ public class TtController {
         System.out.println("setdata:" + map.toString());
         String key = map.get("key");
         String value = map.get("value");
-        JSONObject roleInfo = JSONObject.parseObject(value);
 
-        System.out.println(roleInfo.toJSONString());
-
-        Integer roleId = roleInfo.getInteger("roleId");
-        String channelId = roleInfo.getString("channelId");
-        String channelUid = roleInfo.getString("channelUid");
-        String gameId = roleInfo.getString("appId");
-        Integer serverId = roleInfo.getInteger("zoneId");
-        Integer roleCTime = roleInfo.getInteger("roleCTime");
-        String roleName = roleInfo.getString("roleName");
-        BigInteger balance = roleInfo.getBigInteger("balance");
-
-        if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
-            System.out.println("数据为空");
-            System.out.println("roleId:" + roleId);
-            System.out.println("channelId:" + channelId);
-            System.out.println("channelUid:" + channelUid);
-            System.out.println("gameId:" + gameId);
-            System.out.println("serverId:" + serverId);
-            return;
-        }
-
-        Map<String, String> map1 = new HashMap<>();
-        map1.put("isChannel", "true");
-        map1.put("channelId", channelId);
-        map1.put("channelUid", channelUid);
-        Account account = accountWorker.getAccount(map1);
-        if (account == null) {
-            log.error("account is null\t" + map1.toString());
-            return;
-        }
-        if (key.equals("createrole")) {
-            //role 同渠道游戏区服不能重复
-            //创建角色
-            GameRole gameRole = new GameRole();
-            gameRole.setAccountId(account.getId());
-            gameRole.setRoleId(roleId);
-            gameRole.setChannelId(channelId);
-            gameRole.setChannelUid(channelUid);
-            gameRole.setGameId(gameId);
-            gameRole.setServerId(serverId);
-            gameRole.setCreateTime((long) roleCTime);
-            gameRole.setLastLoginTime(0L);
-            gameRole.setName(roleName);
-            //插入mysql
-            gameRoleWorker.createGameRole(gameRole);
-            //redis
-            cache.createRole(gameId, serverId.toString(), channelId, account.getId());
-        } else if (key.equals("levelup")) {
-            Map<String, Object> lmap = new HashMap<>();
-            lmap.put("roleId", roleId);
-            lmap.put("channelId", channelId);
-            lmap.put("gameId", gameId);
-            lmap.put("serverId", serverId);
-            lmap.put("name", roleName);
-            lmap.put("balance", balance);
-            //更新mysql
-            gameRoleWorker.updateGameRole(lmap);
-
-        } else if (key.equals("enterServer")) {
-            Map<String, Object> tmap = new HashMap<>();
-            tmap.put("roleId", roleId);
-            tmap.put("channelId", channelId);
-            tmap.put("gameId", gameId);
-            tmap.put("serverId", serverId);
-            tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
-            tmap.put("name", roleName);
-            tmap.put("balance", balance);
-            //更新mysql
-            gameRoleWorker.updateGameRole(tmap);
-
-        }
         JSONObject result = new JSONObject();
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-        result.put("roleId", roleId);
-        ResponseUtil.write(response, result);
 
+        do {
+            JSONObject roleInfo = JSONObject.parseObject(value);
+
+            System.out.println(roleInfo.toJSONString());
+
+            Integer roleId = roleInfo.getInteger("roleId");
+            String channelId = roleInfo.getString("channelId");
+            String channelUid = roleInfo.getString("channelUid");
+            String gameId = roleInfo.getString("appId");
+            Integer serverId = roleInfo.getInteger("zoneId");
+            Integer roleCTime = roleInfo.getInteger("roleCTime");
+            String roleName = roleInfo.getString("roleName");
+            BigInteger balance = roleInfo.getBigInteger("balance");
+
+            if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
+                System.out.println("数据为空");
+                System.out.println("roleId:" + roleId);
+                System.out.println("channelId:" + channelId);
+                System.out.println("channelUid:" + channelUid);
+                System.out.println("gameId:" + gameId);
+                System.out.println("serverId:" + serverId);
+                result.put("messgae", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                break;
+            }
+
+            Map<String, String> map1 = new HashMap<>();
+            map1.put("isChannel", "true");
+            map1.put("channelId", channelId);
+            map1.put("channelUid", channelUid);
+            Account account = accountWorker.getAccount(map1);
+            if (account == null) {
+                log.error("account is null\t" + map1.toString());
+                result.put("messgae", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                break;
+            }
+            if (key.equals("createrole")) {
+                //role 同渠道游戏区服不能重复
+                //创建角色
+                GameRole gameRole = new GameRole();
+                gameRole.setAccountId(account.getId());
+                gameRole.setRoleId(roleId);
+                gameRole.setChannelId(channelId);
+                gameRole.setChannelUid(channelUid);
+                gameRole.setGameId(gameId);
+                gameRole.setServerId(serverId);
+                gameRole.setCreateTime((long) roleCTime);
+                gameRole.setLastLoginTime(0L);
+                gameRole.setName(roleName);
+                //插入mysql
+                gameRoleWorker.createGameRole(gameRole);
+                //redis
+                cache.createRole(gameId, serverId.toString(), channelId, account.getId());
+            } else if (key.equals("levelup")) {
+                Map<String, Object> lmap = new HashMap<>();
+                lmap.put("roleId", roleId);
+                lmap.put("channelId", channelId);
+                lmap.put("gameId", gameId);
+                lmap.put("serverId", serverId);
+                lmap.put("name", roleName);
+                lmap.put("balance", balance);
+                //更新mysql
+                gameRoleWorker.updateGameRole(lmap);
+
+            } else if (key.equals("enterServer")) {
+                Map<String, Object> tmap = new HashMap<>();
+                tmap.put("roleId", roleId);
+                tmap.put("channelId", channelId);
+                tmap.put("gameId", gameId);
+                tmap.put("serverId", serverId);
+                tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
+                tmap.put("name", roleName);
+                tmap.put("balance", balance);
+                //更新mysql
+                gameRoleWorker.updateGameRole(tmap);
+
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("channelId", channelId);
+            jsonObject.put("appId", gameId);
+            jsonObject.put("zoneId", serverId);
+            jsonObject.put("roleId", roleId);
+            jsonObject.put("balance", balance);
+
+            result.put("messgae", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            result.put("data", jsonObject.toJSONString());
+        } while (false);
+
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
     }
 
     /**
@@ -360,27 +375,47 @@ public class TtController {
                              String channelId,
                              String channelUid,
                              String roleId, HttpServletResponse response) throws Exception {
-        //查询redis
-        //查找角色的指悦账号
-        Map<String, String> map = new HashMap<>(3);
-        map.put("isChannel", "true");
-        map.put("channelId", channelId);
-        map.put("channelUid", channelUid);
-        Account account = accountWorker.getAccount(map);
-        long accountId = account.getId().longValue();
-        //设置活跃玩家、在线玩家
-        cache.enterGame(appId, serverId, channelId, accountId);
-        //查询mysql
-        //设置角色登录时间
-        Map<String, Object> tmap = new HashMap<>();
-        tmap.put("roleId", roleId);
-        tmap.put("channelId", channelId);
-        tmap.put("gameId", appId);
-        tmap.put("serverId", serverId);
-        tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
-        gameRoleWorker.updateGameRole(tmap);
-        //todo
         JSONObject result = new JSONObject();
+        do {
+            //查询redis
+            //查找角色的指悦账号
+            Map<String, String> map = new HashMap<>(3);
+            map.put("isChannel", "true");
+            map.put("channelId", channelId);
+            map.put("channelUid", channelUid);
+
+            Account account = accountWorker.getAccount(map);
+            if (account == null) {
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                break;
+            }
+            long accountId = account.getId().longValue();
+            //设置活跃玩家、在线玩家
+            cache.enterGame(appId, serverId, channelId, accountId);
+
+            //查询mysql
+            //设置角色登录时间
+            Map<String, Object> tmap = new HashMap<>();
+            tmap.put("roleId", roleId);
+            tmap.put("channelId", channelId);
+            tmap.put("gameId", appId);
+            tmap.put("serverId", serverId);
+            tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
+
+            gameRoleWorker.updateGameRole(tmap);
+            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("channelId", channelId);
+            jsonObject.put("appId", appId);
+            jsonObject.put("serverId", serverId);
+            jsonObject.put("roleId", roleId);
+            jsonObject.put("lastLoginTime", DateUtil.getCurrentDateStr());
+
+            result.put("data", jsonObject.toString());
+        } while (false);
+
+
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
     }
@@ -407,30 +442,50 @@ public class TtController {
         map.put("isChannel", "true");
         map.put("channelId", channelId);
         map.put("channelUid", channelUid);
-        Account account = accountWorker.getAccount(map);
-        long accountId = account.getId().longValue();
 
-        //查询redis
-        //移除在线玩家
-        String currDay = DateUtil.getCurrentDayStr();
-        String key = String.format("%s:spid:%s:gid:%s:sid:%s:date:%s#%s",
-                RedisKeyHeader.USER_INFO, channelId, appId, serverId, currDay,
-                RedisKeyTail.ONLINE_PLAYERS);
-        cache.setbit(key, accountId, false);
-
-        //查询mysql
-        //统计玩家在线时间并存储到redis
-        Map<String, Object> tmap = new HashMap<>();
-        tmap.put("roleId", roleId);
-        tmap.put("channelId", channelId);
-        tmap.put("gameId", appId);
-        tmap.put("serverId", serverId);
-        String logintime = gameRoleWorker.getLastLoginTime(tmap);
-        System.out.println("logintime:" + logintime);
-        //计算时间
-//        DateUtil
-        //todo
         JSONObject result = new JSONObject();
+        do {
+            Account account = accountWorker.getAccount(map);
+            if (account == null) {
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                break;
+            }
+            long accountId = account.getId().longValue();
+
+            //查询redis
+            //移除在线玩家
+            String currDay = DateUtil.getCurrentDayStr();
+            String key = String.format("%s:spid:%s:gid:%s:sid:%s:date:%s#%s",
+                    RedisKeyHeader.USER_INFO, channelId, appId, serverId, currDay,
+                    RedisKeyTail.ONLINE_PLAYERS);
+            cache.setbit(key, accountId, false);
+
+            //查询mysql
+            //统计玩家在线时间并存储到redis
+            Map<String, Object> tmap = new HashMap<>();
+            tmap.put("roleId", roleId);
+            tmap.put("channelId", channelId);
+            tmap.put("gameId", appId);
+            tmap.put("serverId", serverId);
+            String logintime = gameRoleWorker.getLastLoginTime(tmap);
+
+            System.out.println("logintime:" + logintime);
+            //计算时间
+//        DateUtil
+            //todo
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("channelId", channelId);
+            jsonObject.put("appId", appId);
+            jsonObject.put("serverId", serverId);
+            jsonObject.put("roleId", roleId);
+            jsonObject.put("lastLoginTime", DateUtil.getCurrentDateStr());
+
+            result.put("data", jsonObject.toString());
+
+        } while (false);
+
+
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
     }
@@ -480,7 +535,7 @@ public class TtController {
      * @param channelOrderID 渠道订单号
      * @param productID      当前商品ID
      * @param productName    商品名称
-     * @param productDesc    游戏版本
+     * @param productDesc    商品描述
      * @param money          单位 分
      * @param roleID         玩家在游戏服中的角色ID
      * @param roleName       玩家在游戏服中的角色名称
@@ -489,8 +544,8 @@ public class TtController {
      * @param serverName     玩家所在的服务器名称
      * @param extension      额外参数 json
      *                       realMoney      //单位 分，渠道SDK支付成功通知返回的金额，记录，留作查账
-     *                       completeTime   //订单创建时间
-     *                       sdkOrderTime   //渠道SDK那边订单交易时间
+     *                       completeTime   //订单完成时间戳(毫秒，13位)-渠道SDK
+     *                       sdkOrderTime   //订单交易时间戳(毫秒，13位)-渠道SDK
      * @param status         订单状态
      * @param notifyUrl      支付回调通知的游戏服地址
      * @param signType       签名算法， RSA|MD5
@@ -515,12 +570,16 @@ public class TtController {
                            String signType,
                            String sign,
                            HttpServletResponse response) throws Exception {
+
         System.out.println("ttt/payInfo:");
+
         JSONObject result = new JSONObject();
+        JSONObject data = new JSONObject();
         do {
+
             if (channelOrderID == null) {
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                result.put("state", StateCode.CODE_PARAM_ERROR);
+                data.put("state", StateCode.CODE_PARAM_ERROR);
+                break;
             }
 
             Account account = new Account();
@@ -531,9 +590,8 @@ public class TtController {
             //1.判断用户存不存在 userId
             List<GameRole> roleList = gameRoleWorker.findGamerole(map);
             if (roleList.size() == 0) {
-                log.error("the money is not valid. money:" + money);
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                result.put("state", StateCode.CODE_USER_NONE);
+                result.put("meaages", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+                data.put("state", StateCode.CODE_USER_NONE);
                 break;
             }
             //角色信息 可以获取 游戏id、渠道id
@@ -543,8 +601,7 @@ public class TtController {
             //2.金额合法性
             if (money < 0) {
                 log.error("the money is not valid. money:" + money);
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                result.put("state", StateCode.CODE_MONEY_ERROR);
+                data.put("state", StateCode.CODE_MONEY_ERROR);
                 break;
             }
 
@@ -552,7 +609,7 @@ public class TtController {
 //            if (!orderManager.isSignOK(accountID, channelOrderID, productID, productName, productDesc, money,
 //                    roleID, roleName, roleLevel, serverID, serverName, extension, status, notifyUrl, signType, sign)) {
 //                log.error("the sign is not valid. sign:" + sign);
-//                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+//
 //                result.put("state", StateCode.CODE_SIGN_ERROR);
 //                break;
 //            }
@@ -565,28 +622,24 @@ public class TtController {
                 order = orderManager.generateOrder(role, channelOrderID, extension, money, notifyUrl,
                         productDesc, productID, productName, serverID, serverName, status, roleID, roleName);
                 if (order == null) {
-                    result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                    result.put("state", StateCode.CODE_ORDER_ERROR);
+
+                    data.put("state", StateCode.CODE_ORDER_ERROR);
                     break;
                 }
             } else {
                 boolean is_right = order.checkParam(productID, productName, productDesc, money,
                         roleID, roleName, serverID, serverName, status);
                 if (!is_right) {
-                    result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                    result.put("state", StateCode.CODE_PARAM_DIFF);
+
+                    data.put("state", StateCode.CODE_PARAM_DIFF);
                     break;
                 }
                 isPaySuccess = (order.getState() == OrderState.STATE_PAY_SUCCESS);
 
+                System.out.println("Order:\n" + order.toJSON());
                 //更新订单
                 orderManager.updateOrder(order);
             }
-
-            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            result.put("state", StateCode.CODE_SUCCESS);
-
-            System.out.println("status:" + status);
 
             /*
              * redis
@@ -605,8 +658,15 @@ public class TtController {
             if (updateRedis) {
                 cache.reqpay(role.getGameId(), serverID, role.getChannelId(), accountID, money);
             }
+
+            data.put("orderid", order.getOrderID());
+            data.put("state", StateCode.CODE_SUCCESS);
+            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            System.out.println("status:" + status);
         } while (false);
 
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        result.put("data", data.toJSONString());
         ResponseUtil.write(response, result);
     }
 }

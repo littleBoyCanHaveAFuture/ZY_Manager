@@ -44,15 +44,21 @@
         <label for="payRecord_playerId">&nbsp;玩家ID:</label>
         <input id="payRecord_playerId" type="text" class="easyui-textbox" style="width:105px;height: 20px"/>
 
-        <span style="color: blue;margin-left:50px"></span>
-        <label for="pay_player_channel">&nbsp;玩家渠道:</label>
-        <select title="选择渠道" id="pay_player_channel" name="spId">
+        <label for="save_spId"></label>
+        <span style="color: blue; ">渠道:</span>
+        <select title="选择渠道" id="save_spId" name="spId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <span style="color: blue;margin-left:50px"></span>
-        <label for="pay_gameId">&nbsp;游戏列表:</label>
-        <select title="选择渠道" id="pay_gameId" name="spId">
+        <label for="save_gameId"></label>
+        <span style="color: blue;margin-left:50px  ">游戏:</span>
+        <select title="选择游戏" id="save_gameId" name="gameId">
+            <option value="-1" selected="selected">请选择</option>
+        </select>
+
+        <label for="save_serverId"></label>
+        <span style="color: blue; margin-left:50px">区服:</span>
+        <select title="选择区服" id="save_serverId" name="serverId" hidden="true">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
@@ -69,10 +75,12 @@
         </select>
 
         <span style="color: blue;margin-left:50px">开始时间:</span>
+        <label for="payRecord_startTime"></label>
         <input class="easyui-datetimebox" id="payRecord_startTime" name="startTime"
                data-options="required:true,showSeconds:false" style="width:150px">
 
         <span style="color: blue;margin-left:50px">结束时间:</span>
+        <label for="payRecord_endTime"></label>
         <input class="easyui-datetimebox" id="payRecord_endTime" name="endTime"
                data-options="required:true,showSeconds:false" style="width:150px">
 

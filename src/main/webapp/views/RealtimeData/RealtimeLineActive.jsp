@@ -25,7 +25,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/echarts.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/RealtimeData/RealtimeLinePayRecord.js"></script>
+            src="${pageContext.request.contextPath}/js/RealtimeData/RealtimeLineActive.js"></script>
 </head>
 <body>
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
@@ -48,7 +48,6 @@
         <option value="-1" selected="selected">请选择</option>
     </select>
 </div>
-
 <div>
     <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style=""
        iconCls=" icon-search" plain="true">查询渠道</a>
@@ -69,10 +68,9 @@
     <a href="javascript:getLinesByDate(1)" class="easyui-linkbutton" style="margin-left:50px"
        iconCls=" icon-search" plain="true">查询统计数据</a>
 </div>
-
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
 <div id="main" style="width: 1000px;height:600px;margin-left:50px">
-
+    
 </div>
 </body>
 

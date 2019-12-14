@@ -40,12 +40,18 @@ public interface ServerListDao {
     /**
      * 不同的渠道id
      */
-    List<String> selectDistinctSpId(Map<String, Object> map);
+    List<Integer> selectDistinctSpId(Map<String, Object> map);
+
+    /**
+     * 不同的游戏id
+     */
+    List<Integer> selectDistinctGameId(Map<String, Object> map);
 
     /**
      * 不同的区服id
      */
-    List<String> selectDistinctServerId(Map<String, Object> map);
+    List<Integer> selectDistinctServerId(Map<String, Object> map);
+
 
     /**
      * 查询是否可以注册
@@ -56,4 +62,8 @@ public interface ServerListDao {
      * 查询是否可以登录
      */
     int selectLoginStatus(Map<String, Object> map);
+
+    int exist(Map<String, Object> map);
+
+    int selectServerList(Integer spId, Integer gameId, Integer serverId);
 }

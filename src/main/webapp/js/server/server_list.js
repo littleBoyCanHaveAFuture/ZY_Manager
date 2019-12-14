@@ -2,8 +2,9 @@
 $(function () {
     initFirstPage();
     initSelectList();
-    initServerList(1);
-    initServerList(2);
+    initSpGameServer(1);
+    initSpGameServer(2);
+    initSpGameServer(3);
 });
 //初始化内容 下一页按钮
 $(function () {// 初始化内容
@@ -74,14 +75,12 @@ function loadServerListTab() {
                 result = {
                     total: result.total,
                     rows: result.rows
-                }
+                };
                 if (result.total === 0) {
                     $.messager.alert("系统提示", "查询成功 无数据");
                 }
                 $("#serverTable").datagrid("loadData", result);
-                // $('#serverTable').datagrid({loadFilter: pagerFilter}).datagrid('loadData', result);
             }
-
         },
         error: function () {
             $.messager.alert("ERROR！", "查询失败");
@@ -134,7 +133,6 @@ function saveServerType() {
 
 //保存
 function saveServer() {
-
     let gameId = $("#save_gameid").val();
     let serverId = $("#save_serverid").val();
     let spId = $("#save_spid").val();
@@ -158,6 +156,7 @@ function saveServer() {
                 $("#dlg").dialog("close");
                 $("#serverTable").datagrid("reload");
                 resetValue();
+                initFirstPage();
             } else {
                 $.messager.alert("系统提示", "操作失败");
                 $("#dlg").dialog("close");
@@ -324,7 +323,7 @@ function initSelectList() {
     });
 }
 
-function initServerList(type) {
+function initSpGameServer(type) {
     let gameId = $('#gameid').val();
     let serverId = $("#serverid").val();
     let spId = $("#spid").val();
@@ -335,6 +334,7 @@ function initServerList(type) {
         "spId": spId,
         "type": type
     };
+
     $.ajax({
         //获取下拉
         url: "/server/getDistinctServerInfo",
@@ -346,22 +346,32 @@ function initServerList(type) {
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
-                console.log(result);
+                // console.log(result);
                 if (type === 1) {
-                    let select_serverId = $("#serverid");
-                    select_serverId.find("option").remove();
-                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                } else {
                     let select_spId = $("#spid");
                     select_spId.find("option").remove();
                     select_spId.append("<option value=-1 selected=selected>请选择</option>");
                     for (let res = 0; res < result.total; res++) {
                         select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
                     }
+                } else if (type === 2) {
+                    let select_gameId = $("#gameid");
+                    select_gameId.find("option").remove();
+                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        let gameid = result.rows[res].gameId;
+                        let name = result.rows[res].name + "\t" + gameid;
+                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
+                    }
+                } else if (type === 3) {
+                    let select_serverId = $("#serverid");
+                    select_serverId.find("option").remove();
+                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
                 }
+
             }
         },
         error: function () {

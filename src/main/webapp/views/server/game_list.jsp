@@ -18,46 +18,28 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.config.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.all.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/server_list.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/game_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
 
-<table id="serverTable" title="服务器列表" class="easyui-datagrid" pagination="true"
+<table id="dg" title="游戏列表" class="easyui-datagrid" pagination="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#sp">
     <thead data-options="frozen:true">
     <tr>
-        <th field="cb" checkbox="true" align="center"></th>
-        <th field="id" width="70" align="center" hidden="true">编号</th>
-        <th field="gameId" width="70" align="center" hidden="true">游戏id</th>
-        <th field="gamename" width="70" align="center">游戏名</th>
-        <th field="serverId" width="70" align="center">服务器id</th>
-        <th field="spId" width="150" align="center">渠道id</th>
-        <th field="loginUrl" width="300" align="center">登录地址</th>
+        <th field="gameId" width="70" align="center">游戏id</th>
+        <th field="name" width="70" align="center">游戏名</th>
     </tr>
     </thead>
 </table>
 
 <div id="sp">
     <div>
-        <label for="spid"></label>
-        <span style="color: blue;">渠道:</span>
-        <select title="选择渠道" id="spid" name="spId">
-            <option value="-1" selected="selected">请选择</option>
-        </select>
+        <label for="gameid">游戏id:</label>
+        <input type="text" name="gameid" id="gameid">
 
-        <label for="gameid"></label>
-        <span style="color: blue; margin-left:50px ">游戏:</span>
-        <select title="选择游戏" id="gameid" name="gameId">
-            <option value="-1" selected="selected">请选择</option>
-        </select>
-
-        <label for="serverid"></label>
-        <span style="color: blue; margin-left:50px">区服:</span>
-        <select title="选择区服" id="serverid" name="serverId">
-            <option value="-1" selected="selected">请选择</option>
-        </select>
-
+        <label for="name">游戏名称</label>
+        <input type="text" name="name" id="name">
         <button onclick="loadServerListTab()" class="easyui-linkbutton">查询</button>
     </div>
     <div>
@@ -70,7 +52,6 @@
     </div>
 </div>
 
-
 <div id="dlg-buttons">
     <a href="javascript:saveServerType()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
     <a href="javascript:closeServerDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
@@ -82,37 +63,21 @@
         <input type="hidden" name="save_id" id="save_id">
         <table>
             <tr>
-                <td>渠道id</td>
+                <td>游戏id:</td>
                 <td>
-                    <input type="text" name="save_spid" id="save_spid"
-                           required="true" class="easyui-validatebox" validType="namerules"
-                           missingMessage="渠道id不能为空">
-                </td>
-            </tr>
-
-            <tr>
-                <td>游戏id</td>
-                <td>
+                    <label for="save_gameid"></label>
                     <input type="text" name="save_gameid" id="save_gameid"
                            required="true" class="easyui-validatebox" validType="'number','length[5,10]'"
                            missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">
                 </td>
             </tr>
-
             <tr>
-                <td>区服id</td>
+                <td>游戏名称:</td>
                 <td>
-                    <input type="text" name="save_serverid" id="save_serverid"
+                    <label for="save_name"></label>
+                    <input type="text" name="save_name" id="save_name"
                            required="true" class="easyui-validatebox" validType="namerules"
-                           missingMessage="服务器id不能为空">
-                </td>
-            </tr>
-
-            <tr>
-                <td>登录地址</td>
-                <td>
-                    <input type="text" name="save_loginurl" id="save_loginurl"
-                           required="false">
+                           missingMessage="游戏名称">
                 </td>
             </tr>
         </table>

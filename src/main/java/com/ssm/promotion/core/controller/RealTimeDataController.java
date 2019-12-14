@@ -6,7 +6,6 @@ import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.entity.User;
 import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.sdk.UOrderManager;
-import com.ssm.promotion.core.service.PayRecordService;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
@@ -40,8 +39,6 @@ public class RealTimeDataController {
     private static final Logger log = Logger.getLogger(RealTimeDataController.class);
     @Autowired
     JedisRechargeCache cache;
-    @Resource
-    private PayRecordService payRecordService;
     @Resource
     private UOrderManager orderManager;
     @Autowired
@@ -79,8 +76,6 @@ public class RealTimeDataController {
 
         param.put("spId", ServerInfoUtil.spiltStr(currUser.getSpId()));
 
-//        List<PayRecord> orderList = payRecordService.getPayOrderList(param, userId);
-//        Long total = payRecordService.getTotalPayRecords(param, userId);
         long start = System.currentTimeMillis();
 
         List<UOrder> orderList = orderManager.getUOrderList(param);
@@ -89,8 +84,7 @@ public class RealTimeDataController {
         long end = System.currentTimeMillis();
 
         JSONObject result = new JSONObject();
-        JSONArray jsonArray = JSONArray.fromObject(orderList);
-        result.put("rows", jsonArray);
+        result.put("rows", JSONArray.fromObject(orderList));
         result.put("total", total);
         result.put("time", new DecimalFormat("0.00").format((double) (end - start) / 1000));
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
@@ -129,10 +123,10 @@ public class RealTimeDataController {
                 break;
             }
             if (starttime == null || endttime == null) {
-                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYYYMMDDHHmmss);
+                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
                 endttime = DateUtil.getCurrentDateStr();
             }
-            List<String> timeDaylist = DateUtil.transTimes(starttime, endttime);
+            List<String> timeDaylist = DateUtil.transTimes(starttime, endttime, DateUtil.FORMAT_YYYY_MMDD_HHmm);
             if (timeDaylist.size() != 1) {
                 result.put("err", "请选择同一天的数据");
                 result.put("resultCode", Constants.SDK_PARAM);

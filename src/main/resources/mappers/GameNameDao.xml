@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.GameNameDao">
+    <resultMap type="GameName" id="GameNameResult">
+        <result property="gameId" column="gameId"/>
+        <result property="name" column="name"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        select gameId,
+               name
+        from zy_servername
+    </sql>
+
+    <select id="selectAll" resultMap="GameNameResult">
+        <include refid="Base_Column_List"/>
+    </select>
+
+    <select id="select" parameterType="map" resultMap="GameNameResult">
+        <include refid="Base_Column_List"/>
+        <where>
+            <if test="gameId != null and  gameId!= -1">
+                gameId=#{gameId}
+            </if>
+            <if test="name != null and  name!='' ">
+                and name like '%${name}%'
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <delete id="delete" parameterType="int">
+        delete
+        from zy_servername
+        where gameId = #{gameid}
+
+    </delete>
+
+    <update id="update" parameterType="GameName">
+        update zy_servername
+        set name=#{name}
+        where gameId = #{gameId}
+    </update>
+
+    <insert id="insert" parameterType="GameName">
+        insert into zy_servername(gameId, name)
+        values (#{gameId}, #{name})
+    </insert>
+
+</mapper>

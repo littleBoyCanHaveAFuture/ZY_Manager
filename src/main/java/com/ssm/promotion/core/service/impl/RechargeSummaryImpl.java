@@ -6,7 +6,6 @@ import com.ssm.promotion.core.jedis.RedisKey;
 import com.ssm.promotion.core.jedis.RedisKeyHeader;
 import com.ssm.promotion.core.jedis.RedisKeyTail;
 import com.ssm.promotion.core.service.RechargeSummaryService;
-import com.ssm.promotion.core.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,162 +22,182 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
     JedisRechargeCache cache;
 
     @Override
-    public List<RechargeSummary> getRechargeSummary(Map<String, Object> map,
-                                                    Map<Integer, List<String>> serverIdMap,
-                                                    List<String> spIdList,
-                                                    Integer userId) throws Exception {
-        int type = Integer.parseInt(map.get("type").toString());
-        Integer gameId = Integer.parseInt(map.get("gameId").toString());
-        Integer serverId = Integer.parseInt(map.get("serverId").toString());
-        String startTimes = map.get("startTime").toString();
-        String endTimes = map.get("endTime").toString();
-
+    public List<RechargeSummary> getRechargeSummary(Map<Integer, Map<Integer, List<Integer>>> sgsMap,
+                                                    List<String> timeList, Integer type,
+                                                    Integer userId) {
         long s = System.currentTimeMillis();
-        //时间转化
-        List<String> timeList = DateUtil.transTimes(startTimes, endTimes);
-        List<RechargeSummary> rsList = null;
+
+        List<RechargeSummary> rsList;
+
         //分游戏、区服、渠道查询
         //查询游戏自己的数据库
-        switch (type) {
-            case 1:
-                //全服概况
-                rsList = this.setGameRs(gameId, serverIdMap, timeList);
-                break;
-            case 2:
-                //分服概况
-                rsList = this.setServerRs(gameId, serverIdMap, timeList);
-                break;
-            case 3:
-                //渠道概况
-                rsList = this.setSpRs(gameId, serverId, spIdList, timeList);
-                break;
-            default:
-                break;
+        if (type == 1) {                //全服概况
+            rsList = this.setGameRs(sgsMap, timeList);
+        } else if (type == 2) {
+            //分服概况
+            rsList = this.setServerRs(sgsMap, timeList);
+        } else {
+            //渠道概况
+            rsList = this.setSpRs(sgsMap, timeList);
         }
-        long e = System.currentTimeMillis();
-        System.out.println("RS redis use " + new DecimalFormat("0.00").format((double) (e - s) / 1000) + " s");
+
+        System.out.println("RS redis use " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + " s");
 
         //存储查询结果
-
-
         return rsList;
     }
 
     /**
      * 生成全服汇总
-     * 游戏 -所有日期
+     * 按日期排序
      *
-     * @param gameId       游戏id
-     * @param serverIdList 服务器-渠道Map
-     * @param timeList     时间列表 yyyyMMdd
+     * @param sgsMap   游戏id
+     * @param timeList 时间列表 yyyyMMdd
      */
-    public List<RechargeSummary> setGameRs(Integer gameId, Map<Integer, List<String>> serverIdList, List<String> timeList) throws Exception {
-        //该游戏全区统计
+    public List<RechargeSummary> setGameRs(Map<Integer, Map<Integer, List<Integer>>> sgsMap, List<String> timeList) {
+        //该游戏全区统计<yyyy-MM-dd,RS>
         Map<String, RechargeSummary> totalMap = new LinkedHashMap<>();
-        //遍历区服
-        for (Map.Entry<Integer, List<String>> entry : serverIdList.entrySet()) {
-            Integer serverId = entry.getKey();
-            List<String> spIdList = entry.getValue();
 
-            //同区服-所有渠道 时间排序的结果
-            Map<String, RechargeSummary> timeRsMap = this.setGameTimeRs(gameId, serverId, spIdList, timeList);
-            //查询结果 放入 totalMap 中
-            for (String times : timeRsMap.keySet()) {
-                RechargeSummary timeRs = timeRsMap.get(times);
-                if (!totalMap.containsKey(times)) {
-                    totalMap.put(times, timeRs);
-                } else {
-                    RechargeSummary totalRs = totalMap.get(times);
-                    totalRs.add(timeRs);
+        //遍历渠道 游戏 区服
+        for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
+            Integer spId = entry.getKey();
+            Map<Integer, List<Integer>> listMap = entry.getValue();
+
+            for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
+                Integer gameId = gameEntry.getKey();
+                List<Integer> serverIdList = gameEntry.getValue();
+
+                //同区服-所有渠道 时间排序的结果
+                Map<String, RechargeSummary> timeRsMap = this.getRsByDay(spId, gameId, serverIdList, timeList);
+
+                for (String times : timeRsMap.keySet()) {
+                    if (!totalMap.containsKey(times)) {
+                        totalMap.put(times, timeRsMap.get(times));
+                    } else {
+                        totalMap.get(times).add(timeRsMap.get(times));
+                    }
                 }
             }
         }
+
         for (String times : totalMap.keySet()) {
             RechargeSummary totalRs = totalMap.get(times);
             totalRs.setDate(times);
             totalRs.calculate(1);
         }
-
         //该区服结果
         return new ArrayList<>(totalMap.values());
     }
 
     /**
      * 生成区服汇总
-     * 游戏-所有区服
+     * 按照区服排序
      *
-     * @param gameId       游戏id
-     * @param serverIdList 服务器-渠道Map
-     * @param timeList     时间列表 yyyyMMdd
+     * @param sgsMap   游戏id
+     * @param timeList 时间列表 yyyyMMdd
      */
-    public List<RechargeSummary> setServerRs(Integer gameId, Map<Integer, List<String>> serverIdList, List<String> timeList) throws Exception {
-        List<RechargeSummary> serverRsList = new ArrayList<>();
-        for (Map.Entry<Integer, List<String>> entry : serverIdList.entrySet()) {
+    public ArrayList<RechargeSummary> setServerRs(Map<Integer, Map<Integer, List<Integer>>> sgsMap, List<String> timeList) {
+        //渠道-游戏-全区统计<serverId,RS>
+        Map<Integer, RechargeSummary> totalMap = new LinkedHashMap<>();
 
-            Integer serverId = entry.getKey();
-            List<String> spIdList = entry.getValue();
+        //遍历渠道 游戏 区服
+        for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
+            Integer spId = entry.getKey();
+            Map<Integer, List<Integer>> listMap = entry.getValue();
 
-            RechargeSummary serverRs = new RechargeSummary();
+            for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
+                Integer gameId = gameEntry.getKey();
+                List<Integer> serverIdList = gameEntry.getValue();
 
-            //所有渠道的结果
-            List<RechargeSummary> rsList = this.serchSpRs(gameId, serverId, spIdList, timeList);
-            for (RechargeSummary rs : rsList) {
-                serverRs.add(rs);
+                //同渠道-同游戏- 渠道排序的结果
+                Map<Integer, RechargeSummary> serverRsMap = this.getRsByServer(spId, gameId, serverIdList, timeList);
+
+                //统计不同渠道-不同游戏-区服id相同的数据
+                //统计 同一渠道同一游戏即可
+                //其实没必要 这里令 sgsMap 的 key 和 嵌套的Map key 数量均为一个即可
+                for (Integer serverId : serverRsMap.keySet()) {
+                    if (!totalMap.containsKey(serverId)) {
+                        totalMap.put(serverId, serverRsMap.get(serverId));
+                    } else {
+                        totalMap.get(serverId).add(serverRsMap.get(serverId));
+                    }
+                }
             }
-            serverRs.setServerId(serverId);
-            serverRs.calculate(2);
-            //该区服结果
-            serverRsList.add(serverRs);
         }
-        return serverRsList;
+        for (Map.Entry<Integer, RechargeSummary> serverEntry : totalMap.entrySet()) {
+            Integer serverId = serverEntry.getKey();
+            RechargeSummary rs = serverEntry.getValue();
+            rs.setServerId(serverId);
+            rs.calculate(2);
+        }
+
+        return new ArrayList<>(totalMap.values());
     }
 
     /**
      * 生成渠道汇总
-     * 游戏-区服-所有渠道
+     * 按照渠道排序
      *
-     * @param gameId   游戏id
-     * @param serverId 服务器id
+     * @param sgsMap   游戏id
      * @param timeList 时间列表 yyyyMMdd
      */
-    public List<RechargeSummary> setSpRs(Integer gameId, Integer serverId, List<String> spIdList, List<String> timeList) throws Exception {
-        List<RechargeSummary> serverRsList = this.serchSpRs(gameId, serverId, spIdList, timeList);
-        for (RechargeSummary rs : serverRsList) {
+    public List<RechargeSummary> setSpRs(Map<Integer, Map<Integer, List<Integer>>> sgsMap, List<String> timeList) {
+        //该游戏全区统计<spId,RS>
+        Map<Integer, RechargeSummary> totalMap = new LinkedHashMap<>();
+
+        //遍历渠道 游戏 区服
+        for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
+            Integer spId = entry.getKey();
+            Map<Integer, List<Integer>> listMap = entry.getValue();
+
+            RechargeSummary rs = new RechargeSummary();
+
+            for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
+                Integer gameId = gameEntry.getKey();
+                List<Integer> serverIdList = gameEntry.getValue();
+
+                //同渠道-同游戏- 区服排序的结果
+                Map<Integer, RechargeSummary> serverRsMap = this.getRsByServer(spId, gameId, serverIdList, timeList);
+
+                for (RechargeSummary serverRs : serverRsMap.values()) {
+                    rs.add(serverRs);
+                }
+            }
+            rs.setSpId(spId);
             rs.calculate(3);
+            totalMap.put(spId, rs);
         }
-        return serverRsList;
+
+        return new ArrayList<>(totalMap.values());
     }
 
     /**
-     * 生成游戏汇总
-     * 根据日期合并数据
+     * 以天为单位 获取充值汇总
      *
-     * @param gameId   游戏id
-     * @param serverId 游戏区服id
-     * @param spIdList 渠道列表
-     * @param timeList 时间列表 yyyyMMdd
+     * @param spId         渠道id
+     * @param gameId       游戏id
+     * @param serverIdList 区服id
+     * @param timeList     时间
+     * @return 返回 天数-RS 的 map
      */
-    public Map<String, RechargeSummary> setGameTimeRs(Integer gameId, Integer serverId,
-                                                      List<String> spIdList,
-                                                      List<String> timeList) throws Exception {
+    private Map<String, RechargeSummary> getRsByDay(Integer spId, Integer gameId, List<Integer> serverIdList, List<String> timeList) {
         Map<String, RechargeSummary> map = new LinkedHashMap<>();
         for (String time : timeList) {
             RechargeSummary timeRS = new RechargeSummary();
-            //日期
             timeRS.setDate(time);
             map.put(time, timeRS);
         }
+        long s = System.currentTimeMillis();
 
-        //每个渠道 {start,end}每天的记录
-        //总结：每个渠道的记录
+        String userSGKey = String.format(RedisKey.FORMAT_SG_SDD, RedisKeyHeader.USER_INFO, spId, gameId);
 
-        //同区服-所有渠道
-        for (String spId : spIdList) {
-            String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, spId, gameId);
-            String userSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
-            String activeSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+        for (Integer serverId : serverIdList) {
 
-            long s = System.currentTimeMillis();
+            long ss = System.currentTimeMillis();
+
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SDDD, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
+            String activeSGSKey = String.format(RedisKey.FORMAT_SGS_SDDD, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+
             //新版函数
             List<String> tailList = new ArrayList<>();
             Map<String, Map<String, Double>> resultList = new HashMap<>();
@@ -236,8 +255,6 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             Map<String, Double> timeRechargeFirstPayersMap = resultList.get(RedisKey.RECHARGE_FIRST_AMOUNTS);
             Map<String, Double> timeRegisteredPaymentMap = resultList.get(RedisKey.RECHARGE_AMOUNTS_NA_CA);
 
-
-            System.out.println("\nuse : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
 
             //时间排序 逐个增加
             for (String time : timeList) {
@@ -294,36 +311,41 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 }
                 //注册付费ARPU
             }
-            System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
+
+            System.out.println("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
         }
+        System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
         return map;
     }
 
     /**
-     * 查询redis
-     * 分渠道汇总
-     * 根据渠道合并数据
+     * 以区服为单位 获取充值汇总
      *
-     * @param gameId   游戏id
-     * @param serverId 游戏区服id
-     * @param spIdList 渠道列表
-     * @param timeList 时间列表 yyyyMMdd
+     * @param spId         渠道id
+     * @param gameId       游戏id
+     * @param serverIdList 区服id
+     * @param timeList     时间
+     * @return 返回 区服-RS 的 map
      */
-    public List<RechargeSummary> serchSpRs(Integer gameId, Integer serverId,
-                                           List<String> spIdList,
-                                           List<String> timeList) {
-        System.out.println(timeList.toString());
-        List<RechargeSummary> rsList = new LinkedList<>();
+    private Map<Integer, RechargeSummary> getRsByServer(Integer spId, Integer gameId, List<Integer> serverIdList, List<String> timeList) {
+        Map<Integer, RechargeSummary> map = new LinkedHashMap<>();
+        for (Integer serverId : serverIdList) {
+            RechargeSummary serverRs = new RechargeSummary();
+            serverRs.setServerId(serverId);
+            map.put(serverId, serverRs);
+        }
 
-        //每个渠道 {start,end}每天的记录
-        //总结：每个渠道的记录
+        long s = System.currentTimeMillis();
 
-        for (String spId : spIdList) {
-            String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, spId, gameId);
-            String userSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
-            String activeSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+        String userSGKey = String.format(RedisKey.FORMAT_SG_SDD, RedisKeyHeader.USER_INFO, spId, gameId);
 
-            long s = System.currentTimeMillis();
+        for (Integer serverId : serverIdList) {
+
+            long ss = System.currentTimeMillis();
+
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SDDD, RedisKeyHeader.USER_INFO, spId, gameId, serverId);
+            String activeSGSKey = String.format(RedisKey.FORMAT_SGS_SDDD, RedisKeyHeader.ACTIVE_PLAYERS_INFO, spId, gameId, serverId);
+
             //新版函数
             List<String> tailList = new ArrayList<>();
             Map<String, Map<String, Double>> resultList = new HashMap<>();
@@ -381,7 +403,6 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             Map<String, Double> timeRechargeFirstPayersMap = resultList.get(RedisKey.RECHARGE_FIRST_AMOUNTS);
             Map<String, Double> timeRegisteredPaymentMap = resultList.get(RedisKey.RECHARGE_AMOUNTS_NA_CA);
 
-            System.out.println("\nuse : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000));
 
             //注册付费ARPU
 
@@ -397,20 +418,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //注收比
             //新增注收比
 
-            printMap(timecaMap, "timecaMap");
-            printMap(timecrMap, "timecrMap");
-            printMap(timecrroMap, "timecrroMap");
-            printMap(timecrroMap, "timecrroMap");
-            printMap(timeActiveAccountMap, "timeActiveAccountMap");
-            printMap(timeRechargeTimesMap, "timeRechargeTimesMap");
-            printMap(timeRechargeAccountsMap, "timeRechargeAccountsMap");
-            printMap(timeRechargeAmountsMap, "timeRechargeAmountsMap");
-            printMap(timeRechargeFirstPayersMap, "timeRechargeFirstPayersMap");
-            printMap(timefraMap, "timefraMap");
-            printMap(timeRegisteredPayersAccountMap, "timeRegisteredPayersAccountMap");
-            printMap(timeRegisteredPaymentMap, "timeRegisteredPaymentMap");
-
-            RechargeSummary rs = new RechargeSummary();
+            RechargeSummary rs = map.get(serverId);
 
             //新增创号
             rs.setNewAddCreateAccount(this.mapAddToInt(timecaMap));
@@ -460,26 +468,14 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //总付费率
 
             //渠道id
-            rs.setSpId(Integer.parseInt(spId));
+            rs.setSpId(spId);
             //注收比
             //新增注收比
 
-            rsList.add(rs);
+            System.out.println("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
         }
-        return rsList;
-    }
-
-    /**
-     * Map<String, Double>
-     * value值累加
-     * 返回int
-     */
-    public int mapAddInt(Map<String, Integer> map) {
-        double total = 0L;
-        for (Integer d : map.values()) {
-            total += d;
-        }
-        return (int) total;
+        System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
+        return map;
     }
 
     /**
@@ -495,39 +491,6 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         return (int) total;
     }
 
-    /**
-     * Map<String, Double>
-     * value值累加
-     * 返回int
-     */
-    public double mapAddDouble(Map<String, Double> map) {
-        double total = 0L;
-        for (Double d : map.values()) {
-            total += d;
-        }
-        return total;
-    }
-
-    /**
-     * 创角率：新增创角/所有账号的数目
-     * 活跃付费率：充值人数/活跃玩家
-     * 付费ARPU：充值金额/充值人数
-     * 付费ARPU：充值金额/充值人数
-     * 注册付费ARPU：注册付费金额/注册付费人数
-     */
-    public Map<String, Double> genAccountRate(Map<String, Double> map1, Map<String, Double> map2) {
-        Map<String, Double> map = new LinkedHashMap<>();
-        for (String times : map1.keySet()) {
-            Double num1 = map1.get(times);
-            Double num2 = map2.get(times);
-            map.put(times, num1 / num2 * 100);
-        }
-        return map;
-    }
-
-    public void printMap(Map<String, Double> map, String name) {
-        System.out.println("map:" + name + "----->" + map.toString());
-    }
 }
 
 

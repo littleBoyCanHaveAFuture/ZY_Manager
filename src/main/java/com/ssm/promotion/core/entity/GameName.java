@@ -2,14 +2,11 @@ package com.ssm.promotion.core.entity;
 
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
  * @author
  */
 @Data
-public class Servername implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class GameName {
     /**
      * 游戏id
      */
@@ -19,5 +16,13 @@ public class Servername implements Serializable {
      */
     private String name;
 
+    public GameName(Integer gameId, String name) {
+        this.gameId = gameId;
+        this.name = name;
+    }
+
+     GameName() {
+
+    }
 
 }

@@ -26,7 +26,7 @@
 		FROM zy_serverlist
 	</sql>
     <!--   与 selectServers where 条件一致-->
-    <select id="getTotalServers" parameterType="Map" resultType="Long">
+    <select id="getTotalServers" parameterType="map" resultType="Long">
         select count(*) from zy_serverlist
         <where>
             <if test="gameId != null and gameId != -1 ">
@@ -35,8 +35,8 @@
             <if test="serverId != null and  serverId != -1 ">
                 AND serverId = #{serverId}
             </if>
-            <if test="spId != null and spId != '' and spId !='-1'">
-                AND spId like '%${spId}%'
+            <if test="spId != null  and spId !=-1 ">
+                AND spId =#{spId}
             </if>
         </where>
     </select>
@@ -50,23 +50,35 @@
             <if test="serverId != null and  serverId != -1 ">
                 AND serverId = #{serverId}
             </if>
-            <if test="spId != null and spId != '' and spId !='-1'">
-                AND spId like '%${spId}%'
+            <if test="spId != null  and spId !=-1">
+                AND spId = #{spId}
             </if>
         </where>
         <if test="start!=null and size!=null">
             limit #{start},#{size}
         </if>
     </select>
+
     <insert id="insertServer" useGeneratedKeys="true" keyProperty="id" parameterType="ServerInfo">
         insert into
         zy_serverlist(
         gameId,
         serverId,
         spId,
-        loginUrl)
-        values(#{gameId},#{serverId},#{spId},#{loginUrl})
+        loginUrl,
+        gamename )
+        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename})
     </insert>
+
+    <select id="exist" parameterType="map" resultType="int">
+        select count(*) from zy_serverlist
+        where
+        gameId = #{gameId}
+        and
+        serverId = #{serverId}
+        and
+        spId = #{spId}
+    </select>
 
     <update id="updateServer" parameterType="ServerInfo">
         update zy_serverlist
@@ -84,7 +96,7 @@
         where id=#{id}
     </delete>
 
-    <select id="selectDistinctSpId" parameterType="map" resultType="string">
+    <select id="selectDistinctSpId" parameterType="map" resultType="int">
         select distinct spId
         from zy_serverlist
         <where>
@@ -97,24 +109,44 @@
         </where>
     </select>
 
-    <select id="selectDistinctServerId" parameterType="map" resultType="string">
-        select distinct serverId
+    <select id="selectDistinctGameId" parameterType="map" resultType="int">
+        select distinct gameId
         from zy_serverlist
         <where>
-            <if test="gameId != null and gameId != -1 ">
-                gameId = #{gameId}
+            <if test="spId != null  and spId !=-1">
+                spId =#{spId}
+            </if>
+            <if test="serverId != null and serverId != -1 ">
+                and serverId = #{serverId}
             </if>
         </where>
     </select>
 
+    <select id="selectDistinctServerId" parameterType="map" resultType="int">
+        select distinct serverId
+        from zy_serverlist
+        <where>
+            <if test="spId != null  and spId !=-1">
+                spId =#{spId}
+            </if>
+            <if test="gameId != null and gameId != -1 ">
+                and gameId = #{gameId}
+            </if>
+        </where>
+    </select>
+
+
     <select id="selectRegStatus" parameterType="map" resultType="integer">
         select regState from zy_serverlist
         <where>
-            <if test="gameId != null and gameId != -1 ">
-                gameId = #{gameId}
+            <if test="spId != null  and spId !=-1">
+                spId =#{spId}
             </if>
-            <if test="spId != null and spId != '' and spId !='-1'">
-                AND spId like '%${spId}%'
+            <if test="gameId != null and gameId != -1 ">
+                and gameId = #{gameId}
+            </if>
+            <if test="serverId != null and  serverId != -1 ">
+                AND serverId = #{serverId}
             </if>
         </where>
     </select>
@@ -122,15 +154,16 @@
     <select id="selectLoginStatus" parameterType="map" resultType="integer">
         select loginState from zy_serverlist
         <where>
+            <if test="spId != null  and spId !=-1">
+                spId =#{spId}
+            </if>
             <if test="gameId != null and gameId != -1 ">
-                gameId = #{gameId}
+                and gameId = #{gameId}
             </if>
             <if test="serverId != null and  serverId != -1 ">
                 AND serverId = #{serverId}
             </if>
-            <if test="spId != null and spId != '' and spId !='-1'">
-                AND spId like '%${spId}%'
-            </if>
         </where>
     </select>
+
 </mapper>

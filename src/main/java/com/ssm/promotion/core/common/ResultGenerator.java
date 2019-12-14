@@ -4,8 +4,8 @@ package com.ssm.promotion.core.common;
  * 响应结果生成工具
  */
 public class ResultGenerator {
-    private static final String DEFAULT_SUCCESS_MESSAGE = "SUCCESS";
-    private static final String DEFAULT_FAIL_MESSAGE = "FAIL";
+    public static final String DEFAULT_SUCCESS_MESSAGE = "SUCCESS";
+    public static final String DEFAULT_FAIL_MESSAGE = "FAIL";
 
     public static Result genSuccessResult() {
         Result result = new Result();
@@ -19,6 +19,14 @@ public class ResultGenerator {
         result.setResultCode(Constants.RESULT_CODE_SUCCESS);
         result.setMessage(DEFAULT_SUCCESS_MESSAGE);
         result.setData(data);
+        return result;
+    }
+
+    public static Result genFailResult() {
+        Result result = new Result();
+        result.setResultCode(Constants.RESULT_CODE_SUCCESS);
+
+        result.setMessage(DEFAULT_FAIL_MESSAGE);
         return result;
     }
 

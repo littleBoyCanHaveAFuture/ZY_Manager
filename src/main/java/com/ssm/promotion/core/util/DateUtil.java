@@ -38,8 +38,8 @@ public class DateUtil {
 
     public static final String FORMAT_YYMMDD = "yyyyMMdd";
     public static final String FORMAT_YYYYMMddHHmm = "yyyyMMddHHmm";
-    public static final String JS_FORMAT_YYMMDDHHmm = "yyyy-MM-dd HH:mm";
-    public static final String FORMAT_YYYYMMDDHHmmss = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMAT_YYYY_MMDD_HHmm = "yyyy-MM-dd HH:mm";
+    public static final String FORMAT_YYYY_MMDD_HHmmSS = "yyyy-MM-dd HH:mm:ss";
 
     // 获得某天最小时间 2017-10-15 00:00:00
     public static Date getStartOfDay(Date date) {
@@ -67,7 +67,7 @@ public class DateUtil {
         Calendar ca = Calendar.getInstance();
         ca.set(Calendar.MINUTE, 0);
         ca.set(Calendar.SECOND, 0);
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmmSS);
         ca.set(Calendar.HOUR_OF_DAY, ca.get(Calendar.HOUR_OF_DAY) - n);
         date = ca.getTime();
         return sdf.format(date);
@@ -84,33 +84,29 @@ public class DateUtil {
         ca.set(Calendar.MINUTE, 0);
         ca.set(Calendar.SECOND, 0);
         date = ca.getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmmSS);
         return sdf.format(date);
     }
 
     /**
-     * 转化时间
-     * 并获取这段时间的所有天数
-     * @return yyyyMMdd
+     * 时间戳转其他格式
      */
-    public static List<String> transTimes(String startTimes, String endTimes) throws Exception {
-        startTimes = formatJsTime(startTimes);
-        endTimes = formatJsTime(endTimes);
+    public static String formatDate(long timestamp, String outFormat) throws Exception {
+        System.out.println("formatDate:" + timestamp);
+        Date dates = new Date(timestamp);
+        formatDate(dates,outFormat);
+        return formatDate(dates, outFormat);
+    }
 
-        List<String> timeList = new ArrayList<>();
-        if (startTimes.equals(endTimes)) {
-            timeList.add(startTimes);
-        } else {
-            timeList = DateUtil.getDateStr(startTimes, endTimes);
-        }
-        if (timeList != null) {
-            timeList.forEach(day -> {
-                if (day != null && !day.isEmpty()) {
-                    System.out.println("day:" + day);
-                }
-            });
-        }
-        return timeList;
+    /**
+     * inFormat
+     * 转
+     * outFormat
+     */
+    public static String formatDate(String times, String inFormat, String outFormat) throws Exception {
+        System.out.println("formatDate:" + times);
+        Date date = formatString(times, inFormat);
+        return formatDate(date, outFormat);
     }
 
     public static String formatDate(Date date, String format) {
@@ -130,6 +126,9 @@ public class DateUtil {
         return sdf.parse(str);
     }
 
+    /**
+     * 当前时间:yyyyMMddHHmm
+     */
     public static String getCurrentMinuteStr() throws Exception {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
@@ -137,9 +136,9 @@ public class DateUtil {
     }
 
     /**
-     * 获取yyyyMMddmm 时间字符串
+     * 当前时间:yyyyMMddHHmm
      *
-     * @param amount 分钟
+     * @param amount 往前、往后的分钟
      */
     public static String getCurrentMinuteStr(int amount) throws Exception {
         Date date = DateUtils.addMinutes(new Date(), amount);
@@ -147,15 +146,17 @@ public class DateUtil {
         return sdf.format(date);
     }
 
+    /**
+     * 当前时间:yyyy-MM-dd HH:mm:ss
+     */
     public static String getCurrentDateStr() throws Exception {
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmmSS);
         return sdf.format(date);
     }
 
     /**
-     * 当天日期
-     * yyyyMMdd
+     * 当前时间:yyyyMMdd
      */
     public static String getCurrentDayStr() throws Exception {
         Date date = new Date();
@@ -164,52 +165,70 @@ public class DateUtil {
     }
 
     /**
-     * YYMMDD
-     * 天数
+     * 求天数
+     *
+     * @param startTimes 开始时间
+     * @param endTimes   结束时间
+     * @return 这段时间的天数 yyyyMMdd
      */
-    public static List<String> getDateStr(String startTime, String endTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
-        List<String> dateList = new ArrayList<>();
-        if (!"".equals(startTime) && !"".equals(endTime)) {
-            try {
-                long start = sdf.parse(startTime).getTime();
-                long end = sdf.parse(endTime).getTime();
-                int n = (int) ((end - start) / DAY_MILLIS);
-                for (int i = 0; i <= n; i++) {
-                    dateList.add(sdf.format(start + DAY_MILLIS * i));
+    public static List<String> transTimes(String startTimes, String endTimes, String inFormat) throws Exception {
+        SimpleDateFormat in = new SimpleDateFormat(FORMAT_YYMMDD);
+
+        startTimes = formatDate(startTimes, inFormat, FORMAT_YYMMDD);
+        endTimes = formatDate(endTimes, inFormat, FORMAT_YYMMDD);
+
+        List<String> timeList = new ArrayList<>();
+        if (startTimes.equals(endTimes)) {
+            timeList.add(startTimes);
+        } else {
+            List<String> dateList = new ArrayList<>();
+            if (!"".equals(startTimes) && !"".equals(endTimes)) {
+                try {
+                    long start = in.parse(startTimes).getTime();
+                    long end = in.parse(endTimes).getTime();
+
+                    int n = (int) ((end - start) / DAY_MILLIS);
+
+                    for (int i = 0; i <= n; i++) {
+                        dateList.add(in.format(start + DAY_MILLIS * i));
+                    }
+                    return dateList;
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-                return dateList;
-            } catch (ParseException e) {
-                e.printStackTrace();
             }
         }
-        return null;
+        return timeList;
     }
 
+
     /**
+     * 求分钟数
      * 24h制
      * yyyyMMDDmm 年-月-日-小时-分钟格式的时间
      *
-     * @param startTime
-     * @param endTime
-     * @return yyyyMMddHHmm
+     * @param startTime 开始时间 yyyy-MM-dd HH:mm:ss
+     * @param endTime   结束时间 yyyy-MM-dd HH:mm:ss
+     * @return 这段时间的天数 yyyyMMddHHmm
      */
     public static List<String> getDateMinStr(String startTime, String endTime) {
+        SimpleDateFormat sdfIn = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmmSS);
+        SimpleDateFormat sdfOut = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
+
         List<String> dateList = new ArrayList<>();
-        SimpleDateFormat sdfin = new SimpleDateFormat(FORMAT_YYYYMMDDHHmmss);
-        SimpleDateFormat sdfout = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
         if (!startTime.isEmpty() && !endTime.isEmpty()) {
             try {
-                long start = sdfin.parse(startTime).getTime();
-                long end = sdfin.parse(endTime).getTime();
+                long start = sdfIn.parse(startTime).getTime();
+                long end = sdfIn.parse(endTime).getTime();
 
                 long stage = MINUTE_MILLIS;
 
                 int n = (int) ((end - start) / stage);
 
                 for (int i = 0; i <= n; i++) {
-                    dateList.add(sdfout.format(start + stage * i));
+                    dateList.add(sdfOut.format(start + stage * i));
                 }
+
                 return dateList;
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -218,24 +237,19 @@ public class DateUtil {
         return null;
     }
 
-    public static String formatJsTime(String startTime) throws Exception {
-        System.out.println(startTime);
-        Date d = formatString(startTime, JS_FORMAT_YYMMDDHHmm);
-        return formatDate(d, FORMAT_YYMMDD);
-    }
 
     public static void main(String[] args) throws Exception {
-        Date end = new Date();
-//        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
-        Date start = DateUtils.addHours(new Date(), -1);
-
-        System.out.println("start:" + start.getTime());
-        System.out.println("end:" + end.getTime());
-        List<String> res = getDateMinStr(formatDate(start, FORMAT_YYYYMMDDHHmmss), formatDate(end, FORMAT_YYYYMMDDHHmmss));
-        res.forEach(System.out::println);
-
-        String s = DateUtil.getCurrHourTime(end);
-        System.out.println(s);
+//        Date end = new Date();
+////        Date start = DateUtils.addDays(new Date(), -10);//合计 10+1 天
+//        Date start = DateUtils.addHours(new Date(), -1);
+//
+//        System.out.println("start:" + start.getTime());
+//        System.out.println("end:" + end.getTime());
+//        List<String> res = getDateMinStr(formatDate(start, FORMAT_YYYY_MMDD_HHmmSS), formatDate(end, FORMAT_YYYY_MMDD_HHmmSS));
+//        res.forEach(System.out::println);
+//
+//        String s = DateUtil.getCurrHourTime(end);
+//        System.out.println(s);
 //
 //        String startTime = "2019-12-01 10:47";
 //        Date d = formatString(startTime, JS_FORMAT_YYMMDD);
@@ -246,5 +260,8 @@ public class DateUtil {
 //        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
 //        System.out.println(s);
 //        System.out.println(DateUtil.getCurrentMinuteStr());
+        long time = 1576209640600L;
+        String s = formatDate(time, FORMAT_YYYY_MMDD_HHmmSS);
+        System.out.println(s);
     }
 }

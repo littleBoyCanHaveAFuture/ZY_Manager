@@ -28,9 +28,6 @@ public class ServerListServiceImpl implements ServerListService {
 
     @Override
     public int addServer(ServerInfo server, Integer userId) {
-        if (server.getGameId() == null || server.getServerId() == null || server.getSpId() == null) {
-            return 0;
-        }
         return serverListdao.insertServer(server);
     }
 
@@ -61,15 +58,22 @@ public class ServerListServiceImpl implements ServerListService {
      *             2 不同渠道
      */
     @Override
-    public List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId) {
-        List<String> res;
+    public List<Integer> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId) {
+        List<Integer> res = null;
+
         if (type == 1) {
-            res = serverListdao.selectDistinctServerId(map);
-        } else {
+            //查渠道
             res = serverListdao.selectDistinctSpId(map);
+        } else if (type == 2) {
+            //查游戏
+            res = serverListdao.selectDistinctGameId(map);
+        } else if (type == 3) {
+            //查渠道-游戏-区服
+            res = serverListdao.selectDistinctServerId(map);
         }
         return res;
     }
+
 
     @Override
     public boolean isSpCanReg(Map<String, Object> map, Integer userId) {
@@ -84,6 +88,11 @@ public class ServerListServiceImpl implements ServerListService {
     public boolean isSpCanLogin(Map<String, Object> map, Integer userId) {
 //        serverListdao.selectLoginStatus(map);
         return true;
+    }
+
+    @Override
+    public boolean existSGS(Map<String, Object> map, Integer userId) {
+        return serverListdao.exist(map) > 0;
     }
 
 }

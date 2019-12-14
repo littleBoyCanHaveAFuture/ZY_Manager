@@ -78,7 +78,7 @@
                 AND createdTime >= #{startTime}
             </if>
             <if test="endTime!=null and endTime!=''">
-                AND completeTime &lt;= #{endTime}
+                AND createdTime &lt;= #{endTime}
             </if>
             <if test="completeTime!=null and completeTime!=''">
                 AND completeTime &lt;= #{completeTime}
@@ -115,7 +115,7 @@
                 AND createdTime >= #{startTime}
             </if>
             <if test="endTime!=null and endTime!=''">
-                AND completeTime &lt;= #{endTime}
+                AND createdTime &lt;= #{endTime}
             </if>
             <if test="completeTime!=null and completeTime!=''">
                 AND completeTime &lt;= #{completeTime}
@@ -125,18 +125,17 @@
 
 
     <insert id="save" parameterType="UOrder">
-        insert into zy_order(
-        orderID, appID, channelID, channelOrderID, completeTime, createdTime, currency, extension,
-        money, notifyUrl, productDesc, productID, productName, realMoney, roleID, roleName, sdkOrderTime, serverID,
-        serverName, state, userID, username
-        )
-        VALUES
-        (
-        #{orderID},#{appID},#{channelID},#{channelOrderID},#{completeTime},#{createdTime},#{currency},#{extension},
-        #{money},#{notifyUrl},#{productDesc}, #{productID},#{productName},#{realMoney},#{roleID},#{roleName},
-        #{sdkOrderTime}, #{serverID},
-        #{serverName},#{state},#{userID},#{username}
-        )
+        insert into zy_order(orderID, appID, channelID, channelOrderID, completeTime, createdTime, currency, extension,
+                             money, notifyUrl, productDesc, productID, productName, realMoney, roleID, roleName,
+                             sdkOrderTime, serverID,
+                             serverName, state, userID, username)
+        VALUES (#{orderID}, #{appID}, #{channelID}, #{channelOrderID}, #{completeTime,jdbcType=TIMESTAMP},
+                #{createdTime,jdbcType=TIMESTAMP}, #{currency},
+                #{extension},
+                #{money}, #{notifyUrl}, #{productDesc}, #{productID}, #{productName}, #{realMoney}, #{roleID},
+                #{roleName},
+                #{sdkOrderTime,jdbcType=TIMESTAMP}, #{serverID},
+                #{serverName}, #{state}, #{userID}, #{username})
     </insert>
 
     <select id="get" parameterType="map" resultMap="orderRecordResult">

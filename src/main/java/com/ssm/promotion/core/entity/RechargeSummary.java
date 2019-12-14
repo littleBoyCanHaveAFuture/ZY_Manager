@@ -48,9 +48,7 @@ public class RechargeSummary {
 
 
     /**
-     * 创号转化率
-     * :忠诚用户数量：本周登陆3次以上（当天重复登陆算1次），最高角色等级超过15级，在线时长超过14小时的帐号
-     * :转化率：上周登录的用户在本周转化为忠诚用户的比例
+     * 创角转化率：新增创角/新增创号
      */
     public double createAccountTransRate;
 
@@ -160,10 +158,12 @@ public class RechargeSummary {
     public int spId;
     /**
      * 注收比
+     * 总付费/总新增人数（创角）
      */
     public double zhushoubi;
     /**
      * 新增注收比
+     * 每天收入/每天新增创角
      */
     public double addzhushoubi;
 

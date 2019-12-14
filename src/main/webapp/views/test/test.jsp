@@ -25,26 +25,16 @@
 
 <body style="margin:1px;" id="ff" bgcolor="#7fffd4">
 
-<%--<table id="serverTable" title="服务器列表" class="easyui-datagrid" pagination="true"--%>
-<%--       rownumbers="true" fit="true" showFooter="true" toolbar="#sp">--%>
-<%--    <thead>--%>
-<%--    <tr>--%>
-
-<%--    </tr>--%>
-<%--    </thead>--%>
-
-<%--</table>--%>
-
 <div id="sp">
     <div>
-        <a href="javascript:initServerList(2)" class="easyui-linkbutton"
+        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton"
            iconCls=" icon-search" plain="true">查询渠道</a>
-        <a href="javascript:initGameList()" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询游戏</a>
-        <a href="javascript:initServerList(1)" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询区服</a>
-
     </div>
+
     <label for="save_spId"></label>
     <span style="color: blue; ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
@@ -83,7 +73,7 @@
         <label for="auto">渠道自动注册</label>
         <select id="auto">
             <option value="true" selected="selected">渠道号自动</option>
-            <option value="false" s>否</option>
+            <option value="false">否</option>
         </select>
 
     </div>
@@ -96,7 +86,7 @@
         </select>
     </div>
     <div>
-        <label for="channelUserId">角色id：</label>
+        <label for="roleId">角色id：</label>
         <input type="text" id="roleId" size="20" onkeydown=""/>
     </div>
     <div>
@@ -111,7 +101,6 @@
     <div>
         <a href="javascript:entergame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(服务器)</a>
         <a href="javascript:cretaterole()" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>
-        <a href="javascript:entergame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(游戏场景)</a>
         <a href="javascript:exitgame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
     </div>
     <div>
@@ -121,6 +110,8 @@
         <div>
             <label for="oderid">订单号：</label>
             <input type="text" id="oderid" size="20" onkeydown=""/>
+            <label for="money">金额：</label>
+            <input type="text" id="money" size="20" onkeydown=""/>
 
             <label for="payRecord_state">&nbsp;支付状态:</label>
             <select title="选择订单状态" id="payRecord_state">

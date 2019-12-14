@@ -36,12 +36,12 @@ public interface ServerListService {
     /**
      * 不同的区服渠道
      *
-     * @param type 同游戏
-     *             1 不同区服
-     *             2 不同渠道
+     * @param type 1 返回渠道
+     *             2 返回游戏
+     *             3 返回区服
      */
+    List<Integer> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId);
 
-    List<String> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId);
 
     /**
      * 某产品某运营商旗下
@@ -54,4 +54,6 @@ public interface ServerListService {
      * 用户是否可登录
      */
     boolean isSpCanLogin(Map<String, Object> map, Integer userId);
+
+    boolean existSGS(Map<String, Object> map, Integer userId);
 }

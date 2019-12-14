@@ -1,7 +1,6 @@
 $(function () {
-    initGameList();
-    initServerList(2);
     initTableColumns();
+
     $('#payRecord_startTime').datebox('setValue', formatterDate(new Date(), 0));
     $('#payRecord_endTime').datebox('setValue', formatterDate(new Date(), 1));
 
@@ -23,6 +22,8 @@ $(function () {
             selectPayRecord();
         }
     });
+    initSpGameServer(1);
+    initSpGameServer(2);
 });
 
 function formatterDate(date, type) {
@@ -88,6 +89,7 @@ function initTableColumns() {
         columns: [
             activeColumns
         ],
+        striped: true
         // nowrap: true,
     })
     //.datagrid('loadData', ttt.bodys);
@@ -103,16 +105,16 @@ function selectPayRecord() {
 
     let orderId = $("#payRecordId").val();
     let payRecord_playerId = $("#payRecord_playerId").val();
-    let pay_player_channel = $("#pay_player_channel").val();
-    let pay_gameid = $("#pay_gameId").val();
+    let save_spId = $("#save_spId").val();
+    let save_gameId = $("#save_gameId").val();
     let payRecord_state = $("#payRecord_state").val();
     let payRecord_startTime = $("#payRecord_startTime").datetimebox("getValue");
     let payRecord_endTime = $("#payRecord_endTime").datetimebox("getValue");
 
     let data = {
         "orderID": null,
-        "appID": pay_gameid,
-        "channelID": pay_player_channel,
+        "appID": save_gameId,
+        "channelID": save_spId,
         "channelOrderID": orderId,
         "state": payRecord_state,
         "startTime": payRecord_startTime,
@@ -146,9 +148,7 @@ function selectPayRecord() {
                     if (row.state > strState.length || row.state < 0) {
                         row.state = "未知"
                     }
-                    row.createdTime = formatterDate(new Date(row.createdTime.time), 1);
-                    row.sdkOrderTime = formatterDate(new Date(row.sdkOrderTime.time), 1);
-                    row.completeTime = formatterDate(new Date(row.completeTime.time), 1);
+
                     row.state = strState[row.state];
                     if (row.notifyUrl === "null") {
                         row.notifyUrl = "";
@@ -185,32 +185,7 @@ function exportPayRecord() {
     $('#dg').datagrid('toExcel', 'dg.xls'); // export to excel
 }
 
-function initGameList() {
-    $.ajax({
-        //获取下拉
-        url: "/server/getGameList",
-        type: "get",
-        async: false,
-        dataType: "json",
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                let select_gameId = $("#pay_gameId");
-                select_gameId.find("option").remove();
-                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                for (let res = 0; res < result.total; res++) {
-                    select_gameId.append("<option  value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
-                }
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
-        }
-    });
-}
-
-function initServerList(type) {
+function initSpGameServer(type) {
     let gameId = $('#save_gameId').val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
@@ -233,21 +208,32 @@ function initServerList(type) {
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
+                // console.log(result);
                 if (type === 1) {
+                    let select_spId = $("#save_spId");
+                    select_spId.find("option").remove();
+                    select_spId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
+                } else if (type === 2) {
+                    let select_gameId = $("#save_gameId");
+                    select_gameId.find("option").remove();
+                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        let gameid = result.rows[res].gameId;
+                        let name = result.rows[res].name + "\t" + gameid;
+                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
+                    }
+                } else if (type === 3) {
                     let select_serverId = $("#save_serverId");
                     select_serverId.find("option").remove();
                     select_serverId.append("<option value=-1 selected=selected>请选择</option>");
                     for (let res = 0; res < result.total; res++) {
                         select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
                     }
-                } else {
-                    let select_spId = $("#pay_player_channel");
-                    select_spId.find("option").remove();
-                    select_spId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
                 }
+
             }
         },
         error: function () {

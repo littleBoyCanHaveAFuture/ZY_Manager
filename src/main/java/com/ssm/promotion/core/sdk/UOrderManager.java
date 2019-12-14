@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.dao.UOrderDao;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
+import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.EncryptUtils;
 import com.ssm.promotion.core.util.StringUtils;
 import com.ssm.promotion.core.util.enums.OrderState;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -74,8 +74,8 @@ public class UOrderManager {
             return null;
         }
         Integer realMoney = null;
-        Long completeTime = null;
-        Long sdkOrderTime;
+        long completeTime = 0;
+        long sdkOrderTime = 0;
         if (extension == null) {
             System.out.println("extension is null");
             return null;
@@ -83,13 +83,13 @@ public class UOrderManager {
         extension = StringUtils.urlcodeToStr(extension);
         JSONObject object = JSONObject.parseObject(extension);
 
-        sdkOrderTime = object.containsKey("sdkOrderTime") ? object.getLong("sdkOrderTime") : null;
+        sdkOrderTime = object.getLongValue("sdkOrderTime");
 
         if (status == OrderState.STATE_PAY_SUCCESS || status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT) {
-            realMoney = object.containsKey("realMoney") ? object.getInteger("realMoney") : null;
+            realMoney = object.getIntValue("realMoney");
 
             if (status != OrderState.STATE_PAY_SUCCESS) {
-                completeTime = object.containsKey("completeTime") ? object.getLong("completeTime") : null;
+                completeTime = object.getLongValue("completeTime");
             }
         }
 
@@ -99,10 +99,9 @@ public class UOrderManager {
         order.setAppID(Integer.parseInt(role.getGameId()));
         order.setChannelID(Integer.parseInt(role.getChannelId()));
         order.setChannelOrderID(channelOrderID);
-        order.setCompleteTime(completeTime != null ? new Date(completeTime) : null);
+        order.setCompleteTime(DateUtil.formatDate(completeTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
 
-
-        order.setCreatedTime(new Date());
+        order.setCreatedTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
         order.setCurrency("RMB");
         order.setExtension(extension);
         order.setMoney(money);
@@ -112,7 +111,7 @@ public class UOrderManager {
         order.setProductID(productID);
         order.setProductName(productName);
         order.setRealMoney(realMoney);
-        order.setSdkOrderTime(sdkOrderTime != null ? new Date(sdkOrderTime) : null);
+        order.setSdkOrderTime(DateUtil.formatDate(sdkOrderTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
 
         order.setServerID(serverID);
         order.setServerName(serverName);
@@ -122,6 +121,8 @@ public class UOrderManager {
 
         order.setRoleID(roleID);
         order.setRoleName(roleName);
+
+        System.out.println("Order:\n" + order.toJSON());
 
         int res = orderDao.save(order);
         System.out.println("saveOrder:" + res);

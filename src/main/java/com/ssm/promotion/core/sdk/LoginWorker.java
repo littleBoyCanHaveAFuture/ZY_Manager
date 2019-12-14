@@ -1,8 +1,13 @@
 package com.ssm.promotion.core.sdk;
 
+import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.enums.ServiceType;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author song minghua
@@ -16,7 +21,8 @@ public class LoginWorker {
      * 1开启白名单， 仅白名单列表玩家可进
      */
     public static int whiteListState = 0;
-
+    @Resource
+    ServerListService service;
 
     /**
      * 登陆校验
@@ -40,12 +46,15 @@ public class LoginWorker {
      * 用户是否可登录
      */
     public boolean isSpCanLogin(int appId, int channelId) {
-        return true;
+        if (channelId == -1) {
+            return false;
+        }
+        Map<String, Object> map = new HashMap<>();
+        return service.isSpCanLogin(map, null);
     }
 
     public String getGameInfo(int accountId, int appId) {
         //生成token
-
         return LoginToken.getToken(accountId, appId, ServiceType.LOGIN);
     }
 

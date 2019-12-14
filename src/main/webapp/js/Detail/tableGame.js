@@ -1,7 +1,6 @@
 $(function () {
     initTableColumns();
-    initGameList();
-    // $('#save_startTime').datetimebox('setValue', '12/01/2019 00:00');
+    initSpGameServer(1);
     $('#save_startTime').datebox('setValue', formatterDate(new Date(), 0));
     $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
 });
@@ -83,32 +82,7 @@ function initTableColumns() {
 
 }
 
-function initGameList() {
-    $.ajax({
-        //获取下拉
-        url: "/server/getGameList",
-        type: "get",
-        async: false,
-        dataType: "json",
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                let select_gameId = $("#save_gameId");
-                select_gameId.find("option").remove();
-                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                for (let res = 0; res < result.total; res++) {
-                    select_gameId.append("<option  value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
-                }
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
-        }
-    });
-}
-
-function initServerList(type) {
+function initSpGameServer(type) {
     let gameId = $('#save_gameId').val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
@@ -119,9 +93,7 @@ function initServerList(type) {
         "spId": spId,
         "type": type
     };
-    console.log("data " + gameId);
-    console.log("data " + serverId);
-    console.log("data " + spId);
+
     $.ajax({
         //获取下拉
         url: "/server/getDistinctServerInfo",
@@ -133,22 +105,32 @@ function initServerList(type) {
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
-                console.log(result);
+                // console.log(result);
                 if (type === 1) {
-                    let select_serverId = $("#save_serverId");
-                    select_serverId.find("option").remove();
-                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                } else {
                     let select_spId = $("#save_spId");
                     select_spId.find("option").remove();
                     select_spId.append("<option value=-1 selected=selected>请选择</option>");
                     for (let res = 0; res < result.total; res++) {
                         select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
                     }
+                } else if (type === 2) {
+                    let select_gameId = $("#save_gameId");
+                    select_gameId.find("option").remove();
+                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        let gameid = result.rows[res].gameId;
+                        let name = result.rows[res].name + "\t" + gameid;
+                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
+                    }
+                } else if (type === 3) {
+                    let select_serverId = $("#save_serverId");
+                    select_serverId.find("option").remove();
+                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
                 }
+
             }
         },
         error: function () {
@@ -156,6 +138,7 @@ function initServerList(type) {
         }
     });
 }
+
 
 //登录超时 重新返回到登录界面
 function relogin() {
@@ -198,18 +181,20 @@ function search() {
         dataType: "json",
         async: false,
         success: function (result) {
+            console.info(result);
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
                 let useTime = result.time;
-
-                let rows = result.rows;
-                rows = rows.map(function (row) {
-                    row.date = row.date.substring(0, 4) + "-" + row.date.substring(4, 6) + "-" + row.date.substring(6);
-                    row.createAccountRate = row.createAccountRate + "%";
-                    row.activePayRate = row.activePayRate + "%";
-                    return row;
-                });
+                if (result.total !== 0) {
+                    let rows = result.rows;
+                    rows = rows.map(function (row) {
+                        row.date = row.date.substring(0, 4) + "-" + row.date.substring(4, 6) + "-" + row.date.substring(6);
+                        row.createAccountRate = row.createAccountRate + "%";
+                        row.activePayRate = row.activePayRate + "%";
+                        return row;
+                    });
+                }
 
                 result = {
                     total: result.total,

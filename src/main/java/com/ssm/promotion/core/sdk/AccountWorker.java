@@ -89,7 +89,7 @@ public class AccountWorker {
             //某游戏 是否开放注册
             if (!serverService.isSpCanReg(tmp, -1)) {
                 //返回结果
-                reply.put("err", "未开放注册");
+                reply.put("message", "未开放注册");
                 reply.put("status", 0);
                 break;
             }
@@ -100,11 +100,11 @@ public class AccountWorker {
             int deviceSize = this.getDeviceCreateAccount(deviceCode, spid);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {
-                    reply.put("err", "设备码非法");
+                    reply.put("message", "设备码非法");
                     reply.put("status", 0);
                     break;
                 } else if (deviceSize == 20) {
-                    reply.put("err", "已到达设备创建账号最大数量");
+                    reply.put("message", "已到达设备创建账号最大数量");
                     reply.put("status", 0);
                     break;
                 }
@@ -112,32 +112,32 @@ public class AccountWorker {
             //封禁ip
             if (TemplateWorker.hasBanIp(ip)) {
                 TemplateWorker.addBanIp(ip);
-                reply.put("err", "玩家ip已被封禁");
+                reply.put("message", "玩家ip已被封禁");
                 reply.put("status", 0);
                 break;
             }
             //账号密码注册
             if (!auto) {
                 if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("err", "用户名长度不对！");
+                    reply.put("message", "用户名长度不对！");
                     reply.put("status", 0);
                     break;
                 }
                 //名称合法
                 if (!StringUtil.isValidUsername(username)) {
                     //Todo
-                    reply.put("err", "用户名格式不合法！");
+                    reply.put("message", "用户名格式不合法！");
                     reply.put("status", 0);
                     break;
                 }
                 // 能包含敏感词
                 if (TemplateWorker.hasBad(username)) {
-                    reply.put("err", "用户名包含敏感词！");
+                    reply.put("message", "用户名包含敏感词！");
                     reply.put("status", 0);
                     break;
                 }
                 if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("err", "密码长度不对");
+                    reply.put("message", "密码长度不对");
                     reply.put("status", 0);
                     break;
                 }
@@ -145,20 +145,20 @@ public class AccountWorker {
 
             //检查渠道id和渠道用户id是否存在
             if (accountService.exist(map) > 0) {
-                reply.put("err", "渠道账号已经存在");
+                reply.put("message", "渠道账号已经存在");
                 reply.put("status", 0);
                 break;
             }
             //创建账号
             Account account = this.createAccount(map);
             if (account == null) {
-                reply.put("err", "注册失败");
+                reply.put("message", "注册失败");
                 reply.put("status", 0);
                 break;
             }
             if (account.getId() < AccountWorker.USERID_BEGIN) {
                 if (account.getId() == -2) {
-                    reply.put("err", "账号名重复");
+                    reply.put("message", "账号名重复");
                     reply.put("status", 0);
                     break;
                 }
@@ -169,7 +169,6 @@ public class AccountWorker {
             reply.put("account", account.getName());
             reply.put("pwd", account.getPwd());
             reply.put("status", 1);
-            //注册成功 相关数据存入redis
 
         } while (false);
 
@@ -195,14 +194,14 @@ public class AccountWorker {
             //某游戏 是否开放注册
             if (!serverService.isSpCanReg(tmp, -1)) {
                 //返回结果
-                reply.put("err", "未开放注册");
+                reply.put("message", "未开放注册");
                 break;
             }
 
             //封禁ip
             if (TemplateWorker.hasBanIp(ip)) {
                 TemplateWorker.addBanIp(ip);
-                reply.put("err", "玩家ip已被封禁");
+                reply.put("message", "玩家ip已被封禁");
                 break;
             }
 
@@ -211,12 +210,12 @@ public class AccountWorker {
             //创建账号
             Account account = this.createAccount(map);
             if (account == null) {
-                reply.put("err", "注册失败");
+                reply.put("message", "注册失败");
                 break;
             }
             if (account.getId() < AccountWorker.USERID_BEGIN) {
                 if (account.getId() == -2) {
-                    reply.put("err", "账号名重复");
+                    reply.put("message", "账号名重复");
                     break;
                 }
             }

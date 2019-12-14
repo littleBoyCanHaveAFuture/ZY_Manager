@@ -5,10 +5,15 @@ let t_sign;
 let t_pwd;
 let t_channelId;
 let t_channelUid;
+let t_status = 0;
+$(function () {
+    initSpGameServer(1);
+})
 
-function myFunction(id) {
-    let x = document.getElementById("username").value;
-    document.getElementById("out").innerHTML = "你输入的是: " + x * 10;
+function myFunction() {
+    // let x = document.getElementById("username").value;
+    let status = ["登录界面", "选择区服", "选择角色", "在线", "离线"];
+    document.getElementById("status").innerHTML = status[isOnline];
 }
 
 function register() {
@@ -40,23 +45,20 @@ function register() {
             return;
         }
     }
-
     let data = {
-        "username": username,
-        "pwd": password,
-        "phone": 18571470846,
-        "deviceCode": "PC",
-
-        "imei": "PC",
+        "auto": auto,
+        "appId": appId,
         "channelId": channelId,
         "channelUid": channelUid,
-        "channelUname": 546546,
-        "channelUnick": 10,
+        "channelUname": "546546",
+        "channelUnick": "10",
 
-        "addparm": 10,
-        "appId": appId,
-        "auto": auto
-
+        "username": username,
+        "pwd": password,
+        "phone": "18571470846",
+        "deviceCode": "PC",
+        "imei": "PC",
+        "addparm": ""
     };
     $.ajax({
         url: "/ttt/register",
@@ -67,15 +69,16 @@ function register() {
         async: false,
         success: function (result) {
             if (result.resultCode === 200) {
-                if (result.data.status != 1) {
-                    $.messager.alert("注册失败：", result.data.err);
-                } else {
+                $.messager.alert("注册结果：", result.data.message);
+                if (result.data.status === 1) {
+
                     t_accountid = result.data.account;
                     t_pwd = result.data.pwd;
+
                     let ss = "账号:" + result.data.account + "\n密码：" + result.data.pwd;
+
                     $.messager.alert("注册成功：", ss);
                 }
-
             }
         },
         error: function () {
@@ -167,15 +170,12 @@ function logincheck() {
 }
 
 function entergame() {
-    // let appId = t_appid;
-    // let serverId = $("#serverId").val();
-    // let channelId = $("#channelId").val();
     let channelUserId = $("#channelUserId").val();
-
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let roleId = $("#roleId").val();
+
     t_channelId = channelId;
     t_channelUid = channelUserId;
 
@@ -195,6 +195,7 @@ function entergame() {
         success: function (result) {
             if (result.resultCode === 200) {
                 $.messager.alert("系统提示", "进入成功");
+                console.info(result.data);
             }
         },
         error: function () {
@@ -204,11 +205,8 @@ function entergame() {
 }
 
 function exitgame() {
-    // let appId = t_appid;
-    // let serverId = $("#serverId").val();
-    // let channelId = $("#channelId").val();
-    let channelUserId = $("#channelUserId").val();
 
+    let channelUserId = $("#channelUserId").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -227,9 +225,11 @@ function exitgame() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (result) {
-            console.log("result：" + result.status);
             if (result.resultCode === 200) {
                 $.messager.alert("系统提示", result.status);
+                console.info(result.data());
+                t_status = 4;
+                myFunction();
             }
         },
         error: function () {
@@ -244,6 +244,7 @@ function cretaterole() {
     let channelId = $("#save_spId").val();
     let key = "createrole";
     let roleId = $("#roleId").val();
+
     let value = {
         "channelId": channelId,
         "channelUid": t_channelUid,
@@ -273,9 +274,10 @@ function cretaterole() {
         dataType: "json",
         async: false,
         success: function (result) {
-            console.log("result：" + result.status);
+            console.log("result：" + result.message);
+            console.info(result.data);
             if (result.resultCode === 200) {
-                $.messager.alert("角色id", result.roleId);
+                $.messager.alert("角色id", result.data.roleId);
             }
         },
         error: function () {
@@ -298,7 +300,7 @@ function pay() {
     let productID = "1";//   当前商品ID
     let productName = "测试1";// 商品名称
     let productDesc = "0.0.1";//  游戏版本
-    let money = "600";//  单位 分
+    let money = $("#money").val();//  单位 分
     let roleID = roleId;//   玩家在游戏服中的角色ID
     let roleName = "测试账号1";//  玩家在游戏服中的角色名称
     let roleLevel = "1";//   玩家等级
@@ -312,7 +314,7 @@ function pay() {
 
     // if (status === "1" || status === "2") {
     extension = {
-        "realMoney": 600,
+        "realMoney": $("#money").val(),
         "completeTime": new Date().getTime(),
         "sdkOrderTime": new Date().getTime()
     };
@@ -348,13 +350,13 @@ function pay() {
     $.ajax({
         url: url,
         type: "get",
-        // data: JSON.stringify(jsondata),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (result) {
             console.log("result：" + result.state);
             if (result.resultCode === 200) {
-                $.messager.alert("系统提示", stateMsg[result.state]);
+                $.messager.alert("系统提示", stateMsg[result.data.state]);
+                console.info("result：" + result.data);
             }
         },
         error: function () {
@@ -363,32 +365,8 @@ function pay() {
     });
 }
 
-function initGameList() {
-    $.ajax({
-        //获取下拉
-        url: "/server/getGameList",
-        type: "get",
-        async: false,
-        dataType: "json",
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                let select_gameId = $("#save_gameId");
-                select_gameId.find("option").remove();
-                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                for (let res = 0; res < result.total; res++) {
-                    select_gameId.append("<option  value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
-                }
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
-        }
-    });
-}
 
-function initServerList(type) {
+function initSpGameServer(type) {
     let gameId = $('#save_gameId').val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
@@ -399,9 +377,7 @@ function initServerList(type) {
         "spId": spId,
         "type": type
     };
-    // console.log("data " + gameId);
-    // console.log("data " + serverId);
-    // console.log("data " + spId);
+
     $.ajax({
         //获取下拉
         url: "/server/getDistinctServerInfo",
@@ -415,20 +391,30 @@ function initServerList(type) {
             } else if (result.resultCode === 200) {
                 // console.log(result);
                 if (type === 1) {
-                    let select_serverId = $("#save_serverId");
-                    select_serverId.find("option").remove();
-                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                } else {
                     let select_spId = $("#save_spId");
                     select_spId.find("option").remove();
                     select_spId.append("<option value=-1 selected=selected>请选择</option>");
                     for (let res = 0; res < result.total; res++) {
                         select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
                     }
+                } else if (type === 2) {
+                    let select_gameId = $("#save_gameId");
+                    select_gameId.find("option").remove();
+                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        let gameid = result.rows[res].gameId;
+                        let name = result.rows[res].name + "\t" + gameid;
+                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
+                    }
+                } else if (type === 3) {
+                    let select_serverId = $("#save_serverId");
+                    select_serverId.find("option").remove();
+                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
+                    }
                 }
+
             }
         },
         error: function () {

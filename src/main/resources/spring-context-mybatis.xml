@@ -79,8 +79,8 @@
     </bean>
 
     <bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
-        <property name="dataSourceLogEnabled" value="true" />
-        <property name="statementExecutableSqlLogEnable" value="true" />
+        <property name="dataSourceLogEnabled" value="true"/>
+        <property name="statementExecutableSqlLogEnable" value="true"/>
     </bean>
 
 </beans>

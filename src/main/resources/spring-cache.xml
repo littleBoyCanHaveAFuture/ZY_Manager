@@ -41,7 +41,7 @@
     </bean>
     <!-- 全服概况 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
     <bean id="JedisRechargeCache" class="com.ssm.promotion.core.jedis.JedisRechargeCache">
-        <property name="jedisManager" ref="jedisManager"/>
+        <property name="jedismanager" ref="jedisManager"/>
     </bean>
     <!--  数据库模板表读取 启动时初始化-->
     <bean id="TemplateWorker" class="com.ssm.promotion.core.sdk.TemplateWorker" init-method="init">

@@ -1,15 +1,19 @@
 package com.ssm.promotion.core.jedis;
 
+import static com.ssm.promotion.core.jedis.RedisKeyBody.*;
+
 /**
  * @author song minghua
  * @date 2019/11/28
  */
 public class RedisKey {
+    //    public static final String FORMAT_SG = "%s:spid:%s:gid:%d";
+    //    public static final String FORMAT_SGS = "%s:spid:%s:gid:%d:sid:%d";
+    public static final String FORMAT_SG = "%s:" + SP_ID + ":%s:" + GAME_ID + ":%d";
+    public static final String FORMAT_SGS = "%s:" + SP_ID + ":%s:" + GAME_ID + ":%d:" + SERVER_ID + ":%d";
 
-
-    public static final String FORMAT_SG = "%s:spid:%s:gid:%d";
-    public static final String FORMAT_SGS = "%s:spid:%s:gid:%d:sid:%d";
-
+    public static final String FORMAT_SG_SDD = "%s:" + SP_ID + ":%d:" + GAME_ID + ":%d";
+    public static final String FORMAT_SGS_SDDD = "%s:" + SP_ID + ":%d:" + GAME_ID + ":%d:" + SERVER_ID + ":%d";
     /**
      * 充值次数
      */

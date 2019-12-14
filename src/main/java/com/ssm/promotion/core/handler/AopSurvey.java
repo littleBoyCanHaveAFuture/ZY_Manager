@@ -163,7 +163,10 @@ public class AopSurvey {
             case "getGameList":
             case "getDistinctServerInfo":
             case "isSpCanReg":
-
+            case "existSGS":
+            case "deleteGame":
+            case "addGame":
+            case "updateGame":
                 //文章
             case "findArticle":
             case "getTotalArticle":
@@ -275,6 +278,9 @@ public class AopSurvey {
             case "getGameList":
             case "getDistinctServerInfo":
             case "isSpCanReg":
+            case "deleteGame":
+            case "addGame":
+            case "updateGame":
                 //文章
             case "findArticle":
             case "getTotalArticle":

@@ -30,7 +30,7 @@
 </head>
 <body style="margin:1px;">
 
-<table id="dg" title="注：需要先查询游戏、区服、渠道后方可查询" class="easyui-datagrid" pagination="true" fitcolumns="true"
+<table id="dg" title="使用指南：请先选择渠道，然后查询对应的游戏、区服！" class="easyui-datagrid" pagination="true" fitcolumns="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#tb">
     <thead>
     <tr>
@@ -43,8 +43,14 @@
 
 <div id="tb" fitcolumns="true">
     <div id="tbs">
+        <label for="save_spId"></label>
+        <span style="color: blue; ">渠道:</span>
+        <select title="选择渠道" id="save_spId" name="spId">
+            <option value="-1" selected="selected">请选择</option>
+        </select>
+
         <label for="save_gameId"></label>
-        <span style="color: blue; ">游戏:</span>
+        <span style="color: blue;margin-left:50px  ">游戏:</span>
         <select title="选择游戏" id="save_gameId" name="gameId">
             <option value="-1" selected="selected">请选择</option>
         </select>
@@ -52,12 +58,6 @@
         <label for="save_serverId"></label>
         <span style="color: blue; margin-left:50px">区服:</span>
         <select title="选择区服" id="save_serverId" name="serverId">
-            <option value="-1" selected="selected">请选择</option>
-        </select>
-
-        <label for="save_spId"></label>
-        <span style="color: blue;margin-left:50px ">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
@@ -77,12 +77,12 @@
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
     <div>
-        <a href="javascript:initGameList()" class="easyui-linkbutton" style=""
-           iconCls=" icon-search" plain="true">查询游戏</a>
-        <a href="javascript:initServerList(1)" class="easyui-linkbutton" style="margin-left:50px"
-           iconCls=" icon-search" plain="true">查询区服</a>
-        <a href="javascript:initServerList(2)" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style=""
            iconCls=" icon-search" plain="true">查询渠道</a>
+        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询游戏</a>
+        <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询区服</a>
     </div>
 </div>
 

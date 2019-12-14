@@ -7,8 +7,6 @@ import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
-import com.ssm.promotion.core.util.ServerInfoUtil;
-import com.ssm.promotion.core.util.StringUtil;
 import com.ssm.promotion.core.util.enums.RSType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -24,7 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author song minghua
@@ -41,6 +42,7 @@ public class RechargeSummaryControllr {
     private ServerListService serverService;
     @Autowired
     private HttpServletRequest request;
+
 
     /**
      * 获取当前用户 session
@@ -60,10 +62,10 @@ public class RechargeSummaryControllr {
      */
     @RequestMapping(value = "/searchRechargeSummary", method = RequestMethod.POST)
     @ResponseBody
-    public void searchRechargeSummary(Integer type,
-                                      Integer gameId, Integer serverId, String spId,
-                                      String startTime, String endTime,
-                                      HttpServletResponse response) throws Exception {
+    public void searchRechargeSmummary(Integer type,
+                                       Integer spId, Integer gameId, Integer serverId,
+                                       String startTime, String endTime,
+                                       HttpServletResponse response) throws Exception {
         System.out.println("searchRS:");
         Integer userId = getUserId();
         if (userId == null) {
@@ -80,7 +82,7 @@ public class RechargeSummaryControllr {
                 result.put("status", Constants.ERR_RSTYPE);
                 break;
             }
-            if (gameId == null || gameId == -1) {
+            if (gameId == null) {
                 result.put("status", Constants.ERR_GAMEID);
                 break;
             }
@@ -110,175 +112,140 @@ public class RechargeSummaryControllr {
 
 
             List<RechargeSummary> list = this.getGameRechargeSummary(map, userId);
-            list.forEach(rs -> System.out.println(rs.toJSONString()));
-            JSONArray jsonArray = JSONArray.fromObject(list);
-            result.put("rows", jsonArray);
-            result.put("total", list.size());
 
-//            System.out.println("request: rechargeSummary/searchRechargeSummary , map: " + result.toString());
-//            log.info("request: rechargeSummary/searchRechargeSummary , map: " + map.toString());
+            list.forEach(rs -> System.out.println(rs.toJSONString()));
+
+            result.put("rows", JSONArray.fromObject(list));
+            result.put("total", list.size());
 
         } while (false);
 
+        String usetime = new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000);
 
-        long e = System.currentTimeMillis();
-
-        System.out.println("use:" + (e - s));
+        System.out.println("use:" + usetime);
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-        result.put("time", new DecimalFormat("0.00").format((double) (e - s) / 1000));
-        ResponseUtil.write(response, result);
+        result.put("time", usetime);
 
+        ResponseUtil.write(response, result);
     }
 
     /**
      * 根据type获取不同的数据
+     *
+     * @param map    type
+     *               gameId
+     *               serverId
+     *               spId
+     * @param userId 账号id
      */
     public List<RechargeSummary> getGameRechargeSummary(Map<String, Object> map, Integer userId) throws Exception {
         int type = Integer.parseInt(map.get("type").toString());
         int gameId = Integer.parseInt(map.get("gameId").toString());
         int serverId = Integer.parseInt(map.get("serverId").toString());
-        String spId = map.get("spId").toString();
+        int spId = Integer.parseInt(map.get("spId").toString());
+        String startTimes = map.get("startTime").toString();
+        String endTimes = map.get("endTime").toString();
 
-        Map<String, Object> searchMap = new HashMap<>(1);
-        searchMap.put("gameId", gameId);
-        //1.查询对应区服
-        //该游戏-所有不同区服列表
-        List<Integer> serverIdList = this.getServerList(searchMap, userId);
-        if (serverId == -1) {
-            if (serverIdList == null || serverIdList.size() == 0) {
-                return null;
-            }
-        } else {
-            //判断该游戏有该区服
-            if (!serverIdList.contains(serverId)) {
-                return null;
-            }
-            serverIdList.clear();
-            serverIdList.add(serverId);
-        }
+        //1.查询渠道-游戏-区服
+        //<渠道,<游戏，区服>>
+        Map<Integer, Map<Integer, List<Integer>>> sgsMap = new HashMap<>();
+        getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
 
-        switch (type) {
-            case 1:
-            case 2: {
-                //2.查询区服对应渠道
-                Map<Integer, List<String>> serverSpIdMap = getServerSpIdList(searchMap, serverIdList, userId);
-                //3.计算结果
-                return this.rechargeSummaryServices.getRechargeSummary(map, serverSpIdMap, null, userId);
+        //2.时间转化
+        List<String> timeList = DateUtil.transTimes(startTimes, endTimes, DateUtil.FORMAT_YYYY_MMDD_HHmm);
+
+        //3.查询redis
+        return this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
+    }
+
+    public void getAllSGS(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type, int userId) {
+        //查询数据结果
+        Map<Integer, Map<Integer, List<Integer>>> tmpMap = new HashMap<>();
+        //所有渠道-游戏-区服
+        List<ServerInfo> serverInfoList = serverService.getServerList(new HashMap<>(), userId);
+
+        for (ServerInfo serverInfo : serverInfoList) {
+            Integer sSpId = serverInfo.getSpId();
+            Integer sGameId = serverInfo.getGameId();
+            Integer sServerId = serverInfo.getServerId();
+
+            if (sSpId == null || sGameId == null || sServerId == null) {
+                continue;
             }
-            case 3: {
-                //游戏分渠道查看数据
-                //需要明确的 gameId serverId
-                List<String> spidStrList = this.getSpIdList(map, userId);
-                //SpId 是否 渠道拼接的
-                boolean isContainShu = spId.contains("|");
-                if (isContainShu) {
-                    isContainShu = false;
-                    String[] spidlist = spId.split("|");
-                    for (String s : spidlist) {
-                        if (spidStrList.contains(spId)) {
-                            isContainShu = true;
-                            break;
-                        }
-                    }
-                    if (isContainShu) {
-                        spidStrList.clear();
-                        for (String s : spidlist) {
-                            if (!spidStrList.contains(spId)) {
-                                spidStrList.add(spId);
-                            }
-                        }
-                    }
+
+            if (!tmpMap.containsKey(sSpId)) {
+                Map<Integer, List<Integer>> gsMap = new HashMap<>();
+                List<Integer> serverIdList = new ArrayList<>();
+
+                serverIdList.add(sServerId);
+                gsMap.put(sGameId, serverIdList);
+                tmpMap.put(sSpId, gsMap);
+            } else {
+                if (!tmpMap.get(sSpId).containsKey(sGameId)) {
+                    List<Integer> serverIdList = new ArrayList<>();
+                    serverIdList.add(sServerId);
+                    tmpMap.get(sSpId).put(gameId, serverIdList);
                 } else {
-                    if (!StringUtil.isInteger(spId) || spId.equals("-1")) {
-                        //不能转数字 或者 -1 则查询所有区服
-                    } else if (spidStrList.contains(spId)) {
-                        //单个 渠道
-                        spidStrList.clear();
-                        spidStrList.add(spId);
+                    List<Integer> serverIdList = tmpMap.get(sSpId).get(sGameId);
+                    serverIdList.add(sServerId);
+                }
+            }
+        }
+        //2.筛选
+        //某些条件下不允许查询所有
+        //查询所有的
+        if (type == 2) {
+            //需要指定 渠道和游戏id 不能为 -1
+            if (spId == -1 || gameId == -1) {
+                return;
+            }
+        } else if (type == 3) {
+            if (gameId == -1) {
+                return;
+            }
+        }
+
+        //排除不需要的渠道
+        if (spId != -1) {
+            for (Integer sp : tmpMap.keySet()) {
+                if (sp != spId) {
+                    tmpMap.remove(sp);
+                }
+            }
+        }
+        //排除不需要的游戏
+        if (gameId != -1) {
+            for (Integer sp : tmpMap.keySet()) {
+                Map<Integer, List<Integer>> gameMap = tmpMap.get(sp);
+                for (Integer game : gameMap.keySet()) {
+                    if (game != gameId) {
+                        gameMap.remove(game);
                     }
                 }
-
-                if (spidStrList.size() == 0) {
-                    break;
-                }
-
-                //查询redis
-                return this.rechargeSummaryServices.getRechargeSummary(map, null, spidStrList, userId);
-            }
-            default:
-                break;
-        }
-        return null;
-    }
-
-    /**
-     * 查询该游戏所有区服id
-     */
-    public List<Integer> getServerList(Map<String, Object> map, Integer userId) {
-        List<String> serverInfos = serverService.getDistinctServerInfo(map, 1, userId);
-
-        //转数字并排重
-        List<Integer> serverIntList = new LinkedList<>();
-        for (String serverIdStr : serverInfos) {
-            Integer serverId = Integer.parseInt(serverIdStr);
-            if (!serverIntList.contains(serverId)) {
-                serverIntList.add(serverId);
             }
         }
-        return serverIntList;
-    }
-
-    /**
-     * case = 3
-     * 查询该游戏所有渠道id
-     */
-    public List<String> getSpIdList(Map<String, Object> map, Integer userId) {
-        List<String> serverInfos = serverService.getDistinctServerInfo(map, 2, userId);
-        return ServerInfoUtil.spiltStrList(serverInfos);
-    }
-
-    /**
-     * @param searchMap
-     * @param serverIdList 查询的区服列表
-     * @param userId
-     * @return map(serverId, List < Spid >)
-     */
-    public Map<Integer, List<String>> getServerSpIdList(Map<String, Object> searchMap, List<Integer> serverIdList, Integer userId) {
-        //对应渠道List 需要排重
-        Map<Integer, List<String>> serverIdMap = this.getServerSpMap(searchMap, serverIdList, userId);
-        if (serverIdMap.isEmpty()) {
-            return null;
-        }
-        for (Integer serverId : serverIdMap.keySet()) {
-            List<String> value = serverIdMap.get(serverId);
-            serverIdMap.replace(serverId, ServerInfoUtil.spiltStrList(value));
-        }
-        return serverIdMap;
-    }
-
-
-    /**
-     * mysql
-     * 获取区服对应的渠道列表
-     *
-     * @param serverIdList 游戏服务器列表
-     */
-    public Map<Integer, List<String>> getServerSpMap(Map<String, Object> map, List<Integer> serverIdList, Integer userId) {
-        Map<Integer, List<String>> maplist = new LinkedHashMap<>(serverIdList.size());
-
-        //游戏区服对应渠道列表
-        List<ServerInfo> serverInfos = serverService.getServerList(map, userId);
-        for (int serverId : serverIdList) {
-            List<String> serverSpList = new LinkedList<>();
-            for (ServerInfo info : serverInfos) {
-                if (info.getServerId() == serverId) {
-                    serverSpList.add(info.getSpId());
+        //排除不需要的区服
+        if (serverId != -1) {
+            for (Integer sp : tmpMap.keySet()) {
+                Map<Integer, List<Integer>> gameMap = tmpMap.get(sp);
+                for (Integer game : gameMap.keySet()) {
+                    List<Integer> serverList = gameMap.get(game);
+                    //需要的区服存在 添加进去
+                    if (serverList.contains(serverId)) {
+                        serverList.clear();
+                        serverList.add(serverId);
+                    }
                 }
             }
-            maplist.put(serverId, serverSpList);
         }
+        sgsMap.putAll(tmpMap);
 
-        return maplist;
+        for (Integer sp : sgsMap.keySet()) {
+            System.out.println("sgsMap----->sp:" + sp + ":" + sgsMap.get(sp).toString());
+        }
     }
+
+
 }
+

@@ -59,11 +59,12 @@ function getLinesByDate(type) {
         }],
         legend: {	//图表上方的类别显示
             show: true,
-            data: ['收入'],
+            data: ['新增', '在线'],
             x: 'left'
         },
         color: [
-            '#AC00AC',	//收入
+            '#FF3333',	//新增
+            '#53FF53',	//在线
         ],
         toolbox: {
             feature: {
@@ -93,7 +94,7 @@ function getLinesByDate(type) {
                 interval: 10, //值之间的间隔
                 type: 'value',
                 axisLabel: {
-                    formatter: '{value} 分'	//控制输出格式
+                    formatter: '{value} 人'	//控制输出格式
                 }
             }
 
@@ -102,7 +103,13 @@ function getLinesByDate(type) {
         series: [
             //设置折线图中表示每个坐标点的符号；emptycircle：空心圆；emptyrect：空心矩形；circle：实心圆；emptydiamond：菱形
             {
-                name: '收入',
+                name: '新增',
+                type: 'line',	//折线图表示（生成温度曲线）
+                symbol: 'emptycircle',
+                data: []		//数据值通过Ajax动态获取
+            },
+            {
+                name: '在线',
                 type: 'line',
                 symbol: 'emptycircle',
                 data: []
@@ -142,13 +149,18 @@ function getLinesByDate(type) {
         dataType: "json",
         success: function (result) {
             if (result.resultCode === 200) {
+                let newadd = [];
+                let online = [];
                 let money = [];
                 let times = [];
 
-                money = result.money;
+                newadd = result.newadd;
+                online = result.onlines;
                 times = result.times;
 
-                console.info("money" + money);
+                console.info("newadd" + newadd);
+                console.info("online" + online);
+
                 times = times.map(function (str) {
                     let yyyy = str.substring(0, 4);
                     let MM = str.substring(4, 6);
@@ -158,7 +170,7 @@ function getLinesByDate(type) {
                     return yyyy + "-" + MM + "-" + dd + " " + mm + ":" + ss;
                 });
 
-                let maxValue = 2 * getmax(money);
+                let maxValue = 2 * getmax([getmax(newadd), getmax(online)]);
                 let ymax = (maxValue === 0) ? 10 : maxValue;
                 let interval = 1;
                 if (ymax <= 10) {
@@ -181,12 +193,8 @@ function getLinesByDate(type) {
                 } else if (ymax <= 10000) {
                     ymax = 10000;
                     interval = ymax / 10;
-                } else {
-                    ymax = maxValue;
-                    interval = ymax / 10;
                 }
-                console.log("ymax=" + ymax);
-                console.log("interval=" + interval);
+
                 //隐藏加载动画
                 myChart.hideLoading();
                 //载入数据
@@ -199,8 +207,12 @@ function getLinesByDate(type) {
                     //填入系列（内容）数据
                     series: [
                         {
-                            name: '收入',
-                            data: money
+                            name: '新增',
+                            data: newadd
+                        },
+                        {
+                            name: '在线',
+                            data: online
                         }
                     ],
                     yAxis: [
@@ -210,7 +222,7 @@ function getLinesByDate(type) {
                             interval: interval, //值之间的间隔
                             type: 'value',
                             axisLabel: {
-                                formatter: '{value} 分'	//控制输出格式
+                                formatter: '{value} 人'	//控制输出格式
                             }
                         }
                     ],
