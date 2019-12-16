@@ -84,8 +84,8 @@ function initTableColumns() {
         // "渠道id": "spId",
         "开服天数": "openDay",
         "新增玩家": "newaddplayer",
-        "新增创号": "newAddCreateAccount",
-        "新增创角": "newAddCreateRole",
+        // "新增创号": "newAddCreateAccount",
+        // "新增创角": "newAddCreateRole",
         // "新增创角去除滚服": "newAddCreateRoleRemoveOld",
         // "创角率": "createAccountRate",
         // "创号转化率":"createAccountTransRate",
@@ -105,7 +105,7 @@ function initTableColumns() {
 //分服
         "累计充值(分)": "totalPayment",
         "累计创角": "totalCreateRole",
-        "累计充值人数": "totalRechargeNums",
+        "累计充值次数": "totalRechargeNums",
         "总付费率": "totalRechargeRates",
 //渠道
 //     "注收比": "zhushoubi",

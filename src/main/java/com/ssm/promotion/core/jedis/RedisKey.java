@@ -50,5 +50,9 @@ public class RedisKey {
      */
     public static final String GAME_ACCUMULATION_RECHARGE_ACCOUNTS = "GACC_RE_AC";
 
+    /**
+     * 当天总付费率
+     */
+    public static final String RECHARGE_TOTAL_RATE = "RE_TO_RATE";
 
 }

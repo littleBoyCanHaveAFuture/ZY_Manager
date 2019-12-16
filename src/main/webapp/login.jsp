@@ -39,10 +39,12 @@
               action="##">
 
             <div class="form-group">
+                <label for="userName"></label>
                 <input type="email" class="form-control" placeholder="用户名" name="userName" id="userName" required="">
             </div>
 
             <div class="form-group">
+                <label for="password"></label>
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 

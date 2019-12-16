@@ -353,10 +353,9 @@ function pay() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (result) {
-            console.log("result：" + result.state);
+            console.log("result：" + result.data.state);
             if (result.resultCode === 200) {
-                $.messager.alert("系统提示", stateMsg[result.data.state]);
-                console.info("result：" + result.data);
+                $.messager.alert("系统提示", result.data);
             }
         },
         error: function () {
@@ -401,7 +400,9 @@ function initSpGameServer(type) {
                     let select_gameId = $("#save_gameId");
                     select_gameId.find("option").remove();
                     select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                    console.info(result.rows);
                     for (let res = 0; res < result.total; res++) {
+
                         let gameid = result.rows[res].gameId;
                         let name = result.rows[res].name + "\t" + gameid;
                         select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");

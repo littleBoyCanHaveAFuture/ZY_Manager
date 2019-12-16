@@ -147,6 +147,7 @@ public class RechargeSummary {
     public int totalRechargeNums;
     /**
      * 总付费率
+     * 付费玩家账号/所有的玩家账号
      */
     public double totalRechargeRates;
 
@@ -306,19 +307,19 @@ public class RechargeSummary {
                 if (this.createAccountTransRate == 0) {
                     this.setCreateAccountTransRate(0);
                 } else {
-//                    this.setCreateAccountTransRate(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+                    this.setCreateAccountTransRate(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
                 }
                 //注收比
                 if (this.zhushoubi == 0) {
                     this.setZhushoubi(0);
                 } else {
-//                    this.setZhushoubi(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+                    this.setZhushoubi(UtilG.format2point((double) this.totalPayment / this.newAddCreateRole * 100));
                 }
                 //新增注收比
                 if (this.addzhushoubi == 0) {
                     this.setAddzhushoubi(0);
                 } else {
-//                    this.setAddzhushoubi(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+//                    this.setAddzhushoubi(UtilG.format2point((double) this.p / this.newAddCreateAccount * 100));
                 }
             }
         }
@@ -330,7 +331,7 @@ public class RechargeSummary {
      */
     public void add(RechargeSummary add) {
         //1
-        date = add.date;
+//        date = add.date;
         //1/3
         newAddCreateAccount += add.newAddCreateAccount;
         newAddCreateRole += add.newAddCreateRole;

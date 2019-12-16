@@ -20,10 +20,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -284,20 +281,34 @@ public class ServerController {
         map.put("gameId", gameId);
         map.put("serverId", serverId);
 
+        int size = 0;
         List<Integer> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
         serverInfos = serverInfos.stream().sorted(Integer::compareTo).collect(Collectors.toList());
 
         JSONArray rows;
         if (type == 2) {
-            List<GameName> gameNameList = gameService.getGameList(map, userId);
+            //选择已经有的服务器名称
+            Map<String, Object> gamemap = new HashMap<>(1);
+            map.put("gameId", -1);
+            List<GameName> gameNameList = gameService.getGameList(gamemap, userId);
+
+            Iterator<GameName> it = gameNameList.iterator();
+            while (it.hasNext()) {
+                GameName gameName = it.next();
+                if (!serverInfos.contains(gameName.getGameId())) {
+                    it.remove();
+                }
+            }
             rows = JSONArray.fromObject(gameNameList);
+            size = gameNameList.size();
         } else {
             rows = JSONArray.fromObject(serverInfos);
+            size = serverInfos.size();
         }
 
         JSONObject result = new JSONObject();
         result.put("rows", rows.toString());
-        result.put("total", serverInfos.size());
+        result.put("total", size);
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
         ResponseUtil.write(response, result);

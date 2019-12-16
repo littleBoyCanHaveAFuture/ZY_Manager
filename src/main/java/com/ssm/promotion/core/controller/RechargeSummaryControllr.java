@@ -22,10 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author song minghua
@@ -43,6 +40,26 @@ public class RechargeSummaryControllr {
     @Autowired
     private HttpServletRequest request;
 
+
+    private void removeSpMap(Map<Integer, Map<Integer, List<Integer>>> tmpMap, int spId) {
+        Iterator<Map.Entry<Integer, Map<Integer, List<Integer>>>> it = tmpMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, Map<Integer, List<Integer>>> entry = it.next();
+            if (entry.getKey() != spId) {
+                it.remove();//使用迭代器的remove()方法删除元素
+            }
+        }
+    }
+
+    private void removeGameMap(Map<Integer, List<Integer>> tmpMap, int gameId) {
+        Iterator<Map.Entry<Integer, List<Integer>>> it = tmpMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, List<Integer>> entry = it.next();
+            if (entry.getKey() != gameId) {
+                it.remove();//使用迭代器的remove()方法删除元素
+            }
+        }
+    }
 
     /**
      * 获取当前用户 session
@@ -208,21 +225,13 @@ public class RechargeSummaryControllr {
 
         //排除不需要的渠道
         if (spId != -1) {
-            for (Integer sp : tmpMap.keySet()) {
-                if (sp != spId) {
-                    tmpMap.remove(sp);
-                }
-            }
+            removeSpMap(tmpMap, spId);
         }
         //排除不需要的游戏
         if (gameId != -1) {
             for (Integer sp : tmpMap.keySet()) {
                 Map<Integer, List<Integer>> gameMap = tmpMap.get(sp);
-                for (Integer game : gameMap.keySet()) {
-                    if (game != gameId) {
-                        gameMap.remove(game);
-                    }
-                }
+                removeGameMap(gameMap, gameId);
             }
         }
         //排除不需要的区服
@@ -245,7 +254,6 @@ public class RechargeSummaryControllr {
             System.out.println("sgsMap----->sp:" + sp + ":" + sgsMap.get(sp).toString());
         }
     }
-
 
 }
 
