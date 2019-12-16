@@ -24,6 +24,7 @@
     <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/login.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
 </head>
 
 <body class="gray-bg">

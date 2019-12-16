@@ -26,6 +26,7 @@
           href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
           href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/icon.css">
+
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
     <script type="text/javascript"
@@ -33,8 +34,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-
-
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
 <body class="easyui-layout">
 <div region="north" style="height: 78px;background-color: #ffff">
     <table width="100%">

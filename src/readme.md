@@ -11,26 +11,72 @@
 - 4.离开游戏
 - 5.充值上报
 
-####1.注册账号
-RedisKey
-#####该渠道-游戏 所有账号
-######BITMAP：UserInfo:spid:*:gid:*#G_AC_ANUMS
-#####该渠道-游戏 当日-新增创号 
-######BITMAP：UserInfo:spid:*:gid:*:date:yyyyMMdd#NA_CA
+#### 1.注册账号
 
-###### UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#
+###### 1.1 存储玩家账户：精确到，渠道-游戏
+###### BITMAP：UserInfo:spid:*:gid:*#G_AC_ANUMS
+
+###### 1.2 存储新增创号：精确到，渠道-游戏-当月天数
+###### BITMAP：UserInfo:spid:*:gid:*:date:yyyyMMdd#NA_CA
+
+#### 2.进入游戏
+###### 2.1 存储活跃账号：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ACT_PL
+
+###### 2.2 存储在线账号：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ON_PL
+
+###### 2.3 存储实时在线账号：精确到，渠道-游戏-区服-当前分钟
+###### BITMAP：RTS:spid:*:gid:*:sid:*:date:yyyyMMddHHmm#REAL_ONLINE_AC
+
 ###### API:spid:*:gid:*:sid:*:date:yyyyMMdd#
 ###### RTS:spid:*:gid:*:sid:*:date:yyyyMMdd#
 
+#### 3.创建角色
+###### 3.1 创建过角色的账号（可判断滚服账号）：精确到，渠道-游戏
+###### BITMAP：UserInfo:spid:*:gid:*#G_AC_SRole
 
+###### 3.1 新增创角：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#NA_CR
 
+###### 3.2 新增创角去除滚服：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#NA_CR_RM_OLD
+
+###### 3.3 累计创角：精确到，渠道-游戏-区服
+###### Sorted SET：UserInfo:spid:*:gid:*:sid:*#AC_INFO GACC_CR
+
+###### 3.4 实时新增创角（每分钟的创角数目）：精确到，渠道-游戏-当天 
+###### BITMAP：RTS:spid:*:gid:*:sid:*:date:yyyyMMdd#NA_CR yyyyMMddHHmm
+
+#### 4.离开游戏
+###### 4.1 移除在线账号：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ON_PL
 
 ####5.充值上报
+###### 5.1 累计充值金额：精确到，渠道-游戏-区服
+###### Sorted SET：API:spid:*:gid:*:sid:*#RE_TO_INFO GACC_RE_AM
 
-###### UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#
-###### API:spid:*:gid:*:sid:*:date:yyyyMMdd#
-###### RTS:spid:*:gid:*:sid:*:date:yyyyMMdd#
+###### 5.2 充值次数：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：API:spid:*:gid:*:sid:*:date:yyyyMMdd#RE_INFO RE_TS
 
-###### UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ON_PL
-###### UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ON_PL
-###### RTS:spid:*:gid:*:sid:*:date:yyyyMMddHHmm#REAL_ONLINE_AC
+###### 5.3 充值人数：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：API:spid:*:gid:*:sid:*date:yyyyMMdd#RE_INFO RE_PL
+
+###### 5.3 充值金额：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：API:spid:*:gid:*:sid:*date:yyyyMMdd#RE_INFO RE_AM
+
+###### 5.4 当日首次付费金额：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：API:spid:*:gid:*:sid:*date:yyyyMMdd#RE_INFO RE_FAM
+
+###### 5.4 当日首次付费人数：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：API:spid:*:gid:*:sid:*date:yyyyMMdd#RE_AC 
+
+###### 5.4 实时充值金额（每分钟的充值金额）：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：RTS:spid:*:gid:*:sid:*date:yyyyMMdd#REAL_RE_AM yyyyMMddHHmm
+
+###### 5.5 注册付费玩家：精确到，渠道-游戏-区服-当天天数
+###### BITMAP：API:spid:*:gid:*:sid:*date:yyyyMMdd#RE_AC_NA_CA 
+
+###### 5.6 注册付费金额（每分钟的充值金额）：精确到，渠道-游戏-区服-当天天数
+###### Sorted SET：RTS:spid:*:gid:*:sid:*date:yyyyMMdd#REAL_RE_AM RE_AM_NA_CA
+
