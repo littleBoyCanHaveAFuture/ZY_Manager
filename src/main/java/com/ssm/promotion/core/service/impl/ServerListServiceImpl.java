@@ -3,6 +3,7 @@ package com.ssm.promotion.core.service.impl;
 import com.ssm.promotion.core.dao.ServerListDao;
 import com.ssm.promotion.core.entity.ServerInfo;
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.util.RSAUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -26,7 +27,12 @@ public class ServerListServiceImpl implements ServerListService {
     }
 
     @Override
-    public int addServer(ServerInfo server, Integer userId) {
+    public int addServer(ServerInfo server, Integer userId) throws Exception {
+        //生成公钥私钥
+        Map<String, Object> keys = RSAUtils.generateKeys();
+
+        server.setPriKey(RSAUtils.getPrivateKey(keys));
+        server.setPubKey(RSAUtils.getPublicKey(keys));
         return serverListdao.insertServer(server);
     }
 
@@ -97,6 +103,16 @@ public class ServerListServiceImpl implements ServerListService {
     @Override
     public String getOpenday(Map<String, Object> map, Integer userId) {
         return serverListdao.selectOpenday(map);
+    }
+
+    @Override
+    public String selectPrivateKey(Map<String, Object> map, Integer userId) {
+        return serverListdao.selectPrivateKey(map);
+    }
+
+    @Override
+    public String selectPublicKey(Map<String, Object> map, Integer userId) {
+        return serverListdao.selectPublicKey(map);
     }
 
 }

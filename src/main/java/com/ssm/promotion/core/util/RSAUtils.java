@@ -170,7 +170,10 @@ public class RSAUtils {
 
         System.out.println("The pubKey is ");
         System.out.println(pubKey);
+        System.out.println("lenth " + pubKey.length());
+        System.out.println("The priKey is ");
         System.out.println(priKey);
+        System.out.println("lenth " + priKey.length());
 
     }
 

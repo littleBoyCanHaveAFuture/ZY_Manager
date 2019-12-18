@@ -16,7 +16,7 @@ public interface ServerListService {
     /**
      * 添加服务器
      */
-    public int addServer(ServerInfo server, Integer userId);
+    public int addServer(ServerInfo server, Integer userId) throws Exception;
 
     /**
      * 修改服务器
@@ -58,4 +58,12 @@ public interface ServerListService {
     boolean existSGS(Map<String, Object> map, Integer userId);
 
     String getOpenday(Map<String, Object> map, Integer userId);
+    /**
+     * 私钥
+     */
+    String selectPrivateKey(Map<String, Object> map, Integer userId);
+    /**
+     * 公钥
+     */
+    String selectPublicKey(Map<String, Object> map, Integer userId);
 }

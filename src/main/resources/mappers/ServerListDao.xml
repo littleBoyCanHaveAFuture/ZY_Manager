@@ -13,6 +13,8 @@
         <result property="loginUrl" column="loginUrl"/>
         <result property="gamename" column="gamename"/>
         <result property="openday" column="openday"/>
+        <result property="priKey" column="priKey"/>
+        <result property="pubKey" column="pubKey"/>
     </resultMap>
 
     <sql id="select_user_column">
@@ -69,8 +71,9 @@
         spId,
         loginUrl,
         gamename,
-        openday)
-        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday})
+        openday,
+        priKey,pubKey)
+        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday},#{priKey},#{pubKey})
     </insert>
 
     <select id="exist" parameterType="map" resultType="int">
@@ -178,6 +181,23 @@
         gameId = #{gameId}
         and
         serverId = #{serverId}
-
+    </select>
+    <select id="selectPrivateKey" parameterType="map" resultType="string">
+        select priKey from zy_serverlist
+        where
+        spId =#{spId}
+        and
+        gameId = #{gameId}
+        and
+        serverId = #{serverId}
+    </select>
+    <select id="selectPublicKey" parameterType="map" resultType="string">
+        select pubKey from zy_serverlist
+        where
+        spId =#{spId}
+        and
+        gameId = #{gameId}
+        and
+        serverId = #{serverId}
     </select>
 </mapper>

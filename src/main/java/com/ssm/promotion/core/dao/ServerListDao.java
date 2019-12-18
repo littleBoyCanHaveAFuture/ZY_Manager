@@ -69,4 +69,14 @@ public interface ServerListDao {
      * 开服日期
      */
     String selectOpenday(Map<String, Object> map);
+
+    /**
+     * 私钥
+     */
+    String selectPrivateKey(Map<String, Object> map);
+
+    /**
+     * 公钥
+     */
+    String selectPublicKey(Map<String, Object> map);
 }

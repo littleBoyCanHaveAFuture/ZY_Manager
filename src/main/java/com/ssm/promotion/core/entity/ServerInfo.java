@@ -45,12 +45,20 @@ public class ServerInfo {
      * 开服天数
      */
     private String openday;
+    /**
+     * RSA2 公钥
+     */
+    private String pubKey;
+    /**
+     * RSA2 私钥
+     */
+    private String priKey;
 
     public ServerInfo() {
 
     }
 
-    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl, String openday) {
+    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl, String openday, String pubKey, String priKey) {
         super();
         this.id = id;
         this.gameId = gameId;
@@ -60,6 +68,8 @@ public class ServerInfo {
         this.loginState = loginState;
         this.loginUrl = loginUrl;
         this.openday = openday;
+        this.pubKey = pubKey;
+        this.priKey = priKey;
 
         if (spIdList == null) {
             spIdList = new ArrayList<>();
