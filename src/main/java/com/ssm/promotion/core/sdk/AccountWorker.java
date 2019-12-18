@@ -65,25 +65,22 @@ public class AccountWorker {
         JSONObject reply = new JSONObject();
         do {
             //全部数据
+            boolean auto = Boolean.parseBoolean(map.get("auto"));
+            int appId = Integer.parseInt(map.get("appId"));
+            int channelId = Integer.parseInt(map.get("channelId"));
+            String channelUid = map.get("channelUid");
+            String channelUname = map.get("channelUname");
+            String channelUnick = map.get("channelUnick");
             String username = map.get("username");
             String pwd = map.get("pwd");
             String phone = map.get("phone");
-            String ip = map.get("ip");
             String deviceCode = map.get("deviceCode");
-
             String imei = map.get("imei");
-            String channelId = map.get("channelId");
-            String channelUserId = map.get("channelUid");
-            String channelUserName = map.get("channelUname");
-            String channelUserNick = map.get("channelUnick");
-
             String addparm = map.get("addparm");
-            String gameId = map.get("appId");
-            boolean auto = Boolean.parseBoolean(map.get("auto"));
-
+            String ip = map.get("ip");
 
             Map<String, Object> tmp = new HashMap<>(6);
-            tmp.put("gameId", gameId);
+            tmp.put("gameId", appId);
             tmp.put("spId", channelId);
 
             //某游戏 是否开放注册
@@ -93,10 +90,7 @@ public class AccountWorker {
                 reply.put("status", 0);
                 break;
             }
-            int spid = 0;
-            if (!channelId.isEmpty()) {
-                spid = Integer.parseInt(channelId);
-            }
+            int spid = channelId;
             int deviceSize = this.getDeviceCreateAccount(deviceCode, spid);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {

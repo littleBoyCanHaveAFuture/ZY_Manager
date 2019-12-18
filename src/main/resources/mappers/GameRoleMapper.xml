@@ -33,9 +33,10 @@
         FROM zy_role
     </sql>
     <insert id="create" parameterType="GameRole">
-        insert into
-        zy_role(accountId,roleId,channelId,channelUid,gameId,serverId,createTime,lastLoginTime,name,balance,param)
-        values(#{accountId},#{roleId},#{channelId},#{channelUid},#{gameId},#{serverId},#{createTime},#{lastLoginTime},#{name},#{balance},#{param})
+        insert into zy_role(accountId, roleId, channelId, channelUid, gameId, serverId, createTime, lastLoginTime, name,
+                            balance, param)
+        values (#{accountId}, #{roleId}, #{channelId}, #{channelUid}, #{gameId}, #{serverId}, #{createTime},
+                #{lastLoginTime}, #{name}, #{balance}, #{param})
     </insert>
     <update id="updateGameRole" parameterType="map">
         update zy_role
@@ -61,12 +62,12 @@
     </update>
 
     <select id="getLastLoginTime" parameterType="Map" resultType="string">
-        select lastLoginTime from zy_role
-        where
-        channelId=#{roleId} and
-        channelId=#{channelId} and
-        gameId=#{gameId} and
-        serverId=#{serverId}
+        select lastLoginTime
+        from zy_role
+        where channelId = #{roleId}
+          and channelId = #{channelId}
+          and gameId = #{gameId}
+          and serverId = #{serverId}
     </select>
     <select id="findGamerole" parameterType="map" resultMap="GameRoleResult">
         <include refid="select_gamerole_column"/>

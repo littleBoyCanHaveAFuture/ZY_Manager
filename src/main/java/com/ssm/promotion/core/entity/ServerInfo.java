@@ -41,11 +41,16 @@ public class ServerInfo {
      */
     private String gamename;
 
+    /**
+     * 开服天数
+     */
+    private String openday;
+
     public ServerInfo() {
 
     }
 
-    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl) {
+    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl, String openday) {
         super();
         this.id = id;
         this.gameId = gameId;
@@ -54,6 +59,7 @@ public class ServerInfo {
         this.regState = regState;
         this.loginState = loginState;
         this.loginUrl = loginUrl;
+        this.openday = openday;
 
         if (spIdList == null) {
             spIdList = new ArrayList<>();
@@ -69,6 +75,7 @@ public class ServerInfo {
                 "regState = " + regState + ", " +
                 "loginState = " + loginState + ", " +
                 "loginUrl = " + loginUrl + ", " +
+                "openday = " + openday + ", " +
                 "]";
     }
 }

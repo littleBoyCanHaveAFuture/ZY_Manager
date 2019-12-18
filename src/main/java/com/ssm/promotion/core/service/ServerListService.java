@@ -56,4 +56,6 @@ public interface ServerListService {
     boolean isSpCanLogin(Map<String, Object> map, Integer userId);
 
     boolean existSGS(Map<String, Object> map, Integer userId);
+
+    String getOpenday(Map<String, Object> map, Integer userId);
 }

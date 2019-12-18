@@ -82,6 +82,18 @@ public class TtController {
         System.out.println("register:" + map.toString());
 
         boolean auto = Boolean.parseBoolean(map.get("auto"));
+        int appId = Integer.parseInt(map.get("appId"));
+        int channelId = Integer.parseInt(map.get("channelId"));
+        String channelUid = map.get("channelUid");
+        String channelUname = map.get("channelUname");
+        String channelUnick = map.get("channelUnick");
+        String username = map.get("username");
+        String pwd = map.get("pwd");
+        String phone = map.get("phone");
+        String deviceCode = map.get("deviceCode");
+        String imei = map.get("imei");
+        String addparm = map.get("addparm");
+
         //参数校验
         if (auto) {
             for (String key : map.keySet()) {
@@ -108,7 +120,7 @@ public class TtController {
         map.put("ip", UtilG.getIpAddress(request));
         //注册账号
         JSONObject result = accountWorker.reqRegister(map);
-        if (result.getString("status").equals("1")) {
+        if (result.getInteger("status") == 1) {
             //注册成功 相关数据存入redis
             cache.register(map);
         }
@@ -131,6 +143,7 @@ public class TtController {
     @ResponseBody
     public void sdkLogin(@RequestBody Map<String, String> map,
                          HttpServletResponse response) throws Exception {
+        log.info("request: ttt/login , map: " + map.toString());
 
         int appId = Integer.parseInt(map.get("appId"));
         int channelId = Integer.parseInt(map.get("channelId"));
@@ -174,7 +187,7 @@ public class TtController {
         ResponseUtil.write(response, result);
 
         System.out.println("request: ttt/login , map: " + result.toString());
-
+        log.info("request: ttt/login , map: " + result.toString());
     }
 
     /**
@@ -201,6 +214,8 @@ public class TtController {
                               String uid,
                               String sign,
                               HttpServletResponse response) throws Exception {
+        log.info("request: ttt/check , appId: " + appId + "\ttoken:" + token + "\tsign:" + sign);
+        System.out.println("request: ttt/check , appId: " + appId + "\ttoken:" + token + "\tsign:" + sign);
         JSONObject result = new JSONObject();
         do {
             System.out.println(appId);
@@ -230,6 +245,9 @@ public class TtController {
         } while (false);
 
         ResponseUtil.write(response, result);
+
+        log.info("request: ttt/check , result\t" + result.toString());
+        System.out.println("request: ttt/check , result\t" + result.toString());
     }
 
 
@@ -261,7 +279,9 @@ public class TtController {
     @ResponseBody
     public void sdkSetData(@RequestBody Map<String, String> map,
                            HttpServletResponse response) throws Exception {
-        System.out.println("setdata:" + map.toString());
+        log.info("request: ttt/setdata ,map: " + map.toString());
+        System.out.println("request: ttt/setdata ,map: " + map.toString());
+
         String key = map.get("key");
         String value = map.get("value");
 
@@ -357,6 +377,9 @@ public class TtController {
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
+
+        log.info("request: ttt/setdata , result\t" + result.toString());
+        System.out.println("request: ttt/setdata , result\t" + result.toString());
     }
 
     /**
@@ -375,6 +398,11 @@ public class TtController {
                              String channelId,
                              String channelUid,
                              String roleId, HttpServletResponse response) throws Exception {
+        log.info("request: ttt/enter , appId: " + appId + "\tserverId:" + serverId +
+                "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
+        System.out.println("request: ttt/enter , appId: " + appId + "\tserverId:" + serverId +
+                "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
+
         JSONObject result = new JSONObject();
         do {
             //查询redis
@@ -418,6 +446,9 @@ public class TtController {
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
+
+        log.info("request: ttt/enter , result\t" + result.toString());
+        System.out.println("request: ttt/enter , result\t" + result.toString());
     }
 
     /**
@@ -437,6 +468,11 @@ public class TtController {
                             String channelId,
                             String channelUid,
                             String roleId, HttpServletResponse response) throws Exception {
+        log.info("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
+                "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
+        System.out.println("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
+                "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
+
         //查找角色的指悦账号
         Map<String, String> map = new HashMap<>(3);
         map.put("isChannel", "true");
@@ -488,6 +524,9 @@ public class TtController {
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
+
+        log.info("request: ttt/exit , result\t" + result.toString());
+        System.out.println("request: ttt/exit , result\t" + result.toString());
     }
 
 //    /**
@@ -570,13 +609,31 @@ public class TtController {
                            String signType,
                            String sign,
                            HttpServletResponse response) throws Exception {
+        log.info("request: ttt/payInfo , accountID: " + accountID + "\tchannelOrderID:" + channelOrderID +
+                "\tproductID:" + productID + "\tproductName:" + productName + "\tproductDesc:" + productDesc +
+                "\tmoney:" + money +
+                "\troleID:" + roleID + "\troleName:" + roleName + "\troleLevel:" + roleLevel +
+                "\tserverID:" + serverID + "\tserverName:" + serverName +
+                "\textension:" + extension +
+                "\tstatus:" + status +
+                "\tnotifyUrl:" + notifyUrl +
+                "\tsignType:" + signType +
+                "\tsign:" + sign);
+        System.out.println("request: ttt/payInfo , accountID: " + accountID + "\tchannelOrderID:" + channelOrderID +
+                "\tproductID:" + productID + "\tproductName:" + productName + "\tproductDesc:" + productDesc +
+                "\tmoney:" + money +
+                "\troleID:" + roleID + "\troleName:" + roleName + "\troleLevel:" + roleLevel +
+                "\tserverID:" + serverID + "\tserverName:" + serverName +
+                "\textension:" + extension +
+                "\tstatus:" + status +
+                "\tnotifyUrl:" + notifyUrl +
+                "\tsignType:" + signType +
+                "\tsign:" + sign);
 
-        System.out.println("ttt/payInfo:");
 
         JSONObject result = new JSONObject();
         JSONObject data = new JSONObject();
         do {
-
             if (channelOrderID == null) {
                 data.put("state", StateCode.CODE_PARAM_ERROR);
                 break;
@@ -668,5 +725,8 @@ public class TtController {
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         result.put("data", data.toJSONString());
         ResponseUtil.write(response, result);
+
+        log.info("request: ttt/payInfo , result\t" + result.toString());
+        System.out.println("request: ttt/payInfo , result\t" + result.toString());
     }
 }

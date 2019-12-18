@@ -167,16 +167,33 @@ public class RechargeSummaryControllr {
         //1.查询渠道-游戏-区服
         //<渠道,<游戏，区服>>
         Map<Integer, Map<Integer, List<Integer>>> sgsMap = new HashMap<>();
-        getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
+        List<ServerInfo> serverInfoList = getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
 
+        if (sgsMap.size() == 0) {
+            return null;
+        }
         //2.时间转化
         List<String> timeList = DateUtil.transTimes(startTimes, endTimes, DateUtil.FORMAT_YYYY_MMDD_HHmm);
 
         //3.查询redis
-        return this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
+        List<RechargeSummary> rs = this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
+        //处理开服天数
+        if (type == 2) {
+            Iterator<RechargeSummary> it = rs.iterator();
+            while (it.hasNext()) {
+                RechargeSummary next = it.next();
+                for (ServerInfo info : serverInfoList) {
+                    if (info.getServerId() == next.getServerId()) {
+                        next.setOpenDay(DateUtil.transTimes(info.getOpenday(), DateUtil.getCurrentDateStr(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS).size());
+                        break;
+                    }
+                }
+            }
+        }
+        return rs;
     }
 
-    public void getAllSGS(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type, int userId) {
+    public List<ServerInfo> getAllSGS(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type, int userId) {
         //查询数据结果
         Map<Integer, Map<Integer, List<Integer>>> tmpMap = new HashMap<>();
         //所有渠道-游戏-区服
@@ -186,6 +203,7 @@ public class RechargeSummaryControllr {
             Integer sSpId = serverInfo.getSpId();
             Integer sGameId = serverInfo.getGameId();
             Integer sServerId = serverInfo.getServerId();
+            String openday = serverInfo.getOpenday();
 
             if (sSpId == null || sGameId == null || sServerId == null) {
                 continue;
@@ -215,11 +233,11 @@ public class RechargeSummaryControllr {
         if (type == 2) {
             //需要指定 渠道和游戏id 不能为 -1
             if (spId == -1 || gameId == -1) {
-                return;
+                return null;
             }
         } else if (type == 3) {
             if (gameId == -1) {
-                return;
+                return null;
             }
         }
 
@@ -253,6 +271,22 @@ public class RechargeSummaryControllr {
         for (Integer sp : sgsMap.keySet()) {
             System.out.println("sgsMap----->sp:" + sp + ":" + sgsMap.get(sp).toString());
         }
+        Iterator<ServerInfo> it = serverInfoList.iterator();
+        while (it.hasNext()) {
+            ServerInfo next = it.next();
+            if (sgsMap.containsKey(next.getSpId())) {
+                Map<Integer, List<Integer>> gameMap = sgsMap.get(next.getSpId());
+                if (gameMap.containsKey(next.getGameId())) {
+                    List<Integer> serverList = gameMap.get(next.getGameId());
+                    if (serverList.contains(next.getServerId())) {
+                        continue;
+                    }
+                }
+            }
+            it.remove();
+        }
+
+        return serverInfoList;
     }
 
 }

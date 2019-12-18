@@ -90,4 +90,8 @@ public class RedisKeyTail {
      */
     public static final String REALTIME_ADD_ROLES = "REAL_ADD_ROLES";
 
+    /**
+     * 该游戏所有的充值账号
+     */
+    public static final String GAME_ACCOUNT_ALL_RECHARGE = "G_AC_ALL_RE";
 }

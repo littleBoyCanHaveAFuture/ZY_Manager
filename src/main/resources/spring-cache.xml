@@ -18,22 +18,29 @@
         <property name="minEvictableIdleTimeMillis" value="60000"/><!--  资源池中资源最小空闲时间(单位为毫秒)，达到此值后空闲资源将被移除      -->
 
     </bean>
-    <!-- redis 配置,也可以把配置挪到properties配置文件中,再读取 -->
-    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
-        <constructor-arg index="0" ref="jedisPoolConfig"/>
-        <!-- 端口，默认6379 -->
-        <constructor-arg index="2" value="6379" name="port" type="int"/>
-        <constructor-arg index="3" value="5000" name="timeout" type="int"/>
-        <constructor-arg index="1" value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"
-                         name="host" type="java.lang.String"/>
-        <constructor-arg index="4" value="ppB7xnDF6pQdZRZp" name="password" type="java.lang.String"/>
 
-    </bean>
+    <!-- redis 配置,也可以把配置挪到properties配置文件中,再读取 -->
     <!--
         这种 arguments 构造的方式，之前配置有缺点。
         这里之前的配置有问题，因为参数类型不一致，有时候jar和环境的问题，导致参数根据index对应，会处理问题，
         理论上加另一个 name，就可以解决，现在把name 和type都加上，更保险。
-     -->
+    -->
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <constructor-arg index="1" name="host" type="java.lang.String"
+                         value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>
+        <constructor-arg index="2" name="port" type="int" value="6379"/>
+        <constructor-arg index="3" name="timeout" type="int" value="5000"/>
+        <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>
+    </bean>
+    <!-- 正式服  腾讯云 只能内网连接-->
+<!--    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">-->
+<!--        <constructor-arg index="0" ref="jedisPoolConfig"/>-->
+<!--        <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>-->
+<!--        <constructor-arg index="2" name="port" type="int" value="6379"/>-->
+<!--        <constructor-arg index="3" name="timeout" type="int" value="5000"/>-->
+<!--        <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>-->
+<!--    </bean>-->
 
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.ssm.promotion.core.jedis.jedisManager">
@@ -48,9 +55,9 @@
     </bean>
     <!--  随机id生成器-->
     <bean id="LoginIdGenerator" class="com.ssm.promotion.core.sdk.LoginIdGenerator" init-method="init">
-    <property name="datacenterId" value="1"/><!-- 渠道id -->
-    <property name="workerId" value="1"/><!-- 区服 -->
-</bean>
+        <property name="datacenterId" value="1"/><!-- 渠道id -->
+        <property name="workerId" value="1"/><!-- 区服 -->
+    </bean>
     <bean id="AccountWorker" class="com.ssm.promotion.core.sdk.AccountWorker" init-method="AccountWorker">
 
     </bean>

@@ -326,9 +326,21 @@ public class RechargeSummary {
     }
 
     /**
+     * 通用属性
      * 同类数据相加
      * 部分属性需要重新计算
      */
+    public void addCommon(RechargeSummary add) {
+        activePlayer += add.activePlayer;
+        rechargeTimes += add.rechargeTimes;
+        rechargeNumber += add.rechargeNumber;
+        rechargePayment += add.rechargePayment;
+        nofPayers += add.nofPayers;
+        nofPayment += add.nofPayment;
+        registeredPayers += add.registeredPayers;
+        registeredPayment += add.registeredPayment;
+    }
+
     public void add(RechargeSummary add) {
         //1
 //        date = add.date;

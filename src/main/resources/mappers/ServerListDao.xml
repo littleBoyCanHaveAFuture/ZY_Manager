@@ -12,6 +12,7 @@
         <result property="loginState" column="loginState"/>
         <result property="loginUrl" column="loginUrl"/>
         <result property="gamename" column="gamename"/>
+        <result property="openday" column="openday"/>
     </resultMap>
 
     <sql id="select_user_column">
@@ -22,7 +23,8 @@
 			regState,
 			loginState,
 			loginUrl,
-			gamename
+			gamename,
+			openday
 		FROM zy_serverlist
 	</sql>
     <!--   与 selectServers where 条件一致-->
@@ -66,8 +68,9 @@
         serverId,
         spId,
         loginUrl,
-        gamename )
-        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename})
+        gamename,
+        openday)
+        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday})
     </insert>
 
     <select id="exist" parameterType="map" resultType="int">
@@ -86,7 +89,8 @@
         gameId=#{gameId},
         serverId=#{serverId},
         spId=#{spId},
-        loginUrl=#{loginUrl}
+        loginUrl=#{loginUrl},
+        openday=#{openday}
         where id=#{id}
     </update>
 
@@ -166,4 +170,14 @@
         </where>
     </select>
 
+    <select id="selectOpenday" parameterType="map" resultType="string">
+        select openday from zy_serverlist
+        where
+        spId =#{spId}
+        and
+        gameId = #{gameId}
+        and
+        serverId = #{serverId}
+
+    </select>
 </mapper>

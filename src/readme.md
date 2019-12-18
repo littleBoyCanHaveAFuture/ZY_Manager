@@ -19,6 +19,49 @@
 ###### 1.2 存储新增创号：精确到，渠道-游戏-当月天数
 ###### BITMAP：UserInfo:spid:*:gid:*:date:yyyyMMdd#NA_CA
 
+
+    url: "47.101.44.31/ttt/register",
+    type: "post",
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(data),
+    dataType: "json",
+    async: false,
+        
+    Request：
+    let data = {
+        "auto": "true",
+        "appId": "9999",
+        "channelId": 9999,
+        "channelUid": "1000099",
+        "channelUname": "test20191217",
+        "channelUnick": "测试账号1000099",
+        "username": "",
+        "pwd": "",
+        "phone": "11100003333",
+        "deviceCode": "PC",
+        "imei": "PC",
+        "addparm": ""
+    };
+    
+    Response ：
+        body = {
+            "resultCode":"200",
+            "message":"SUCCESS",//SUCCESS|FAIL
+            "data":""
+        }
+    FAIL：
+        data={
+            "err":"参数非法："+"key"+"为空";//key为Request data的键
+        }
+    SUCCESS：
+        data={
+            "message":"";//注册结果描述
+            "account":"",
+            "pwd":"",
+            "status":"1"//1，注册成功|0，注册失败
+        }
+    
+
 #### 2.进入游戏
 ###### 2.1 存储活跃账号：精确到，渠道-游戏-区服-当天天数
 ###### BITMAP：UserInfo:spid:*:gid:*:sid:*:date:yyyyMMdd#ACT_PL
@@ -79,4 +122,5 @@
 
 ###### 5.6 注册付费金额（每分钟的充值金额）：精确到，渠道-游戏-区服-当天天数
 ###### Sorted SET：RTS:spid:*:gid:*:sid:*date:yyyyMMdd#REAL_RE_AM RE_AM_NA_CA
+
 

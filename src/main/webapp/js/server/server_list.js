@@ -69,6 +69,7 @@ function loadServerListTab() {
         dataType: "json",
         async: false,
         success: function (result) {
+            console.info(result);
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
@@ -108,6 +109,7 @@ function openServerModifyDialog() {
     let serverId = row.serverId;
     let spId = row.spId;
     let loginUrl = row.loginUrl;
+    let openday = row.openday;
 
 
     $("#dlg").dialog({
@@ -117,6 +119,7 @@ function openServerModifyDialog() {
             $("#save_serverid").val(serverId);
             $("#save_spid").val(spId);
             $("#save_loginurl").val(loginUrl);
+            $('#save_openday').datebox('setValue', openday);
         }
     });
     $("#dlg").dialog("open").dialog("setTitle", "修改服务器信息");
@@ -137,9 +140,10 @@ function saveServer() {
     let serverId = $("#save_serverid").val();
     let spId = $("#save_spid").val();
     let loginUrl = $("#save_loginurl").val();
+    let openday = $("#save_openday").datetimebox("getValue");
 
     console.log("id" + gameid);
-    let data = {"gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl};
+    let data = {"gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl, "openday": openday};
     $.ajax({
         url: "/server/addServer",
         type: "post",
@@ -176,8 +180,16 @@ function updateServer() {
     let serverId = $("#save_serverid").val();
     let spId = $("#save_spid").val();
     let loginUrl = $("#save_loginurl").val();
+    let openday = $("#save_openday").datetimebox("getValue");
 
-    var data = {"id": dataId, "gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl};
+    var data = {
+        "id": dataId,
+        "gameId": gameId,
+        "serverId": serverId,
+        "spId": spId,
+        "loginUrl": loginUrl,
+        "openday": openday
+    };
     console.log(data);
     $.ajax({
         url: "/server/updateServer",
@@ -219,6 +231,7 @@ function resetValue() {
     $("#save_serverid").val("");
     $("#save_spid").val("");
     $("#save_loginurl").val("");
+    $("#save_openday").val("");
 }
 
 //删除服务器
@@ -363,6 +376,16 @@ function initSpGameServer(type) {
                         let name = result.rows[res].name + "\t" + gameid;
                         select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
                     }
+                    let save_gameid = $("#save_gameid");
+                    save_gameid.find("option").remove();
+                    save_gameid.append("<option value=-1 selected=selected>请选择</option>");
+                    for (let res = 0; res < result.total; res++) {
+                        let gameid = result.rows[res].gameId;
+                        let name = result.rows[res].name + "\t" + gameid;
+                        save_gameid.append("<option  value='" + gameid + "'>" + name + "</option>");
+                    }
+
+
                 } else if (type === 3) {
                     let select_serverId = $("#serverid");
                     select_serverId.find("option").remove();

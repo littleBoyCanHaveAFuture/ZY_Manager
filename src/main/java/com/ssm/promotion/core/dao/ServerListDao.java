@@ -65,5 +65,8 @@ public interface ServerListDao {
 
     int exist(Map<String, Object> map);
 
-    int selectServerList(Integer spId, Integer gameId, Integer serverId);
+    /**
+     * 开服日期
+     */
+    String selectOpenday(Map<String, Object> map);
 }

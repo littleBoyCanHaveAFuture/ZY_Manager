@@ -34,6 +34,7 @@
         <th field="serverId" width="70" align="center">服务器id</th>
         <th field="spId" width="150" align="center">渠道id</th>
         <th field="loginUrl" width="300" align="center">登录地址</th>
+        <th field="openday" width="300" align="center">开服时间</th>
     </tr>
     </thead>
 </table>
@@ -93,9 +94,12 @@
             <tr>
                 <td>游戏id</td>
                 <td>
-                    <input type="text" name="save_gameid" id="save_gameid"
-                           required="true" class="easyui-validatebox" validType="'number','length[5,10]'"
-                           missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">
+                    <select title="选择游戏" id="save_gameid" name="save_gameid">
+                        <option value="-1" selected="selected">请选择</option>
+                    </select>
+<%--                    <input type="text" name="save_gameid" id="save_gameid"--%>
+<%--                           required="true" class="easyui-validatebox" validType="'number','length[5,10]'"--%>
+<%--                           missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">--%>
                 </td>
             </tr>
 
@@ -113,6 +117,13 @@
                 <td>
                     <input type="text" name="save_loginurl" id="save_loginurl"
                            required="false">
+                </td>
+            </tr>
+            <tr>
+                <td>开服时间</td>
+                <td>
+                    <input class="easyui-datetimebox" id="save_openday" name="save_openday"
+                           data-options="required:true,showSeconds:false" style="width:150px">
                 </td>
             </tr>
         </table>

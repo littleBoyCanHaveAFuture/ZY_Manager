@@ -82,6 +82,9 @@ public class JedisRechargeCache {
         return jedisManager;
     }
 
+    /**
+     * bean
+     */
     public void setJedismanager(jedisManager jedismanager) {
         this.jedisManager = jedismanager;
     }
@@ -405,8 +408,8 @@ public class JedisRechargeCache {
             String currDay = DateUtil.getCurrentDayStr();
             String currDayMin = DateUtil.getCurrentMinuteStr();
 
-            String userSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s", RedisKeyHeader.USER_INFO, channelId, appId, serverId);
-            String realtimeSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s", RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
+            String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
 
             Pipeline pipeline = jds.pipelined();
             //活跃账号 渠道-游戏-区服-日期
@@ -466,9 +469,9 @@ public class JedisRechargeCache {
             String currDay = DateUtil.getCurrentDayStr();
 
             //渠道-游戏
-            String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, channelId, appId);
+            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
             //渠道-游戏-区服
-            String userSGSKey = String.format(RedisKey.FORMAT_SGS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
             //渠道-游戏-区服
             String realtimeSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s:date:", RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
             //渠道-游戏 有角色的账号
@@ -529,7 +532,7 @@ public class JedisRechargeCache {
             jds.select(DB_INDEX);
 
             String currDay = DateUtil.getCurrentDayStr();
-            String userSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s", RedisKeyHeader.USER_INFO, channelId, appId, serverId);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
             //活跃账号 渠道-游戏-区服-日期
             String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.ACTIVE_PLAYERS;
             //在线账号 渠道-游戏-区服-日期
@@ -590,9 +593,9 @@ public class JedisRechargeCache {
             //当天时间
             String currDay = DateUtil.getCurrentDayStr();
 
-            String userSGKey = String.format("%s:spid:%s:gid:%s", RedisKeyHeader.USER_INFO, channelId, appId);
-            String activeSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s", RedisKeyHeader.ACTIVE_PLAYERS_INFO, channelId, appId, serverId);
-            String realtimeSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s", RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
+            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
+            String activeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, channelId, appId, serverId);
+            String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
             //渠道-游戏-区服-日期
             /**
              * 1.充值次数
@@ -618,7 +621,7 @@ public class JedisRechargeCache {
             String key10 = userSGKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ACCOUNT;
             //当前时间段的收入
             String key11 = realtimeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.REALTIME_RECHARGE_AMOUNTS;
-            //所有玩家
+            //所有充值玩家（累积）
             String key71 = userSGKey + "#" + RedisKeyTail.GAME_ACCOUNT_ALL_NUMS;
             //是否当日已付费
             boolean isPaid = jds.getbit(key3, accountId);
@@ -689,8 +692,7 @@ public class JedisRechargeCache {
 
             String key = keyBody + "#" + keyTail;
 
-            double res = jds.zscore(key, member);
-            return res;
+            return jds.zscore(key, member);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();

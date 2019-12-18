@@ -15,7 +15,6 @@ import java.util.Map;
  */
 @Service("serverList")
 public class ServerListServiceImpl implements ServerListService {
-
     @Resource
     private ServerListDao serverListdao;
 
@@ -93,6 +92,11 @@ public class ServerListServiceImpl implements ServerListService {
     @Override
     public boolean existSGS(Map<String, Object> map, Integer userId) {
         return serverListdao.exist(map) > 0;
+    }
+
+    @Override
+    public String getOpenday(Map<String, Object> map, Integer userId) {
+        return serverListdao.selectOpenday(map);
     }
 
 }
