@@ -21,16 +21,13 @@ public class RedisKeyTail {
      * 当日新建角色去除滚服
      */
     public static final String NEW_ADD_CREATE_ROLE_RM_OLD = "NA_CR_RM_OLD";
+
     /**
-     * 创建了账号的账号
+     * 同一渠道同一游戏
+     * 创建过角色的账号
      */
     public static final String GAME_ACCOUNT_HAS_ROLE = "G_AC_SRole";
-    /**
-     * 创建了多个角色的账号
-     * 数据会一直更新
-     * 新增创角去除滚服：需要当天之前的数据
-     */
-    public static final String GAME_ACCOUNT_MULTIPLE_ROLE = "G_AC_MRole";
+
     /**
      * 该游戏所有的账号(渠道、官方)
      */
@@ -47,14 +44,7 @@ public class RedisKeyTail {
      * 付费玩家
      */
     public static final String RECHARGE_ACCOUNT = "RE_AC";
-    /**
-     * 付费玩家
-     */
-    public static final String RECHARGE_ACCOUNT_M = "RE_AC_M";
-    /**
-     * 注册付费玩家
-     */
-    public static final String RECHARGE_ACCOUNT_NA_CA = "RE_AC_NA_CA";
+
     /**
      * 有序集合
      * 账号信息 1.累计创角 GAME_ACCUMULATION_CREATE_ROLE
@@ -91,7 +81,26 @@ public class RedisKeyTail {
     public static final String REALTIME_ADD_ROLES = "REAL_ADD_ROLES";
 
     /**
-     * 该游戏所有的充值账号
+     * Set
+     * 每日充值过的角色id
      */
-    public static final String GAME_ACCOUNT_ALL_RECHARGE = "G_AC_ALL_RE";
+    public static final String RECHARGE_ROLES = "RE_RO";
+    /**
+     * Sorted Set
+     * 当日首次付费信息
+     */
+    public static final String RECHARGE_FIRST_PAY_ROLES = "RE_FI_P_R";
+    /**
+     * Sorted Set
+     * 当日首次付费金额
+     */
+    public static final String RECHARGE_FIRST_PAY_AMOUNTS = "RE_FI_P_AM";
+    /**
+     * 注册付费玩家
+     */
+    public static final String RECHARGE_ROLES_NA_CR = "RE_RO_NA_CR";
+    /**
+     * 注册付费金额
+     */
+    public static final String RECHARGE_AMOUNTS_NA_CR = "RE_AM_NA_CR";
 }

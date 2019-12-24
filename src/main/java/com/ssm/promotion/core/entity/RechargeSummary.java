@@ -29,14 +29,13 @@ public class RechargeSummary {
 
     /**
      * 新增创角
-     * :当日创建新角色的账号数目
+     * :角色数：当天创建的
      */
     public int newAddCreateRole;
 
     /**
      * 新增创角去除滚服
-     * :新增创角 - 其中在其他区服已有角色的账号数目
-     * :当日创建新角色的账号数目 - 其中在其他区服已有角色的账号数目
+     * 角色数：当天创建的，且是账号首个角色
      */
     public int newAddCreateRoleRemoveOld;
 
@@ -48,64 +47,64 @@ public class RechargeSummary {
 
 
     /**
-     * 创角转化率：新增创角/新增创号
+     * 创角转化率：该渠道：新增创角之和/新增创号之和
      */
     public double createAccountTransRate;
 
     //通用
     /**
      * 活跃玩家
-     * :当日上线的玩家账号数目
+     * :当日上线的角色数目
      */
     public int activePlayer;
     /**
      * 充值次数
-     * :当日充值的次数
+     * :当日充值成功的订单数目
      */
     public int rechargeTimes;
     /**
      * 充值人数
-     * :当日充值的玩家账号数目
+     * :当日充值成功的角色数目
      */
     public int rechargeNumber;
     /**
      * 充值金额
-     * :当日充值的金额数目
+     * :当日充值成功的金额之和
      */
     public int rechargePayment;
     /**
      * 活跃付费率
-     * :当日充值的玩家账号数目/当日上线的玩家账号数目·
+     * :当日充值的角色数目/当日上线的角色数目
      */
     public double activePayRate;
     /**
      * 付费ARPU
-     * :当日充值总额/当日充值的玩家账号数目
+     * :当日充值总额/当日充值的角色数目
      */
     public double paidARPU;
     /**
      * 活跃ARPU
-     * :当日充值总额/当日上线的玩家账号数目
+     * :当日充值总额/当日上线的角色数目
      */
     public double activeARPU;
     /**
      * 当日首次付费人数
-     * : 当日充值1次的玩家账号数目
+     * 角色数目：注册时间超过一天的，首次充值的
      */
     public int nofPayers;
     /**
      * 当日首次付费金额
-     * : 当日充值1次的玩家支付金额数目
+     * 当天充值总金额：注册时间超过一天的，首次充值的角色
      */
     public int nofPayment;
     /**
      * 注册付费人数
-     * : 当日注册并且充值的玩家账号数目
+     * : 当日注册并且充值的角色数目
      */
     public int registeredPayers;
     /**
      * 注册付费金额
-     * : 当日注册并且充值的玩家支付金额数目
+     * : 当日注册并且充值的角色支付金额数目
      */
     public int registeredPayment;
     /**
@@ -134,23 +133,29 @@ public class RechargeSummary {
 //分服概况\分渠道 =2/3
     /**
      * 累计充值
+     * 开服起：每天充值金额之和
      */
     public int totalPayment;
 
     /**
      * 累计创角
+     * 开服起：每天新增创角之和
      */
     public int totalCreateRole;
     /**
      * 累计充值人数
+     * 开服起：不同充值角色数目之和（每个角色只计算一次）
      */
     public int totalRechargeNums;
     /**
      * 总付费率
-     * 付费玩家账号/所有的玩家账号
+     * 付费角色数目/所有的角色数目
      */
     public double totalRechargeRates;
-
+    /**
+     * 该渠道该游戏所有的账号数目
+     */
+    public double totalAccounts;
 
 //    分渠道概况3
     /**
@@ -159,12 +164,12 @@ public class RechargeSummary {
     public int spId;
     /**
      * 注收比
-     * 总付费/总新增人数（创角）
+     * 该服务器充值总金额/总创角数
      */
     public double zhushoubi;
     /**
+     * 无用
      * 新增注收比
-     * 每天收入/每天新增创角
      */
     public double addzhushoubi;
 
@@ -204,6 +209,7 @@ public class RechargeSummary {
         json.put("spId", spId);
         json.put("zhushoubi", zhushoubi);
         json.put("addzhushoubi", addzhushoubi);
+        json.put("totalAccounts", totalAccounts);
         return json.toString();
     }
 
@@ -272,19 +278,19 @@ public class RechargeSummary {
         if (this.rechargeNumber == 0) {
             this.setPaidARPU(0);
         } else {
-            this.setPaidARPU((double) this.rechargePayment / this.rechargeNumber);
+            this.setPaidARPU(UtilG.format2point((double) this.rechargePayment / this.rechargeNumber));
         }
         //活跃ARPU
         if (this.activePlayer == 0) {
             this.setActiveARPU(0);
         } else {
-            this.setActiveARPU((double) this.rechargePayment / this.activePlayer);
+            this.setActiveARPU((UtilG.format2point((double) this.rechargePayment / this.activePlayer)));
         }
         //注册付费ARPU
         if (this.registeredPayers == 0) {
             this.setRegisteredPaymentARPU(0);
         } else {
-            this.setRegisteredPaymentARPU((double) this.rechargePayment / this.registeredPayers);
+            this.setRegisteredPaymentARPU(UtilG.format2point((double) this.registeredPayment / this.registeredPayers));
         }
 
 
@@ -297,91 +303,54 @@ public class RechargeSummary {
             }
         } else {
             //总付费率
-            if (this.totalRechargeRates == 0) {
+            if (this.totalCreateRole == 0) {
                 this.setTotalRechargeRates(0);
             } else {
-//                this.setTotalRechargeRates(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+                this.setTotalRechargeRates(UtilG.format2point((double) this.totalRechargeNums / this.totalCreateRole * 100));
             }
             if (type == 3) {
                 //创号转化率
-                if (this.createAccountTransRate == 0) {
+                if (this.totalAccounts == 0) {
                     this.setCreateAccountTransRate(0);
                 } else {
-                    this.setCreateAccountTransRate(UtilG.format2point((double) this.newAddCreateRole / this.newAddCreateAccount * 100));
+//                    this.setCreateAccountTransRate(UtilG.format2point((double) this.totalCreateRole / this.totalAccounts * 100));
                 }
                 //注收比
-                if (this.zhushoubi == 0) {
+                if (this.totalCreateRole == 0) {
                     this.setZhushoubi(0);
                 } else {
-                    this.setZhushoubi(UtilG.format2point((double) this.totalPayment / this.newAddCreateRole * 100));
+                    this.setZhushoubi(UtilG.format2point((double) this.totalPayment / this.totalCreateRole * 100));
                 }
                 //新增注收比
-                if (this.addzhushoubi == 0) {
-                    this.setAddzhushoubi(0);
-                } else {
-//                    this.setAddzhushoubi(UtilG.format2point((double) this.p / this.newAddCreateAccount * 100));
-                }
+                this.setAddzhushoubi(0);
             }
         }
     }
 
-    /**
-     * 通用属性
-     * 同类数据相加
-     * 部分属性需要重新计算
-     */
-    public void addCommon(RechargeSummary add) {
-        activePlayer += add.activePlayer;
-        rechargeTimes += add.rechargeTimes;
-        rechargeNumber += add.rechargeNumber;
-        rechargePayment += add.rechargePayment;
-        nofPayers += add.nofPayers;
-        nofPayment += add.nofPayment;
-        registeredPayers += add.registeredPayers;
-        registeredPayment += add.registeredPayment;
-    }
 
     public void add(RechargeSummary add) {
-        //1
-//        date = add.date;
         //1/3
         newAddCreateAccount += add.newAddCreateAccount;
         newAddCreateRole += add.newAddCreateRole;
         newAddCreateRoleRemoveOld += add.newAddCreateRoleRemoveOld;
-
-        //1
-//        createAccountRate += add.createAccountRate;
-        //3
-//        createAccountTransRate += add.createAccountTransRate;
 
         //通用
         activePlayer += add.activePlayer;
         rechargeTimes += add.rechargeTimes;
         rechargeNumber += add.rechargeNumber;
         rechargePayment += add.rechargePayment;
-//        activePayRate += add.activePayRate;
-//        paidARPU += add.paidARPU;
-//        activeARPU += add.activeARPU;
         nofPayers += add.nofPayers;
         nofPayment += add.nofPayment;
         registeredPayers += add.registeredPayers;
         registeredPayment += add.registeredPayment;
-//        registeredPaymentARPU+=add.registeredPaymentARPU;
 
         //2
-//        serverId += add.serverId;
-//        openDay+=openDay;
-//        newaddplayer+=newaddplayer;
+        newaddplayer += newaddplayer;
 
         //2/3
         totalPayment += add.totalPayment;
         totalCreateRole += add.totalCreateRole;
         totalRechargeNums += add.totalRechargeNums;
-//        totalRechargeRates += add.totalRechargeRates;
 
-        //3
-//        spId += add.spId;
-//        zhushoubi += add.zhushoubi;
-//        addzhushoubi += add.addzhushoubi;
     }
 }

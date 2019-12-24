@@ -8,13 +8,12 @@ import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.RedisKey;
 import com.ssm.promotion.core.jedis.RedisKeyHeader;
 import com.ssm.promotion.core.jedis.RedisKeyTail;
 import com.ssm.promotion.core.sdk.*;
-import com.ssm.promotion.core.util.DateUtil;
-import com.ssm.promotion.core.util.ResponseUtil;
-import com.ssm.promotion.core.util.StringUtils;
-import com.ssm.promotion.core.util.UtilG;
+import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.util.*;
 import com.ssm.promotion.core.util.enums.OrderState;
 import com.ssm.promotion.core.util.enums.StateCode;
 import org.apache.log4j.Logger;
@@ -54,10 +53,53 @@ public class TtController {
     AccountWorker accountWorker;
     @Resource
     GameRoleWorker gameRoleWorker;
+    @Resource
+    private ServerListService serverService;
     @Autowired
     private HttpServletRequest request;
     @Resource
     private UOrderManager orderManager;
+
+    @RequestMapping(value = "/autoGame", method = RequestMethod.GET)
+    public void autoGame(String accountId, String appId, String serverId, HttpServletResponse response) throws Exception {
+        //登录地址
+        Map<String, Object> map = new HashMap<>();
+        map.put("spId", "0");
+        map.put("gameId", appId);
+        map.put("serverId", serverId);
+        String loginUrl = serverService.selectLoginUrl(map, 0);
+        String param = "";
+        param += "qid=" + accountId;
+        param += "&server_id=" + serverId;
+        param += "&time=" + System.currentTimeMillis();
+
+        String sign = MD5Util.md5(param);
+        param += "&sign=" + sign;
+
+        JSONObject reply = new JSONObject();
+        reply.put("url", loginUrl + param);
+        reply.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, reply);
+    }
+
+    @RequestMapping(value = "/autoReg", method = RequestMethod.GET)
+    public void autoReg(String auto,
+                        String appid, HttpServletResponse response) throws Exception {
+
+        //注册账号
+        JSONObject reply = new JSONObject();
+        Account acc = accountWorker.autoRegister(reply, UtilG.getIpAddress(request));
+        if (reply.getInteger("status") == 1) {
+            //注册成功 相关数据存入redis
+            Map<String, String> map = new HashMap<>();
+            map.put("auto", auto);
+            map.put("appId", appid);
+            map.put("accountId", acc.getId().toString());
+            cache.register(map);
+        }
+        reply.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, reply);
+    }
 
     /**
      * 注册账号
@@ -133,9 +175,9 @@ public class TtController {
      * SDK 登录接口
      *
      * @param map isChannel         是否渠道登录*             渠道登录可以不输入(name pwd),非渠道登录必须输入(name pwd)
-     *            appId             指悦平台创建的游戏ID*      请使用URLEncoder编码
-     *            channelId         平台标示的渠道SDKID       请使用URLEncoder编码
-     *            channelUid        渠道SDK标示的用户ID       请使用URLEncoder编码
+     *            appId             指悦平台创建的游戏ID*
+     *            channelId         平台标示的渠道SDKID
+     *            channelUid        渠道SDK标示的用户ID
      *            name              指悦账号名称
      *            pwd               指悦账号密码
      */
@@ -195,13 +237,9 @@ public class TtController {
      * 验证账号信息
      *
      * @param appId 指悦平台创建的游戏ID，appId
-     *              请使用URLEncoder编码
      * @param token 随机字符串
-     *              请使用URLEncoder编码
      * @param uid   玩家指悦账号id
-     *              请使用URLEncoder编码
      * @param sign  签名数据：md5 (appId+token+uid)
-     *              请使用URLEncoder编码
      * @return 接口返回：表示用户已登录，其他表示未登陆。
      * 0    验证通过
      * 1    token错误
@@ -338,7 +376,7 @@ public class TtController {
                 //插入mysql
                 gameRoleWorker.createGameRole(gameRole);
                 //redis
-                cache.createRole(gameId, serverId.toString(), channelId, account.getId());
+                cache.createRole(gameId, serverId.toString(), channelId, account.getId(), roleId);
             } else if (key.equals("levelup")) {
                 Map<String, Object> lmap = new HashMap<>();
                 lmap.put("roleId", roleId);
@@ -490,11 +528,11 @@ public class TtController {
 
             //查询redis
             //移除在线玩家
+            //todo 凌晨在线玩家重新赋值
             String currDay = DateUtil.getCurrentDayStr();
-            String key = String.format("%s:spid:%s:gid:%s:sid:%s:date:%s#%s",
-                    RedisKeyHeader.USER_INFO, channelId, appId, serverId, currDay,
-                    RedisKeyTail.ONLINE_PLAYERS);
-            cache.setbit(key, accountId, false);
+            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
+
+            cache.zincrby(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
 
             //查询mysql
             //统计玩家在线时间并存储到redis
@@ -506,8 +544,7 @@ public class TtController {
             String logintime = gameRoleWorker.getLastLoginTime(tmap);
 
             System.out.println("logintime:" + logintime);
-            //计算时间
-//        DateUtil
+            //计算在线时间
             //todo
 
             JSONObject jsonObject = new JSONObject();
@@ -529,43 +566,6 @@ public class TtController {
         System.out.println("request: ttt/exit , result\t" + result.toString());
     }
 
-//    /**
-//     * 定额计费接口
-//     *
-//     * @param context           上下文Activity
-//     * @param unitPrice         游戏道具价格，单位为人民币分
-//     * @param itemName          虚拟货币名称(商品名称)
-//     *                          注意：虚拟币名称在游戏内一定要确保唯一性！！！！不能出现多个虚拟币名称相同。
-//     * @param count             用户选择购买道具界面的默认道具数量。（总价为 count*unitPrice）
-//     * @param callBackInfo      由游戏开发者定义传入的字符串，会与支付结果一同发送给游戏服务器，游戏服务器可通过该字段判断交易的详细内容（金额角色等）
-//     * @param callBackUrl       将支付结果通知给游戏服务器时的通知地址url，交易结束后，系统会向该url发送http请求，通知交易的结果金额callbackInfo等信息
-//     *                          注意：这里的回调地址可以填也可以为空字串，如果填了则以这里的回调地址为主，如果为空则以易接开发者中心设置的回调地址为准。
-//     * @param payResultListener 支付回调接口
-//     */
-//    @RequestMapping(value = "/pay", method = RequestMethod.GET)
-//    public void sdkPay(String context,
-//                       String unitPrice,
-//                       String itemName,
-//                       String count,
-//                       String callBackInfo,
-//                       String callBackUrl,
-//                       String payResultListener) {
-//
-//    }
-//
-//    /**
-//     * 充值校验
-//     */
-//    @RequestMapping(value = "/paycheck", method = RequestMethod.GET)
-//    public void sdkPayCheck(String context,
-//                            String unitPrice,
-//                            String itemName,
-//                            String count,
-//                            String callBackInfo,
-//                            String callBackUrl,
-//                            String payResultListener) {
-//
-//    }
 
     /**
      * 上报充值数据
@@ -609,16 +609,16 @@ public class TtController {
                            String signType,
                            String sign,
                            HttpServletResponse response) throws Exception {
-        log.info("request: ttt/payInfo , accountID: " + accountID + "\tchannelOrderID:" + channelOrderID +
-                "\tproductID:" + productID + "\tproductName:" + productName + "\tproductDesc:" + productDesc +
-                "\tmoney:" + money +
-                "\troleID:" + roleID + "\troleName:" + roleName + "\troleLevel:" + roleLevel +
-                "\tserverID:" + serverID + "\tserverName:" + serverName +
-                "\textension:" + extension +
-                "\tstatus:" + status +
-                "\tnotifyUrl:" + notifyUrl +
-                "\tsignType:" + signType +
-                "\tsign:" + sign);
+//        log.info("request: ttt/payInfo , accountID: " + accountID + "\tchannelOrderID:" + channelOrderID +
+//                "\tproductID:" + productID + "\tproductName:" + productName + "\tproductDesc:" + productDesc +
+//                "\tmoney:" + money +
+//                "\troleID:" + roleID + "\troleName:" + roleName + "\troleLevel:" + roleLevel +
+//                "\tserverID:" + serverID + "\tserverName:" + serverName +
+//                "\textension:" + extension +
+//                "\tstatus:" + status +
+//                "\tnotifyUrl:" + notifyUrl +
+//                "\tsignType:" + signType +
+//                "\tsign:" + sign);
         System.out.println("request: ttt/payInfo , accountID: " + accountID + "\tchannelOrderID:" + channelOrderID +
                 "\tproductID:" + productID + "\tproductName:" + productName + "\tproductDesc:" + productDesc +
                 "\tmoney:" + money +
@@ -639,21 +639,28 @@ public class TtController {
                 break;
             }
 
-            Account account = new Account();
+
             Map<String, Object> map = new HashMap<>();
             map.put("accountId", accountID);
             map.put("roleId", roleID);
 
+
             //1.判断用户存不存在 userId
             List<GameRole> roleList = gameRoleWorker.findGamerole(map);
             if (roleList.size() == 0) {
-                result.put("meaages", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+                result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
                 data.put("state", StateCode.CODE_USER_NONE);
                 break;
             }
             //角色信息 可以获取 游戏id、渠道id
             GameRole role = roleList.get(0);
             System.out.println("role:accountID --->" + role.getAccountId());
+
+            Map<String, String> mapstr = new HashMap<>();
+            mapstr.put("isChannel", "true");
+            mapstr.put("channelId", role.getChannelId());
+            mapstr.put("channelUid", role.getChannelUid());
+            Account account = accountWorker.getAccount(mapstr);
 
             //2.金额合法性
             if (money < 0) {
@@ -662,7 +669,7 @@ public class TtController {
                 break;
             }
 
-            //3.验签
+//            //3.验签
 //            if (!orderManager.isSignOK(accountID, channelOrderID, productID, productName, productDesc, money,
 //                    roleID, roleName, roleLevel, serverID, serverName, extension, status, notifyUrl, signType, sign)) {
 //                log.error("the sign is not valid. sign:" + sign);
@@ -713,7 +720,7 @@ public class TtController {
                 }
             }
             if (updateRedis) {
-                cache.reqpay(role.getGameId(), serverID, role.getChannelId(), accountID, money);
+                cache.reqpay(role.getGameId(), serverID, role.getChannelId(), accountID, roleID, money, account.getCreateTime());
             }
 
             data.put("orderid", order.getOrderID());

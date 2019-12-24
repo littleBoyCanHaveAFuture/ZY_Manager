@@ -30,6 +30,9 @@ public class AopSurvey {
         //ServerListServiceImpl
         allJumpFuncMethodList.add("isSpCanReg");
         allJumpFuncMethodList.add("isSpCanLogin");
+        allJumpFuncMethodList.add("getDistinctServerInfo");
+        allJumpFuncMethodList.add("getGameList");
+        allJumpFuncMethodList.add("selectLoginUrl");
     }
 
     @Resource

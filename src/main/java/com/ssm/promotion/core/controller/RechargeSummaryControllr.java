@@ -176,6 +176,7 @@ public class RechargeSummaryControllr {
         List<String> timeList = DateUtil.transTimes(startTimes, endTimes, DateUtil.FORMAT_YYYY_MMDD_HHmm);
 
         //3.查询redis
+        //todo 查询数据 区服/渠道概况 必须指定 渠道和游戏
         List<RechargeSummary> rs = this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
         //处理开服天数
         if (type == 2) {

@@ -61,6 +61,42 @@ public class AccountWorker {
     /**
      * 注册账号
      */
+    public Account autoRegister(JSONObject reply, String ip) throws Exception {
+
+        //创建账号
+        Account account = new Account();
+        account.setName(RandomUtil.rndStr(10, true));
+        account.setPwd(RandomUtil.rndStr(6, false));
+
+
+        account.setPhone("");
+        account.setCreateIp(ip);
+        account.setCreateTime(DateUtil.getCurrentDateStr());
+        account.setCreateDevice("");
+        account.setDeviceCode("");
+        account.setChannelId("0");
+        account.setChannelUserId("");
+        account.setChannelUserName("Official");
+        account.setChannelUserNick("Official");
+        account.setLastLoginTime(0L);
+        account.setToken("");
+        account.setAddParam("");
+
+        accountService.createAccount(account);
+
+        reply.put("message", "注册成功");
+        reply.put("accountId", account.getId());
+        reply.put("account", account.getName());
+        reply.put("pwd", account.getPwd());
+        reply.put("status", 1);
+
+        return account;
+
+    }
+
+    /**
+     * 注册账号
+     */
     public JSONObject reqRegister(Map<String, String> map) throws Exception {
         JSONObject reply = new JSONObject();
         do {
@@ -163,7 +199,7 @@ public class AccountWorker {
             reply.put("account", account.getName());
             reply.put("pwd", account.getPwd());
             reply.put("status", 1);
-
+            reply.put("accountId", account.getId());
         } while (false);
 
 
@@ -312,7 +348,6 @@ public class AccountWorker {
      * 根据渠道和玩家所在渠道编号获取user
      */
     public Account getAccount(Map<String, String> map) {
-
         List<Account> list = accountService.findUser(map);
         if (list.isEmpty()) {
             return null;

@@ -21,34 +21,64 @@ public class JedisRechargeCache {
     /**
      * Redis 分片(分区)，也可以在配置文件中配置
      */
-    private static final int DB_INDEX = 2;
+    private static final int DB_INDEX = 3;
     private jedisManager jedisManager;
 
     private boolean isLog = true;
 
 //键值参考：账号id 一定要唯一
-/*  zscore
-    充值次数:         zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO" {value} "RECHARGE_TIMES"
-    充值人数:         zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO" {value} "RECHARGE_PLAYERS"
-    充值金额:         zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO" {value} "RECHARGE_AMOUNTS"
-    当日首次付费金额： zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO" {amounts} "RECHARGE_FIRST_AMOUNTS"
-    注册付费金额：    zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO" {amounts} "RECHARGE_AMOUNTS_NA_CA"
-    累计充值金额：    zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}#RechargeTotalInfo" {value} "GAME_ACCUMULATION_RECHARGE_AMOUNTS"
-    累计充值人数:     zincrby "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}#RechargeTotalInfo" {value} "GAME_ACCUMULATION_RECHARGE_ACCOUNTS"
+/*
+    新增创号    BitMap
+    UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NEW_ADD_CREATE_ACCOUNT {account_Id}
 
-    累计创角:        zincrby "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#AccountInfo" {value} "GAME_ACCUMULATION_CREATE_ROLE"
+    该游戏所有账号 BitMap
+    UserInfo:spid:{spid}:gid:{gid}#GAME_ACCOUNT_ALL_NUMS {account_Id}
 
-    bitcount
-    新增创号                  SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NEW_ADD_CREATE_ACCOUNT" {account_Id}
-    新增创角                  SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NA_CR {account_Id}
-    所有账号的数目:            SETBIT "UserInfo:spid:{spid}:gid:{gid}#GAME_ACCOUNT_ALL_NUMS" {account_Id}
-    活跃玩家 的账号数目:       SETBIT "UserInfo:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#activePlayers" {account_id}
-    当日首次付费人数:         SETBIT "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_ACCOUNT" {account_id}
-    当日多次付费人数:         SETBIT "activePlayers:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_ACCOUNT_M" {account_id}
-    注册付费人数:            SETBIT "activePlayers:gid:{gid}:sid:{sid}:spid:{spid}:date:{yyyyMMdd}#RECHARGE_ACCOUNT_NA_CA" {account_id}
+    创建过角色的账号    BitMap
+    UserInfo:spid:{spid}:gid:{gid}#GAME_ACCOUNT_HAS_ROLE {account_Id}
 
-    创建过角色的账号          SETBIT "UserInfo:spid:{spid}:gid:{gid}#GAME_ACCOUNT_HAS_ROLE" {account_id}
-    新增创角去除滚服           SETBIT "UserInfo:spid:{spid}:gid:{gid}:date:{yyyyMMdd}#NA_CR_RM_OLD {account_Id}
+    活跃玩家    Sorted Set
+    UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#ACTIVE_PLAYERS score {yyyyMMdd}
+
+    在线玩家    Sorted Set
+    UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#ONLINE_PLAYERS score {yyyyMMdd}
+
+    新增创角    Sorted Set
+    UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#NEW_ADD_CREATE_ROLE    score   {yyyyMMdd}
+
+    新增创角去除滚服
+    UserInfo:spid:{spid}:gid:{gid}:sid:{sid}#NEW_ADD_CREATE_ROLE_RM_OLD    score   {yyyyMMdd}
+
+    累计创角    Sorted Set
+    UserInfo:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#ACCOUNT_INFO    score   {yyyyMMdd}
+
+    当日付费角色  Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_ROLES" {role_id}
+
+    历史付费角色  Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}#RECHARGE_ACCOUNT" {role_id}
+
+    充值次数    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO {score} RECHARGE_TIMES
+    充值人数    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO {score} RECHARGE_PLAYERS
+    充值金额    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}:date:{yyyyMMdd}#RECHARGE_INFO {score} RECHARGE_AMOUNTS
+
+    累计充值金额    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}#RECHARGE_INFO {score} GAME_ACCUMULATION_RECHARGE_AMOUNTS
+    累计充值人数    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}#RECHARGE_INFO {score} GAME_ACCUMULATION_RECHARGE_ACCOUNTS
+
+    注册付费人数    Sorted Set
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}RECHARGE_ROLES_NA_CR {score} {yyyyMMdd}
+    注册付费金额
+    ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}RECHARGE_AMOUNTS_NA_CR {score} {yyyyMMdd}
+
+    当日首次付费人数    Sorted Set
+     ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}RECHARGE_FIRST_PAY_ROLES {score} {yyyyMMdd}
+    当日首次付费金额    Sorted Set
+     ACTIVE_PLAYERS_INFO:spid:{spid}:gid:{gid}:sid:{sid}RECHARGE_FIRST_PAY_AMOUNTS {score} {yyyyMMdd}
  */
 
     public static void main(String[] args) {
@@ -157,13 +187,14 @@ public class JedisRechargeCache {
         String nextMin = DateUtil.getCurrentMinuteStr(1);
 
         //实时在线玩家数据
-        String key1 = RedisKeyHeader.USER_INFO + ":spid:*:gid:*:sid:*:date:" + currDay + "#" + RedisKeyTail.ONLINE_PLAYERS;
+        String key1 = RedisKeyHeader.USER_INFO + ":spid:*:gid:*:sid:*" + "#" + RedisKeyTail.ONLINE_PLAYERS;
         String key2 = RedisKeyHeader.REALTIMEDATA + ":spid:*:gid:*:sid:*:date:" + currDayMin + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
         //查询的键
         String patternKey = key1;
 
         ScanParams scanParams = new ScanParams();
-        scanParams.match(patternKey);// 匹配以 {header}:spid:*:gid:*:sid:*:date:*#{tail} 为前缀的 key
+        // 匹配以 {header}:spid:*:gid:*:sid:*:date:*#{tail} 为前缀的 key
+        scanParams.match(patternKey);
         scanParams.count(500);
 
         //当天的实时在线玩家数据-有序集合键值
@@ -171,38 +202,40 @@ public class JedisRechargeCache {
         Pipeline pipeline = jedis.pipelined();
 
         do {
+            long t1 = System.currentTimeMillis();
             //使用scan命令获取500条数据，使用cursor游标记录位置，下次循环使用
             ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
 
             cursor = scanResult.getCursor();
             List<String> list = scanResult.getResult();
 
-            long t1 = System.currentTimeMillis();
-
             //每分钟的在线玩家
             //亦或|或 都可以 反正 key2 此刻不存在 均为0
             for (String mapEntry : list) {
                 String[] keys = mapEntry.split(":");
                 StringBuilder targetbody = new StringBuilder();
-                // :spid:*:gid:*:sid:*:date:
-                for (int i = 1; i <= 7; i++) {
+                // :spid:*:gid:*:sid:*#
+                for (int i = 1; i <= 5; i++) {
                     targetbody.append(keys[i]).append(":");
                 }
-                String target = RedisKeyHeader.REALTIMEDATA + ":" + targetbody + currDay + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
+                targetbody.append(keys[6].split("#")[0]).append(":");
+                String target = RedisKeyHeader.REALTIMEDATA + ":" + targetbody + "date:" + currDay + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
                 targetKeyList.add(target);
                 if (isLog) {
                     System.out.println("src key------>" + mapEntry);
                     System.out.println("target key--->" + target);
                 }
-                pipeline.bitcount(mapEntry);
+                pipeline.zscore(mapEntry, currDay);
             }
             //给当前时间实际在线添加数值
             List<Object> res = pipeline.syncAndReturnAll();
             for (int i = 0; i < res.size(); i++) {
-                double num = Double.parseDouble(res.get(i).toString());
                 String targetKey = targetKeyList.get(i);
-
-                pipeline.zincrby(targetKey, num, currDayMin);
+                double num = 0D;
+                if (res.get(i) != null) {
+                    num = Double.parseDouble(res.get(i).toString());
+                }
+                pipeline.zadd(targetKey, num, currDayMin);
                 if (isLog) {
                     System.out.println("target key:" + targetKey + "\tmember:" + currDayMin + "\t" + num);
                 }
@@ -220,18 +253,72 @@ public class JedisRechargeCache {
         pipeline.close();
     }
 
+    public void setOfflineData(Jedis jedis) throws Exception {
+        // 游标初始值为0
+        String cursor = ScanParams.SCAN_POINTER_START;
+        //当天时间
+        String currDay = DateUtil.getCurrentDayStr();
+        String nextDay = DateUtil.formatDate(DateUtil.getEndTimestamp() * 1000, DateUtil.FORMAT_YYMMDD);
+        //当前分钟
+        String currDayMin = DateUtil.getCurrentMinuteStr();
+        //下一分钟 大概是第二天 0:00:50
+        String nextMin = DateUtil.getCurrentMinuteStr(1);
+
+        //实时在线玩家数据
+        String key1 = RedisKeyHeader.USER_INFO + ":spid:*:gid:*:sid:*" + "#" + RedisKeyTail.ONLINE_PLAYERS;
+        String patternKey = key1;
+        ScanParams scanParams = new ScanParams();
+        // 匹配以 {header}:spid:*:gid:*:sid:*:date:*#{tail} 为前缀的 key
+        scanParams.match(patternKey);
+
+        scanParams.count(500);
+
+        //当天的实时在线玩家数据-有序集合键值
+        Pipeline pipeline = jedis.pipelined();
+        do {
+            long t1 = System.currentTimeMillis();
+            //使用scan命令获取500条数据，使用cursor游标记录位置，下次循环使用
+            ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
+
+            cursor = scanResult.getCursor();
+            List<String> list = scanResult.getResult();
+
+            for (String mapEntry : list) {
+                pipeline.zscore(mapEntry, currDay);
+                if (isLog) {
+                    System.out.println("src key------>" + mapEntry);
+                }
+            }
+
+            List<Object> res = pipeline.syncAndReturnAll();
+            int i = 0;
+            for (String mapEntry : list) {
+                double ss = 0D;
+                if (res.get(i) != null) {
+                    ss = Double.parseDouble(res.get(i).toString());
+                }
+                pipeline.zadd(mapEntry, ss, nextDay);
+                i++;
+            }
+            pipeline.sync();
+            if (isLog) {
+                System.out.println("find " + list.size() + " key,use: " + (System.currentTimeMillis() - t1) + " ms,cursor:" + cursor);
+            }
+        } while (!"0".equals(cursor));
+    }
+
     /**
      * 每天12点更新活跃玩家实时数据
      * todo
      */
-    public void setOfflineData() {
+    public void updateNextDayOnlineData() {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
 
-//            this.getListKey(jds);
+//            this.setOfflineData(jds);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -331,7 +418,6 @@ public class JedisRechargeCache {
         }
     }
 
-
     /**
      * 注册账号
      * 1.新增创号
@@ -348,8 +434,6 @@ public class JedisRechargeCache {
             Integer gameId = Integer.parseInt(map.get("appId"));
             long accountId = Long.parseLong(map.get("accountId"));
             String currday = DateUtil.getCurrentDayStr();
-            //当前分钟
-            String currDayMin = DateUtil.getCurrentMinuteStr();
 
             String key1;
             String key2;
@@ -412,26 +496,41 @@ public class JedisRechargeCache {
             String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
 
             Pipeline pipeline = jds.pipelined();
-            //活跃账号 渠道-游戏-区服-日期
-            String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.ACTIVE_PLAYERS;
-            //在线账号 渠道-游戏-区服-日期
-            String key2 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.ONLINE_PLAYERS;
+
+            //新版
+            //活跃玩家
+            pipeline.zincrby(RedisKeyNew.getKeyRolesActiveDay(channelId, appId, serverId), 1, currDay);
+            //在线玩家
+            pipeline.zincrby(RedisKeyNew.getKeyRolesOnlineDay(channelId, appId, serverId), 1, currDay);
             //实时在线
-            String key3 = realtimeSGSKey + ":date:" + currDayMin + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
+            pipeline.zincrby(RedisKeyNew.getKeyRolesOnlineMin(channelId, appId, serverId, currDay), 1, currDayMin);
+            //设置过期时间
+            //todo
+            pipeline.sync();
 
-            pipeline.setbit(key1, accountId, true);
-            pipeline.setbit(key2, accountId, true);
-//            pipeline.expireAt(key2, DateUtil.getEndTimestamp());
-            pipeline.setbit(key3, accountId, true);
-//            pipeline.expire(key3, (int) ((int) DateUtil.MONTH_MILLIS / DateUtil.SECOND_MILLIS));
 
-            List<Object> res = pipeline.syncAndReturnAll();
-            if (isLog) {
-                System.out.println("enterGame key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res.get(0).toString() + "]");
-                System.out.println("enterGame key2:" + key2 + "\taccountId:" + accountId + "\tresult:[" + res.get(1).toString() + "]");
-            }
-            log.info("enterGame key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res.get(0).toString() + "]");
-            log.info("enterGame key2:" + key2 + "\taccountId:" + accountId + "\tresult:[" + res.get(1).toString() + "]");
+//            //活跃账号 渠道-游戏-区服-日期
+//            String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.ACTIVE_PLAYERS;
+//            //在线账号 渠道-游戏-区服-日期
+//            String key2 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.ONLINE_PLAYERS;
+//            //实时在线
+//            String key3 = realtimeSGSKey + ":date:" + currDayMin + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
+//
+//            pipeline.setbit(key1, accountId, true);
+//            pipeline.setbit(key2, accountId, true);
+////            pipeline.expireAt(key2, DateUtil.getEndTimestamp());
+//            pipeline.setbit(key3, accountId, true);
+////            pipeline.expire(key3, (int) ((int) DateUtil.MONTH_MILLIS / DateUtil.SECOND_MILLIS));
+//
+//            List<Object> res = pipeline.syncAndReturnAll();
+//            if (isLog) {
+//                System.out.println("enterGame key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res.get(0).toString() + "]");
+//                System.out.println("enterGame key2:" + key2 + "\taccountId:" + accountId + "\tresult:[" + res.get(1).toString() + "]");
+//            }
+//            log.info("enterGame key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res.get(0).toString() + "]");
+//            log.info("enterGame key2:" + key2 + "\taccountId:" + accountId + "\tresult:[" + res.get(1).toString() + "]");
+
+
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -441,7 +540,6 @@ public class JedisRechargeCache {
     }
 
     /**
-     * redis 管道
      * 创建角色
      * 1.新增创角
      * 2.创建过角色的账号
@@ -452,12 +550,13 @@ public class JedisRechargeCache {
      * @param appId     游戏id
      * @param serverId  区服id
      * @param channelId 渠道id
+     * @param accountId 指悦账号id
      * @param accountId 角色id
      */
     public void createRole(String appId,
                            String serverId,
                            String channelId,
-                           long accountId) {
+                           long accountId, long roleId) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -468,41 +567,157 @@ public class JedisRechargeCache {
             String currDayMin = DateUtil.getCurrentMinuteStr();
             String currDay = DateUtil.getCurrentDayStr();
 
-            //渠道-游戏
-            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
-            //渠道-游戏-区服
-            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
-            //渠道-游戏-区服
-            String realtimeSGSKey = String.format("%s:spid:%s:gid:%s:sid:%s:date:", RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
-            //渠道-游戏 有角色的账号
-            String key2 = userSGKey + "#" + RedisKeyTail.GAME_ACCOUNT_HAS_ROLE;
-
             //是否滚服用户
-            boolean isMutiple = jds.getbit(key2, accountId);
-            System.out.println("isMutiple:" + isMutiple);
+            boolean hasRole = jds.getbit(RedisKeyNew.getKeyAccountCreateRoles(channelId, appId), accountId);
+            System.out.println("hasRole:" + hasRole);
+            log.info("hasRole:" + hasRole);
 
-            //新增创角 渠道-游戏-区服-日期
-            String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE;
-            //新增创角去除滚服 渠道-游戏-区服-日期
-            String key3 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD;
-            // 累计创角 渠道-游戏-区服
-            String key5 = userSGSKey + "#" + RedisKeyTail.ACCOUNT_INFO;
+            //新版
+            //新增创角
+            jds.zincrby(RedisKeyNew.getKeyRolesCreateDay(channelId, appId, serverId), 1, currDay);
+            if (!hasRole) {
+                //新增创角去除滚服
+                jds.zincrby(RedisKeyNew.getKeyRolesCreateFirst(channelId, appId, serverId), 1, currDay);
+                //创建过角色的账号
+                jds.setbit(RedisKeyNew.getKeyAccountCreateRoles(channelId, appId), accountId, true);
+            }
+            //实时创角
+            jds.zincrby(RedisKeyNew.getKeyRolesCreateMin(channelId, appId, serverId, currDay), 1, currDayMin);
+            //累计创角数目(所有角色)
+            jds.zincrby(RedisKeyNew.getKeyRolesCreateServer(channelId, appId, serverId), 1, RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
 
-            String key11 = realtimeSGSKey + currDay + "#" + RedisKeyTail.REALTIME_ADD_ROLES;
+//            //渠道-游戏
+//            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
+//            //渠道-游戏-区服
+//            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
+//            //渠道-游戏-区服
+//            String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
+//            //新增创角 渠道-游戏-区服-日期
+//            String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE;
+//            //新增创角去除滚服 渠道-游戏-区服-日期
+//            String key3 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD;
+//            // 累计创角 渠道-游戏-区服
+//            String key5 = userSGSKey + "#" + RedisKeyTail.ACCOUNT_INFO;
+//
+//            String key11 = realtimeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.REALTIME_ADD_ROLES;
+//
+//            boolean res1 = jds.setbit(key1, accountId, true);
+//            boolean res2 = jds.setbit(key3, accountId, !hasRole);
+//            double res3 = jds.zincrby(key5, 1, RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
+//            if (!hasRole) {
+//                jds.setbit(key2, accountId, true);
+//            }
+//
+//            jds.zincrby(key11, 1, currDayMin);
+//            if (isLog) {
+//                System.out.println("createRole key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res1 + "]");
+//                System.out.println("createRole key3:" + key3 + "\taccountId:" + accountId + "\tresult:[" + res2 + "]");
+//                System.out.println("createRole key5:" + key5 + "\taccountId:" + accountId + "\tresult:[" + res3 + "]");
+//            }
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
 
-            boolean res1 = jds.setbit(key1, accountId, true);
-            boolean res2 = jds.setbit(key3, accountId, !isMutiple);
-            double res3 = jds.zincrby(key5, 1, RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
-            if (!isMutiple) {
-                jds.setbit(key2, accountId, true);
+    /**
+     * 充值
+     * 1.充值次数
+     * 2.充值人数
+     * 3.充值金额
+     * 4.当日首次付费金额
+     * 5.注册付费金额
+     * 6.累计充值金额
+     * 7.累计充值人数
+     * 8.当日首次付费人数
+     * 9.注册付费人数
+     *
+     * @param appId      游戏id
+     * @param serverId   区服id
+     * @param channelId  渠道id
+     * @param accountId  账号id
+     * @param roleId     角色id
+     * @param payamounts 支付金额
+     * @param createTime 账号注册时间
+     */
+    public void reqpay(String appId, String serverId, String channelId, long accountId, String roleId, long payamounts,
+                       String createTime) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            //当前分钟
+            String currDayMin = DateUtil.getCurrentMinuteStr();
+            //当天时间
+            String currDay = DateUtil.getCurrentDayStr();
+
+
+            //账号创建时间 + 一天
+            long currtimes = System.currentTimeMillis();
+            //当天凌晨 24:00的时间戳
+            long endtime = DateUtil.getEndTimestamp() * 1000;
+            long createtime = DateUtil.formatString(createTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS).getTime();
+            //新版
+            //今日充值过的角色
+            boolean hasPaidCurrDay = jds.sismember(RedisKeyNew.getKeyRolesPaidDay(channelId, appId, serverId, currDay), roleId);
+            //历史付费
+            boolean hasPaid = jds.sismember(RedisKeyNew.getKeyRolesPaidServer(channelId, appId, serverId), roleId);
+            //当日新增创号的角色
+            boolean hasRegCurrday = (createtime < endtime) && (createtime > endtime - DateUtil.DAY_MILLIS);
+            //创号超过一天的角色 首次付费
+            boolean hasRegYesterday = (currtimes - createtime >= DateUtil.DAY_MILLIS);
+
+            //当天充值
+            //充值次数
+            jds.zincrby(RedisKeyNew.getKeyRolesPayInfoDay(channelId, appId, serverId, currDay), 1, RedisKey.RECHARGE_TIMES);
+            //充值金额
+            jds.zincrby(RedisKeyNew.getKeyRolesPayInfoDay(channelId, appId, serverId, currDay), payamounts, RedisKey.RECHARGE_AMOUNTS);
+            if (!hasPaidCurrDay) {
+                //充值人数
+                jds.zincrby(RedisKeyNew.getKeyRolesPayInfoDay(channelId, appId, serverId, currDay), 1, RedisKey.RECHARGE_PLAYERS);
+                //今日充值过的角色
+                jds.sadd(RedisKeyNew.getKeyRolesPaidDay(channelId, appId, serverId, currDay), roleId);
             }
 
-            jds.zincrby(key11, 1, currDayMin);
-            if (isLog) {
-                System.out.println("createRole key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res1 + "]");
-                System.out.println("createRole key3:" + key3 + "\taccountId:" + accountId + "\tresult:[" + res2 + "]");
-                System.out.println("createRole key5:" + key5 + "\taccountId:" + accountId + "\tresult:[" + res3 + "]");
+            //实时充值
+            //充值金额-当前分钟
+            jds.zincrby(RedisKeyNew.getKeyRolesPaidMin(channelId, appId, serverId, currDay), payamounts, currDayMin);
+
+
+            //累计充值
+            //充值金额
+            jds.zincrby(RedisKeyNew.getKeyRolesPayInfoServer(channelId, appId, serverId), payamounts, RedisKey.GAME_ACCUMULATION_RECHARGE_AMOUNTS);
+            if (!hasPaid) {
+                //充值人数 也阔以通过计算下面的size 获得
+                jds.zincrby(RedisKeyNew.getKeyRolesPayInfoServer(channelId, appId, serverId), 1, RedisKey.GAME_ACCUMULATION_RECHARGE_ACCOUNTS);
+                //历史付费角色
+                jds.sadd(RedisKeyNew.getKeyRolesPaidServer(channelId, appId, serverId), roleId);
             }
+
+            //当日注册付费
+            if (hasRegCurrday) {
+                if (!hasPaidCurrDay) {
+                    //注册付费人数
+                    jds.zincrby(RedisKeyNew.getKeyRegisterPaidRoles(channelId, appId, serverId), 1, currDay);
+                }
+                //注册付费金额
+                jds.zincrby(RedisKeyNew.getKeyRegisterPaidAmounts(channelId, appId, serverId), payamounts, currDay);
+            }
+
+            //当日首次付费
+            if (hasRegYesterday) {
+                if (!hasPaid) {
+                    //当日首次付费人数
+                    jds.zincrby(RedisKeyNew.getKeyFirstPaidRoles(channelId, appId, serverId), 1, currDay);
+                    //当日首次付费金额
+                    jds.zincrby(RedisKeyNew.getKeyFirstPaidRolesAmounts(channelId, appId, serverId), payamounts, currDay);
+                }
+            }
+
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -564,133 +779,29 @@ public class JedisRechargeCache {
         }
     }
 
-    /**
-     * redis 管道
-     * 1.充值次数
-     * 2.充值人数
-     * 3.充值金额
-     * 4.当日首次付费金额
-     * 5.注册付费金额
-     * 6.累计充值金额
-     * 7.累计充值人数
-     * 8.当日首次付费人数
-     * 9.注册付费人数
-     *
-     * @param appId     游戏id
-     * @param serverId  区服id
-     * @param channelId 渠道id
-     * @param accountId 角色id
-     */
-    public void reqpay(String appId, String serverId, String channelId, long accountId, long payamounts) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            //当前分钟
-            String currDayMin = DateUtil.getCurrentMinuteStr();
-            //当天时间
-            String currDay = DateUtil.getCurrentDayStr();
-
-            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
-            String activeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.ACTIVE_PLAYERS_INFO, channelId, appId, serverId);
-            String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
-            //渠道-游戏-区服-日期
-            /**
-             * 1.充值次数
-             * 2.充值人数
-             * 3.充值金额
-             * 4.当日首次付费金额
-             * 5.注册付费金额
-             */
-            String key1 = activeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.RECHARGE_INFO;
-            /**
-             * 渠道-游戏-区服
-             * 6.累计充值金额
-             * 7.累计充值人数
-             */
-            String key2 = activeSGSKey + "#" + RedisKeyTail.RECHARGE_TOTAL_INFO;
-            //付费玩家 渠道-游戏-区服-日期
-            String key3 = activeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.RECHARGE_ACCOUNT;
-            //多次付费玩家 渠道-游戏-区服-日期
-            String key31 = activeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.RECHARGE_ACCOUNT_M;
-            //注册付费人数
-            String key9 = activeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.RECHARGE_ACCOUNT_NA_CA;
-            //新增创号(注册人数)
-            String key10 = userSGKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ACCOUNT;
-            //当前时间段的收入
-            String key11 = realtimeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.REALTIME_RECHARGE_AMOUNTS;
-            //所有充值玩家（累积）
-            String key71 = userSGKey + "#" + RedisKeyTail.GAME_ACCOUNT_ALL_NUMS;
-            //是否当日已付费
-            boolean isPaid = jds.getbit(key3, accountId);
-            //是否当日多次付费
-            boolean isPaidMutiple = jds.getbit(key31, accountId);
-            //是否当日注册玩家
-            boolean isRegister = jds.getbit(key10, accountId);
-            if (isLog) {
-                System.out.println("key1:" + key1);
-                System.out.println("key2:" + key2);
-                System.out.println("key3:" + key3);
-                System.out.println("key31:" + key31);
-                System.out.println("key10:" + key10);
-                System.out.println("key11:" + key11);
-
-                System.out.println("isPaid:" + isPaid);
-                System.out.println("isPaidMutiple:" + isPaidMutiple);
-                System.out.println("isRegister:" + isRegister);
-            }
-            //累计充值 游戏-区服
-            jds.zincrby(key2, payamounts, RedisKey.GAME_ACCUMULATION_RECHARGE_AMOUNTS);
-
-            //充值次数
-            jds.zincrby(key1, 1, RedisKey.RECHARGE_TIMES);
-            //充值人数
-            jds.zincrby(key1, 1, RedisKey.RECHARGE_PLAYERS);
-            //充值金额
-            jds.zincrby(key1, payamounts, RedisKey.RECHARGE_AMOUNTS);
-            //充值金额-当前分钟
-            jds.zincrby(key11, payamounts, currDayMin);
-//            jds.expire(key11, (int) (DateUtil.MONTH_MILLIS / DateUtil.SECOND_MILLIS));
-
-            if (!isPaid) {
-                //当日首次付费金额
-                jds.zincrby(key1, payamounts, RedisKey.RECHARGE_FIRST_AMOUNTS);
-                //当日首次付费人数
-                jds.setbit(key3, accountId, true);
-            } else {
-                //多次付费
-                jds.setbit(key31, accountId, true);
-            }
-            //注册付费玩家
-            if (isRegister) {
-                //注册付费人数
-                jds.setbit(key9, accountId, true);
-                //注册付费金额
-                jds.zincrby(key1, payamounts, RedisKey.RECHARGE_AMOUNTS_NA_CA);
-            }
-            //计算总付费率=付费玩家/所有玩家
-
-//            long allAccounts = jds.bitcount(key71);
-//            jds.zadd(RedisKey.RECHARGE_TOTAL_RATE, , currDay);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-    }
-
-
-    public Double getZscore(String keyBody, String keyTail, String member) {
+    public void zincrby(String key, long score, String member) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = this.jedisManager.getJedis();
             jds.select(DB_INDEX);
 
-            String key = keyBody + "#" + keyTail;
+            jds.zincrby(key, score, member);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+
+    }
+
+    public Double getZscore(String key, String member) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(DB_INDEX);
 
             return jds.zscore(key, member);
         } catch (Exception e) {
@@ -787,7 +898,7 @@ public class JedisRechargeCache {
                         stream().
                         map(
                                 e -> {
-                                    Double re;
+                                    double re;
                                     if (e != null) {
                                         re = Double.parseDouble(e.toString());
                                     } else {
@@ -812,6 +923,95 @@ public class JedisRechargeCache {
         } finally {
             returnResource(jds, isBroken);
         }
+    }
+
+
+    /**
+     * 获取Sorted Set 分数
+     * <p>
+     *
+     * @param keyListMap 1.每天：活跃玩家
+     *                   2.每天：在线玩家
+     *                   3.每天：新增创角
+     *                   4.每天：新增创角去除滚服
+     *                   5.每天：注册付费金额
+     *                   7.每天：注册付费人数
+     *                   8.每天：当日首次付费人数
+     *                   9.每天：当日首次付费金额
+     * @param timeList   时间字符串 yyyyMMdd
+     * @param resultList 查询结果
+     *                   key keytail
+     *                   value （times，score）
+     */
+    public void getDayZscore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            Pipeline pipeline = jds.pipelined();
+
+            int tlSize = timeList.size();
+
+            for (Map.Entry<String, List<String>> entry : keyListMap.entrySet()) {
+                String type = entry.getKey();
+                //同一渠道 同一游戏 不同区服
+                List<String> keyList = entry.getValue();
+                // 按照时间顺序 获取分数
+                for (String key : keyList) {
+                    for (String times : timeList) {
+                        pipeline.zscore(key, times);
+                    }
+                }
+            }
+            //res 大小为：键类型数*区服数*天数
+            // [key][serverId][day]
+            List<Object> res = pipeline.syncAndReturnAll();
+            if (res == null || res.size() == 0) {
+                return;
+            }
+
+            int i = 0;
+            for (Map.Entry<String, List<String>> entry : keyListMap.entrySet()) {
+                List<String> keyList = entry.getValue();
+                for (String key : keyList) {
+                    Map<String, Double> resultmap = new HashMap<>();
+                    for (String times : timeList) {
+                        if (res.get(i) == null) {
+                            resultmap.put(times, 0D);
+                        } else {
+                            Double d = Double.parseDouble(res.get(i).toString());
+                            resultmap.put(times, d);
+                        }
+                        i++;
+                    }
+                    resultList.put(entry.getKey(), resultmap);
+                }
+            }
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    public Long getbitcount(String key) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            return jds.bitcount(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
     }
 
     /**

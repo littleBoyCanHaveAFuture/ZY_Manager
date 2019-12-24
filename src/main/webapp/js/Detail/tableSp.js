@@ -109,7 +109,7 @@ function initTableColumns() {
         "总付费率": "totalRechargeRates",
 //渠道
         "注收比": "zhushoubi",
-        "新增注收比": "addzhushoubi"
+        // "新增注收比": "addzhushoubi"
     };
     $.each(commonResult, function (index, value) {
         let column = {};

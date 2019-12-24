@@ -76,9 +76,9 @@ public class ScheduledService {
         cache.setRealtimeData();
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "50 59 23 * * ?")
     public void redisOffline() {
         //reids 将前一天的在线玩家数据转移
-        cache.setOfflineData();
+        cache.updateNextDayOnlineData();
     }
 }

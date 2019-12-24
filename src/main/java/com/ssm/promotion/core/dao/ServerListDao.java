@@ -79,4 +79,6 @@ public interface ServerListDao {
      * 公钥
      */
     String selectPublicKey(Map<String, Object> map);
+
+    String selectLoginUrl(Map<String, Object> map);
 }

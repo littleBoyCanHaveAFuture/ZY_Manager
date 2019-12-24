@@ -1,5 +1,10 @@
 package com.ssm.promotion.core.util;
 
+import org.apache.log4j.Logger;
+
+import javax.crypto.Cipher;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -12,11 +17,10 @@ import java.util.Map;
  * Created by ant on 2015/4/11.
  */
 public class RSAUtils {
-
     public static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM_MD5 = "MD5withRSA";
     public static final String SIGNATURE_ALGORITHM_SHA = "SHA1WithRSA";
-
+    private static final Logger log = Logger.getLogger(RSAUtils.class);
     private static final String PUBLIC_KEY = "RSAPublicKey";
     private static final String PRIVATE_KEY = "RSAPrivateKey";
 
@@ -132,49 +136,61 @@ public class RSAUtils {
         return null;
     }
 
-
     /**
-     * 取得私钥
-     *
-     * @param keyMap
-     * @return
-     * @throws Exception
+     * 获得公钥
      */
-    public static String getPrivateKey(Map<String, Object> keyMap)
-            throws Exception {
-        Key key = (Key) keyMap.get(PRIVATE_KEY);
-
-        return Base64.encode(key.getEncoded());
+    public static RSAPublicKey getpublicKey(Map<String, Object> keyMap) {
+        RSAPublicKey publicKey = (RSAPublicKey) keyMap.get(PUBLIC_KEY);
+        return publicKey;
     }
 
     /**
-     * 取得公钥
-     *
-     * @param keyMap
-     * @return
-     * @throws Exception
+     * 获得私钥
      */
-    public static String getPublicKey(Map<String, Object> keyMap)
-            throws Exception {
-        Key key = (Key) keyMap.get(PUBLIC_KEY);
+    public static RSAPrivateKey getPrivateKey(Map<String, Object> keyMap) {
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyMap.get(PRIVATE_KEY);
+        return privateKey;
+    }
 
-        return Base64.encode(key.getEncoded());
+    /**
+     * 公钥加密
+     */
+    public static byte[] encrypt(byte[] data, RSAPublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] cipherBytes = cipher.doFinal(data);
+        return cipherBytes;
+    }
+
+    /**
+     * 私钥解密
+     */
+    public static byte[] decrypt(byte[] data, RSAPrivateKey privateKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] plainBytes = cipher.doFinal(data);
+        return plainBytes;
     }
 
     public static void main(String[] args) throws Exception {
 
         Map<String, Object> keys = generateKeys();
 
-        String pubKey = getPublicKey(keys);
-        String priKey = getPrivateKey(keys);
+        RSAPublicKey pubKey = RSAUtils.getpublicKey(keys);
+        RSAPrivateKey priKey = RSAUtils.getPrivateKey(keys);
+
+        String pubk = Base64.encode(pubKey.getEncoded());
+        String prik = Base64.encode(priKey.getEncoded());
 
         System.out.println("The pubKey is ");
-        System.out.println(pubKey);
-        System.out.println("lenth " + pubKey.length());
+        System.out.println(pubk);
+        System.out.println("lenth\t" + pubk.length());
         System.out.println("The priKey is ");
-        System.out.println(priKey);
-        System.out.println("lenth " + priKey.length());
+        System.out.println(prik);
+        System.out.println("lenth\t" + prik.length());
+
 
     }
+
 
 }

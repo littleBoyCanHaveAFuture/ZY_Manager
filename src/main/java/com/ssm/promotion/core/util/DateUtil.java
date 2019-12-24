@@ -49,7 +49,6 @@ public class DateUtil {
     }
 
     public static long getEndTimestamp() {
-        // TODO 自动生成的方法存根
         long now = System.currentTimeMillis() / SECOND_MILLIS;
         long daySecond = 60 * 60 * 24;
         long dayTime = now - (now + 8 * 60 * 60) % daySecond;
@@ -94,7 +93,7 @@ public class DateUtil {
     public static String formatDate(long timestamp, String outFormat) throws Exception {
         System.out.println("formatDate:" + timestamp);
         Date dates = new Date(timestamp);
-        formatDate(dates,outFormat);
+        formatDate(dates, outFormat);
         return formatDate(dates, outFormat);
     }
 
@@ -260,8 +259,15 @@ public class DateUtil {
 //        String s = String.format("gid:{%d}:sid:{%d}", gameId, serverId);
 //        System.out.println(s);
 //        System.out.println(DateUtil.getCurrentMinuteStr());
-        long time = 1576209640600L;
-        String s = formatDate(time, FORMAT_YYYY_MMDD_HHmmSS);
-        System.out.println(s);
+//        long time = 1576209640600L;
+//        String s = formatDate(time, FORMAT_YYYY_MMDD_HHmmSS);
+//        System.out.println(System.currentTimeMillis());
+//        System.out.println(DateUtil.getEndTimestamp());
+//        Date s = formatString("2019-12-19 16:20:05.0", DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
+//        System.out.println(s.getTime());
+        String currDay = DateUtil.getCurrentDayStr();
+        String nextDay = DateUtil.formatDate(DateUtil.getEndTimestamp()*1000, DateUtil.FORMAT_YYMMDD);
+        System.out.println(currDay);
+        System.out.println(nextDay);
     }
 }

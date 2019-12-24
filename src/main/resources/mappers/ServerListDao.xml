@@ -200,4 +200,13 @@
         and
         serverId = #{serverId}
     </select>
+    <select id="selectLoginUrl" parameterType="map" resultType="string">
+        select loginUrl from zy_serverlist
+        where
+        spId =#{spId}
+        and
+        gameId = #{gameId}
+        and
+        serverId = #{serverId}
+    </select>
 </mapper>

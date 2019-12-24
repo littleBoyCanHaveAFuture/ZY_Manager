@@ -83,5 +83,9 @@ public class MD5Util {
         return resultString;
     }
 
+    public static void main(String[] args) {
+        String s = "qid=1000165?server_id=1?time=1577179162748";
+        System.out.println(md5(s));
+    }
 
 }

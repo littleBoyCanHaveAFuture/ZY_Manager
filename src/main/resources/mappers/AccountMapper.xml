@@ -39,15 +39,12 @@
         FROM zy_account
     </sql>
     <insert id="create" parameterType="Account">
-        insert into
-        zy_account(
-        id,name,pwd,phone,createIp,createTime,
-        createDevice,deviceCode,channelId,channelUserId,channelUserName,
-        channelUserNick,lastLoginTime,token,addParam
-        )
-        values( #{id},#{name},#{pwd},#{phone},#{createIp},#{createTime},
-        #{createDevice},#{deviceCode},#{channelId},#{channelUserId},#{channelUserName},
-        #{channelUserNick},#{lastLoginTime},#{token},#{addParam})
+        insert into zy_account(id, name, pwd, phone, createIp, createTime,
+                               createDevice, deviceCode, channelId, channelUserId, channelUserName,
+                               channelUserNick, lastLoginTime, token, addParam)
+        values (#{id}, #{name}, #{pwd}, #{phone}, #{createIp}, #{createTime},
+                #{createDevice}, #{deviceCode}, #{channelId}, #{channelUserId}, #{channelUserName},
+                #{channelUserNick}, #{lastLoginTime}, #{token}, #{addParam})
     </insert>
 
     <select id="getTotalSameDeviceCode" parameterType="String" resultType="int">
@@ -63,7 +60,8 @@
     </select>
 
     <select id="readMaxAccountId" parameterType="int" resultType="int">
-        select max(id) from zy_account
+        select max(id)
+        from zy_account
         where id &lt; #{maxSpid}
 
     </select>
@@ -90,15 +88,11 @@
         where id=#{id}
     </update>
     <select id="exist" parameterType="map" resultType="int">
-        select id from zy_account
-        <where>
-            <if test="channelId!=null and channelId!='' ">
-                AND channelId = #{channelId}
-            </if>
-            <if test="channelUid!=null and channelUid!='' ">
-                AND channelUserId = #{channelUid}
-            </if>
-        </where>
+        select id
+        from zy_account
+        where channelId = #{channelId}
+          and channelUserId = #{channelUid}
+
     </select>
 
 </mapper>

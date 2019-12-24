@@ -58,12 +58,19 @@ public interface ServerListService {
     boolean existSGS(Map<String, Object> map, Integer userId);
 
     String getOpenday(Map<String, Object> map, Integer userId);
+
     /**
      * 私钥
      */
     String selectPrivateKey(Map<String, Object> map, Integer userId);
+
     /**
      * 公钥
      */
     String selectPublicKey(Map<String, Object> map, Integer userId);
+
+    /**
+     * 公钥
+     */
+    String selectLoginUrl(Map<String, Object> map, Integer userId);
 }

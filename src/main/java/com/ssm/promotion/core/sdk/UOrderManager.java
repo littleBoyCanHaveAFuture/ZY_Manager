@@ -6,13 +6,13 @@ import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.EncryptUtils;
+import com.ssm.promotion.core.util.RSAUtilsNew;
 import com.ssm.promotion.core.util.StringUtils;
 import com.ssm.promotion.core.util.enums.OrderState;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -129,35 +129,11 @@ public class UOrderManager {
         return order;
     }
 
-    //    public UOrder generateOrder(UChannelMaster master, String userID, int money, String productID, String productName,
-//                                String productDesc, String roleID, String roleName, String serverID, String serverName,
-//                                String extension, String notifyUrl) {
-//
-//        UOrder order = new UOrder();
-//        order.setOrderID(IDGenerator.getInstance().nextOrderID());
-//        order.setAppID(0);
-//        order.setChannelID(master.getMasterID());
-//        order.setMoney(money);
-//        order.setProductID(productID);
-//        order.setProductName(productName);
-//        order.setProductDesc(productDesc);
-//        order.setCurrency("RMB");
-//        order.setUserID(0);
-//        order.setUsername(userID);
-//        order.setExtension(extension);
-//        order.setState(PayState.STATE_PAYING);
-//        order.setChannelOrderID("");
-//        order.setRoleID(roleID);
-//        order.setRoleName(roleName);
-//        order.setServerID(serverID);
-//        order.setServerName(serverName);
-//        order.setCreatedTime(new Date());
-//        order.setNotifyUrl(notifyUrl);
-//
-//        orderDao.save(order);
-//
-//        return order;
-//    }
+    /**
+     * 公钥加密
+     *
+     * @param accountID
+     */
     public boolean isSignOK(int accountID,
                             String channelOrderID,
                             String productID,
@@ -173,7 +149,7 @@ public class UOrderManager {
                             Integer status,
                             String notifyUrl,
                             String signType,
-                            String sign) throws UnsupportedEncodingException {
+                            String sign) throws Exception {
 
         StringBuilder sb = new StringBuilder();
         sb.append("accountID=").append(accountID).append("&")
@@ -194,14 +170,14 @@ public class UOrderManager {
             sb.append("&notifyUrl=").append(notifyUrl);
         }
 
-//        if ("rsa".equalsIgnoreCase(signType)) {
-//            String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
-//
-//            log.debug("The encoded getOrderID sign is " + encoded);
-//            log.debug("The getOrderID sign is " + sign);
-//            String publickey = "";
-//            return RSAUtils.verify(encoded, sign, publickey, "UTF-8", "SHA1withRSA");
-//        }
+        if ("rsa".equalsIgnoreCase(signType)) {
+            String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
+
+            log.debug("The encoded getOrderID sign is " + encoded);
+            log.debug("The getOrderID sign is " + sign);
+            String publicKey = "";
+            return RSAUtilsNew.encryptByPublicKey(sb.toString(), publicKey).equals(sign);
+        }
         String appkey = "";
         //md5 sign
         sb.append(appkey);
