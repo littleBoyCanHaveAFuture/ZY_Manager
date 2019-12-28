@@ -69,8 +69,8 @@
         渠道
     </div>
     <div>
-        <label for="channelUserId">用户id：</label>
-        <input type="text" id="channelUserId" size="20" onkeydown=""/>
+        <label for="channelUid">用户id：</label>
+        <input type="text" id="channelUid" size="20" onkeydown=""/>
     </div>
 
     <div>
@@ -102,7 +102,7 @@
         <a href="javascript:test_Register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
     </div>
     <div>
-        <a href="javascript:login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
+        <a href="javascript:test_Login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
     </div>
     <div>
         <a href="javascript:test_CreateRole()" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>

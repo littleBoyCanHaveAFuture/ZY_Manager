@@ -209,8 +209,8 @@ public class TtController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public void sdkLogin(@RequestBody Map<String, String> map,
-                         HttpServletResponse response) throws Exception {
+    public Result sdkLogin(@RequestBody Map<String, String> map,
+                           HttpServletResponse response) throws Exception {
         log.info("request: ttt/login , map: " + map.toString());
 
         int appId = Integer.parseInt(map.get("appId"));
@@ -221,8 +221,8 @@ public class TtController {
         do {
             Account account = accountWorker.getAccount(map);
             if (account == null) {
-                result.put("err", "指悦账号不存在，请前往注册！");
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                result.put("reason", "指悦账号不存在，请前往注册！");
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
             int accountId = account.getId();
@@ -234,15 +234,16 @@ public class TtController {
 
             }
             //获取账号成功 发送token
-            String loginToken = loginWorker.getGameInfo(accountId, appId);
-            String sign = StringUtils.getBASE64(appId + loginToken + accountId);
+            String token = loginWorker.getGameInfo(accountId, appId);
+            String sign = MD5Util.md5(appId + token + accountId);
 
             result.put("appid", appId);
-            result.put("token", loginToken);
             result.put("uid", accountId);
+            result.put("token", token);
             result.put("sign", sign);
-            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
+            result.put("reason", "获取token成功");
+            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
             //数据库
             //设置账号登录时间
             Map<String, Object> tmap = new HashMap<>();
@@ -253,9 +254,9 @@ public class TtController {
         } while (false);
 
         setResponseAccess(response);
-        ResponseUtil.write(response, result);
 
         System.out.println("request: ttt/login , map: " + result.toString());
+        return ResultGenerator.genSuccessResult(result);
     }
 
     /**
@@ -273,46 +274,44 @@ public class TtController {
      */
     @RequestMapping(value = "/check", method = RequestMethod.GET)
     @ResponseBody
-    public void sdkLoginCheck(String appId,
-                              String token,
-                              String uid,
-                              String sign,
-                              HttpServletResponse response) throws Exception {
-        log.info("request: ttt/check , appId: " + appId + "\ttoken:" + token + "\tsign:" + sign);
-        System.out.println("request: ttt/check , appId: " + appId + "\ttoken:" + token + "\tsign:" + sign);
+    public Result sdkLoginCheck(int appId,
+                                int uid,
+                                String token,
+                                String sign,
+                                HttpServletResponse response) throws Exception {
+        System.out.println("request: ttt/check , " + "appId: " + appId + "\tuid:" + uid + "\ttoken:" + token + "\tsign:" + sign);
+
         JSONObject result = new JSONObject();
         do {
-            System.out.println(appId);
-            System.out.println(token);
-            System.out.println(uid);
-            System.out.println(sign);
-
-
-            if (appId == null || token == null || uid == null || sign == null) {
-                result.put("status", Constants.SDK_PARAM);
+            if (token == null || sign == null) {
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("reason", "token 或 sign 为空");
                 break;
             }
-            int accountId = Integer.parseInt(uid);
+            int accountId = uid;
 
             if (!LoginToken.check(accountId, token)) {
-                //token 非法
-                result.put("status", Constants.SDK_LOGIN_FAIL_TOKEN);
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("reason", "token非法");
                 break;
             }
-            String tmpSign = StringUtils.getBASE64(appId + token + accountId);
+            String tmpSign = MD5Util.md5(appId + token + accountId);
             if (!tmpSign.equals(sign)) {
-                result.put("status", Constants.SDK_LOGIN_FAIL_SIGN);
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("reason", "签名不一致非法");
                 break;
             }
-            result.put("status", Constants.SDK_LOGIN_SUCCESS);
-            result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            result.put("reason", "登录成功");
+            result.put("accountId", accountId);
+
         } while (false);
 
         setResponseAccess(response);
-        ResponseUtil.write(response, result);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
-        log.info("request: ttt/check , result\t" + result.toString());
         System.out.println("request: ttt/check , result\t" + result.toString());
+        return ResultGenerator.genSuccessResult(result);
     }
 
 
@@ -373,7 +372,8 @@ public class TtController {
                 System.out.println("channelUid:" + channelUid);
                 System.out.println("gameId:" + gameId);
                 System.out.println("serverId:" + serverId);
-                result.put("messgae", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("reason", "数据为空");
                 break;
             }
 
@@ -384,7 +384,8 @@ public class TtController {
             Account account = accountWorker.getAccount(map1);
             if (account == null) {
                 log.error("account is null\t" + map1.toString());
-                result.put("messgae", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                result.put("reason", "账号不存在");
                 break;
             }
             if (key.equals("createRole")) {
@@ -402,7 +403,8 @@ public class TtController {
                 gameRole.setName(roleName);
                 //插入mysql
                 boolean res = gameRoleWorker.createGameRole(gameRole);
-                if (res) {
+                if (!res) {
+                    result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     result.put("reason", "角色已存在");
                     break;
                 }
@@ -440,15 +442,14 @@ public class TtController {
             jsonObject.put("roleId", roleId);
             jsonObject.put("balance", balance);
 
-            result.put("messgae", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            result.put("reason", "上报成功");
             result.put("data", jsonObject.toJSONString());
         } while (false);
 
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        log.info("request: ttt/setdata , result\t" + result.toString());
         System.out.println("request: ttt/setdata , result\t" + result.toString());
     }
 
@@ -525,23 +526,20 @@ public class TtController {
 
             gameRoleWorker.updateGameRole(tmap);
             result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            result.put("reason", "进入成功");
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("channelId", channelId);
             jsonObject.put("appId", appId);
             jsonObject.put("serverId", serverId);
             jsonObject.put("roleId", roleId);
-            jsonObject.put("lastLoginTime", DateUtil.getCurrentDateStr());
 
             result.put("data", jsonObject.toString());
         } while (false);
 
-
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        log.info("request: ttt/enter , result\t" + result.toString());
         System.out.println("request: ttt/enter , result\t" + result.toString());
     }
 
@@ -629,11 +627,9 @@ public class TtController {
             result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
         } while (false);
 
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        log.info("request: ttt/exit , result\t" + result.toString());
         System.out.println("request: ttt/exit , result\t" + result.toString());
     }
 

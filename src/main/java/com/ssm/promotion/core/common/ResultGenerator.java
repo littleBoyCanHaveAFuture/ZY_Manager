@@ -22,14 +22,6 @@ public class ResultGenerator {
         return result;
     }
 
-    public static Result genFailResult() {
-        Result result = new Result();
-        result.setResultCode(Constants.RESULT_CODE_SUCCESS);
-
-        result.setMessage(DEFAULT_FAIL_MESSAGE);
-        return result;
-    }
-
     public static Result genFailResult(String message) {
         Result result = new Result();
         result.setResultCode(Constants.RESULT_CODE_SERVER_ERROR);

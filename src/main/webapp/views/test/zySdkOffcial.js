@@ -20,19 +20,315 @@ let OrderStateMsg = [0, "发送成功", 2, 3, 4, 5,
     "订单错误", 12, 13, 14, 15,
     16, "参数与订单参数不一致", "参数为空或非法", "账号不存在"];
 
+const appId_CS = 2;
+const appId_SGYX = 9999;
+
+/**
+ * @param param 判断的参数
+ * @return {boolean}
+ * */
+function checkParam(param) {
+    return (param == null || param === "" || param === "undefined");
+}
+
+function test_Register() {
+    let auto = $("#auto").val();
+    let appId = $("#save_gameId").val();
+    let channelId = $("#save_spId").val();
+    let channelUid = $("#channelUid").val();
+
+    let username = $("#username").val();
+    let password = $("#password").val();
+    let phone = "18571470846";
+    let deviceCode = "PC";
+    let imei = "PC";
+    let addparm = "";
+
+    let result = register(auto, appId,
+        channelId, channelUid, "account_" + channelUid, "name_" + channelUid,
+        username, password, phone, deviceCode, imei, addparm);
+
+    console.info("test_Register");
+    console.info(result);
+    $("#username").val(result.account);
+    $("#password").val(result.password);
+    $("#accountId").val(result.uid);
+    $("#channelUid").val(result.channelUid);
+}
+
+/**
+ * 注册-接口
+ * @param   {boolean}       auto             是否自动注册,无需账号密码
+ * @param   {number}        appId            游戏id
+ * @param   {number}        channelId        渠道id
+ * @param   {string}        channelUid       渠道账号id
+ * @param   {string}        channelUname     渠道账号名称
+ * @param   {string}        channelUnick     渠道账号昵称
+ * @param   {string}        username         指悦账号
+ * @param   {string}        password         指悦账号密码
+ * @param   {string}        phone            手机号
+ * @param   {string}        deviceCode
+ * @param   {string}        imei
+ * @param   {string}        addparm          额外参数
+ * @return  {json}
+ * */
+function register(auto, appId,
+                  channelId, channelUid, channelUname, channelUnick,
+                  username, password,
+                  phone, deviceCode, imei,
+                  addparm) {
+    let way = "注册-接口 ";
+    if (auto === "true") {
+        if (checkParam(channelId)) {
+            console.error(way + "参数错误" + " channelId=" + channelId);
+            return null;
+        }
+        if (channelId === "0") {
+            //官方渠道
+            channelUid = "0";
+        } else {
+            //其他渠道
+            if (checkParam(channelUid)) {
+                console.error(way + "参数错误" + " channelUid=" + channelUid);
+                return null;
+            }
+        }
+    } else {
+        if (checkParam(username) || checkParam(password)) {
+            console.error(way + "参数错误" + " username=" + username + " password=" + password);
+            return null;
+        }
+    }
+
+    let data = {
+        "auto": auto,
+        "appId": appId,
+        "channelId": channelId,
+        "channelUid": channelUid,
+        "channelUname": channelUname,
+        "channelUnick": channelUnick,
+
+        "username": username,
+        "pwd": password,
+        "phone": phone,
+        "deviceCode": deviceCode,
+        "imei": imei,
+        "addparm": addparm
+    };
+
+    let response;
+    $.ajax({
+        url: t_domain + "/register",
+        type: "post",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(data),
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            console.info(result);
+            if (result.resultCode === 200) {
+                if (result.data.message === messgae[0]) {
+                    console.info(way + "recv ", result.data.reason);
+                    console.info(way + "recv 账号 " + result.data.account);
+                    console.info(way + "recv 密码 " + result.data.password);
+                    console.info(way + "recv uid " + result.data.accountId);
+                    console.info(way + "recv channelUid " + result.data.channelUid);
+                    response = {
+                        "account": result.data.account,
+                        "password": result.data.password,
+                        "uid": result.data.accountId,
+                        "channelUid": result.data.channelUid,
+                        "reason": result.data.reason,
+                        "message": result.data.message
+                    }
+                } else {
+                    console.error(way + "recv ", result.data.reason);
+                    response = {
+                        "reason": result.data.reason,
+                        "message": result.data.message
+                    }
+                }
+            }
+        },
+        error: function () {
+            console.error(way + "通信失败");
+        }
+    });
+    return response;
+}
+
+function test_Login() {
+    let isChannel = $("#isChannel").val();
+    let appId = $("#save_gameId").val();
+    let channelId = $("#save_spId").val();
+    let channelUid = $("#channelUid").val();
+    let username = $("#username").val();
+    let password = $("#password").val();
+    let result = login(isChannel, appId, channelId, channelUid, username, password);
+    console.info("test_Login");
+    console.info(result);
+    if (result.message === messgae[0]) {
+        let loginResult = loginCheck(result.appid, result.uid, result.token, result.sign);
+        console.info("test_Login");
+        console.info(loginResult);
+    }
+}
+
+/**
+ * 请求登录-接口
+ * @param    {boolean}      isChannel        是否渠道自动注册
+ * @param   {number}        appId            游戏id
+ * @param   {number}        channelId        渠道id
+ * @param   {string}        channelUid       渠道账号id
+ * @param   {string}        username         指悦账号
+ * @param   {string}        password         指悦账号密码
+ * @return  {json}
+ * */
+function login(isChannel, appId,
+               channelId, channelUid,
+               username, password) {
+    let way = "请求登录-接口 ";
+    if (checkParam(appId)) {
+        console.error(way + "参数错误" + " appId=" + appId);
+        return null;
+    }
+
+    if (isChannel === "true") {
+        if (checkParam(channelId)) {
+            console.error(way + "参数错误" + " channelId=" + channelId);
+            return null;
+        }
+        if (checkParam(channelUid)) {
+            console.error(way + "参数错误" + " channelUid=" + channelUid);
+            return null;
+        }
+    } else if (isChannel === "false") {
+        if (checkParam(username) || checkParam(password)) {
+            console.error(way + "参数错误" + " username=" + username + " password=" + password);
+            return null;
+        }
+    } else {
+        console.error(way + "参数错误" + " isChannel=" + isChannel);
+        return null;
+    }
+
+    let data = {
+        "isChannel": isChannel,
+        "appId": appId,
+        "channelId": channelId,
+        "channelUid": channelUid,
+        "name": username,
+        "pwd": password
+    };
+    let response;
+    $.ajax({
+        url: t_domain + "/login",
+        type: "post",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(data),
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            console.info(result);
+            if (result.resultCode === 200) {
+                let rdata = result.data;
+                if (result.data.message === messgae[0]) {
+                    console.info(way + "recv reason " + rdata.reason);
+                    console.info(way + "recv appid " + rdata.appid);
+                    console.info(way + "recv token " + rdata.token);
+                    console.info(way + "recv uid " + rdata.uid);
+                    console.info(way + "recv sign " + rdata.sign);
+                    response = {
+                        "appid": rdata.appid,
+                        "uid": rdata.uid,
+                        "token": rdata.token,
+                        "sign": rdata.sign,
+                        "reason": rdata.reason,
+                        "message": rdata.message
+                    };
+                } else {
+                    console.error("recv ", rdata.reason);
+                    response = {
+                        "reason": rdata.reason,
+                        "message": rdata.message
+                    };
+                }
+            }
+        },
+        error: function () {
+            console.error(way + "请求登录接口失败");
+        }
+    });
+    return response;
+}
+
+/**
+ * 请求登录校验-接口
+ * @param   {number}        appId           游戏id
+ * @param   {number}        accountId       指悦uid
+ * @param   {string}        token           登录token
+ * @param   {string}        sign            签名
+ * @return  {json}
+ * */
+function loginCheck(appId, accountId, token, sign) {
+    let way = "请求登录校验-接口 ";
+    if (checkParam(appId) || checkParam(accountId) || checkParam(token) || checkParam(sign)) {
+        console.error(way + "参数错误" + " appId=" + appId + " accountId=" + accountId + " token=" + token + " sign=" + sign);
+        return null;
+    }
+    let param = "appId=" + appId + "&uid=" + accountId + "&token=" + token + "&sign=" + sign;
+    console.info(way + "send " + param);
+    let response;
+    $.ajax({
+        url: t_domain + "/check?" + param,
+        type: "get",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            console.info(result);
+            if (result.resultCode === 200) {
+                let rdata = result.data;
+                if (result.data.message === messgae[0]) {
+                    console.info(way + "recv reason " + rdata.reason);
+                    console.info(way + "recv uid " + rdata.accountId);
+
+                    response = {
+                        "accountId": rdata.accountId,
+                        "reason": rdata.reason,
+                        "message": rdata.message
+                    }
+                } else {
+                    console.error(way + "recv ", rdata.reason);
+                    response = {
+                        "reason": rdata.reason,
+                        "message": rdata.message
+                    }
+                }
+            }
+        },
+        error: function () {
+            console.error(way + "登录校验失败");
+        }
+    });
+    return response;
+}
+
 //测试用例
 function test_CreateRole() {
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let roleId = $("#roleId").val();
 
     let timestamp = (new Date()).valueOf();
-    createRole(keys[0], appId, channelId, channelUserId,
+    let result = createRole(keys[0], appId, channelId, channelUid,
         roleId, "测试角色" + roleId, 1,
         serverId, "区服" + serverId, 100, 1,
         "无帮派", timestamp, 0);
+    console.info("test_CreateRole");
+    console.info(result);
 }
 
 /**
@@ -60,6 +356,7 @@ function createRole(key, appId, channelId, channelUid,
                     roleId, roleName, roleLevel,
                     zoneId, zoneName, balance, vip,
                     partyName, roleCTime, roleLevelMTime) {
+    let way = "角色-上报数据接口 ";
     let hasKey = false;
     for (let aKey of keys) {
         console.info(aKey);
@@ -70,8 +367,28 @@ function createRole(key, appId, channelId, channelUid,
     }
 
     if (!hasKey) {
-        console.error("不存在key " + key);
-        return;
+        console.error(way + "参数错误" + " key= " + key);
+        return null;
+    }
+    if (checkParam(appId) || checkParam(channelId) || checkParam(channelUid)) {
+        console.error(way + "参数错误" + " appId=" + appId + " channelId=" + channelId + " channelUid=" + channelUid);
+        return null;
+    }
+    if (checkParam(roleId) || checkParam(roleName) || checkParam(roleLevel)) {
+        console.error(way + "参数错误" + " roleId=" + roleId + " roleName=" + roleName + " roleLevel=" + roleLevel);
+        return null;
+    }
+    if (checkParam(zoneId) || checkParam(zoneName)) {
+        console.error(way + "参数错误" + " zoneId=" + zoneId + " zoneName=" + zoneName);
+        return null;
+    }
+    if (checkParam(balance) || checkParam(vip) || checkParam(partyName)) {
+        console.error(way + "参数错误" + " balance=" + balance + " vip=" + vip + " partyName=" + partyName);
+        return null;
+    }
+    if (key === keys[0] && checkParam(roleCTime)) {
+        console.error(way + "参数错误" + "创建角色时，创建时间不能为空" + " roleCTime = " + roleCTime);
+        return null;
     }
 
     let value = {
@@ -91,18 +408,19 @@ function createRole(key, appId, channelId, channelUid,
     };
 
     for (let key in value) {
-        if (value[key] === "undefined") {
-            console.error(key + ':' + value[key]);
-            return;
+        if (checkParam(value[key])) {
+            console.error(way + "参数错误 " + key + "=" + value[key]);
+            return null;
         }
     }
 
+    let response;
     let ss = JSON.stringify(value);
     let data = {
         "key": key,
         "value": ss
     };
-    console.info("设置角色基本数据 send " + ss);
+    console.info(way + "send " + ss);
     $.ajax({
         url: t_domain + "/setdata",
         type: "post",
@@ -111,32 +429,51 @@ function createRole(key, appId, channelId, channelUid,
         dataType: "json",
         async: false,
         success: function (result) {
-            console.info("设置角色基本数据 recv code=" + result.resultCode);
-            if (result.resultCode === 200) {
-                console.info("设置角色基本数据 recv result:" + result.messgae);
-                if (result.messgae === messgae[0]) {
-                    console.info("设置角色基本数据 recv " + result.data);
-                }
+            console.info(result);
+            if (result.message === messgae[0]) {
+                console.info(way + "recv result ", result.reason);
+                console.info(way + "recv message ", result.message);
+                console.info(way + "recv data " + result.data);
+
+                let rdata = result.data;
+                response = {
+                    "channelId": rdata.channelId,
+                    "appId": rdata.appId,
+                    "zoneId": rdata.zoneId,
+                    "roleId": rdata.roleId,
+                    "balance": rdata.balance,
+                    "reason": result.reason,
+                    "message": result.message
+                };
+            } else {
+                console.error(way + "recv result ", result.reason);
+                console.error(way + "recv message ", result.message);
+                response = {
+                    "reason": result.reason,
+                    "message": result.message
+                };
             }
-            return result;
         },
-        error: function (result) {
-            console.info(result.data);
-            console.info("系统提示", "上传角色数据失败");
+        error: function () {
+            console.error(way + "上传角色数据失败");
+            response = {
+                "message": messgae[1]
+            };
         }
     });
-    return "";
+    return response;
 }
 
 //测试用例
 function test_EnterGame() {
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let roleId = $("#roleId").val();
-    let result = enterGame(appId, serverId, channelId, channelUserId, roleId);
-
+    let result = enterGame(appId, serverId, channelId, channelUid, roleId);
+    console.info("test_EnterGame");
+    console.info(result);
 }
 
 /**
@@ -148,55 +485,74 @@ function test_EnterGame() {
  * @param   {number}     roleId          当前登录的玩家角色ID，必须为数字
  * */
 function enterGame(appId, serverId, channelId, channelUid, roleId) {
-    if (appId == null || serverId == null || channelId == null || channelUid == null || roleId == null) {
-        console.error("enterGame 参数为空 请检查 ");
-        console.error(" appId " + appId);
-        console.error(" serverId " + serverId);
-        console.error(" channelId " + channelId);
-        console.error(" channelUid " + channelUid);
-        console.error(" roleId " + roleId);
-        return;
+    let way = "进入游戏-上报数据接口 ";
+    if (checkParam(appId) || checkParam(serverId) || checkParam(channelId)) {
+        console.error(way + "参数错误" + "appId=" + appId + " serverId=" + serverId + " channelId=" + channelId);
+        return null;
     }
+    if (checkParam(channelUid) || checkParam(roleId)) {
+        console.error(way + "参数错误" + "channelUid=" + channelUid + " channelUid=" + roleId);
+        return null;
+    }
+
     let param = "appId=" + appId +
         "&serverId=" + serverId +
         "&channelId=" + channelId +
         "&channelUid=" + channelUid +
         "&roleId=" + roleId;
 
-    console.info("进入游戏上报 send " + param);
+    console.info(way + "send " + param);
 
+    let response;
     $.ajax({
         url: t_domain + "/enter?" + param,
         type: "get",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
+        async: false,
         success: function (result) {
-            console.info("进入游戏上报 recv " + result.resultCode);
-            if (result.resultCode === 200) {
-                console.info("进入游戏上报 recv result:" + result.message);
-                if (result.message === messgae[0]) {
-                    console.info("进入游戏上报 recv " + result.data);
-                } else {
-                    console.error("进入游戏上报 recv " + result.reason);
+            console.info(result);
+            if (result.message === messgae[0]) {
+                console.info(way + "recv reason " + result.reason);
+                console.info(way + "recv message " + result.message);
+                console.info(way + "recv data " + result.data);
+                let rdata = result.data;
+                response = {
+                    "channelId": rdata.channelId,
+                    "appId": rdata.appId,
+                    "serverId": rdata.serverId,
+                    "roleId": rdata.roleId,
+                    "lastLoginTime": rdata.lastLoginTime,
+                    "reason": result.reason,
+                    "message": result.message
+                }
+            } else {
+                console.error(way + "recv " + result.reason);
+                console.error(way + "recv " + result.message);
+                response = {
+                    "reason": result.reason,
+                    "message": result.message
                 }
             }
-            return result;
+
         },
         error: function () {
-            console.error("系统提示", "进入游戏上报失败");
+            console.error(way + "上报失败");
         }
     });
-    return "";
+    return response;
 }
 
 //测试用例
 function test_ExitGame() {
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let roleId = $("#roleId").val();
-    exitGame(appId, serverId, channelId, channelUserId, roleId);
+    let result = exitGame(appId, serverId, channelId, channelUid, roleId);
+    console.info("test_ExitGame");
+    console.info(result);
 }
 
 /**
@@ -208,14 +564,14 @@ function test_ExitGame() {
  * @param   {number}     roleId          当前登录的玩家角色ID，必须为数字
  * */
 function exitGame(appId, serverId, channelId, channelUid, roleId) {
-    if (appId == null || serverId == null || channelId == null || channelUid == null || roleId == null) {
-        console.error("enterGame 参数为空 请检查 ");
-        console.error(" appId " + appId);
-        console.error(" serverId " + serverId);
-        console.error(" channelId " + channelId);
-        console.error(" channelUid " + channelUid);
-        console.error(" roleId " + roleId);
-        return;
+    let way = "退出游戏-上报数据接口 ";
+    if (checkParam(appId) || checkParam(serverId) || checkParam(channelId)) {
+        console.error(way + "参数错误" + " appId=" + appId + " serverId=" + serverId + " channelId=" + channelId);
+        return null;
+    }
+    if (checkParam(channelUid) || checkParam(roleId)) {
+        console.error(way + "参数错误" + " channelUid=" + channelUid + " channelUid=" + roleId);
+        return null;
     }
     let param = "appId=" + appId +
         "&serverId=" + serverId +
@@ -223,29 +579,40 @@ function exitGame(appId, serverId, channelId, channelUid, roleId) {
         "&channelUid=" + channelUid +
         "&roleId=" + roleId;
 
-    console.info("退出游戏上报 send " + param);
+    console.info(way + "send " + param);
 
+    let response;
     $.ajax({
         url: t_domain + "/exit?" + param,
         type: "get",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (result) {
-            if (result.resultCode === 200) {
-                console.info("退出游戏上报 recv " + result.resultCode);
-                if (result.resultCode === 200) {
-                    console.info("退出游戏上报 recv result:" + result.message);
-                    if (result.message === messgae[0]) {
-                        console.info("退出游戏上报 recv " + result.data);
-                    } else {
-                        console.error("退出游戏上报 recv " + result.reason);
-                    }
+            if (result.message === messgae[0]) {
+                console.info(way + "recv " + result.reason);
+                console.info(way + "recv " + result.message);
+                console.info(way + "recv " + result.data);
+                let rdata = result.data;
+                response = {
+                    "channelId": rdata.channelId,
+                    "appId": rdata.appId,
+                    "serverId": rdata.serverId,
+                    "roleId": rdata.roleId,
+                    "reason": result.reason,
+                    "message": result.message
+                }
+            } else {
+                console.error(way + "recv " + result.reason);
+                console.error(way + "recv " + result.message);
+                response = {
+                    "reason": result.reason,
+                    "message": result.message
                 }
             }
-            return result;
+
         },
         error: function () {
-            console.error("系统提示", "退出游戏上报失败");
+            console.error(way + "退出游戏上报失败");
         }
     });
     return "";
@@ -254,7 +621,7 @@ function exitGame(appId, serverId, channelId, channelUid, roleId) {
 
 //测试用例
 function test_UploadPayInfo() {
-    let channelUid = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -289,15 +656,15 @@ function test_UploadPayInfo() {
         serverID, serverName,
         realMoney, completeTime, sdkOrderTime,
         status, notifyUrl, signType);
-
-
-    uploadPayInfo(accountId, channelId, channelUid, appId, channelOrderID,
+    let result = uploadPayInfo(accountId, channelId, channelUid, appId, channelOrderID,
         productID, productName, productDesc, money,
         roleID, roleName, roleLevel,
-        serverID, serverName, realMoney,
-        completeTime, sdkOrderTime,
+        serverID, serverName,
+        realMoney, completeTime, sdkOrderTime,
         status, notifyUrl,
         signType, sign);
+    console.info("test_UploadPayInfo");
+    console.info(result);
 }
 
 //md5加密
@@ -334,9 +701,9 @@ function md5(accountID, channelId, channelUid, appId, channelOrderID,
 
             "status=" + status + "&" +
             "notifyUrl=" + notifyUrl;
-        console.info("充值 sign " + signString);
+        // console.info("充值 sign " + signString);
         let urlSign = encodeURIComponent(signString);
-        console.info("充值 sign url " + urlSign);
+        // console.info("充值 sign url " + urlSign);
         return $.md5(urlSign);
     } else {
         return "";
@@ -375,6 +742,7 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
                        realMoney, completeTime, sdkOrderTime,
                        status, notifyUrl,
                        signType, sign) {
+    let way = "充值上报 ";
     let isStatus = false;
     for (let orderStatus of status) {
         if (orderStatus === status) {
@@ -384,42 +752,43 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
     }
     if (!isStatus) {
         console.error("订单状态错误 " + status);
-        return;
+        return null;
     }
-    let extension;
+
     if (status >= OrderStatus[3]) {
-
+        console.info("订单当前状态 " + OrderStatusDesc[status]);
     }
 
-    if (accountID == null || channelId == null || channelUid == null || appId == null ||
-        accountID === "" || channelId === "" || channelUid === "" || appId === "") {
-        console.error("账号或游戏参数为空 ");
-        return;
+    if (checkParam(accountID) || checkParam(channelId) || checkParam(channelUid) || checkParam(appId)) {
+        console.error(way + "账号或游戏参数为空" + " accountID=" + accountID + " channelId=" + channelId + " channelUid=" + channelUid + " appId=" + appId);
+        return null;
     }
-    if (productID == null || productName == null || productDesc == null || money == null ||
-        productID === "" || productName === "" || productDesc === "") {
-        console.error("商品参数为空 ");
-        return;
+    if (checkParam(productID) || checkParam(productName) || checkParam(productDesc)) {
+        console.error(way + "商品参数为空 " + " productID=" + productID + " productName=" + productName + " productDesc=" + productDesc);
+        return null;
     }
-    if (roleID === null || roleName === null || roleName === "" || roleLevel === null) {
-        console.error("角色参数为空 ");
-        return;
+    if (checkParam(roleID) || checkParam(roleName) || checkParam(roleLevel)) {
+        console.error(way + "角色参数为空 " + " roleID=" + roleID + " roleName=" + roleName + " roleLevel=" + roleLevel);
+        return null;
     }
-    if (serverID === null || serverName === null || serverName === "") {
-        console.error("区服参数为空 ");
-        return;
+    if (checkParam(serverID) || checkParam(serverName)) {
+        console.error(way + "区服参数为空 " + " serverID=" + serverID + " serverName=" + serverName);
+        return null;
     }
-    if (channelOrderID == null || channelOrderID === "" || realMoney == null || completeTime == null || sdkOrderTime == null) {
-        console.error("订单参数为空 ");
-        return;
+    if (checkParam(channelOrderID) || checkParam(realMoney)) {
+        console.error(way + "订单参数为空 " + " channelOrderID=" + channelOrderID + " realMoney=" + realMoney);
+        return null;
     }
-    if (signType == null || signType === "" || sign == null || sign === "") {
-        console.error("签名数为空 ");
-        return;
+    if (checkParam(completeTime) || checkParam(sdkOrderTime)) {
+
+    }
+    if (checkParam(sign) || checkParam(signType)) {
+        console.error(way + "签名数为空 ");
+        return null;
     }
     if (signType !== "MD5" && signType !== "RSA") {
-        console.error("签名类型错误 ");
-        return;
+        console.error(way + "签名类型错误 ");
+        return null;
     }
 
     let data = {
@@ -451,6 +820,7 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
         "sign": sign
     };
     console.info(data);
+    let response;
     $.ajax({
         url: "/ttt/payInfo",
         type: "post",
@@ -459,143 +829,29 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
         data: JSON.stringify(data),
         async: false,
         success: function (result) {
-            console.info("充值上报 recv " + result.resultCode);
+            console.info(way + "recv " + result.resultCode);
             if (result.resultCode === 200) {
-                console.info("充值上报 recv result:" + result.message);
+                console.info(way + "recv result " + result.message);
                 if (result.state !== 1) {
-                    console.error("充值上报 recv " + OrderStateMsg[result.state]);
+                    console.error(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
+                    response = {
+                        "message": result.message,
+                        "state": result.state
+                    }
                 } else {
-                    console.info("充值上报 recv " + OrderStateMsg[result.state]);
+                    console.info(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
+                    response = {
+                        "message": result.message,
+                        "orderId": result.orderId,
+                        "state": result.state
+                    }
                 }
             }
-            return result;
         },
         error: function () {
             console.error("系统提示", "充值数据上报失败");
         }
     });
-}
-
-function test_Register() {
-    let auto = $("#auto").val();
-    let appId = $("#save_gameId").val();
-    let channelId = $("#save_spId").val();
-    let channelUid = $("#channelUserId").val();
-
-    let username = $("#username").val();
-    let password = $("#password").val();
-    let phone = "18571470846";
-    let deviceCode = "PC";
-    let imei = "PC";
-    let addparm = "";
-
-    let result = register(auto, appId,
-        channelId, channelUid, "account_" + channelUid, "name_" + channelUid,
-        username, password, phone, deviceCode, imei, addparm);
-
-    $("#username").val(result.account);
-    $("#password").val(result.password);
-    $("#accountId").val(result.uid);
-    $("#channelUserId").val(result.channelUid);
-}
-
-/**
- * 注册-接口
- * @param   {boolean}       auto             是否自动注册,无需账号密码
- * @param   {number}        appId            游戏id
- * @param   {number}        channelId        渠道id
- * @param   {string}        channelUid       渠道账号id
- * @param   {string}        channelUname     渠道账号名称
- * @param   {string}        channelUnick     渠道账号昵称
- * @param   {string}        username         指悦账号
- * @param   {string}        password         指悦账号密码
- * @param   {string}        phone            手机号
- * @param   {string}        deviceCode
- * @param   {string}        imei
- * @param   {string}        addparm          额外参数
- * @return  {json}
- * */
-function register(auto, appId,
-                  channelId, channelUid, channelUname, channelUnick,
-                  username, password,
-                  phone, deviceCode, imei,
-                  addparm) {
-    if (auto === "true") {
-        if (channelId == null || channelId.toString() === "") {
-            console.error("注册接口", "渠道id错误：" + channelId);
-            return null;
-        }
-        if (channelId === "0") {
-            //官方渠道
-            channelUid = "0";
-        } else {
-            //其他渠道
-            if (channelUid == null || channelUid === "") {
-                console.error("注册接口", "渠道uid错误：" + channelUid);
-                return null;
-            }
-        }
-    } else {
-        console.log("username：" + username);
-        console.log("password：" + password);
-        if (username == null || username === "" || password == null || password === "") {
-            console.error("注册接口", "账号密码为空");
-            return null;
-        }
-    }
-
-    let data = {
-        "auto": auto,
-        "appId": appId,
-        "channelId": channelId,
-        "channelUid": channelUid,
-        "channelUname": channelUname,
-        "channelUnick": channelUnick,
-
-        "username": username,
-        "pwd": password,
-        "phone": phone,
-        "deviceCode": deviceCode,
-        "imei": imei,
-        "addparm": addparm
-    };
-    let response;
-    $.ajax({
-        url: "/ttt/register",
-        type: "post",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(data),
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            console.info(result);
-            if (result.resultCode === 200) {
-                if (result.data.message === messgae[0]) {
-                    console.info("注册接口 recv ", result.data.reason);
-                    console.info("注册接口 recv 账号 " + result.data.account);
-                    console.info("注册接口 recv 密码 " + result.data.password);
-                    console.info("注册接口 recv uid " + result.data.accountId);
-                    console.info("注册接口 recv channelUid " + result.data.channelUid);
-                    response = {
-                        "account": result.data.account,
-                        "password": result.data.password,
-                        "uid": result.data.accountId,
-                        "channelUid": result.data.channelUid,
-                        "reason": result.data.reason,
-                        "message": result.data.message
-                    }
-                } else {
-                    console.error("注册接口 recv ", result.data.reason);
-                    response = {
-                        "reason": result.data.reason,
-                        "message": result.data.message
-                    }
-                }
-            }
-        },
-        error: function () {
-            console.error("注册接口", "通信失败");
-        }
-    });
     return response;
 }
+

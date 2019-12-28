@@ -15,7 +15,7 @@ $(function () {
 function register() {
     let username = $("#username").val();
     let password = $("#password").val();
-    let channelUid = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -68,7 +68,7 @@ function register() {
                     $("#password").val(result.data.pwd);
                     $("#accountId").val(result.data.accountId);
                     if (channelId === "0") {
-                        $("#channelUserId").val(result.data.accountId);
+                        $("#channelUid").val(result.data.accountId);
                     }
                     let ss = "账号:" + result.data.account + "\n密码：" + result.data.pwd;
 
@@ -87,7 +87,7 @@ function login() {
     let password = $("#password").val();
 
     let isChannel = $("#isChannel").val();
-    let channelUid = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -165,19 +165,19 @@ function logincheck() {
 }
 
 function entergame() {
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let roleId = $("#roleId").val();
 
     t_channelId = channelId;
-    t_channelUid = channelUserId;
+    t_channelUid = channelUid;
 
     let data = "?appId=" + appId +
         "&serverId=" + serverId +
         "&channelId=" + channelId +
-        "&channelUid=" + channelUserId +
+        "&channelUid=" + channelUid +
         "&roleId=" + roleId;
     let url = "/ttt/enter" + data;
     console.log("entergame:" + url);
@@ -201,7 +201,7 @@ function entergame() {
 
 function exitgame() {
 
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -209,7 +209,7 @@ function exitgame() {
     let data = "?appId=" + appId +
         "&serverId=" + serverId +
         "&channelId=" + channelId +
-        "&channelUid=" + channelUserId +
+        "&channelUid=" + channelUid +
         "&roleId=" + "";
     let url = "/ttt/exit" + data;
     console.log("logincheck:" + url);
@@ -283,7 +283,7 @@ function cretaterole() {
 }
 
 function pay() {
-    let channelUserId = $("#channelUserId").val();
+    let channelUid = $("#channelUid").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();

@@ -269,7 +269,7 @@ public class ServerController {
     public void getDistinctServerInfo(Integer spId, Integer gameId, Integer serverId,
                                       Integer type,
                                       HttpServletResponse response) throws Exception {
-        System.out.println("getDistinctServerInfo:");
+//        System.out.println("getDistinctServerInfo:");
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -324,7 +324,7 @@ public class ServerController {
     public void getDistinctServerInfoAll(Integer spId, Integer gameId, Integer serverId,
                                          Integer type,
                                          HttpServletResponse response) throws Exception {
-        System.out.println("getDistinctServerInfoAll:");
+//        System.out.println("getDistinctServerInfoAll:");
 
         Map<String, Object> map = new HashMap<>(6);
         map.put("spId", spId);
