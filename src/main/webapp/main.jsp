@@ -34,8 +34,8 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
-<body class="easyui-layout">
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
+<body class="easyui-layout" onload="checkCookies()">
 <div region="north" style="height: 78px;background-color: #ffff">
     <table width="100%">
         <tr>
@@ -166,7 +166,7 @@
 </div>
 <script type="text/javascript">
     checkCookies();
-    var url;
+    let url;
     // $('#aa').accordion({
     //     multiple: true,
     //     selected: true

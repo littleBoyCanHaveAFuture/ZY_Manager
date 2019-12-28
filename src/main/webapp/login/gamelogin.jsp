@@ -36,24 +36,9 @@
     <div class="pan">
         <form class="m-t" role="form" id="adminlogin" method="post" name="adminlogin" onsubmit="return false"
               action="##">
-
-            <label for="save_spId"></label>
-            <%--            <span style="color: blue; ">渠道:</span>--%>
-            <select title="选择渠道" id="save_spId" name="spId" hidden="hidden">
-                <option value="-1" selected="selected">请选择</option>
-            </select>
-
-            <label for="save_gameId"></label>
-            <span style="color: blue;margin-left:50px  ">游戏:</span>
-            <select title="选择游戏" id="save_gameId" name="gameId">
-                <option value="-1" selected="selected">请选择</option>
-            </select>
-            <label for="save_serverId"></label>
-            <%--            <span style="color: blue; margin-left:50px">区服:</span>--%>
-            <select title="选择区服" id="save_serverId" name="serverId" hidden="hidden">
-                <option value="-1" selected="selected">请选择</option>
-            </select>
-
+            <div>
+                <p>游戏登录</p>
+            </div>
             <div class="form-group">
                 <label for="username"></label>
                 <input type="text" class="form-control" placeholder="用户名" name="username" id="username" required="">
@@ -75,27 +60,14 @@
                 点击复制账号密码
             </button>
             <p class="text-muted text-center">
-                <a href="##" onclick="adminlogin.reset();return false;">
-                    <small>重置</small>
+                <a href="##" onclick="adminlogin.reset();return false;" style="float: right">
+                    <small>重置账号密码</small>
                 </a>
+                <a onclick="gameList()" style="float: left">返回游戏列表</a>
             </p>
         </form>
     </div>
 </div>
-
-<style type="text/css" >
-
-/*    .m-t {*/
-/*        position: fixed;*/
-/*        top: 0px;*/
-/*        left: 0px;*/
-/*        right: 0px;*/
-/*        bottom: 0px;*/
-/*        margin: auto;*/
-/*        background:url("http://111.231.244.198:8080/try/login/ui_1.png") center no-repeat;*/
-/*        background-size: 100% 100%;*/
-/*    }*/
-</style>
 
 <script type="text/javascript">
 
@@ -104,6 +76,10 @@
             return $("input:hidden[name='res']").val();
         }
     });
+    let name = getCookies("username");
+    let pwd = getCookies("password");
+    let res = "账号: " + name + " 密码: " + pwd;
+    $('#res').val(res);
     clipboard.on('success', function (e) {
         console.info('Action:', e.action);
         console.info('Text:', e.text);

@@ -8,36 +8,58 @@ import net.sf.json.JSONObject;
  */
 @Data
 public class UOrder {
-    private Long orderID;           //订单号
-    private Integer appID;          //当前所属游戏ID
-    private Integer channelID;      //当前所属渠道ID
-    private Integer userID;         //指悦这边对应的用户账号ID
-    private String username;        //指悦这边生成的用户名
-    private String productID;       //游戏中商品ID
-    private String productName;     //游戏中商品名称
-    private String productDesc;     //游戏中商品描述
-    private Integer money;          //单位 分, 下单时收到的金额，实际充值的金额以这个为准
-    private Integer realMoney;      //单位 分，渠道SDK支付回调通知返回的金额，记录，留作查账
-    private String currency;        //币种
-    private String roleID;          //游戏中角色ID
-    private String roleName;        //游戏中角色名称
-    private String serverID;        //服务器ID
-    private String serverName;      //服务器名称
-    private Integer state;          //订单状态
-    private String channelOrderID;  //渠道SDK对应的订单号
-    private String extension;       //扩展数据
-    private String createdTime;       //订单创建时间戳-本地
-    private String sdkOrderTime;      //订单交易时间戳-渠道SDK那边
-    private String completeTime;      //订单完成时间戳-渠道SDK那边
-    private String notifyUrl;       //游戏下单的时候，可以携带notifyUrl过来，作为渠道支付回调时，通知到游戏服务器的地址，没有设置的话，默认走后台游戏管理中配置的固定通知回调地址
+    /**订单号*/
+    private Long orderID;
+    /**当前所属游戏ID*/
+    private Integer appID;
+    /**当前所属渠道ID*/
+    private Integer channelID;
+    /**指悦这边对应的用户账号ID*/
+    private Integer userID;
+    /**指悦这边生成的用户名*/
+    private String username;
+    /**游戏中商品ID*/
+    private String productID;
+    /**游戏中商品名称*/
+    private String productName;
+    /**游戏中商品描述*/
+    private String productDesc;
+    /**单位 分, 下单时收到的金额，实际充值的金额以这个为准*/
+    private Integer money;
+    /**单位 分，渠道SDK支付回调通知返回的金额，记录，留作查账*/
+    private Integer realMoney;
+    /**币种*/
+    private String currency;
+    /**游戏中角色ID*/
+    private String roleID;
+    /**游戏中角色名称*/
+    private String roleName;
+    /**服务器ID*/
+    private String serverID;
+    /**服务器名称*/
+    private String serverName;
+    /**订单状态*/
+    private Integer state;
+    /**渠道SDK对应的订单号*/
+    private String channelOrderID;
+    /**扩展数据*/
+    private String extension;
+    /**订单创建时间戳-本地*/
+    private String createdTime;
+    /**订单交易时间戳-渠道SDK那边*/
+    private String sdkOrderTime;
+    /**订单完成时间戳-渠道SDK那边*/
+    private String completeTime;
+    /**游戏下单的时候，可以携带notifyUrl过来，作为渠道支付回调时，通知到游戏服务器的地址，没有设置的话，默认走后台游戏管理中配置的固定通知回调地址*/
+    private String notifyUrl;
 
     /**
-     * 检查参数 是否相符
+     * 检查参数 是否相符 或者合法
      */
     public boolean checkParam(String productID, String productName, String productDesc,
                               int money,
                               String roleID, String roleName,
-                              String serverID, String serverName, Integer status) {
+                              int serverID, String serverName, int status, String sdkOrderTime) {
         boolean res = false;
         do {
             if (!this.productID.equals(productID)) {
@@ -61,10 +83,16 @@ public class UOrder {
                 break;
             }
 
-            if (!this.serverID.equals(serverID)) {
+            if (!this.serverID.equals(String.valueOf(serverID))) {
                 break;
             }
             if (!this.serverName.equals(serverName)) {
+                break;
+            }
+            if (!this.sdkOrderTime.equals(sdkOrderTime)) {
+                break;
+            }
+            if (this.state >= status) {
                 break;
             }
             res = true;

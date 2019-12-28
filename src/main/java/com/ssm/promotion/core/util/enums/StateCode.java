@@ -24,4 +24,5 @@ public class StateCode {
     public static final int CODE_USER_IP_BLOCK = 16;        //
     public static final int CODE_PARAM_DIFF = 17;        //参数不一致
     public static final int CODE_PARAM_ERROR = 18;        //参数为空或非法
+    public static final int CODE_ACCOUNT_NONE = 19;        //账号不存在
 }

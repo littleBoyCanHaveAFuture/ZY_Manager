@@ -17,7 +17,7 @@ public interface GameRoleService {
      * @param gameRole
      * @return
      */
-    public void createGameRole(GameRole gameRole) throws DataAccessException;
+    public boolean createGameRole(GameRole gameRole) throws DataAccessException;
 
 
     int readMaxAccountId(int maxSpid);

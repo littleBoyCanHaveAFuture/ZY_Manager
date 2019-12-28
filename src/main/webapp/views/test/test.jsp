@@ -21,9 +21,13 @@
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/views/test/test.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/views/test/jquery.md5.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/views/test/zySdkOffcial.js"></script>
 </head>
 
-<body style="margin:1px;" id="ff" bgcolor="#7fffd4">
+<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">
 
 <div id="sp">
     <div>
@@ -56,7 +60,7 @@
 
     <div>
         <label for="username">用户名：</label>
-        <input type="text" id="username" size="20" oninput="myFunction()"/>
+        <input type="text" id="username" size="20"/>
 
         <label for="password">密码：</label>
         <input type="text" id="password" size="20" onkeydown=""/>
@@ -86,6 +90,8 @@
         </select>
     </div>
     <div>
+        <label for="accountId">账号id：</label>
+        <input type="text" id="accountId" size="20" onkeydown=""/>
         <label for="roleId">角色id：</label>
         <input type="text" id="roleId" size="20" onkeydown=""/>
     </div>
@@ -93,15 +99,15 @@
         <label>-------------功能---------------</label>
     </div>
     <div>
-        <a href="javascript:register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
+        <a href="javascript:test_Register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
     </div>
     <div>
         <a href="javascript:login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
     </div>
     <div>
-        <a href="javascript:entergame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(服务器)</a>
-        <a href="javascript:cretaterole()" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>
-        <a href="javascript:exitgame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
+        <a href="javascript:test_CreateRole()" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>
+        <a href="javascript:test_EnterGame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(游戏场景)</a>
+        <a href="javascript:test_ExitGame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
     </div>
     <div>
         <div>
@@ -127,7 +133,7 @@
         <div>
             <label>--------------------------------------</label>
         </div>
-        <a href="javascript:pay()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值</a>
+        <a href="javascript:test_UploadPayInfo()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值</a>
         <a href="javascript:pay()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">充值校验</a>
     </div>
 

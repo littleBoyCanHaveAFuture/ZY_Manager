@@ -71,22 +71,12 @@
     </select>
     <select id="findGamerole" parameterType="map" resultMap="GameRoleResult">
         <include refid="select_gamerole_column"/>
-        <where>
-            <if test="accountId!=null and accountId!='' ">
-                accountId=#{accountId}
-            </if>
-            <if test="roleId!=null and roleId!=''  ">
-                and roleId=#{roleId}
-            </if>
-            <if test="channelId!=null and channelId!=''  ">
-                and param=#{channelId}
-            </if>
-            <if test="serverId!=null and serverId!=''  ">
-                and serverId=#{serverId}
-            </if>
-            <if test="channelUid!=null and channelUid!=''  ">
-                and channelUid=#{channelUid}
-            </if>
-        </where>
+        where
+        accountId=#{accountId}
+        and roleId=#{roleId}
+        and serverId=#{serverId}
+        and channelId=#{channelId}
+        and channelUid=#{channelUid}
+
     </select>
 </mapper> 

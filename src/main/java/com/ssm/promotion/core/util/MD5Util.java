@@ -8,6 +8,7 @@ import java.security.MessageDigest;
  * @date 2017-3-1
  */
 public class MD5Util {
+    public static final String KEY_ALGORITHM = "MD5";
     private static final String HEX_DIGITS[] = {
             "0", "1", "2", "3", "4", "5",
             "6", "7", "8", "9", "a", "b",

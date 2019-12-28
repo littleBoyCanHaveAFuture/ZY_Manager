@@ -64,13 +64,13 @@ public class AopSurvey {
         String signature = pjp.getSignature().getName();
 
         System.out.println("");
-        System.out.println("---------checkSecurity()------------");
-        System.out.println("len:" + obj.length);
-        for (Object o : obj) {
-            System.out.println("args:" + o);
-        }
+        System.out.println("--------- AopSurvey verifyMethod()------------");
         //得到方法名
         System.out.println("function:" + signature);
+        int i = 0;
+        for (Object o : obj) {
+            System.out.println("args[" + (i++) + "]:" + o);
+        }
 
         if (this.jumpInterface(pjp)) {
             return;

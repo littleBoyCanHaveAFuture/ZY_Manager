@@ -368,47 +368,51 @@ public class RSAUtilsNew {
 
         return sb.toString();
     }
-    public static boolean isSignOK(int accountID,
-                                   String channelOrderID,
-                                   String productID,
-                                   String productName,
-                                   String productDesc,
-                                   int money,
-                                   String roleID,
-                                   String roleName,
-                                   String roleLevel,
-                                   String serverID,
-                                   String serverName,
-                                   String extension,
-                                   Integer status,
-                                   String notifyUrl,
+
+    public static boolean isSignOK(String accountID, String channelID, String channelUid, String appID, String channelOrderID,
+                                   String productID, String productName, String productDesc, String money,
+                                   String roleID, String roleName, String roleLevel,
+                                   String serverID, String serverName,
+                                   String realMoney, String completeTime, String sdkOrderTime,
+                                   String status, String notifyUrl,
                                    String signType,
                                    String sign) throws UnsupportedEncodingException {
 
         StringBuilder sb = new StringBuilder();
         sb.append("accountID=").append(accountID).append("&")
+                .append("channelID=").append(channelID).append("&")
+                .append("channelUid=").append(channelUid).append("&")
+
+                .append("appID=").append(appID).append("&")
                 .append("channelOrderID=").append(channelOrderID == null ? "" : channelOrderID).append("&")
-                .append("productID=").append(productID == null ? "" : productID).append("&")
-                .append("productName=").append(productName == null ? "" : productName).append("&")
-                .append("productDesc=").append(productDesc == null ? "" : productDesc).append("&")
+
+                .append("productID=").append(productID).append("&")
+                .append("productName=").append(productName).append("&")
+                .append("productDesc=").append(productDesc).append("&")
                 .append("money=").append(money).append("&")
-                .append("roleID=").append(roleID == null ? "" : roleID).append("&")
+
+                .append("roleID=").append(roleID).append("&")
                 .append("roleName=").append(roleName == null ? "" : roleName).append("&")
                 .append("roleLevel=").append(roleLevel == null ? "" : roleLevel).append("&")
-                .append("serverID=").append(serverID == null ? "" : serverID).append("&")
-                .append("serverName=").append(serverName == null ? "" : serverName).append("&")
-                .append("extension=").append(extension == null ? "" : extension)
-                .append("status=").append(status == null ? "" : status);
 
-        if (!StringUtils.isEmpty(notifyUrl)) {
-            sb.append("&notifyUrl=").append(notifyUrl);
-        }
+                .append("serverID=").append(serverID).append("&")
+                .append("serverName=").append(serverName == null ? "" : serverName).append("&")
+
+                .append("realMoney=").append(realMoney == null ? "" : realMoney).append("&")
+                .append("completeTime=").append(completeTime).append("&")
+                .append("sdkOrderTime=").append(sdkOrderTime == null ? "" : sdkOrderTime).append("&")
+
+                .append("status=").append(status)
+                .append("&notifyUrl=").append(notifyUrl);
 
         String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
 
-        String newSign = EncryptUtils.md5(encoded);
+        String newSign = EncryptUtils.md5(encoded).toLowerCase();
 
-        return newSign.toLowerCase().equals(sign);
+        System.out.println("Md5 sign recv  \n:" + sign);
+        System.out.println("Md5 sign server\n:" + newSign);
+
+        return newSign.equals(sign);
     }
 
     public static void main(String[] args) throws Exception {

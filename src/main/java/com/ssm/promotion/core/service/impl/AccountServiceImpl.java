@@ -47,6 +47,7 @@ public class AccountServiceImpl implements AccountService {
                     return;
                 }
             } catch (Exception e) {
+                account.setId(-3);
                 System.out.println("err4:" + e.getMessage());
                 return;
             }
@@ -96,5 +97,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public int exist(Map<String, String> map) {
         return accountDao.exist(map).size();
+    }
+
+    @Override
+    public void updateAccountUid(Map<String, Object> map) {
+        accountDao.updateAccountUid(map);
     }
 }

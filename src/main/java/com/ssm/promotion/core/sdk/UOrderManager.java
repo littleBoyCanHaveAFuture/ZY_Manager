@@ -1,18 +1,16 @@
 package com.ssm.promotion.core.sdk;
 
-import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.dao.UOrderDao;
-import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.EncryptUtils;
-import com.ssm.promotion.core.util.RSAUtilsNew;
-import com.ssm.promotion.core.util.StringUtils;
+import com.ssm.promotion.core.util.MD5Util;
 import com.ssm.promotion.core.util.enums.OrderState;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +22,54 @@ public class UOrderManager {
     LoginIdGenerator loginIdGenerator;
     @Resource
     private UOrderDao orderDao;
+
+    public static boolean isSignOK(int accountId, int channelId, String channelUid, int appID, String channelOrderID,
+                                   String productID, String productName, String productDesc, int money,
+                                   String roleID, String roleName, String roleLevel,
+                                   int serverID, String serverName,
+                                   int realMoney, String completeTime, String sdkOrderTime,
+                                   int status, String notifyUrl,
+                                   String signType,
+                                   String sign) throws UnsupportedEncodingException {
+        if (!signType.equals(MD5Util.KEY_ALGORITHM)) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("accountID=").append(accountId).append("&")
+                .append("channelID=").append(channelId).append("&")
+                .append("channelUid=").append(channelUid == null ? "" : channelUid).append("&")
+                .append("appID=").append(appID).append("&")
+                .append("channelOrderID=").append(channelOrderID == null ? "" : channelOrderID).append("&")
+
+                .append("productID=").append(productID).append("&")
+                .append("productName=").append(productName).append("&")
+                .append("productDesc=").append(productDesc).append("&")
+                .append("money=").append(money).append("&")
+
+                .append("roleID=").append(roleID).append("&")
+                .append("roleName=").append(roleName == null ? "" : roleName).append("&")
+                .append("roleLevel=").append(roleLevel == null ? "" : roleLevel).append("&")
+
+                .append("serverID=").append(serverID).append("&")
+                .append("serverName=").append(serverName == null ? "" : serverName).append("&")
+
+                .append("realMoney=").append(realMoney).append("&")
+                .append("completeTime=").append(completeTime).append("&")
+                .append("sdkOrderTime=").append(sdkOrderTime == null ? "" : sdkOrderTime).append("&")
+
+                .append("status=").append(status).append("&")
+                .append("notifyUrl=").append(notifyUrl == null ? "" : notifyUrl);
+        System.out.println("sign\n" + sb.toString());
+
+        String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
+        System.out.println("sign url\n" + encoded);
+        String newSign = EncryptUtils.md5(encoded).toLowerCase();
+
+        System.out.println("Md5 sign recv  \n:" + sign);
+        System.out.println("Md5 sign server\n:" + newSign);
+
+        return newSign.equals(sign);
+    }
 
     /**
      * @param appId          游戏id
@@ -64,46 +110,34 @@ public class UOrderManager {
      * 保存
      * 生成订单(首先得没有该订单）
      */
-    public UOrder generateOrder(GameRole role,
-                                String channelOrderID,
-                                String extension, int money, String notifyUrl,
-                                String productDesc, String productID, String productName,
-                                String serverID, String serverName, Integer status,
-                                String roleID, String roleName) throws Exception {
+    public UOrder generateOrder(int accountId, int channelId, String channelUid, int appID, String channelOrderID,
+                                String productID, String productName, String productDesc, int money,
+                                String roleID, String roleName, String roleLevel,
+                                int serverID, String serverName,
+                                int realMoney, String completeTime, String sdkOrderTime,
+                                int status, String notifyUrl) throws Exception {
         if (status < OrderState.STATE_OPEN_SHOP || status > OrderState.STATE_PAY_SUPPLEMENT) {
             return null;
         }
-        Integer realMoney = null;
-        long completeTime = 0;
-        long sdkOrderTime = 0;
-        if (extension == null) {
-            System.out.println("extension is null");
-            return null;
-        }
-        extension = StringUtils.urlcodeToStr(extension);
-        JSONObject object = JSONObject.parseObject(extension);
-
-        sdkOrderTime = object.getLongValue("sdkOrderTime");
-
+        String completetiems = "";
         if (status == OrderState.STATE_PAY_SUCCESS || status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT) {
-            realMoney = object.getIntValue("realMoney");
-
             if (status != OrderState.STATE_PAY_SUCCESS) {
-                completeTime = object.getLongValue("completeTime");
+                completetiems = DateUtil.formatDate(Long.parseLong(completeTime), DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
             }
         }
 
         UOrder order = new UOrder();
 
         order.setOrderID(loginIdGenerator.getRandomId());
-        order.setAppID(Integer.parseInt(role.getGameId()));
-        order.setChannelID(Integer.parseInt(role.getChannelId()));
+        order.setAppID(appID);
+        order.setChannelID(channelId);
         order.setChannelOrderID(channelOrderID);
-        order.setCompleteTime(DateUtil.formatDate(completeTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+
+        order.setCompleteTime(completetiems);
 
         order.setCreatedTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
         order.setCurrency("RMB");
-        order.setExtension(extension);
+        order.setExtension("");
         order.setMoney(money);
         order.setNotifyUrl(notifyUrl);
 
@@ -111,12 +145,12 @@ public class UOrderManager {
         order.setProductID(productID);
         order.setProductName(productName);
         order.setRealMoney(realMoney);
-        order.setSdkOrderTime(DateUtil.formatDate(sdkOrderTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+        order.setSdkOrderTime(DateUtil.formatDate(Long.parseLong(sdkOrderTime), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
 
-        order.setServerID(serverID);
+        order.setServerID(String.valueOf(serverID));
         order.setServerName(serverName);
         order.setState(status);
-        order.setUserID(role.getAccountId());
+        order.setUserID(accountId);
         order.setUsername("");
 
         order.setRoleID(roleID);
@@ -127,70 +161,5 @@ public class UOrderManager {
         int res = orderDao.save(order);
         System.out.println("saveOrder:" + res);
         return order;
-    }
-
-    /**
-     * 公钥加密
-     *
-     * @param accountID
-     */
-    public boolean isSignOK(int accountID,
-                            String channelOrderID,
-                            String productID,
-                            String productName,
-                            String productDesc,
-                            int money,
-                            String roleID,
-                            String roleName,
-                            String roleLevel,
-                            String serverID,
-                            String serverName,
-                            String extension,
-                            Integer status,
-                            String notifyUrl,
-                            String signType,
-                            String sign) throws Exception {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("accountID=").append(accountID).append("&")
-                .append("channelOrderID=").append(channelOrderID == null ? "" : channelOrderID).append("&")
-                .append("productID=").append(productID == null ? "" : productID).append("&")
-                .append("productName=").append(productName == null ? "" : productName).append("&")
-                .append("productDesc=").append(productDesc == null ? "" : productDesc).append("&")
-                .append("money=").append(money).append("&")
-                .append("roleID=").append(roleID == null ? "" : roleID).append("&")
-                .append("roleName=").append(roleName == null ? "" : roleName).append("&")
-                .append("roleLevel=").append(roleLevel == null ? "" : roleLevel).append("&")
-                .append("serverID=").append(serverID == null ? "" : serverID).append("&")
-                .append("serverName=").append(serverName == null ? "" : serverName).append("&")
-                .append("extension=").append(extension == null ? "" : extension)
-                .append("status=").append(status == null ? "" : status);
-
-        if (!StringUtils.isEmpty(notifyUrl)) {
-            sb.append("&notifyUrl=").append(notifyUrl);
-        }
-
-        if ("rsa".equalsIgnoreCase(signType)) {
-            String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
-
-            log.debug("The encoded getOrderID sign is " + encoded);
-            log.debug("The getOrderID sign is " + sign);
-            String publicKey = "";
-            return RSAUtilsNew.encryptByPublicKey(sb.toString(), publicKey).equals(sign);
-        }
-        String appkey = "";
-        //md5 sign
-        sb.append(appkey);
-
-        log.debug("the appkey:" + appkey);
-
-        String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
-
-        log.debug("The encoded getOrderID sign is " + encoded);
-        log.debug("The getOrderID sign is " + sign);
-        String newSign = EncryptUtils.md5(encoded);
-
-        log.debug("the sign now is md5; newSign:" + newSign);
-        return newSign.toLowerCase().equals(sign);
     }
 }

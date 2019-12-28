@@ -20,7 +20,8 @@ public class GameRoleServiceImpl implements GameRoleService {
     GameRoleDao gameRoleDao;
 
     @Override
-    public void createGameRole(GameRole gameRole) throws DataAccessException {
+    public boolean createGameRole(GameRole gameRole) throws DataAccessException {
+        boolean res = true;
         try {
             this.gameRoleDao.create(gameRole);
             System.out.println("createGameRole success");
@@ -34,9 +35,12 @@ public class GameRoleServiceImpl implements GameRoleService {
             } else {
                 System.out.println("err3:" + err);
             }
+            res = false;
         } catch (Exception e) {
             System.out.println("err4:" + e.getMessage());
+            res = false;
         }
+        return res;
     }
 
     @Override

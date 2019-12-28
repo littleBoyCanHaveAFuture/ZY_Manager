@@ -5,32 +5,25 @@ let t_sign;
 let t_pwd;
 let t_channelId;
 let t_channelUid;
-let t_status = 0;
 $(function () {
     initSpGameServer(1);
-})
+    initSpGameServer(2);
+    initSpGameServer(3);
+});
 
-function myFunction() {
-    // let x = document.getElementById("username").value;
-    let status = ["登录界面", "选择区服", "选择角色", "在线", "离线"];
-    document.getElementById("status").innerHTML = status[isOnline];
-}
 
 function register() {
     let username = $("#username").val();
     let password = $("#password").val();
-    // let channelId = $("#channelId").val();
     let channelUid = $("#channelUserId").val();
-    // let appId = $("#appId").val();
-    // let serverId = $("#serverId").val();
-
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
-
     let auto = $("#auto").val();
+
     console.log("auto：" + auto);
-    if (auto == "true") {
+
+    if (auto === "true") {
         console.log("channelId：->" + channelId + "<-");
         console.log("channelUid：->" + channelUid + "<-");
         if (channelId == null || channelId.length === 0 || channelUid == null || channelUid.length === 0) {
@@ -71,10 +64,12 @@ function register() {
             if (result.resultCode === 200) {
                 $.messager.alert("注册结果：", result.data.message);
                 if (result.data.status === 1) {
-
-                    t_accountid = result.data.account;
-                    t_pwd = result.data.pwd;
-
+                    $("#username").val(result.data.account);
+                    $("#password").val(result.data.pwd);
+                    $("#accountId").val(result.data.accountId);
+                    if (channelId === "0") {
+                        $("#channelUserId").val(result.data.accountId);
+                    }
                     let ss = "账号:" + result.data.account + "\n密码：" + result.data.pwd;
 
                     $.messager.alert("注册成功：", ss);
@@ -88,12 +83,11 @@ function register() {
 }
 
 function login() {
-    // let appId = $("#appId").val();
-    let isChannel = $("#isChannel").val();
+    let username = $("#username").val();
     let password = $("#password").val();
-    // let channelId = $("#channelId").val();
-    let channelUid = $("#channelUserId").val();
 
+    let isChannel = $("#isChannel").val();
+    let channelUid = $("#channelUserId").val();
     let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
@@ -107,8 +101,8 @@ function login() {
     let data = {
         "appId": appId,
         "isChannel": isChannel,
-        "name": t_accountid,
-        "pwd": t_pwd,
+        "name": username,
+        "pwd": password,
         "channelId": channelId,
         "channelUid": channelUid
     };
@@ -126,10 +120,12 @@ function login() {
                 t_token = result.token;
                 t_accountid = result.uid;
                 t_sign = result.sign;
+                $("#accountId").val(result.uid);
 
                 let data = "appId=" + t_appid + "token=" + t_token + "uid=" + t_accountid + "sign=" + t_sign;
+
                 console.log(data);
-                $.messager.alert("系统提示", "登录回复：" + data);
+                // $.messager.alert("系统提示", "登录回复：" + data);
                 logincheck();
             }
         },
@@ -140,7 +136,6 @@ function login() {
 }
 
 function logincheck() {
-    // let appId = t_appid;
     let token = t_token;
     let uid = t_accountid;
     let sign = t_sign;
@@ -228,8 +223,6 @@ function exitgame() {
             if (result.resultCode === 200) {
                 $.messager.alert("系统提示", result.status);
                 console.info(result.data());
-                t_status = 4;
-                myFunction();
             }
         },
         error: function () {
@@ -260,6 +253,9 @@ function cretaterole() {
         "roleCTime": 0,
         "roleLevelMTime": 0
     };
+    for (let key in value) {
+        console.info(key + ':' + value[key]);
+    }
     let ss = JSON.stringify(value);
     let data = {
         "key": key,
@@ -400,7 +396,7 @@ function initSpGameServer(type) {
                     let select_gameId = $("#save_gameId");
                     select_gameId.find("option").remove();
                     select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                    console.info(result.rows);
+                    // console.info(result.rows);
                     for (let res = 0; res < result.total; res++) {
 
                         let gameid = result.rows[res].gameId;

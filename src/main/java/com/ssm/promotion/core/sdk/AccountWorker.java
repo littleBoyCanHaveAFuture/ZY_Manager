@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.sdk;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.service.AccountService;
 import com.ssm.promotion.core.service.ServerListService;
@@ -58,41 +59,6 @@ public class AccountWorker {
         return USERID_BEGIN + USERID_SP_INTERVAL * (spId - 1);
     }
 
-    /**
-     * 注册账号
-     */
-    public Account autoRegister(JSONObject reply, String ip) throws Exception {
-
-        //创建账号
-        Account account = new Account();
-        account.setName(RandomUtil.rndStr(10, true));
-        account.setPwd(RandomUtil.rndStr(6, false));
-
-
-        account.setPhone("");
-        account.setCreateIp(ip);
-        account.setCreateTime(DateUtil.getCurrentDateStr());
-        account.setCreateDevice("");
-        account.setDeviceCode("");
-        account.setChannelId("0");
-        account.setChannelUserId("");
-        account.setChannelUserName("Official");
-        account.setChannelUserNick("Official");
-        account.setLastLoginTime(0L);
-        account.setToken("");
-        account.setAddParam("");
-
-        accountService.createAccount(account);
-
-        reply.put("message", "注册成功");
-        reply.put("accountId", account.getId());
-        reply.put("account", account.getName());
-        reply.put("pwd", account.getPwd());
-        reply.put("status", 1);
-
-        return account;
-
-    }
 
     /**
      * 注册账号
@@ -122,141 +88,92 @@ public class AccountWorker {
             //某游戏 是否开放注册
             if (!serverService.isSpCanReg(tmp, -1)) {
                 //返回结果
-                reply.put("message", "未开放注册");
-                reply.put("status", 0);
+                reply.put("reason", "未开放注册");
+                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
-            int spid = channelId;
-            int deviceSize = this.getDeviceCreateAccount(deviceCode, spid);
+            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {
-                    reply.put("message", "设备码非法");
-                    reply.put("status", 0);
+                    reply.put("reason", "设备码非法");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 } else if (deviceSize == 20) {
-                    reply.put("message", "已到达设备创建账号最大数量");
-                    reply.put("status", 0);
+                    reply.put("reason", "已到达设备创建账号最大数量");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
             }
             //封禁ip
             if (TemplateWorker.hasBanIp(ip)) {
                 TemplateWorker.addBanIp(ip);
-                reply.put("message", "玩家ip已被封禁");
-                reply.put("status", 0);
+                reply.put("reason", "玩家ip已被封禁");
+                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
             //账号密码注册
             if (!auto) {
                 if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("message", "用户名长度不对！");
-                    reply.put("status", 0);
+                    reply.put("reason", "用户名长度不对！");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
                 //名称合法
                 if (!StringUtil.isValidUsername(username)) {
                     //Todo
-                    reply.put("message", "用户名格式不合法！");
-                    reply.put("status", 0);
+                    reply.put("reason", "用户名格式不合法！");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
                 // 能包含敏感词
                 if (TemplateWorker.hasBad(username)) {
-                    reply.put("message", "用户名包含敏感词！");
-                    reply.put("status", 0);
+                    reply.put("reason", "用户名包含敏感词！");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
                 if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("message", "密码长度不对");
-                    reply.put("status", 0);
+                    reply.put("reason", "密码长度不对");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
             }
 
             //检查渠道id和渠道用户id是否存在
-            if (accountService.exist(map) > 0) {
-                reply.put("message", "渠道账号已经存在");
-                reply.put("status", 0);
+            if (channelId != 0 && accountService.exist(map) > 0) {
+                reply.put("reason", "渠道账号已经存在");
+                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
             //创建账号
             Account account = this.createAccount(map);
+
             if (account == null) {
-                reply.put("message", "注册失败");
-                reply.put("status", 0);
+                reply.put("reason", "注册失败");
+                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
-            if (account.getId() < AccountWorker.USERID_BEGIN) {
+            if (account.getId() < 0) {
                 if (account.getId() == -2) {
-                    reply.put("message", "账号名重复");
-                    reply.put("status", 0);
+                    reply.put("reason", "账号名重复");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    break;
+                } else {
+                    reply.put("reason", "注册失败");
+                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
             }
+
             map.put("accountId", account.getId().toString());
 
-            reply.put("message", "注册成功");
-            reply.put("account", account.getName());
-            reply.put("pwd", account.getPwd());
-            reply.put("status", 1);
+            reply.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
             reply.put("accountId", account.getId());
-        } while (false);
-
-
-        return reply;
-    }
-
-    /**
-     * 注册账号
-     */
-    public JSONObject channelAutoRegister(Map<String, String> map) throws Exception {
-        JSONObject reply = new JSONObject();
-        do {
-            //全部数据
-            String channelId = map.get("channelId");
-            String gameId = map.get("appId");
-            String ip = map.get("ip");
-
-            Map<String, Object> tmp = new HashMap<>(6);
-            tmp.put("gameId", gameId);
-            tmp.put("spId", channelId);
-
-            //某游戏 是否开放注册
-            if (!serverService.isSpCanReg(tmp, -1)) {
-                //返回结果
-                reply.put("message", "未开放注册");
-                break;
-            }
-
-            //封禁ip
-            if (TemplateWorker.hasBanIp(ip)) {
-                TemplateWorker.addBanIp(ip);
-                reply.put("message", "玩家ip已被封禁");
-                break;
-            }
-
-            //检查渠道id和渠道用户id是否存在
-
-            //创建账号
-            Account account = this.createAccount(map);
-            if (account == null) {
-                reply.put("message", "注册失败");
-                break;
-            }
-            if (account.getId() < AccountWorker.USERID_BEGIN) {
-                if (account.getId() == -2) {
-                    reply.put("message", "账号名重复");
-                    break;
-                }
-            }
-
-            map.put("accountId", account.getId().toString());
-            reply.put("message", "注册成功");
-            reply.put("status", 1);
-            //注册成功 相关数据存入redis
+            reply.put("account", account.getName());
+            reply.put("password", account.getPwd());
+            reply.put("channelUid", account.getChannelUserId());
+            reply.put("reason", "注册成功");
 
         } while (false);
-
 
         return reply;
     }
@@ -283,21 +200,24 @@ public class AccountWorker {
      * 创建用户
      */
     public Account createAccount(Map<String, String> map) throws Exception {
-        String username = map.get("username");
-        String pwd = map.get("pwd");
-        String phone = map.get("phone");
-        String ip = map.get("ip");
-        String deviceCode = map.get("deviceCode");
+        boolean auto = Boolean.parseBoolean(map.get("auto"));
+        String gameId = map.get("gameId");
 
-        String imei = map.get("imei");
         String channelId = map.get("channelId");
         String channelUserId = map.get("channelUid");
         String channelUserName = map.get("channelUname");
         String channelUserNick = map.get("channelUnick");
 
+        String username = map.get("username");
+        String pwd = map.get("pwd");
+
+        String phone = map.get("phone");
+        String deviceCode = map.get("deviceCode");
+        String imei = map.get("imei");
+
         String addparm = map.get("addparm");
-        String gameId = map.get("gameId");
-        boolean auto = Boolean.parseBoolean(map.get("auto"));
+
+        String ip = map.get("ip");
 
         Account account = new Account();
         if (auto) {
@@ -307,23 +227,92 @@ public class AccountWorker {
             account.setName(username);
             account.setPwd(pwd);
         }
+        if (channelId.equals("0")) {
+            account.setPhone(phone);
+            account.setCreateIp(ip);
+            account.setCreateTime(DateUtil.getCurrentDateStr());
+            account.setCreateDevice(deviceCode);
+            account.setDeviceCode(deviceCode);
+            account.setChannelId("0");
+            account.setChannelUserId("");
+            account.setChannelUserName("Official");
+            account.setChannelUserNick("Official");
+            account.setLastLoginTime(0L);
+            account.setToken("");
+            account.setAddParam(addparm);
 
-        account.setPhone(phone);
+            accountService.createAccount(account);
+            if (account.getId() == -1 || account.getId() == -2 || account.getId() == -3) {
+                return null;
+            }
+            //官方
+            account.setChannelUserId(account.getId().toString());
+
+            //更新uid
+            Map<String, Object> maps = new HashMap<>();
+            maps.put("id", account.getId());
+            maps.put("channelUid", account.getId());
+            accountService.updateAccountUid(maps);
+
+        } else {
+            account.setPhone(phone);
+            account.setCreateIp(ip);
+            account.setCreateTime(DateUtil.getCurrentDateStr());
+            account.setCreateDevice(deviceCode);
+            account.setDeviceCode(deviceCode);
+            account.setChannelId(channelId);
+            account.setChannelUserId(channelUserId);
+            account.setChannelUserName(channelUserName);
+            account.setChannelUserNick(channelUserNick);
+            account.setLastLoginTime(0L);
+            account.setToken("");
+            account.setAddParam(addparm);
+
+            accountService.createAccount(account);
+        }
+
+        return account;
+    }
+
+    /**
+     * 注册账号
+     */
+    public Account autoRegister(JSONObject reply, String ip) throws Exception {
+        //创建账号
+        Account account = new Account();
+
+        account.setPhone("");
         account.setCreateIp(ip);
         account.setCreateTime(DateUtil.getCurrentDateStr());
-        account.setCreateDevice(deviceCode);
-        account.setDeviceCode(deviceCode);
-        account.setChannelId(channelId);
-        account.setChannelUserId(channelUserId);
-        account.setChannelUserName(channelUserName);
-        account.setChannelUserNick(channelUserNick);
+        account.setCreateDevice("");
+        account.setDeviceCode("");
+        account.setChannelId("0");
+        account.setChannelUserId("");
+        account.setChannelUserName("Official");
+        account.setChannelUserNick("Official");
         account.setLastLoginTime(0L);
         account.setToken("");
-        account.setAddParam(addparm);
+        account.setAddParam("");
 
         accountService.createAccount(account);
-        return account;
+        if (account.getId() == -1 || account.getId() == -2 || account.getId() == -3) {
+            return null;
+        }
+        //官方
+        account.setChannelUserId(account.getId().toString());
+        //更新uid
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", account.getId());
+        map.put("channelUid", account.getId());
+        accountService.updateAccountUid(map);
 
+        reply.put("message", "注册成功");
+        reply.put("accountId", account.getId());
+        reply.put("account", account.getName());
+        reply.put("pwd", account.getPwd());
+        reply.put("status", 1);
+
+        return account;
     }
 
     private void AccountWorker() {

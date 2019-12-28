@@ -46,7 +46,7 @@ public class GameRole {
     /**
      * 创建时间
      */
-    long createTime;
+    String createTime;
     /**
      * 最后一次登录时间
      */

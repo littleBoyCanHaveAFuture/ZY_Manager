@@ -17,8 +17,8 @@ public class GameRoleWorker {
     @Autowired
     GameRoleService gameRoleService;
 
-    public void createGameRole(GameRole role) {
-        gameRoleService.createGameRole(role);
+    public boolean createGameRole(GameRole role) {
+        return gameRoleService.createGameRole(role);
     }
 
     public void updateGameRole(Map<String, Object> map) {

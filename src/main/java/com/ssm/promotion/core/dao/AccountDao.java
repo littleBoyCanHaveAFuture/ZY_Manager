@@ -77,4 +77,6 @@ public interface AccountDao {
     List<Integer> exist(Map<String, String> map);
 
     List<Account> findAccountOF(Map<String, String> map);
+
+    int updateAccountUid(Map<String, Object> map);
 }

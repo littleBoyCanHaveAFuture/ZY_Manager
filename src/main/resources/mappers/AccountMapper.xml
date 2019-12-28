@@ -92,7 +92,14 @@
         from zy_account
         where channelId = #{channelId}
           and channelUserId = #{channelUid}
-
     </select>
-
+    <update id="updateAccountUid" parameterType="map">
+        update zy_account
+        <set>
+            <if test="channelUid!=null and channelUid!=''">
+                channelUserId=#{channelUid},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
 </mapper>
