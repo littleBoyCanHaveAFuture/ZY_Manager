@@ -60,7 +60,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public int getTotalSameDeviceCode(String deviceCode, Integer channelId) {
-
         return accountDao.getTotalSameDeviceCode(deviceCode, channelId);
     }
 
@@ -87,6 +86,11 @@ public class AccountServiceImpl implements AccountService {
             }
             return accountDao.findAccountOF(map);
         }
+    }
+
+    @Override
+    public Account findAccountById(int id) {
+        return accountDao.findAccountById(id);
     }
 
     @Override

@@ -42,6 +42,13 @@ function clearCookie() {
     window.location.href = "login.jsp";
 }
 
+function clearGameCookie() {
+    delCookie("username");
+    delCookie("password");
+    delCookie("channelUid");
+    delCookie("accountid");
+}
+
 function formatterDate(date, type) {
     let day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
     let month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0" + (date.getMonth() + 1);

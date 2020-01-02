@@ -4,6 +4,7 @@ import com.ssm.promotion.core.dao.ServerListDao;
 import com.ssm.promotion.core.entity.ServerInfo;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.RSAUtilsNew;
+import com.ssm.promotion.core.util.RandomUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,6 +33,7 @@ public class ServerListServiceImpl implements ServerListService {
         Map<String, Object> keyMap = RSAUtilsNew.genKeyPair();
         server.setPriKey(RSAUtilsNew.getPrivateKey(keyMap));
         server.setPubKey(RSAUtilsNew.getPublicKey(keyMap));
+        server.setSecertKey(RandomUtil.rndStr(12, true));
         return serverListdao.insertServer(server);
     }
 
@@ -119,4 +121,8 @@ public class ServerListServiceImpl implements ServerListService {
         return serverListdao.selectLoginUrl(map);
     }
 
+    @Override
+    public String selectSecertKey(Map<String, Object> map, Integer userId) {
+        return serverListdao.selectPublicKey(map);
+    }
 }

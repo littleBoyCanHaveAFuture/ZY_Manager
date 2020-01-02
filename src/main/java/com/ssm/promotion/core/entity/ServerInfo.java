@@ -53,12 +53,18 @@ public class ServerInfo {
      * RSA2 私钥
      */
     private String priKey;
+    /**
+     * md5 秘钥
+     */
+    private String secertKey;
 
     public ServerInfo() {
 
     }
 
-    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState, String loginUrl, String openday, String pubKey, String priKey) {
+    public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState,
+                      String loginUrl, String openday,
+                      String pubKey, String priKey, String secertKey) {
         super();
         this.id = id;
         this.gameId = gameId;
@@ -70,7 +76,7 @@ public class ServerInfo {
         this.openday = openday;
         this.pubKey = pubKey;
         this.priKey = priKey;
-
+        this.secertKey = secertKey;
         if (spIdList == null) {
             spIdList = new ArrayList<>();
         }

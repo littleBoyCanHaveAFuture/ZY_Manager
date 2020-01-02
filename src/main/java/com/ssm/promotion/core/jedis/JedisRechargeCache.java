@@ -586,34 +586,6 @@ public class JedisRechargeCache {
             //累计创角数目(所有角色)
             jds.zincrby(RedisKeyNew.getKeyRolesCreateServer(channelId, appId, serverId), 1, RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
 
-//            //渠道-游戏
-//            String userSGKey = String.format(RedisKey.FORMAT_SG_SS, RedisKeyHeader.USER_INFO, channelId, appId);
-//            //渠道-游戏-区服
-//            String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
-//            //渠道-游戏-区服
-//            String realtimeSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.REALTIMEDATA, channelId, appId, serverId);
-//            //新增创角 渠道-游戏-区服-日期
-//            String key1 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE;
-//            //新增创角去除滚服 渠道-游戏-区服-日期
-//            String key3 = userSGSKey + ":date:" + currDay + "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD;
-//            // 累计创角 渠道-游戏-区服
-//            String key5 = userSGSKey + "#" + RedisKeyTail.ACCOUNT_INFO;
-//
-//            String key11 = realtimeSGSKey + ":date:" + currDay + "#" + RedisKeyTail.REALTIME_ADD_ROLES;
-//
-//            boolean res1 = jds.setbit(key1, accountId, true);
-//            boolean res2 = jds.setbit(key3, accountId, !hasRole);
-//            double res3 = jds.zincrby(key5, 1, RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
-//            if (!hasRole) {
-//                jds.setbit(key2, accountId, true);
-//            }
-//
-//            jds.zincrby(key11, 1, currDayMin);
-//            if (isLog) {
-//                System.out.println("createRole key1:" + key1 + "\taccountId:" + accountId + "\tresult:[" + res1 + "]");
-//                System.out.println("createRole key3:" + key3 + "\taccountId:" + accountId + "\tresult:[" + res2 + "]");
-//                System.out.println("createRole key5:" + key5 + "\taccountId:" + accountId + "\tresult:[" + res3 + "]");
-//            }
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();

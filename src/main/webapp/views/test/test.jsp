@@ -16,13 +16,11 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/test/test.js"></script>
+            src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/test/jquery.md5.js"></script>
+            src="${pageContext.request.contextPath}/views/test/test.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/views/test/zySdkOffcial.js"></script>
 </head>
@@ -86,7 +84,7 @@
         <label for="isChannel">是否渠道登录</label>
         <select id="isChannel">
             <option value="true" selected="selected">渠道号自动</option>
-            <option value="false" s>否</option>
+            <option value="false">否</option>
         </select>
     </div>
     <div>
@@ -133,8 +131,8 @@
         <div>
             <label>--------------------------------------</label>
         </div>
-        <a href="javascript:test_UploadPayInfo()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值</a>
-        <a href="javascript:pay()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">充值校验</a>
+        <a href="javascript:test_UploadPayInfo()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值上报</a>
+        <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>
     </div>
 
     <div>

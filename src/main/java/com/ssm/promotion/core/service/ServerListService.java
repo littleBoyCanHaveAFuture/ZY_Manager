@@ -73,4 +73,9 @@ public interface ServerListService {
      * 公钥
      */
     String selectLoginUrl(Map<String, Object> map, Integer userId);
+
+    /**
+     * md5秘钥
+     */
+    String selectSecertKey(Map<String, Object> map, Integer userId);
 }

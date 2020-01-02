@@ -92,7 +92,7 @@ public class AccountWorker {
                 reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
-            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
+/*            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {
                     reply.put("reason", "设备码非法");
@@ -103,7 +103,7 @@ public class AccountWorker {
                     reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                     break;
                 }
-            }
+            }*/
             //封禁ip
             if (TemplateWorker.hasBanIp(ip)) {
                 TemplateWorker.addBanIp(ip);
@@ -342,6 +342,12 @@ public class AccountWorker {
             return null;
         }
         return list.get(NumberUtil.ZERO);
+    }
+
+    public Account getAccountById(int id) {
+        Account account = accountService.findAccountById(id);
+
+        return account;
     }
 
     /**

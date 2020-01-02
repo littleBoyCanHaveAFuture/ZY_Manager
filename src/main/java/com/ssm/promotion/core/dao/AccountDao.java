@@ -79,4 +79,6 @@ public interface AccountDao {
     List<Account> findAccountOF(Map<String, String> map);
 
     int updateAccountUid(Map<String, Object> map);
+
+    Account findAccountById(@Param("id") int id);
 }

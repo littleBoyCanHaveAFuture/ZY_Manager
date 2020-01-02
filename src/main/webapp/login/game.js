@@ -11,11 +11,9 @@ function EnterGame() {
 
 function EnterGame_Cisha() {
     setCookie("appId", 2);
-    // alert(2);
     EnterGame();
 }
 function EnterGame_SGYX() {
     setCookie("appId", 9999);
-    // alert(9999);
     EnterGame();
 }

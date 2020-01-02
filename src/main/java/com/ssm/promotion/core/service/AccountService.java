@@ -43,9 +43,11 @@ public interface AccountService {
      * 查询相同渠道号
      */
     public int exist(Map<String, String> map);
+
     /**
      * 更新数据
      */
     public void updateAccountUid(Map<String, Object> map);
 
+    public Account findAccountById(int id);
 }

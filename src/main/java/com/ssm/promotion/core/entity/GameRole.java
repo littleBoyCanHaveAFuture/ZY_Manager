@@ -26,7 +26,7 @@ public class GameRole {
      * index 该区第几个角色
      * String = id + Spid + gameId + ServerId + index  ;
      */
-    Integer roleId;
+    long roleId;
     /**
      * 渠道id
      */
@@ -50,7 +50,7 @@ public class GameRole {
     /**
      * 最后一次登录时间
      */
-    long lastLoginTime;
+    String lastLoginTime;
     /**
      * 昵称
      */

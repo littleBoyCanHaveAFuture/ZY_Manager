@@ -78,6 +78,13 @@
         where
         name=#{name}
     </select>
+
+    <select id="findAccountById" parameterType="int" resultMap="AccountResult">
+        <include refid="select_account_column"/>
+        where
+        id=#{id}
+    </select>
+
     <update id="updateAccount" parameterType="map">
         update zy_account
         <set>

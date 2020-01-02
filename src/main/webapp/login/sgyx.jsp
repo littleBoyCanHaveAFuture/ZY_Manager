@@ -24,10 +24,10 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/jquery.md5.js"></script>
+            src="${pageContext.request.contextPath}/js/md5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script src="${pageContext.request.contextPath}/login/gamelogin.js"></script>
+    <script src="${pageContext.request.contextPath}/login/gamelogin.js?201912311802"></script>
 </head>
 
 <body class="gray-bg">
@@ -48,8 +48,8 @@
                 <label for="password"></label>
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
-
-
+            <input type="text" name="aid" id="aid" required="" hidden="hidden">
+            <input type="text" name="uid" id="uid" required="" hidden="hidden">
             <input type="text" name="res" id="res" required="" hidden="hidden">
 
             <button type="button" class="btn btn-primary block full-width m-b" onclick="test_Register();"> 一 键 注 册
@@ -63,14 +63,16 @@
                 <a href="##" onclick="adminlogin.reset();return false;" style="float: right">
                     <small>重置账号密码</small>
                 </a>
-                <a onclick="gameList()" style="float: left">返回游戏列表</a>
+                <a href="##" onclick="clearGameCookie();return false;" style="float: left">
+                    <small>清理缓存</small>
+                </a>
             </p>
         </form>
     </div>
 </div>
 
 <script type="text/javascript">
-
+    setCookie("appId", 9999);
     var clipboard = new ClipboardJS('.copyBtn', {
         text: function () {
             return $("input:hidden[name='res']").val();

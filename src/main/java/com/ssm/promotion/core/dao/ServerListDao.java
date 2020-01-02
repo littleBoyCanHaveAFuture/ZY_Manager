@@ -81,4 +81,9 @@ public interface ServerListDao {
     String selectPublicKey(Map<String, Object> map);
 
     String selectLoginUrl(Map<String, Object> map);
+
+    /**
+     * md5私钥
+     */
+    String selectSecertKey(Map<String, Object> map);
 }

@@ -76,8 +76,8 @@ public class TtController {
         String[] allowDomain = {"http://127.0.0.1:8080", "http://lh5ds.yy66game.com/", "http://47.101.44.31:8080"};
         Set<String> allowedOrigins = new HashSet<>(Arrays.asList(allowDomain));
 //        String originHeader = ((HttpServletRequest) rsp).getHeader("Origin");
-//        System.out.println("originHeader:" + originHeader);
-//        System.out.println("allowedOrigins:" + allowedOrigins);
+//        log.info("originHeader:" + originHeader);
+//        log.info("allowedOrigins:" + allowedOrigins);
 //        if (allowedOrigins.contains(originHeader)) {
         response.addHeader("Access-Control-Allow-Origin", "http://lh5ds.yy66game.com/");
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
@@ -158,7 +158,7 @@ public class TtController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public Result sdkRegister(@RequestBody Map<String, String> map) throws Exception {
-        System.out.println("register:" + map.toString());
+        log.info("register:" + map.toString());
 
         boolean auto = Boolean.parseBoolean(map.get("auto"));
         //参数校验
@@ -209,8 +209,8 @@ public class TtController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public Result sdkLogin(@RequestBody Map<String, String> map,
-                           HttpServletResponse response) throws Exception {
+    public void sdkLogin(@RequestBody Map<String, String> map,
+                         HttpServletResponse response) throws Exception {
         log.info("request: ttt/login , map: " + map.toString());
 
         int appId = Integer.parseInt(map.get("appId"));
@@ -253,10 +253,8 @@ public class TtController {
 
         } while (false);
 
-        setResponseAccess(response);
-
-        System.out.println("request: ttt/login , map: " + result.toString());
-        return ResultGenerator.genSuccessResult(result);
+        log.info("request: ttt/login , map: " + result.toString());
+        ResponseUtil.write(response, result);
     }
 
     /**
@@ -279,7 +277,7 @@ public class TtController {
                                 String token,
                                 String sign,
                                 HttpServletResponse response) throws Exception {
-        System.out.println("request: ttt/check , " + "appId: " + appId + "\tuid:" + uid + "\ttoken:" + token + "\tsign:" + sign);
+        log.info("request: ttt/check , " + "appId: " + appId + "\tuid:" + uid + "\ttoken:" + token + "\tsign:" + sign);
 
         JSONObject result = new JSONObject();
         do {
@@ -301,16 +299,21 @@ public class TtController {
                 result.put("reason", "签名不一致非法");
                 break;
             }
+
+            Account account = accountWorker.getAccountById(accountId);
+            if (account != null) {
+                result.put("accountId", accountId);
+                result.put("channelUid", account.getChannelUserId());
+            }
             result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
             result.put("reason", "登录成功");
-            result.put("accountId", accountId);
 
         } while (false);
 
         setResponseAccess(response);
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
-        System.out.println("request: ttt/check , result\t" + result.toString());
+        log.info("request: ttt/check , result\t" + result.toString());
         return ResultGenerator.genSuccessResult(result);
     }
 
@@ -343,114 +346,118 @@ public class TtController {
     @ResponseBody
     public void sdkSetData(@RequestBody Map<String, String> map,
                            HttpServletResponse response) throws Exception {
-        log.info("request: ttt/setdata ,map: " + map.toString());
-        System.out.println("request: ttt/setdata ,map: " + map.toString());
+        log.info("request: /ttt/setdata ,map: " + map.toString());
 
         String key = map.get("key");
         String value = map.get("value");
 
+        log.info("key\t" + key);
+        log.info("value\t" + value);
+
         JSONObject result = new JSONObject();
 
-        do {
-            JSONObject roleInfo = JSONObject.parseObject(value);
 
-            System.out.println(roleInfo.toJSONString());
+        JSONObject roleInfo = JSONObject.parseObject(value);
 
-            Integer roleId = roleInfo.getInteger("roleId");
-            String channelId = roleInfo.getString("channelId");
-            String channelUid = roleInfo.getString("channelUid");
-            String gameId = roleInfo.getString("appId");
-            Integer serverId = roleInfo.getInteger("zoneId");
-            Long roleCTime = roleInfo.getLongValue("roleCTime");
-            String roleName = roleInfo.getString("roleName");
-            BigInteger balance = roleInfo.getBigInteger("balance");
+        long roleId = roleInfo.getLong("roleId");
+        String channelId = roleInfo.getString("channelId");
+        String channelUid = roleInfo.getString("channelUid");
+        String gameId = roleInfo.getString("appId");
+        Integer serverId = roleInfo.getInteger("zoneId");
+        long roleCTime = roleInfo.getLongValue("roleCTime");
+        String roleName = roleInfo.getString("roleName");
+        BigInteger balance = roleInfo.getBigInteger("balance");
 
-            if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
-                System.out.println("数据为空");
-                System.out.println("roleId:" + roleId);
-                System.out.println("channelId:" + channelId);
-                System.out.println("channelUid:" + channelUid);
-                System.out.println("gameId:" + gameId);
-                System.out.println("serverId:" + serverId);
+        if (StringUtils.isBlank(roleId, channelId, channelUid, gameId, serverId)) {
+            log.info("数据为空");
+
+            result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+            result.put("reason", "数据为空");
+            ResponseUtil.write(response, result);
+            return;
+        }
+
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("isChannel", "true");
+        map1.put("channelId", channelId);
+        map1.put("channelUid", channelUid);
+
+        Account account = accountWorker.getAccount(map1);
+        if (account == null) {
+            log.info("account is null\t" + map1.toString());
+            result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+            result.put("reason", "账号不存在");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        log.info("key\t" + key);
+        if ("createRole".equals(key)) {
+
+            //role 同渠道游戏区服不能重复
+            //创建角色
+            GameRole gameRole = new GameRole();
+            gameRole.setAccountId(account.getId());
+            gameRole.setRoleId(roleId);
+            gameRole.setChannelId(channelId);
+            gameRole.setChannelUid(channelUid);
+            gameRole.setGameId(gameId);
+            gameRole.setServerId(serverId);
+            gameRole.setCreateTime(DateUtil.formatDate(roleCTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+            gameRole.setLastLoginTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+            gameRole.setName(roleName);
+            //插入mysql
+            boolean res = gameRoleWorker.createGameRole(gameRole);
+            if (!res) {
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
-                result.put("reason", "数据为空");
-                break;
+                result.put("reason", "角色已存在");
+                ResponseUtil.write(response, result);
+                return;
             }
+            //redis
+            cache.createRole(gameId, serverId.toString(), channelId, account.getId(), roleId);
+        } else if ("levelUp".equals(key)) {
+            Map<String, Object> lmap = new HashMap<>();
+            lmap.put("roleId", roleId);
+            lmap.put("channelId", channelId);
+            lmap.put("gameId", gameId);
+            lmap.put("serverId", serverId);
+            lmap.put("name", roleName);
+            lmap.put("balance", balance);
+            //更新mysql
+            gameRoleWorker.updateGameRole(lmap);
 
-            Map<String, String> map1 = new HashMap<>();
-            map1.put("isChannel", "true");
-            map1.put("channelId", channelId);
-            map1.put("channelUid", channelUid);
-            Account account = accountWorker.getAccount(map1);
-            if (account == null) {
-                log.error("account is null\t" + map1.toString());
-                result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
-                result.put("reason", "账号不存在");
-                break;
-            }
-            if (key.equals("createRole")) {
-                //role 同渠道游戏区服不能重复
-                //创建角色
-                GameRole gameRole = new GameRole();
-                gameRole.setAccountId(account.getId());
-                gameRole.setRoleId(roleId);
-                gameRole.setChannelId(channelId);
-                gameRole.setChannelUid(channelUid);
-                gameRole.setGameId(gameId);
-                gameRole.setServerId(serverId);
-                gameRole.setCreateTime(DateUtil.formatDate(roleCTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
-                gameRole.setLastLoginTime(0L);
-                gameRole.setName(roleName);
-                //插入mysql
-                boolean res = gameRoleWorker.createGameRole(gameRole);
-                if (!res) {
-                    result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
-                    result.put("reason", "角色已存在");
-                    break;
-                }
-                //redis
-                cache.createRole(gameId, serverId.toString(), channelId, account.getId(), roleId);
-            } else if (key.equals("levelUp")) {
-                Map<String, Object> lmap = new HashMap<>();
-                lmap.put("roleId", roleId);
-                lmap.put("channelId", channelId);
-                lmap.put("gameId", gameId);
-                lmap.put("serverId", serverId);
-                lmap.put("name", roleName);
-                lmap.put("balance", balance);
-                //更新mysql
-                gameRoleWorker.updateGameRole(lmap);
+        } else if ("enterServer".equals(key)) {
+            Map<String, Object> tmap = new HashMap<>();
+            tmap.put("roleId", roleId);
+            tmap.put("channelId", channelId);
+            tmap.put("gameId", gameId);
+            tmap.put("serverId", serverId);
+            tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
+            tmap.put("name", roleName);
+            tmap.put("balance", balance);
+            //更新mysql
+            gameRoleWorker.updateGameRole(tmap);
+        } else {
+            result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+            result.put("reason", "key 错误");
+            ResponseUtil.write(response, result);
+            return;
+        }
 
-            } else if (key.equals("enterServer")) {
-                Map<String, Object> tmap = new HashMap<>();
-                tmap.put("roleId", roleId);
-                tmap.put("channelId", channelId);
-                tmap.put("gameId", gameId);
-                tmap.put("serverId", serverId);
-                tmap.put("lastLoginTime", DateUtil.getCurrentDateStr());
-                tmap.put("name", roleName);
-                tmap.put("balance", balance);
-                //更新mysql
-                gameRoleWorker.updateGameRole(tmap);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("channelId", channelId);
+        jsonObject.put("appId", gameId);
+        jsonObject.put("zoneId", serverId);
+        jsonObject.put("roleId", roleId);
+        jsonObject.put("balance", balance);
 
-            }
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("channelId", channelId);
-            jsonObject.put("appId", gameId);
-            jsonObject.put("zoneId", serverId);
-            jsonObject.put("roleId", roleId);
-            jsonObject.put("balance", balance);
-
-            result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
-            result.put("reason", "上报成功");
-            result.put("data", jsonObject.toJSONString());
-        } while (false);
-
-        setResponseAccess(response);
+        result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+        result.put("reason", "上报成功");
+        result.put("data", jsonObject.toJSONString());
         ResponseUtil.write(response, result);
 
-        System.out.println("request: ttt/setdata , result\t" + result.toString());
+        log.info("request: ttt/setdata , result\t" + result.toString());
+
     }
 
     /**
@@ -471,7 +478,7 @@ public class TtController {
                              String roleId, HttpServletResponse response) throws Exception {
         log.info("request: ttt/enter , appId: " + appId + "\tserverId:" + serverId +
                 "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
-        System.out.println("request: ttt/enter , appId: " + appId + "\tserverId:" + serverId +
+        log.info("request: ttt/enter , appId: " + appId + "\tserverId:" + serverId +
                 "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
 
         JSONObject result = new JSONObject();
@@ -540,7 +547,7 @@ public class TtController {
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        System.out.println("request: ttt/enter , result\t" + result.toString());
+        log.info("request: ttt/enter , result\t" + result.toString());
     }
 
     /**
@@ -562,7 +569,7 @@ public class TtController {
                             String roleId, HttpServletResponse response) throws Exception {
         log.info("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
                 "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
-        System.out.println("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
+        log.info("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
                 "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
 
         //查找角色的指悦账号
@@ -611,7 +618,7 @@ public class TtController {
             tmap.put("serverId", serverId);
             String logintime = gameRoleWorker.getLastLoginTime(tmap);
 
-            System.out.println("logintime:" + logintime);
+            log.info("logintime:" + logintime);
 
             //计算在线时间
             //todo
@@ -630,7 +637,7 @@ public class TtController {
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        System.out.println("request: ttt/exit , result\t" + result.toString());
+        log.info("request: ttt/exit , result\t" + result.toString());
     }
 
 
@@ -665,7 +672,7 @@ public class TtController {
     public void sdkPayInfo(@RequestBody String jsonData,
                            HttpServletResponse response) throws Exception {
         JSONObject request = JSONObject.parseObject(jsonData);
-        System.out.println("request: ttt/payInfo " + request.toString());
+        log.info("request: ttt/payInfo " + request.toString());
 
         int accountId = request.getInteger("accountID");
         int channelId = request.getInteger("channelID");
@@ -732,7 +739,7 @@ public class TtController {
 
             //2.金额合法性
             if (money < 0) {
-                System.out.println("the money is not valid. money:" + money);
+                log.info("the money is not valid. money:" + money);
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 result.put("state", StateCode.CODE_MONEY_ERROR);
                 break;
@@ -745,7 +752,7 @@ public class TtController {
                     serverID, serverName, realMoney,
                     completeTime, sdkOrderTime, status, notifyUrl, signType, sign)) {
 
-                System.out.println("the sign is not valid. sign:" + sign);
+                log.info("the sign is not valid. sign:" + sign);
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 result.put("state", StateCode.CODE_SIGN_ERROR);
                 break;
@@ -755,7 +762,7 @@ public class TtController {
             boolean isPaySuccess = false;
             UOrder order = orderManager.getOrder(String.valueOf(appId), String.valueOf(channelId), channelOrderID);
             if (order == null) {
-                System.out.println("order is not exist. generateOrder");
+                log.info("order is not exist. generateOrder");
                 order = orderManager.generateOrder(accountId, channelId, channelUid, appId,
                         channelOrderID, productID, productName, productDesc, money,
                         roleID, roleName, roleLevel,
@@ -778,7 +785,7 @@ public class TtController {
                 }
                 isPaySuccess = (order.getState() == OrderState.STATE_PAY_SUCCESS);
 
-                System.out.println("Order:\n" + order.toJSON());
+                log.info("Order:\n" + order.toJSON());
                 //更新订单
                 orderManager.updateOrder(order);
             }
@@ -805,7 +812,7 @@ public class TtController {
             result.put("orderId", order.getOrderID());
             result.put("state", StateCode.CODE_SUCCESS);
 
-            System.out.println("status:" + status);
+            log.info("status:" + status);
         } while (false);
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
@@ -813,6 +820,6 @@ public class TtController {
         setResponseAccess(response);
         ResponseUtil.write(response, result);
 
-        System.out.println("request: ttt/payInfo , result\t" + result.toString());
+        log.info("request: ttt/payInfo , result\t" + result.toString());
     }
 }

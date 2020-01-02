@@ -3,7 +3,7 @@
  * @date 2019/12/31
  * @version 0.1.1
  */
-// document.write("<script type='text/javascript' src='http://111.231.244.198:8080/try/login/jquery-3.4.1.min.js'></script>");
+document.write("<script type='text/javascript' src='http://111.231.244.198:8080/try/login/jquery-3.4.1.min.js'></script>");
 //md5 函数
 var newscript = document.createElement('script');
 newscript.setAttribute('type', 'text/javascript');
@@ -325,8 +325,7 @@ function loginCheck(appId, accountId, token, sign) {
 
 //测试用例
 function test_CreateRole() {
-    // let appId = $("#save_gameId").val();
-    let appId=9999;
+    let appId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let channelUid = $("#channelUid").val();
@@ -336,9 +335,9 @@ function test_CreateRole() {
     let timestamp = "1577788132";
     let roleLevelMTime = "1577788132";
     let result = createRole(keys[0], appId, channelId, channelUid,
-        roleId, "Role_" + roleId, 1,
-        serverId, "Server_" + serverId, 100, 1,
-        "NONE", timestamp, 0);
+        roleId, "测试角色" + roleId, 1,
+        serverId, "区服" + serverId, 100, 1,
+        "无帮派", timestamp, 0);
     console.info("test_CreateRole");
     console.info(result);
 }
