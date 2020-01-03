@@ -1,7 +1,9 @@
 package com.ssm.promotion.core.service.impl;
 
 import com.ssm.promotion.core.dao.ServerListDao;
+import com.ssm.promotion.core.dao.SpListDao;
 import com.ssm.promotion.core.entity.ServerInfo;
+import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.RSAUtilsNew;
 import com.ssm.promotion.core.util.RandomUtil;
@@ -19,11 +21,12 @@ import java.util.Map;
 public class ServerListServiceImpl implements ServerListService {
     @Resource
     private ServerListDao serverListdao;
+    @Resource
+    private SpListDao spDao;
+
 
     @Override
     public List<ServerInfo> getServerList(Map<String, Object> map, Integer userId) {
-        //  map.entrySet().forEach((k) -> System.out.println("getServerList--->" + k.getKey() + ":" + k.getValue()));
-
         return serverListdao.selectServers(map);
     }
 
@@ -125,4 +128,45 @@ public class ServerListServiceImpl implements ServerListService {
     public String selectSecertKey(Map<String, Object> map, Integer userId) {
         return serverListdao.selectPublicKey(map);
     }
+
+    @Override
+    public List<Sp> getAllSp(Integer userId) {
+        return spDao.getAllSp();
+    }
+
+    @Override
+    public List<Sp> selectSpByIds(Map<String, Object> map, Integer userId) {
+        return spDao.selectSpByIds(map);
+    }
+
+    @Override
+    public List<Sp> getSpById(Map<String, Object> map, Integer userId) {
+        return spDao.getSpById(map);
+    }
+
+    @Override
+    public List<Sp> getAllSpByPage(Map<String, Object> map, Integer userId) {
+        return spDao.getAllSpByPage(map);
+    }
+
+    @Override
+    public Long getTotalSp(Integer userId) {
+        return spDao.getTotalSp();
+    }
+
+    @Override
+    public int delSp(Integer id, Integer userId) {
+        return spDao.deleteSp(id);
+    }
+
+    @Override
+    public int updateSp(Map<String, Object> map, Integer userId) {
+        return spDao.updateSp(map);
+    }
+
+    @Override
+    public int addSp(Map<String, Object> map, Integer userId) {
+        return spDao.addSp(map);
+    }
+
 }

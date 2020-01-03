@@ -1,14 +1,36 @@
 // 初始化内容 先加载完列表
 $(function () {
-    initFirstPage();
-    initSelectList();
-    initSpGameServer(1);
-    initSpGameServer(2);
-    initSpGameServer(3);
-});
-//初始化内容 下一页按钮
-$(function () {// 初始化内容
+    let activeColumns = [];
+    let commonResult = {
+        "编号": "id",
+        "游戏id": "gameId",
+        "游戏名": "gamename",
+        "服务器id": "serverId",
+        "渠道id": "spId",
+        "开服时间": "openday",
+        "md5秘钥": "secertKey",
+        "登录地址": "loginUrl",
+    };
+
+    $.each(commonResult, function (index, value) {
+        let column = {};
+        column["field"] = value;
+        column["title"] = index;
+        column["align"] = 'center';
+        // column["width"] = 50;
+        if(value==="loginUrl"){
+            column["width"] = 300;
+        }
+        activeColumns.push(column);
+    });
     let dg = $("#serverTable");
+    dg.datagrid({
+        pagination: true, //分页显示
+        loadMsg: "正在加载，请稍后...",
+        frozenColumns: [[]], columns: [
+            activeColumns
+        ],
+    });
     let opts = dg.datagrid('options');
     let pager = dg.datagrid('getPager');
     pager.pagination({
@@ -22,13 +44,15 @@ $(function () {// 初始化内容
         onSelectPage: function (pageNum, pageSize) {
             opts.pageNumber = pageNum;
             opts.pageSize = pageSize;
-            // pager.pagination('refresh', {
-            //     pageNumber: pageNum,
-            //     pageSize: pageSize
-            // });
             loadServerListTab();
         }
     });
+
+    initFirstPage();
+    initSelectList();
+    initSpGameServer(1);
+    initSpGameServer(2);
+    initSpGameServer(3);
 });
 
 var url = "${pageContext.request.contextPath}/server/getServerList";
@@ -207,6 +231,7 @@ function updateServer() {
                 $("#dlg").dialog("close");
                 $("#serverTable").datagrid("reload");
                 resetValue();
+                initFirstPage();
             } else {
                 $.messager.alert("系统提示", "操作失败");
                 $("#dlg").dialog("close");

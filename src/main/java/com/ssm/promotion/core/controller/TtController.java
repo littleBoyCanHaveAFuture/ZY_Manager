@@ -99,6 +99,7 @@ public class TtController {
         map.put("gameId", appId);
         map.put("serverId", serverId);
         String loginUrl = serverService.selectLoginUrl(map, 0);
+
         String param = "";
         param += "qid=" + accountId;
         if (appId.equals("2")) {
@@ -115,7 +116,25 @@ public class TtController {
         setResponseAccess(response);
         ResponseUtil.write(response, reply);
     }
+    /**
+     * 官方一键登录
+     */
+    @RequestMapping(value = "/autoGameSp", method = RequestMethod.GET)
+    public void autoGameSp(String accountId, String appId, String serverId, HttpServletResponse response) throws Exception {
+        //登录地址
+        Map<String, Object> map = new HashMap<>();
+        map.put("spId", "0");
+        map.put("gameId", appId);
+        map.put("serverId", serverId);
+        String loginUrl = serverService.selectLoginUrl(map, 0);
 
+
+        JSONObject reply = new JSONObject();
+//        reply.put("url", loginUrl + param);
+        reply.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        setResponseAccess(response);
+        ResponseUtil.write(response, reply);
+    }
     /**
      * 一键注册
      */
@@ -286,23 +305,22 @@ public class TtController {
                 result.put("reason", "token 或 sign 为空");
                 break;
             }
-            int accountId = uid;
 
-            if (!LoginToken.check(accountId, token)) {
+            if (!LoginToken.check(uid, token)) {
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 result.put("reason", "token非法");
                 break;
             }
-            String tmpSign = MD5Util.md5(appId + token + accountId);
-            if (!tmpSign.equals(sign)) {
+            String tmpSign = MD5Util.md5(appId + token + uid);
+            if (tmpSign == null || !tmpSign.equals(sign)) {
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 result.put("reason", "签名不一致非法");
                 break;
             }
 
-            Account account = accountWorker.getAccountById(accountId);
+            Account account = accountWorker.getAccountById(uid);
             if (account != null) {
-                result.put("accountId", accountId);
+                result.put("accountId", uid);
                 result.put("channelUid", account.getChannelUserId());
             }
             result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);

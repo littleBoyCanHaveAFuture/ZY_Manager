@@ -5,11 +5,11 @@
  */
 document.write("<script type='text/javascript' src='http://111.231.244.198:8080/try/login/jquery-3.4.1.min.js'></script>");
 //md5 函数
-var newscript = document.createElement('script');
-newscript.setAttribute('type', 'text/javascript');
-newscript.setAttribute('src', 'http://111.231.244.198:8080/try/login/md5.js');
-var head = document.getElementsByTagName('head')[0];
-head.appendChild(newscript);
+let md5Script = document.createElement('script');
+md5Script.setAttribute('type', 'text/javascript');
+md5Script.setAttribute('src', 'http://111.231.244.198:8080/try/login/md5.js');
+let head = document.getElementsByTagName('head')[0];
+head.appendChild(md5Script);
 
 const t_url = "http://47.101.44.31";
 // const t_url = "http://localhost";

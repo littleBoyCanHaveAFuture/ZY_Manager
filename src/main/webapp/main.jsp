@@ -36,6 +36,7 @@
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
 <body class="easyui-layout" onload="checkCookies()">
+
 <div region="north" style="height: 78px;background-color: #ffff">
     <table width="100%">
         <tr>
@@ -80,6 +81,11 @@
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">测试
+            </a>
+            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">quick
             </a>
         </div>
         <div title="游戏概况"
@@ -148,6 +154,11 @@
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">游戏列表
+            </a>
+            <a href="javascript:openTab('渠道列表','server/sp_list.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">渠道列表
             </a>
             <%--            <a href="javascript:openTab('踢人下线','server/server_kickout.jsp','icon-wenzhang')"--%>
             <%--               class="easyui-linkbutton"--%>

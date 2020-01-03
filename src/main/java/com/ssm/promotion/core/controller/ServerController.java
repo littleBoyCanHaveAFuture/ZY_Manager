@@ -6,6 +6,7 @@ import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.GameName;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.entity.ServerInfo;
+import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.service.GameNameService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.ResponseUtil;
@@ -365,5 +366,96 @@ public class ServerController {
 
         System.out.println("request: server/getDistinctServerInfo , map: " + result.toString());
         log.info("request: server/getDistinctServerInfo , map: " + result.toString());
+    }
+
+    /**
+     * 查询服务器列表
+     */
+    @RequestMapping(value = "/getSpList", method = RequestMethod.GET)
+    public void getSpList(@RequestParam(value = "page", required = false) String page,
+                          @RequestParam(value = "rows", required = false) String rows,
+                          Integer spId,
+                          String name,
+                          HttpServletResponse response) throws Exception {
+        System.out.println("getSpList:");
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        if (page != null && rows != null) {
+            PageBean pageBean = new PageBean(Integer.parseInt(page),
+                    Integer.parseInt(rows));
+            map.put("start", pageBean.getStart());
+            map.put("size", pageBean.getPageSize());
+        }
+        map.put("name", name);
+        map.put("spId", spId);
+        List<Sp> spInfos = serverService.getAllSpByPage(map, userId);
+
+        long size = serverService.getTotalSp(userId);
+        result.put("rows", spInfos);
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameList , map: " + result.toString());
+    }
+
+    /**
+     * 增加、修改、删除 渠道信息
+     *
+     * @param type 1 删除
+     *             2 更新
+     *             3 增加
+     */
+    @RequestMapping(value = "/changeSp", method = RequestMethod.GET)
+    @ResponseBody
+    public void changeSp(Integer spId,
+                         String name,
+                         Integer parent,
+                         Integer state,
+                         String shareLinkUrl,
+                         Integer type, HttpServletResponse response) throws Exception {
+        log.info("changeSp");
+        System.out.println("spId:" + spId);
+        System.out.println("name:" + name);
+        System.out.println("parent:" + parent);
+        System.out.println("state:" + state);
+        System.out.println("shareLinkUrl:" + shareLinkUrl);
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (spId == null) {
+            return;
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("spId", spId);
+        map.put("name", name);
+        map.put("parent", parent);
+        map.put("state", state);
+        map.put("shareLinkUrl", shareLinkUrl);
+
+        if (type == 1) {
+            serverService.delSp(spId, userId);
+        } else if (type == 2) {
+            serverService.updateSp(map, userId);
+        } else if (type == 3) {
+            serverService.addSp(map, userId);
+        }
+
+
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+        log.info("request: changeSp ");
     }
 }

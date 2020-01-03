@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.SpListDao">
+    <resultMap type="Sp" id="SpResult">
+        <result property="spId" column="spId"/>
+        <result property="parent" column="parent"/>
+        <result property="name" column="name"/>
+        <result property="state" column="state"/>
+        <result property="shareLinkUrl" column="shareLinkUrl"/>
+    </resultMap>
+
+    <sql id="select_sp_column">
+        SELECT spId,
+               name,
+               parent,
+               state,
+               shareLinkUrl
+        FROM zy_sp
+    </sql>
+
+    <select id="getAllSp" resultMap="SpResult">
+        <include refid="select_sp_column"/>
+    </select>
+
+    <select id="getAllSpByPage" parameterType="map" resultMap="SpResult">
+        <include refid="select_sp_column"/>
+        <where>
+            <if test="name != null  and name !=''">
+                and name like '%${name}%'
+            </if>
+            <if test="spId != null  and spId !=-1">
+                and spId=#{spId}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="getSpById" resultMap="SpResult">
+        <include refid="select_sp_column"/>
+        <where>
+            <if test="name != null  and name !=''">
+                and name like '%${name}%'
+            </if>
+            <if test="spId != null  and spId !=-1">
+                and spId=#{spId}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+
+    <select id="selectSpByIds" parameterType="map" resultMap="SpResult">
+        SELECT * FROM zy_sp
+        <where>
+            <if test="spIdList != null">
+                zy_sp.spId in
+                <foreach collection="spIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getTotalSp" resultType="Long">
+        select count(*)
+        from zy_sp
+    </select>
+
+    <delete id="deleteSp" parameterType="int">
+        delete
+        from zy_sp
+        where spId = #{spId}
+    </delete>
+
+    <update id="updateSp" parameterType="map">
+        update zy_sp
+        <set>
+            <if test="name != null  and name !=''">
+                name=#{name},
+            </if>
+            <if test="parent != null  and parent !=-1">
+                parent=#{parent},
+            </if>
+            <if test="state != null  and state !=-1">
+                state=#{state},
+            </if>
+            <if test="shareLinkUrl != null  and shareLinkUrl !=''">
+                shareLinkUrl=#{shareLinkUrl},
+            </if>
+        </set>
+        where spId=#{spId}
+    </update>
+
+    <insert id="addSp" parameterType="map">
+        insert into zy_sp(spId, parent, name, state, shareLinkUrl)
+        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl})
+    </insert>
+</mapper>

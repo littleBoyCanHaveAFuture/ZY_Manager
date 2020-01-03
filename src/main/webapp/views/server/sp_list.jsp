@@ -18,43 +18,41 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.config.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.all.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/game_list.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/sp_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
 
-<table id="dg" title="游戏列表" class="easyui-datagrid" pagination="true"
+<table id="dg" title="渠道列表" class="easyui-datagrid" pagination="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#sp">
     <thead data-options="frozen:true">
     <tr>
-<%--        <th field="gameId" width="70" align="center">游戏id</th>--%>
-<%--        <th field="name" width="70" align="center">游戏名</th>--%>
     </tr>
     </thead>
 </table>
 
 <div id="sp">
     <div>
-        <label for="gameid">游戏id:</label>
-        <input type="text" name="gameid" id="gameid">
+        <label for="spid">渠道id:</label>
+        <input type="text" name="spid" id="spid">
 
-        <label for="name">游戏名称</label>
-        <input type="text" name="name" id="name">
-        <button onclick="loadServerListTab()" class="easyui-linkbutton">查询</button>
+        <label for="sname">渠道名称</label>
+        <input type="text" name="sname" id="sname">
+        <button onclick="loadSpListTab()" class="easyui-linkbutton">查询</button>
     </div>
     <div>
-        <a href="javascript:openServerDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">
+        <a href="javascript:openSpDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">
             添加</a>
-        <a href="javascript:openServerModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">
+        <a href="javascript:openSpModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">
             修改</a>
-        <a href="javascript:deleteServer()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">
+        <a href="javascript:deleteSp()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">
             删除</a>
     </div>
 </div>
 
 <div id="dlg-buttons">
-    <a href="javascript:saveServerType()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
-    <a href="javascript:closeServerDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+    <a href="javascript:saveSpType()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+    <a href="javascript:closeSpDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
 </div>
 
 <div id="dlg" class="easyui-dialog" closed="true" buttons="#dlg-buttons"
@@ -63,21 +61,48 @@
         <input type="hidden" name="save_id" id="save_id">
         <table>
             <tr>
-                <td>游戏id:</td>
+                <td>渠道id:</td>
                 <td>
-                    <label for="save_gameid"></label>
-                    <input type="text" name="save_gameid" id="save_gameid"
+                    <label for="save_spId"></label>
+                    <input type="text" name="save_spId" id="save_spId"
                            required="true" class="easyui-validatebox" validType="'number','length[5,10]'"
-                           missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">
+                           missingMessage="渠道id不能为空" ,invalidMessage="请输入数字">
                 </td>
             </tr>
             <tr>
-                <td>游戏名称:</td>
+                <td>渠道名称:</td>
                 <td>
                     <label for="save_name"></label>
                     <input type="text" name="save_name" id="save_name"
                            required="true" class="easyui-validatebox" validType="namerules"
-                           missingMessage="游戏名称">
+                           missingMessage="渠道名称">
+                </td>
+            </tr>
+            <tr>
+                <td>父渠道:</td>
+                <td>
+                    <label for="save_parent"></label>
+                    <input type="text" name="save_parent" id="save_parent"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="父渠道">
+                </td>
+            </tr>
+            <tr>
+                <td>状态:</td>
+                <td>
+                    <label for="save_state"></label>
+                    <input type="text" name="save_state" id="save_state"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="状态">
+                </td>
+            </tr>
+            <tr>
+                <td>分享链接:</td>
+                <td>
+                    <label for="save_shareLinkUrl"></label>
+                    <input type="text" name="save_shareLinkUrl" id="save_shareLinkUrl"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="分享链接">
                 </td>
             </tr>
         </table>

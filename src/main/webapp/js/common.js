@@ -70,3 +70,7 @@ function getmax(arr) {
     }
     return max;
 }
+
+function checkParam(param) {
+    return (param == null || param === "" || param === "undefined");
+}

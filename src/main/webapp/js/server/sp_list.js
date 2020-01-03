@@ -1,9 +1,18 @@
 // 初始化内容 先加载完列表
 $(function () {
+    initTableColumns();
+    loadSpListTab();
+
+});
+
+function initTableColumns() {
     let activeColumns = [];
     let commonResult = {
-        "游戏id": "gameId",
-        "游戏名称": "name",
+        "渠道id": "spId",
+        "父渠道": "parent",
+        "渠道名称": "name",
+        "状态": "state",
+        "分享链接": "shareLinkUrl",
     };
 
     $.each(commonResult, function (index, value) {
@@ -37,19 +46,17 @@ $(function () {
         onSelectPage: function (pageNum, pageSize) {
             opts.pageNumber = pageNum;
             opts.pageSize = pageSize;
-            loadServerListTab();
+            loadSpListTab();
         }
     });
+}
 
-    loadServerListTab();
-});
-
-var url = "${pageContext.request.contextPath}/server/getServerList";
-var method;
-var type;
+let url = "/server/getSpList";
+let method;
+let type;
 
 //查询游戏
-function loadServerListTab() {
+function loadSpListTab() {
     let dg = $("#dg");
     let opts = dg.datagrid('options');
     let pager = dg.datagrid('getPager');
@@ -57,29 +64,22 @@ function loadServerListTab() {
     let pageNumber = opts.pageNumber;
     let pageSize = opts.pageSize;
 
-    let gameId = $("#gameid").val();
-    let name = $("#name").val();
+    let spId = $("#spid").val();
+    let name = $("#sname").val();
 
-    if (gameId === "" || gameId === undefined) {
-        gameId = "-1";
-    }
-    if (name === "" || name === undefined) {
-        name = "";
-    }
     if (pageNumber === "" || pageNumber === undefined || pageNumber <= 0) {
         pageNumber = null;
     }
     if (pageSize === "" || pageSize === undefined || pageSize <= 0) {
         pageSize = null;
     }
-    let url = "/server/getGameList" +
-        "?gameId=" + gameId +
-        "&name=" + name +
-        "&page=" + pageNumber +
-        "&rows=" + pageSize;
+    if (checkParam(spId)) {
+        spId = -1;
+    }
+    let param = "?spId=" + spId + "&name=" + name + "&page=" + pageNumber + "&rows=" + pageSize;
 
     $.ajax({
-        url: url,
+        url: "/server/getSpList" + param,
         type: "get",
         dataType: "json",
         async: false,
@@ -104,7 +104,7 @@ function loadServerListTab() {
     });
 }
 
-function saveServerType() {
+function saveSpType() {
     if (type === 3) {
         saveServer(3);
     } else if (type === 2) {
@@ -113,20 +113,20 @@ function saveServerType() {
 }
 
 // 打开dialog 添加渠道
-function openServerDialog() {
+function openSpDialog() {
     type = 3;
     resetValue();
-    $("#dlg").dialog("open").dialog("setTitle", "添加游戏");
+    $("#dlg").dialog("open").dialog("setTitle", "添加渠道");
 }
 
 //关闭 添加服务器 对话框
-function closeServerDialog() {
+function closeSpDialog() {
     $("#dlg").dialog("close");
     resetValue();
 }
 
 //打开dialog 修改服务器
-function openServerModifyDialog() {
+function openSpModifyDialog() {
     let dlg = $("#dlg");
     type = 2;
     let selectedRows = $("#dg").datagrid('getSelections');
@@ -135,26 +135,34 @@ function openServerModifyDialog() {
         $.messager.alert("系统提示", "请选择一条要编辑的数据！");
         return;
     }
-    let gameId = row.gameId;
+    let spId = row.spId;
     let name = row.name;
-
+    let parent = row.parent;
+    let state = row.state;
+    let shareLinkUrl = row.shareLinkUrl;
 
     dlg.dialog({
         onOpen: function () {
-            $("#save_gameid").val(gameId);
+            $("#save_spId").val(spId);
             $("#save_name").val(name);
+            $("#save_parent").val(parent);
+            $("#save_state").val(state);
+            $("#save_shareLinkUrl").val(shareLinkUrl);
         }
     });
     dlg.dialog("open").dialog("setTitle", "修改游戏信息");
 }
 
 function resetValue() {
-    $("#save_gameid").val("");
+    $("#save_spId").val("");
     $("#save_name").val("");
+    $("#save_parent").val("");
+    $("#save_state").val("");
+    $("#save_shareLinkUrl").val("");
 }
 
 //删除服务器
-function deleteServer() {
+function deleteSp() {
     type = 1;
     let selectedRows = $("#dg").datagrid('getSelections');
     if (selectedRows.length === 0) {
@@ -167,21 +175,30 @@ function deleteServer() {
     }
 
     let length = selectedRows.length;
-    let gameId = selectedRows[0].gameId;
+
+    let spId = selectedRows[0].spId;
     let name = selectedRows[0].name;
+    let parent = selectedRows[0].parent;
+    let state = selectedRows[0].state;
+    let shareLinkUrl = selectedRows[0].shareLinkUrl;
 
-
-    let url = "/server/gamedata" +
-        "?gameId=" + gameId +
+    let param =
+        "?type=" + type +
+        "&spId=" + spId +
         "&name=" + name +
-        "&type=" + type;
+        "&parent=" + parent +
+        "&state=" + state +
+        "&shareLinkUrl=" + shareLinkUrl
+    ;
+
     $.messager.confirm("系统提示", "您确认要删除这" + "<font color=red>" + length + "</font>" + "条数据吗？",
         function (r) {
             if (r) {
                 $.ajax({
+                    url: "/server/changeSp" + param,
                     type: "get",
                     dataType: "json",
-                    url: url,
+                    async: false,
                     success: function (result) {
                         if (result.resultCode === 501) {
                             relogin();
@@ -189,7 +206,7 @@ function deleteServer() {
                             $.messager.alert(
                                 "系统提示",
                                 "数据已成功删除！");
-                            loadServerListTab();
+                            loadSpListTab();
                         } else {
                             $.messager.alert(
                                 "系统提示",
@@ -206,16 +223,23 @@ function deleteServer() {
 
 //保存
 function saveServer(type) {
-    let gameId = $("#save_gameid").val();
+    let spId = $("#save_spId").val();
     let name = $("#save_name").val();
+    let parent = $("#save_parent").val();
+    let state = $("#save_state").val();
+    let shareLinkUrl = $("#save_shareLinkUrl").val();
 
-    let url = "/server/gamedata" +
-        "?gameId=" + gameId +
+    let param =
+        "?type=" + type +
+        "&spId=" + spId +
         "&name=" + name +
-        "&type=" + type;
+        "&parent=" + parent +
+        "&state=" + state +
+        "&shareLinkUrl=" + shareLinkUrl;
     console.info(url);
+
     $.ajax({
-        url: url,
+        url: "/server/changeSp" + param,
         type: "get",
         dataType: "json",
         async: false,
@@ -227,7 +251,7 @@ function saveServer(type) {
                 $("#dlg").dialog("close");
                 $("#serverTable").datagrid("reload");
                 resetValue();
-                loadServerListTab();
+                loadSpListTab()
             } else {
                 $.messager.alert("系统提示", "操作失败");
                 $("#dlg").dialog("close");

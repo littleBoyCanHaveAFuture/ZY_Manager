@@ -170,6 +170,14 @@ public class AopSurvey {
             case "deleteGame":
             case "addGame":
             case "updateGame":
+            case "getAllSp":
+            case "selectSpByIds":
+            case "getSpById":
+            case "getAllSpByPage":
+            case "getTotalSp":
+            case "updateSp":
+            case "delSp":
+            case "addSp":
                 //文章
             case "findArticle":
             case "getTotalArticle":
@@ -284,6 +292,14 @@ public class AopSurvey {
             case "deleteGame":
             case "addGame":
             case "updateGame":
+            case "getAllSp":
+            case "selectSpByIds":
+            case "getSpById":
+            case "getAllSpByPage":
+            case "getTotalSp":
+            case "updateSp":
+            case "delSp":
+            case "addSp":
                 //文章
             case "findArticle":
             case "getTotalArticle":
