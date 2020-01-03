@@ -251,7 +251,7 @@ function saveServer(type) {
                 $("#dlg").dialog("close");
                 $("#serverTable").datagrid("reload");
                 resetValue();
-                loadSpListTab()
+                loadSpListTab();
             } else {
                 $.messager.alert("系统提示", "操作失败");
                 $("#dlg").dialog("close");
