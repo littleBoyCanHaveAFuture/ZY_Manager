@@ -19,7 +19,7 @@ public class TemplateWorker {
     /**
      * 敏感字
      */
-    public static Set<String> BadWordList;
+    public static HashSet<String> BadWordList;
     /**
      * 禁止登陆的ip
      */
@@ -29,7 +29,7 @@ public class TemplateWorker {
 
     public static boolean hasBad(String org) {
         String s = org.replace(" ", "").replace("　", "");
-        Iterator var2 = BadWordList.iterator();
+        Iterator<String> var2 = BadWordList.iterator();
 
         String badWord;
         do {
@@ -37,7 +37,7 @@ public class TemplateWorker {
                 return false;
             }
 
-            badWord = (String) var2.next();
+            badWord = var2.next();
         } while (!s.contains(badWord));
 
         return true;
@@ -51,18 +51,14 @@ public class TemplateWorker {
     }
 
     public static void addBanIp(String ip) {
-        if (!BanIpList.contains(ip)) {
-            BanIpList.add(ip);
-        }
+        BanIpList.add(ip);
     }
 
     public void init() {
         log.info("------------------TemplateWorker init start-------------------");
-        BadWordList = new HashSet();
+        BadWordList = new HashSet<String>();
         List<String> cacheMapList = dao.selectall();
-        for (String word : cacheMapList) {
-            BadWordList.add(word);
-        }
+        BadWordList.addAll(cacheMapList);
         log.info("------------------TemplateWorker init finished-------------------");
     }
 }

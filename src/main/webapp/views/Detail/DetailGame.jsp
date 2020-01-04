@@ -19,13 +19,13 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/datagrid-export/datagrid-export.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/Detail/tableGame.js"></script>
+            src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
 </head>
 <body style="margin:1px;">
 
@@ -65,7 +65,7 @@
         <input class="easyui-datetimebox" id="save_endTime" name="endTime"
                data-options="required:true,showSeconds:false" style="width:150px">
 
-        <a href="javascript:search()" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:search(1)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>
         <a href="javascript:exportToLocal()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
@@ -81,4 +81,30 @@
 </div>
 
 </body>
+<script type="text/javascript">
+    $(function () {
+        let commonResult = {
+            "日期": "date",
+            "新增创号": "newAddCreateAccount",
+            "新增创角": "newAddCreateRole",
+            "新增创角去除滚服": "newAddCreateRoleRemoveOld",
+            "创角率": "createAccountRate",
+
+            "活跃玩家": "activePlayer",
+            "充值次数": "rechargeTimes",
+            "充值人数": "rechargeNumber",
+            "充值金额(分)": "rechargePayment",
+            "活跃付费率": "activePayRate",
+            "付费ARPU": "paidARPU",
+            "活跃ARPU": "activeARPU",
+            "当日首次付费人数": "nofPayers",
+            "当日首次付费金额(分)": "nofPayment",
+            "注册付费人数": "registeredPayers",
+            "注册付费金额(分)": "registeredPayment",
+            "注册付费ARPU": "registeredPaymentARPU",
+        };
+        initDatagrid(commonResult);
+        initSpGameServer(1);
+    });
+</script>
 </html>

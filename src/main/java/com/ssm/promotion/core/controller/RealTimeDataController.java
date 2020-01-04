@@ -55,7 +55,7 @@ public class RealTimeDataController {
      */
     @RequestMapping(value = "/getPayRecord", method = RequestMethod.POST)
     @ResponseBody
-    public void getServerList(@RequestBody Map<String, Object> param,
+    public void getPayRecord(@RequestBody Map<String, Object> param,
                               HttpServletResponse response) throws Exception {
         System.out.println("getPayRecord:" + param.toString());
 

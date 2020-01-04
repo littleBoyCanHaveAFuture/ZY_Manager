@@ -9,7 +9,7 @@
     <link href="${pageContext.request.contextPath}/css/tab.css" type="text/css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/item.css" type="text/css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/item_do.css" type="text/css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/uploadify.css" type="text/css"></link>
+    <link href="${pageContext.request.contextPath}/css/uploadify.css" type="text/css" rel="stylesheet">
 
     <link rel="stylesheet" type="text/css"
           href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">

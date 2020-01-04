@@ -1,43 +1,9 @@
 $(function () {
     initTableColumns();
-
-    $('#payRecord_startTime').datebox('setValue', formatterDate(new Date(), 0));
-    $('#payRecord_endTime').datebox('setValue', formatterDate(new Date(), 1));
-
-    //初始化内容 下一页按钮
-    let dg = $("#dg");
-    let opts = dg.datagrid('options');
-    let pager = dg.datagrid('getPager');
-    pager.pagination({
-        // pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
-        pageList: [5, 10, 15, 20],//可以设置每页记录条数的列表 　　　　　　　　　　　　
-        // beforePageText: '第',//页数文本框前显示的汉字
-        // afterPageText: '页    共 {pages} 页',
-        // displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
-        onChangePageSize: function () {
-        },
-        onSelectPage: function (pageNum, pageSize) {
-            opts.pageNumber = pageNum;
-            opts.pageSize = pageSize;
-            selectPayRecord();
-        }
-    });
     initSpGameServer(1);
     initSpGameServer(2);
+    initSpGameServer(3);
 });
-
-function formatterDate(date, type) {
-    let day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
-    let month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0" + (date.getMonth() + 1);
-    let hor = date.getHours();
-    let min = date.getMinutes();
-    let sec = (date.getSeconds() > 9) ? date.getSeconds() : "0" + date.getSeconds();
-    if (type === 0) {
-        return date.getFullYear() + '-' + month + '-' + "01" + " " + "00" + ":" + "00";
-    } else {
-        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
-    }
-}
 
 function initTableColumns() {
     let activeColumns = [];
@@ -74,30 +40,46 @@ function initTableColumns() {
             column["field"] = value;
             column["title"] = index;
             column["align"] = 'center';
-            // column["width"] = 50;
-
             activeColumns.push(column);
         }
     );
 
     let dg = $("#dg");
-    let opts = dg.datagrid('options');
-    let pager = dg.datagrid('getPager');
 
     dg.datagrid({
-        // frozenColumns: [[]],
+        frozenColumns: [[]],
         columns: [
             activeColumns
         ],
         striped: true
         // nowrap: true,
-    })
+    });
     //.datagrid('loadData', ttt.bodys);
+    //初始化内容 下一页按钮
+
+    let opts = getDatagridOptions(dg);
+    let pager = dg.datagrid('getPager');
+    pager.pagination({
+        // pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
+        pageList: [5, 10, 15, 20],//可以设置每页记录条数的列表 　　　　　　　　　　　　
+        // beforePageText: '第',//页数文本框前显示的汉字
+        // afterPageText: '页    共 {pages} 页',
+        // displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+        onChangePageSize: function () {
+        },
+        onSelectPage: function (pageNum, pageSize) {
+            opts.pageNumber = pageNum;
+            opts.pageSize = pageSize;
+            selectPayRecord();
+        }
+    });
+    $('#payRecord_startTime').datebox('setValue', formatterDate(new Date(), 0));
+    $('#payRecord_endTime').datebox('setValue', formatterDate(new Date(), 1));
 }
 
 function selectPayRecord() {
     let dg = $("#dg");
-    let opts = dg.datagrid('options');
+    let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
 
     let pageNumber = opts.pageNumber;
@@ -177,84 +159,6 @@ function selectPayRecord() {
     });
 }
 
-function loadPayRecord() {
-
-}
-
 function exportPayRecord() {
     $('#dg').datagrid('toExcel', 'dg.xls'); // export to excel
-}
-
-function initSpGameServer(type) {
-    let gameId = $('#save_gameId').val();
-    let serverId = $("#save_serverId").val();
-    let spId = $("#save_spId").val();
-
-    let data = {
-        "gameId": gameId,
-        "serverId": serverId,
-        "spId": spId,
-        "type": type
-    };
-
-    $.ajax({
-        //获取下拉
-        url: "/server/getDistinctServerInfo",
-        type: "post",
-        data: data,
-        async: false,
-        dataType: "json",
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                // console.log(result);
-                if (type === 1) {
-                    let select_spId = $("#save_spId");
-                    select_spId.find("option").remove();
-                    select_spId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                } else if (type === 2) {
-                    let select_gameId = $("#save_gameId");
-                    select_gameId.find("option").remove();
-                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        let gameid = result.rows[res].gameId;
-                        let name = result.rows[res].name + "\t" + gameid;
-                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
-                    }
-                } else if (type === 3) {
-                    let select_serverId = $("#save_serverId");
-                    select_serverId.find("option").remove();
-                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                }
-
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
-        }
-    });
-}
-
-
-//登录超时 重新返回到登录界面
-function relogin() {
-    // 登录失效
-    console.log("登录失效");
-    $.messager.confirm(
-        "系统提示",
-        "登录超时！",
-        function (r) {
-            if (r) {
-                delCookie("userName");
-                delCookie("roleName");
-                parent.location.href = "../../login.jsp";
-            }
-        });
 }

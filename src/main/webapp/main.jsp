@@ -35,6 +35,7 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
+
 <body class="easyui-layout" onload="checkCookies()">
 
 <div region="north" style="height: 78px;background-color: #ffff">
@@ -44,8 +45,8 @@
             </td>
             <td valign="bottom" style="font-size: 20px;color:#8B8B8B;font-family: '楷体',serif;"
                 align="right" width="50%">
-                <font size="3">&nbsp;&nbsp;<strong>当前用户：</strong><%=username%>
-                </font>【<%=roleName%>】
+                <span style="font-size: medium; ">&nbsp;&nbsp;<strong>当前用户：</strong><%=username%>
+                </span>[<%=roleName%>]
             </td>
         </tr>
         <tr>
@@ -64,20 +65,19 @@
 
 <div region="center">
     <div class="easyui-tabs" fit="true" border="false" id="tabs">
-        <div title="首页" data-options="iconCls:'icon-home'">
-            <img src="${pageContext.request.contextPath}/images/home.jpg"
-                 alt="">
+        <div title="首页" data-options="iconCls:'icon-home'" align="center" class="ttt"
+             style="width:100%;height:100%;background: url(${pageContext.request.contextPath}/images/home.jpg) no-repeat center top;background-size: 100%;">
+
         </div>
     </div>
 </div>
 
-<div region="west" style="width: 200px;height:500px;" title="导航菜单"
-     split="true">
+<div region="west" style="width: 200px;height:500px;" title="导航菜单" split="true">
     <div id="aa" class="easyui-accordion" data-options="multiple:true">
         <div title="测试----->"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
              style="padding: 10px;height:10px;">
-            <a href="javascript:openTab('注册、登录、支付','test/test.jsp','icon-wenzhang')"
+            <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">测试
@@ -150,7 +150,7 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">服务器列表
             </a>
-            <a href="javascript:openTab('服务器列表','server/game_list.jsp','icon-wenzhang')"
+            <a href="javascript:openTab('游戏列表','server/game_list.jsp','icon-wenzhang')"
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">游戏列表
@@ -178,13 +178,9 @@
 <script type="text/javascript">
     checkCookies();
     let url;
-    // $('#aa').accordion({
-    //     multiple: true,
-    //     selected: true
-    // });
 
     function addTab(url, text, iconCls) {
-        var content = "<iframe frameborder=0 scrolling='auto' style='width:100%;height:100%' " +
+        let content = "<iframe frameborder=0 scrolling='auto' style='width:100%;height:100%' " +
             "src='${pageContext.request.contextPath}/views/" + url + "'></iframe>";
         $("#tabs").tabs("add", {
             title: text,
@@ -201,13 +197,14 @@
      * @param icon  选项卡图标
      */
     function openTab(text, url, icon) {
+        let tab = $('#tabs');
         //判断当前选项卡是否存在
-        if ($('#tabs').tabs('exists', text)) {
-            $("#tabs").tabs("close", text);
+        if (tab.tabs('exists', text)) {
+            // tab.tabs("close", text);
             // addTab(url, text, iconCls);
             // $("#tabs").tabs("select", text);
             //如果存在 显示
-            $("#tabs").tabs("select", text);
+            tab.tabs("select", text);
         } else {
             //如果不存在 则新建一个
             addTab(url, text, icon);
@@ -226,5 +223,10 @@
                 });
     }
 </script>
+
+<style type="text/css">
+
+</style>
+
 </body>
 </html>

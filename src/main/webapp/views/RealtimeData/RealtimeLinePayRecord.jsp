@@ -25,6 +25,8 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/echarts.js"></script>
     <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
+    <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/RealtimeData/RealtimeLinePayRecord.js"></script>
 </head>
 <body>
@@ -75,5 +77,24 @@
 
 </div>
 </body>
+<script type="text/javascript">
+    let myChart;
+    $(function () {
+        initSpGameServer(1);
+        initSpGameServer(2);
+        initSpGameServer(3);
+        getLinesByDate(0);
+    });
 
+    function initChart() {
+        if (myChart != null && myChart !== "" && myChart !== undefined) {
+            myChart.dispose();
+        }
+        // 基于准备好的dom，初始化echarts实例
+        myChart = echarts.init(document.getElementById('main'));
+
+        $('#save_startTime').datebox('setValue', formatterDate(new Date(new Date().getTime() - 60 * 60 * 1000), 1));
+        $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
+    }
+</script>
 </html>

@@ -53,7 +53,7 @@ public class ServerController {
                               Integer serverId,
                               Integer spId,
                               HttpServletResponse response) throws Exception {
-        System.out.println("getServerList:");
+        log.info("getServerList:");
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
@@ -82,7 +82,6 @@ public class ServerController {
 
         ResponseUtil.write(response, result);
 
-        System.out.println("request: serverInfo/getServerList , map: " + result.toString());
         log.info("request: serverInfo/getServerList , map: " + map.toString());
     }
 
@@ -178,7 +177,7 @@ public class ServerController {
      */
     @RequestMapping(value = "/gamedata", method = RequestMethod.GET)
     @ResponseBody
-    public void deletegame(Integer gameId,
+    public void deleteGame(Integer gameId,
                            String name,
                            Integer type, HttpServletResponse response) throws Exception {
         System.out.println("deletegame:");
@@ -270,27 +269,29 @@ public class ServerController {
     public void getDistinctServerInfo(Integer spId, Integer gameId, Integer serverId,
                                       Integer type,
                                       HttpServletResponse response) throws Exception {
-//        System.out.println("getDistinctServerInfo:");
-
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
             return;
         }
+
         Map<String, Object> map = new HashMap<>(6);
         map.put("spId", spId);
         map.put("gameId", gameId);
         map.put("serverId", serverId);
 
-        int size = 0;
+        int size;
         List<Integer> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
         serverInfos = serverInfos.stream().sorted(Integer::compareTo).collect(Collectors.toList());
 
         JSONArray rows;
-        if (type == 2) {
+        if (type == 1) {
+            rows = JSONArray.fromObject(serverInfos);
+            size = serverInfos.size();
+        } else if (type == 2) {
             //选择已经有的服务器名称
             Map<String, Object> gamemap = new HashMap<>(1);
-            map.put("gameId", -1);
+            map.replace("gameId", -1);
             List<GameName> gameNameList = gameService.getGameList(gamemap, userId);
 
             Iterator<GameName> it = gameNameList.iterator();
@@ -314,57 +315,6 @@ public class ServerController {
 
         ResponseUtil.write(response, result);
 
-        System.out.println("request: server/getDistinctServerInfo , map: " + result.toString());
-        log.info("request: server/getDistinctServerInfo , map: " + result.toString());
-    }
-
-    /**
-     * 查询不同的区服和渠道
-     */
-    @RequestMapping(value = "/getDistinctServerInfoAll", method = RequestMethod.POST)
-    public void getDistinctServerInfoAll(Integer spId, Integer gameId, Integer serverId,
-                                         Integer type,
-                                         HttpServletResponse response) throws Exception {
-//        System.out.println("getDistinctServerInfoAll:");
-
-        Map<String, Object> map = new HashMap<>(6);
-        map.put("spId", spId);
-        map.put("gameId", gameId);
-        map.put("serverId", serverId);
-
-        int size = 0;
-        List<Integer> serverInfos = serverService.getDistinctServerInfo(map, type, 0);
-        serverInfos = serverInfos.stream().sorted(Integer::compareTo).collect(Collectors.toList());
-
-        JSONArray rows;
-        if (type == 2) {
-            //选择已经有的服务器名称
-            Map<String, Object> gamemap = new HashMap<>(1);
-            map.put("gameId", -1);
-            List<GameName> gameNameList = gameService.getGameList(gamemap, 0);
-
-            Iterator<GameName> it = gameNameList.iterator();
-            while (it.hasNext()) {
-                GameName gameName = it.next();
-                if (!serverInfos.contains(gameName.getGameId())) {
-                    it.remove();
-                }
-            }
-            rows = JSONArray.fromObject(gameNameList);
-            size = gameNameList.size();
-        } else {
-            rows = JSONArray.fromObject(serverInfos);
-            size = serverInfos.size();
-        }
-
-        JSONObject result = new JSONObject();
-        result.put("rows", rows.toString());
-        result.put("total", size);
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-
-        ResponseUtil.write(response, result);
-
-        System.out.println("request: server/getDistinctServerInfo , map: " + result.toString());
         log.info("request: server/getDistinctServerInfo , map: " + result.toString());
     }
 

@@ -20,9 +20,9 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/test/test.js"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/test/zySdkOffcial.js"></script>
+            src="${pageContext.request.contextPath}/js/zySdkOffcial.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">
@@ -150,5 +150,13 @@
 
 
 </body>
+<script type="text/javascript">
+    $(function () {
+        initSpGameServer(1);
+        initSpGameServer(2);
+        initSpGameServer(3);
+    });
+
+</script>
 
 </html>

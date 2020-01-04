@@ -20,11 +20,13 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/datagrid-export/datagrid-export.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/RealtimeData/PayRecord.js"></script>
 </head>
@@ -58,7 +60,7 @@
 
         <label for="save_serverId"></label>
         <span style="color: blue; margin-left:50px">区服:</span>
-        <select title="选择区服" id="save_serverId" name="serverId" hidden="true">
+        <select title="选择区服" id="save_serverId" name="serverId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
@@ -85,9 +87,8 @@
                data-options="required:true,showSeconds:false" style="width:150px">
 
         <a href="javascript:selectPayRecord()" class="easyui-linkbutton" style="margin-left:50px"
-           iconCls=" icon-search" plain="true">查询统计数据</a>
-        <a href="javascript:loadPayRecord()" class="easyui-linkbutton" style="float: right"
-           iconCls="icon-save" plain="true">查询全部</a>
+           iconCls=" icon-search" plain="true">查询订单</a>
+
         <a href="javascript:exportPayRecord()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
@@ -95,4 +96,5 @@
 </div>
 
 </body>
+
 </html>

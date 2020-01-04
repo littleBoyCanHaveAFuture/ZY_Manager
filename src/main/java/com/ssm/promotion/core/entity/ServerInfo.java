@@ -6,7 +6,9 @@ import java.util.ArrayList;
 
 @Data
 public class ServerInfo {
-
+    /**
+     * 主键
+     */
     private Integer id;
     /**
      * 游戏id

@@ -1,57 +1,30 @@
 // 初始化内容 先加载完列表
 $(function () {
-    let activeColumns = [];
+    let dg = $("#dg");
     let commonResult = {
         "游戏id": "gameId",
         "游戏名称": "name",
     };
-
+    let activeColumns = [];
     $.each(commonResult, function (index, value) {
         let column = {};
-        column["field"] = value;
         column["title"] = index;
+        column["field"] = value;
         column["align"] = 'center';
-        // column["width"] = 50;
         activeColumns.push(column);
     });
-
-    let dg = $("#dg");
-
-    dg.datagrid({
-        pagination: true, //分页显示
-        loadMsg: "正在加载，请稍后...",
-        frozenColumns: [[]], columns: [
-            activeColumns
-        ],
-    });
-    let opts = dg.datagrid('options');
-    let pager = dg.datagrid('getPager');
-    pager.pagination({
-        pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页
-        pageList: [5, 10, 15, 50],//可以设置每页记录条数的列表 　　　　　　　　　　　　 //pageSize都会变回设置的值
-        beforePageText: '第',//页数文本框前显示的汉字
-        afterPageText: '页    共 {pages} 页',
-        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
-        onChangePageSize: function () {
-        },
-        onSelectPage: function (pageNum, pageSize) {
-            opts.pageNumber = pageNum;
-            opts.pageSize = pageSize;
-            loadServerListTab();
-        }
-    });
-
+    initDataGrid(dg, activeColumns, loadServerListTab());
     loadServerListTab();
 });
 
-var url = "${pageContext.request.contextPath}/server/getServerList";
-var method;
-var type;
+let method;
+let t_type;
 
 //查询游戏
 function loadServerListTab() {
     let dg = $("#dg");
-    let opts = dg.datagrid('options');
+    let opts = getDatagridOptions(dg);
+    // let opts = dg.datagrid('options');
     let pager = dg.datagrid('getPager');
 
     let pageNumber = opts.pageNumber;
@@ -72,14 +45,14 @@ function loadServerListTab() {
     if (pageSize === "" || pageSize === undefined || pageSize <= 0) {
         pageSize = null;
     }
-    let url = "/server/getGameList" +
+    let param =
         "?gameId=" + gameId +
         "&name=" + name +
         "&page=" + pageNumber +
         "&rows=" + pageSize;
 
     $.ajax({
-        url: url,
+        url: "/server/getGameList" + param,
         type: "get",
         dataType: "json",
         async: false,
@@ -105,16 +78,16 @@ function loadServerListTab() {
 }
 
 function saveServerType() {
-    if (type === 3) {
+    if (t_type === 3) {
         saveServer(3);
-    } else if (type === 2) {
+    } else if (t_type === 2) {
         saveServer(2);
     }
 }
 
 // 打开dialog 添加渠道
 function openServerDialog() {
-    type = 3;
+    t_type = 3;
     resetValue();
     $("#dlg").dialog("open").dialog("setTitle", "添加游戏");
 }
@@ -128,7 +101,7 @@ function closeServerDialog() {
 //打开dialog 修改服务器
 function openServerModifyDialog() {
     let dlg = $("#dlg");
-    type = 2;
+    t_type = 2;
     let selectedRows = $("#dg").datagrid('getSelections');
     let row = selectedRows[0];
     if (selectedRows.length !== 1) {
@@ -155,7 +128,7 @@ function resetValue() {
 
 //删除服务器
 function deleteServer() {
-    type = 1;
+    t_type = 1;
     let selectedRows = $("#dg").datagrid('getSelections');
     if (selectedRows.length === 0) {
         $.messager.alert("系统提示", "请选择要删除的数据！");
@@ -171,17 +144,15 @@ function deleteServer() {
     let name = selectedRows[0].name;
 
 
-    let url = "/server/gamedata" +
-        "?gameId=" + gameId +
-        "&name=" + name +
-        "&type=" + type;
+    let param = "?gameId=" + gameId + "&name=" + name + "&type=" + t_type;
+
     $.messager.confirm("系统提示", "您确认要删除这" + "<font color=red>" + length + "</font>" + "条数据吗？",
         function (r) {
             if (r) {
                 $.ajax({
                     type: "get",
                     dataType: "json",
-                    url: url,
+                    url: "/server/gamedata" + param,
                     success: function (result) {
                         if (result.resultCode === 501) {
                             relogin();
@@ -209,13 +180,10 @@ function saveServer(type) {
     let gameId = $("#save_gameid").val();
     let name = $("#save_name").val();
 
-    let url = "/server/gamedata" +
-        "?gameId=" + gameId +
-        "&name=" + name +
-        "&type=" + type;
-    console.info(url);
+    let param = "?gameId=" + gameId + "&name=" + name + "&type=" + type;
+
     $.ajax({
-        url: url,
+        url: "/server/gamedata" + param,
         type: "get",
         dataType: "json",
         async: false,

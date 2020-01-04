@@ -1,5 +1,6 @@
 package com.ssm.promotion.core.service.impl;
 
+import com.ssm.promotion.core.dao.GameNameDao;
 import com.ssm.promotion.core.dao.ServerListDao;
 import com.ssm.promotion.core.dao.SpListDao;
 import com.ssm.promotion.core.entity.ServerInfo;
@@ -23,7 +24,8 @@ public class ServerListServiceImpl implements ServerListService {
     private ServerListDao serverListdao;
     @Resource
     private SpListDao spDao;
-
+    @Resource
+    private GameNameDao nameDao;
 
     @Override
     public List<ServerInfo> getServerList(Map<String, Object> map, Integer userId) {

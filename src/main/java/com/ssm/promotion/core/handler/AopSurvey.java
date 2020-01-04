@@ -2,14 +2,12 @@ package com.ssm.promotion.core.handler;
 
 
 import com.ssm.promotion.core.entity.User;
-import com.ssm.promotion.core.service.UserService;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;
 import com.ssm.promotion.core.util.StringUtil;
 import com.ssm.promotion.core.util.enums.FunctionType;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +32,6 @@ public class AopSurvey {
         allJumpFuncMethodList.add("getGameList");
         allJumpFuncMethodList.add("selectLoginUrl");
     }
-
-    @Resource
-    UserService service;
 
     /**
      * 转换int列表
@@ -88,44 +83,57 @@ public class AopSurvey {
         }
 
         Integer userId = (Integer) obj[len];
+        if (userId == -1) {
+            return;
+        }
+
         User user = UserServiceImpl.getUser(userId);
         log.info("AopSurvey:  employeeId=" + userId + " operation >>>> " + signature);
         if (user == null) {
             throw new RuntimeException("登陆超时,请重新登陆!!");
         }
+        //用户权限
         List<Integer> allFuncsList = new ArrayList<>();
         String addFunStr = user.getFunc();
-        if (addFunStr != null && !"".equals(addFunStr)) {
+        if (addFunStr != null && !addFunStr.isEmpty()) {
             allFuncsList = convertIntList(addFunStr);
         }
-        boolean isFuncs = false;
-        switch (checkType(signature, allFuncsList)) {
-            case NONE:
-                break;
-            case GameDetail:
-                isFuncs = containGameDetail(signature, allFuncsList);
-                break;
-            case PlayerInfo:
-                break;
-            case DataAnalysis:
-                break;
-            case LiveData:
-                isFuncs = containLiveData(signature, allFuncsList);
-                break;
-            case GMFunction:
-                break;
-            case ServerManagement:
-                isFuncs = containServerList(signature, allFuncsList);
-                break;
-            case AccountManagement:
-                isFuncs = containAccount(signature, allFuncsList);
-                break;
-            default:
-                break;
+        FunctionType type = FunctionType.NONE;
+        boolean hasFuncs = false;
+        if (allFuncsList != null) {
+            type = checkType(signature, allFuncsList);
+            switch (type) {
+                case NONE:
+
+                    break;
+                case GameDetail:
+                    hasFuncs = containGameDetail(signature, allFuncsList);
+                    break;
+                case PlayerInfo:
+
+                    break;
+                case DataAnalysis:
+
+                    break;
+                case LiveData:
+                    hasFuncs = containLiveData(signature, allFuncsList);
+                    break;
+                case GMFunction:
+
+                    break;
+                case ServerManagement:
+                    hasFuncs = containServerList(signature, allFuncsList);
+                    break;
+                case AccountManagement:
+                    hasFuncs = containAccount(signature, allFuncsList);
+                    break;
+                default:
+                    break;
+            }
         }
 
-        log.info("AopSurvey:  employeeId=" + userId + " operation >>>> " + signature);
-        this.funcThrowRuntimeException(isFuncs, signature);
+        log.info("AopSurvey: type = " + type.getName() + "\thasFuncs = " + hasFuncs);
+        this.funcThrowRuntimeException(hasFuncs, signature);
     }
 
 

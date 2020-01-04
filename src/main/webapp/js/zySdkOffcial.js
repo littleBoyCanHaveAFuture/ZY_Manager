@@ -11,8 +11,8 @@ md5Script.setAttribute('src', 'http://111.231.244.198:8080/try/login/md5.js');
 let head = document.getElementsByTagName('head')[0];
 head.appendChild(md5Script);
 
-const t_url = "http://47.101.44.31";
-// const t_url = "http://localhost";
+// const t_url = "http://47.101.44.31";
+const t_url = "http://localhost";
 const t_domain = t_url + ":8080/ttt";
 const t_domainPay = t_url + ":80/payInfo";
 const keys = ["createRole", "levelUp", "enterServer"];

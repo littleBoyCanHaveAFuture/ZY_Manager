@@ -1,6 +1,5 @@
 // 初始化内容 先加载完列表
 $(function () {
-    let activeColumns = [];
     let commonResult = {
         "编号": "id",
         "游戏id": "gameId",
@@ -11,42 +10,22 @@ $(function () {
         "md5秘钥": "secertKey",
         "登录地址": "loginUrl",
     };
-
+    let activeColumns = [];
     $.each(commonResult, function (index, value) {
         let column = {};
-        column["field"] = value;
         column["title"] = index;
+        column["field"] = value;
         column["align"] = 'center';
-        // column["width"] = 50;
-        if(value==="loginUrl"){
+        if (value === "loginUrl") {
             column["width"] = 300;
         }
         activeColumns.push(column);
     });
+
     let dg = $("#serverTable");
-    dg.datagrid({
-        pagination: true, //分页显示
-        loadMsg: "正在加载，请稍后...",
-        frozenColumns: [[]], columns: [
-            activeColumns
-        ],
-    });
-    let opts = dg.datagrid('options');
-    let pager = dg.datagrid('getPager');
-    pager.pagination({
-        // pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页
-        pageList: [5, 10, 15],//可以设置每页记录条数的列表 　　　　　　　　　　　　 //pageSize都会变回设置的值
-        beforePageText: '第',//页数文本框前显示的汉字
-        afterPageText: '页    共 {pages} 页',
-        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
-        onChangePageSize: function () {
-        },
-        onSelectPage: function (pageNum, pageSize) {
-            opts.pageNumber = pageNum;
-            opts.pageSize = pageSize;
-            loadServerListTab();
-        }
-    });
+    initDataGrid(dg, activeColumns, loadServerListTab());
+
+    let opts = getDatagridOptions(dg);
 
     initFirstPage();
     initSelectList();
@@ -55,14 +34,14 @@ $(function () {
     initSpGameServer(3);
 });
 
-var url = "${pageContext.request.contextPath}/server/getServerList";
+let t_url = "/server/getServerList";
 var method;
 var type;
 
 //查询服务器
 function loadServerListTab() {
     let dg = $("#serverTable");
-    let opts = dg.datagrid('options');
+    let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
 
     let pageNumber = opts.pageNumber;
@@ -87,7 +66,7 @@ function loadServerListTab() {
         pageSize = null;
     }
     $.ajax({
-        url: "/server/getServerList",
+        url: t_url,
         type: "post",
         data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": pageNumber, "rows": pageSize},
         dataType: "json",
@@ -307,7 +286,7 @@ function initFirstPage() {
     let serverId = null;
     let spId = null;
     $.ajax({
-        url: "/server/getServerList",
+        url: t_url,
         type: "post",
         data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": 1, "rows": 10},
         dataType: "json",

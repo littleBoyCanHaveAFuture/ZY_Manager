@@ -6,7 +6,7 @@ $(function () {
 });
 
 function initTableColumns() {
-    let activeColumns = [];
+
     let commonResult = {
         "渠道id": "spId",
         "父渠道": "parent",
@@ -15,6 +15,7 @@ function initTableColumns() {
         "分享链接": "shareLinkUrl",
     };
 
+    let activeColumns = [];
     $.each(commonResult, function (index, value) {
         let column = {};
         column["field"] = value;
@@ -26,29 +27,7 @@ function initTableColumns() {
 
     let dg = $("#dg");
 
-    dg.datagrid({
-        pagination: true, //分页显示
-        loadMsg: "正在加载，请稍后...",
-        frozenColumns: [[]], columns: [
-            activeColumns
-        ],
-    });
-    let opts = dg.datagrid('options');
-    let pager = dg.datagrid('getPager');
-    pager.pagination({
-        pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页
-        pageList: [5, 10, 15, 50],//可以设置每页记录条数的列表 　　　　　　　　　　　　 //pageSize都会变回设置的值
-        beforePageText: '第',//页数文本框前显示的汉字
-        afterPageText: '页    共 {pages} 页',
-        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
-        onChangePageSize: function () {
-        },
-        onSelectPage: function (pageNum, pageSize) {
-            opts.pageNumber = pageNum;
-            opts.pageSize = pageSize;
-            loadSpListTab();
-        }
-    });
+    initDataGrid(dg, activeColumns, loadSpListTab());
 }
 
 let url = "/server/getSpList";
@@ -58,7 +37,7 @@ let type;
 //查询游戏
 function loadSpListTab() {
     let dg = $("#dg");
-    let opts = dg.datagrid('options');
+    let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
 
     let pageNumber = opts.pageNumber;
