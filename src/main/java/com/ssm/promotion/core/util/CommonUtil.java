@@ -2,31 +2,35 @@ package com.ssm.promotion.core.util;
 
 
 import com.ssm.promotion.core.util.enums.OSType;
+import org.apache.log4j.Logger;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * @author song minghua
+ */
 public class CommonUtil {
     public static final OSType OS_TYPE;
+    private static final Logger log = Logger.getLogger(CommonUtil.class);
     private static final int BUFFER_SIZE = 2048;
+
+    static {
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("windows")) {
+            OS_TYPE = OSType.Windows;
+        } else if (osName.contains("android")) {
+            OS_TYPE = OSType.Android;
+        } else if (osName.contains("linux")) {
+            OS_TYPE = OSType.Linux;
+        } else {
+            OS_TYPE = OSType.IOS;
+        }
+
+    }
 
     public CommonUtil() {
     }
@@ -52,7 +56,7 @@ public class CommonUtil {
             bytes = os.toByteArray();
             os.close();
         } catch (Exception var3) {
-//            LogUtil.exception(var3);
+            log.info(var3);
         }
 
         return bytes;
@@ -233,19 +237,5 @@ public class CommonUtil {
         }
 
         return newMap;
-    }
-
-    static {
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("windows")) {
-            OS_TYPE = OSType.Windows;
-        } else if (osName.contains("android")) {
-            OS_TYPE = OSType.Android;
-        } else if (osName.contains("linux")) {
-            OS_TYPE = OSType.Linux;
-        } else {
-            OS_TYPE = OSType.IOS;
-        }
-
     }
 }

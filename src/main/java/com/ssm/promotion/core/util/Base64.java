@@ -7,20 +7,24 @@
 package com.ssm.promotion.core.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * @author song minghua
+ */
 public final class Base64 {
 
-    static private final int     BASELENGTH           = 128;
-    static private final int     LOOKUPLENGTH         = 64;
-    static private final int     TWENTYFOURBITGROUP   = 24;
-    static private final int     EIGHTBIT             = 8;
-    static private final int     SIXTEENBIT           = 16;
-    static private final int     FOURBYTE             = 4;
-    static private final int     SIGN                 = -128;
-    static private final char    PAD                  = '=';
-    static private final boolean fDebug               = false;
-    static final private byte[]  base64Alphabet       = new byte[BASELENGTH];
-    static final private char[]  lookUpBase64Alphabet = new char[LOOKUPLENGTH];
+    static private final int BASELENGTH = 128;
+    static private final int LOOKUPLENGTH = 64;
+    static private final int TWENTYFOURBITGROUP = 24;
+    static private final int EIGHTBIT = 8;
+    static private final int SIXTEENBIT = 16;
+    static private final int FOURBYTE = 4;
+    static private final int SIGN = -128;
+    static private final char PAD = '=';
+    static private final boolean boolDebug = false;
+    static final private byte[] base64Alphabet = new byte[BASELENGTH];
+    static final private char[] lookUpBase64Alphabet = new char[LOOKUPLENGTH];
 
     static {
         for (int i = 0; i < BASELENGTH; ++i) {
@@ -88,15 +92,13 @@ public final class Base64 {
         int fewerThan24bits = lengthDataBits % TWENTYFOURBITGROUP;
         int numberTriplets = lengthDataBits / TWENTYFOURBITGROUP;
         int numberQuartet = fewerThan24bits != 0 ? numberTriplets + 1 : numberTriplets;
-        char encodedData[] = null;
-
-        encodedData = new char[numberQuartet * 4];
+        char[] encodedData = new char[numberQuartet * 4];
 
         byte k = 0, l = 0, b1 = 0, b2 = 0, b3 = 0;
 
         int encodedIndex = 0;
         int dataIndex = 0;
-        if (fDebug) {
+        if (boolDebug) {
             System.out.println("number of triplets = " + numberTriplets);
         }
 
@@ -105,7 +107,7 @@ public final class Base64 {
             b2 = binaryData[dataIndex++];
             b3 = binaryData[dataIndex++];
 
-            if (fDebug) {
+            if (boolDebug) {
                 System.out.println("b1= " + b1 + ", b2= " + b2 + ", b3= " + b3);
             }
 
@@ -116,7 +118,7 @@ public final class Base64 {
             byte val2 = ((b2 & SIGN) == 0) ? (byte) (b2 >> 4) : (byte) ((b2) >> 4 ^ 0xf0);
             byte val3 = ((b3 & SIGN) == 0) ? (byte) (b3 >> 6) : (byte) ((b3) >> 6 ^ 0xfc);
 
-            if (fDebug) {
+            if (boolDebug) {
                 System.out.println("val2 = " + val2);
                 System.out.println("k4   = " + (k << 4));
                 System.out.println("vak  = " + (val2 | (k << 4)));
@@ -132,7 +134,7 @@ public final class Base64 {
         if (fewerThan24bits == EIGHTBIT) {
             b1 = binaryData[dataIndex];
             k = (byte) (b1 & 0x03);
-            if (fDebug) {
+            if (boolDebug) {
                 System.out.println("b1=" + b1);
                 System.out.println("b1<<2 = " + (b1 >> 2));
             }
@@ -176,7 +178,8 @@ public final class Base64 {
         int len = removeWhiteSpace(base64Data);
 
         if (len % FOURBYTE != 0) {
-            return null;//should be divisible by four
+            //should be divisible by four
+            return null;
         }
 
         int numberQuadruple = (len / FOURBYTE);
@@ -185,20 +188,20 @@ public final class Base64 {
             return new byte[0];
         }
 
-        byte decodedData[] = null;
+        byte[] decodedData = new byte[(numberQuadruple) * 3];
         byte b1 = 0, b2 = 0, b3 = 0, b4 = 0;
         char d1 = 0, d2 = 0, d3 = 0, d4 = 0;
 
         int i = 0;
         int encodedIndex = 0;
         int dataIndex = 0;
-        decodedData = new byte[(numberQuadruple) * 3];
+
 
         for (; i < numberQuadruple - 1; i++) {
 
             if (!isData((d1 = base64Data[dataIndex++])) || !isData((d2 = base64Data[dataIndex++]))
-                || !isData((d3 = base64Data[dataIndex++]))
-                || !isData((d4 = base64Data[dataIndex++]))) {
+                    || !isData((d3 = base64Data[dataIndex++]))
+                    || !isData((d4 = base64Data[dataIndex++]))) {
                 return null;
             }//if found "no data" just return null
 
@@ -213,7 +216,8 @@ public final class Base64 {
         }
 
         if (!isData((d1 = base64Data[dataIndex++])) || !isData((d2 = base64Data[dataIndex++]))) {
-            return null;//if found "no data" just return null
+            //if found "no data" just return null
+            return null;
         }
 
         b1 = base64Alphabet[d1];
@@ -221,9 +225,11 @@ public final class Base64 {
 
         d3 = base64Data[dataIndex++];
         d4 = base64Data[dataIndex++];
-        if (!isData((d3)) || !isData((d4))) {//Check if they are PAD characters
+        //Check if they are PAD characters
+        if (!isData((d3)) || !isData((d4))) {
             if (isPad(d3) && isPad(d4)) {
-                if ((b2 & 0xf) != 0)//last 4 bits should be zero
+                //last 4 bits should be zero
+                if ((b2 & 0xf) != 0)
                 {
                     return null;
                 }
@@ -233,7 +239,8 @@ public final class Base64 {
                 return tmp;
             } else if (!isPad(d3) && isPad(d4)) {
                 b3 = base64Alphabet[d3];
-                if ((b3 & 0x3) != 0)//last 2 bits should be zero
+                //last 2 bits should be zero
+                if ((b3 & 0x3) != 0)
                 {
                     return null;
                 }
@@ -257,27 +264,25 @@ public final class Base64 {
         return decodedData;
     }
 
-    public static String encode(String s, String encode){
-        try{
+    public static String encode(String s, String encode) {
+        try {
 
             return encode(s.getBytes(Charset.forName(encode)));
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return "";
     }
 
-    public static String decode(String s)
-    {
-
-        byte buf[];
+    public static String decode(String s) {
+        byte[] buf;
         try {
             buf = decode2Bytes(s);
 
-            s=new String(buf,"UTF-8");
-            s=s.replaceAll("[\\n|\\r]","");
+            s = new String(buf, StandardCharsets.UTF_8);
+            s = s.replaceAll("[\\n|\\r]", "");
         } catch (Exception e) {
             e.printStackTrace();
             return "";
@@ -288,8 +293,8 @@ public final class Base64 {
     /**
      * remove WhiteSpace from MIME containing encoded Base64 data.
      *
-     * @param data  the byte array of base64 data (with WS)
-     * @return      the new length
+     * @param data the byte array of base64 data (with WS)
+     * @return the new length
      */
     private static int removeWhiteSpace(char[] data) {
         if (data == null) {
@@ -306,8 +311,8 @@ public final class Base64 {
         }
         return newSize;
     }
-    
-    public static void main(String[] args) throws Exception  {
-    	System.out.println(Base64.decode("MTIzMTIzIUAjIUAjISNAISM="));
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(Base64.decode("MTIzMTIzIUAjIUAjISNAISM="));
     }
 }

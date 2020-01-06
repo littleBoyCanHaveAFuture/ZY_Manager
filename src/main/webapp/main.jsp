@@ -145,11 +145,6 @@
         <div title="服务器管理"
              data-options="selected:true,iconCls:'icon-wenzhangs'"
              style="padding: 10px;height:10px;">
-            <a href="javascript:openTab('服务器列表','server/server_list.jsp','icon-wenzhang')"
-               class="easyui-linkbutton"
-               data-options="plain:true,iconCls:'icon-wenzhang'"
-               style="width: 150px;">服务器列表
-            </a>
             <a href="javascript:openTab('游戏列表','server/game_list.jsp','icon-wenzhang')"
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
@@ -160,11 +155,11 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">渠道列表
             </a>
-            <%--            <a href="javascript:openTab('踢人下线','server/server_kickout.jsp','icon-wenzhang')"--%>
-            <%--               class="easyui-linkbutton"--%>
-            <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-            <%--               style="width: 150px;">踢人下线--%>
-            <%--            </a>--%>
+            <a href="javascript:openTab('服务器列表','server/server_list.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">服务器列表
+            </a>
         </div>
 
         <div title="账号管理" data-options="iconCls:'icon-item'" style="padding:10px;border:none;">

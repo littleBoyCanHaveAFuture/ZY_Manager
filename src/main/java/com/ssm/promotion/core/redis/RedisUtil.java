@@ -2,17 +2,17 @@ package com.ssm.promotion.core.redis;
 
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
 
 /**
  * @author 13
  * @date 2017/12/4
  */
-//@Component
 public class RedisUtil {
 
     private static final String CACHE_NAME = "perfect-ssm-cache:";
-    // 过期时间
+    /**
+     * 过期时间
+     */
     private static final int EXPIRE_TIME = 3000;
 
     private RedisTemplate template;

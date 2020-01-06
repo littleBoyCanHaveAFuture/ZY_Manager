@@ -35,7 +35,9 @@ public class GameNameServiceImpl implements GameNameService {
 
     @Override
     public int addGame(Integer id, String name, Integer userId) {
-        return dao.insert(new GameName(id, name));
+        GameName s = new GameName(id, name);
+        dao.insert(s);
+        return s.getId();
     }
 
 }

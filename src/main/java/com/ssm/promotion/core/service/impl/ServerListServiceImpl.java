@@ -88,7 +88,8 @@ public class ServerListServiceImpl implements ServerListService {
 
     @Override
     public boolean isSpCanReg(Map<String, Object> map, Integer userId) {
-        if (map.get("spId").equals("-1")) {
+        String spId = map.get("spId").toString();
+        if ("-1".equals(spId)) {
             return false;
         }
 //        serverListdao.selectRegStatus(map);

@@ -44,7 +44,7 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
      * @author zhou-baicheng
      */
     public static boolean isBlank(Object... objects) {
-        Boolean result = false;
+        boolean result = false;
         for (Object object : objects) {
             if (null == object || "".equals(object.toString().trim())
                     || "null".equals(object.toString().trim())) {
@@ -275,18 +275,18 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
      * @return
      */
     public static String toUnicode(String str) {
-        String as[] = new String[str.length()];
-        String s1 = "";
+        String[] as = new String[str.length()];
+        StringBuilder s1 = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
             int v = str.charAt(i);
             if (v >= 19968 && v <= 171941) {
                 as[i] = Integer.toHexString(str.charAt(i) & 0xffff);
-                s1 = s1 + "\\u" + as[i];
+                s1.append("\\u").append(as[i]);
             } else {
-                s1 = s1 + str.charAt(i);
+                s1.append(str.charAt(i));
             }
         }
-        return s1;
+        return s1.toString();
     }
 
     /**
@@ -384,7 +384,7 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
         String answer = strout.replaceAll("[\\pP‘’“”]", " ")
                 .replaceAll("\r", " ").replaceAll("\n", " ")
                 .replaceAll("\\s", " ").replaceAll("　", "");
-        
+
         return answer;
     }
 

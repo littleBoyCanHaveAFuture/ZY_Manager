@@ -1,7 +1,9 @@
 package com.ssm.promotion.core.entity;
 
 import lombok.Data;
-
+/**
+ * @author song minghua
+ */
 @Data
 public class UserFunc {
     /**

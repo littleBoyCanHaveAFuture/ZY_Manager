@@ -36,7 +36,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("/users")
 public class UserController {
-    // 日志文件
     private static final Logger log = Logger.getLogger(UserController.class);
     @Resource
     private UserService userService;
@@ -214,7 +213,7 @@ public class UserController {
             return ResultGenerator.genRelogin();
         }
         String MD5pwd = null;
-        if (user.getPassword() != null && !user.getPassword().equals("******")) {
+        if (user.getPassword() != null && !"******".equals(user.getPassword())) {
             MD5pwd = MD5Util.md5Encode(user.getPassword(), "UTF-8");
         }
         if (user.getId() == null) {
@@ -228,9 +227,12 @@ public class UserController {
         }
         user.setPassword(MD5pwd);
         user.setRoleName(ManagerType.pareseTo(user.getManagerLv()).getName());
+
         System.out.println("user:" + user.toString());
+
         int resultTotal = userService.updateUser(user, userId);
         log.info("request: user/update , user: " + user.toString());
+
         if (resultTotal > 0) {
             return ResultGenerator.genSuccessResult();
         } else {

@@ -2,14 +2,38 @@ package com.ssm.promotion.core.entity;
 
 import java.io.Serializable;
 
+/**
+ * @author song minghua
+ */
 public class Article implements Serializable {
-    private String id;//主键
-    private String articleTitle;//文章标题
-    private String articleCreateDate;//创建日期
-    private String articleContent;//文章内容
-    private int articleClassID;//文章类别id
-    private int isTop;//置顶字段
-    private String addName;//添加者
+    /**
+     * 主键
+     */
+    private String id;
+    /**
+     * 文章标题
+     */
+    private String articleTitle;
+    /**
+     * 创建日期
+     */
+    private String articleCreateDate;
+    /**
+     * 文章内容
+     */
+    private String articleContent;
+    /**
+     * 文章类别id
+     */
+    private int articleClassID;
+    /**
+     * 置顶字段
+     */
+    private int isTop;
+    /**
+     * 添加者
+     */
+    private String addName;
 
     public String getId() {
         return id;

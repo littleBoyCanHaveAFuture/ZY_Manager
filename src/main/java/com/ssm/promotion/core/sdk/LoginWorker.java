@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.sdk;
 
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.util.MD5Util;
 import com.ssm.promotion.core.util.enums.ServiceType;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -31,12 +32,12 @@ public class LoginWorker {
      */
     public boolean isWhiteCanLogin(int accountId, String channelUid) {
         if (LoginWorker.whiteListState == 1) {
-//            List<CacheWhiteList.Builder> list = this.whiteListTao.select(param);
-//            if (!list.isEmpty() && list.get(NumberUtil.ZERO).getState() == 0) {
-//                return false;
-//            } else {
-//                return true;
-//            }
+/*            List<CacheWhiteList.Builder> list = this.whiteListTao.select(param);
+            if (!list.isEmpty() && list.get(NumberUtil.ZERO).getState() == 0) {
+                return false;
+            } else {
+                return true;
+            }*/
         }
         return true;
     }
@@ -58,4 +59,32 @@ public class LoginWorker {
         return LoginToken.getToken(accountId, appId, ServiceType.LOGIN);
     }
 
+    /**
+     * 获取登录地址
+     */
+    public String getLoginParam(String accountId, String appId, String serverId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("spId", "0");
+        map.put("gameId", appId);
+        map.put("serverId", serverId);
+
+        String loginUrl = service.selectLoginUrl(map, 0);
+
+        StringBuilder param = new StringBuilder();
+        param.append(loginUrl);
+        param.append("qid=").append(accountId);
+        switch (appId) {
+            case "2":
+                param.append("&server_id=").append(serverId);
+                break;
+            default:
+                break;
+        }
+        param.append("time=").append(System.currentTimeMillis());
+
+        String sign = MD5Util.md5(param.toString());
+        param.append("sign=").append(sign);
+
+        return param.toString();
+    }
 }

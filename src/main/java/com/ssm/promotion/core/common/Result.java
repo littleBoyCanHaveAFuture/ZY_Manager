@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by 13 on 17/6/26.
+ *
+ * @author Administrator
  */
 public class Result<T> implements Serializable {
     private static final long serialVersionUID = 1L;

@@ -1,7 +1,9 @@
 package com.ssm.promotion.core.entity;
 
 import java.io.Serializable;
-
+/**
+ * @author song minghua
+ */
 public class Picture implements Serializable {
 	@Override
 	public String toString() {

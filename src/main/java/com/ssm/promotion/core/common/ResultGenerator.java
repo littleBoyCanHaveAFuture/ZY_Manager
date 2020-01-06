@@ -2,6 +2,8 @@ package com.ssm.promotion.core.common;
 
 /**
  * 响应结果生成工具
+ *
+ * @author Administrator
  */
 public class ResultGenerator {
     public static final String DEFAULT_SUCCESS_MESSAGE = "SUCCESS";

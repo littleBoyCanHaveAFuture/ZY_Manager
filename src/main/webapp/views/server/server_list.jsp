@@ -28,14 +28,6 @@
     <thead data-options="frozen:true">
     <tr>
         <th field="cb" checkbox="true" align="center"></th>
-<%--        <th field="id" width="70" align="center" hidden="true">编号</th>--%>
-<%--        <th field="gameId" width="70" align="center" hidden="true">游戏id</th>--%>
-<%--        <th field="gamename" width="70" align="center">游戏名</th>--%>
-<%--        <th field="serverId" width="70" align="center">服务器id</th>--%>
-<%--        <th field="spId" width="150" align="center">渠道id</th>--%>
-<%--        <th field="loginUrl" width="300" align="center">登录地址</th>--%>
-<%--        <th field="openday" width="300" align="center">开服时间</th>--%>
-<%--        <th field="secertKey" width="300" align="center">md5秘钥</th>--%>
     </tr>
     </thead>
 </table>
@@ -99,9 +91,6 @@
                     <select title="选择游戏" id="save_gameid" name="save_gameid">
                         <option value="-1" selected="selected">请选择</option>
                     </select>
-                    <%--                    <input type="text" name="save_gameid" id="save_gameid"--%>
-                    <%--                           required="true" class="easyui-validatebox" validType="'number','length[5,10]'"--%>
-                    <%--                           missingMessage="游戏id不能为空" ,invalidMessage="请输入数字">--%>
                 </td>
             </tr>
 

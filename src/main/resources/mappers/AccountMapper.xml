@@ -65,7 +65,7 @@
         where id &lt; #{maxSpid}
 
     </select>
-    <select id="findAccountSp" parameterType="map" resultMap="AccountResult">
+    <select id="findAccountSp" parameterType="string" resultMap="AccountResult">
         <include refid="select_account_column"/>
         where
         channelId = #{channelId}
@@ -73,7 +73,7 @@
         channelUserId = #{channelUid}
     </select>
 
-    <select id="findAccountOF" parameterType="map" resultMap="AccountResult">
+    <select id="findAccountByname" parameterType="map" resultMap="AccountResult">
         <include refid="select_account_column"/>
         where
         name=#{name}

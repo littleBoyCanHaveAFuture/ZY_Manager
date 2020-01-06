@@ -6,7 +6,7 @@ package com.ssm.promotion.core.util.enums;
  * 2.渠道管理员 可以查看修改所有同渠道的  500
  * 3.渠道普通成员 只能查看自己           100
  * 4.普通成员                          0
-
+ *
  * @author tgzwmkkkk
  */
 
@@ -30,7 +30,9 @@ public enum ManagerType {
         this.id = id;
     }
 
-    //获取对应 id 的 ManagerType
+    /**
+     * 获取对应 id 的 ManagerType
+     */
     public static ManagerType pareseTo(Integer id) {
         if (id == null) {
             return CommonMember;

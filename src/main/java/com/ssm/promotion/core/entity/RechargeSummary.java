@@ -315,8 +315,9 @@ public class RechargeSummary {
                 } else {
 //                    this.setCreateAccountTransRate(UtilG.format2point((double) this.totalCreateRole / this.totalAccounts * 100));
                 }
-                //注收比
+
                 if (this.totalCreateRole == 0) {
+                    //注收比
                     this.setZhushoubi(0);
                 } else {
                     this.setZhushoubi(UtilG.format2point((double) this.totalPayment / this.totalCreateRole * 100));

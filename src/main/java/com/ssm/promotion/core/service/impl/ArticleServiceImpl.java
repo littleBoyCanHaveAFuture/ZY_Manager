@@ -1,9 +1,7 @@
 package com.ssm.promotion.core.service.impl;
 
-import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.dao.ArticleDao;
 import com.ssm.promotion.core.entity.Article;
-//import com.ssm.promotion.core.redis.RedisUtil;
 import com.ssm.promotion.core.service.ArticleService;
 import com.ssm.promotion.core.util.AntiXssUtil;
 import org.apache.log4j.Logger;
@@ -14,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * @author song minghua
+ */
 @Service("articleService")
 public class ArticleServiceImpl implements ArticleService {
 
@@ -21,8 +22,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     private ArticleDao articleDao;
-//    @Resource
-//    private RedisUtil redisUtil;
 
     @Override
     public List<Article> findArticle(Map<String, Object> map) {
@@ -35,7 +34,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public int addArticle(Article article,Integer userId) {
+    public int addArticle(Article article, Integer userId) {
         if (article.getArticleTitle() == null || article.getArticleContent() == null || getTotalArticle(null) > 90 || article.getArticleContent().length() > 50000) {
             return 0;
         }

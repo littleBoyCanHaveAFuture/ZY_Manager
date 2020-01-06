@@ -11,7 +11,9 @@ import com.ssm.promotion.core.service.PictureService;
 import com.ssm.promotion.core.util.AntiXssUtil;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * @author song minghua
+ */
 @Service("pictureService")
 public class PictureServiceImpl implements PictureService {
     @Resource

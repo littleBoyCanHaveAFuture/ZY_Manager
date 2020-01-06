@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @author song minghua
+ */
 @Component
 @Data
 public class AccountWorker {
@@ -63,23 +66,23 @@ public class AccountWorker {
     /**
      * 注册账号
      */
-    public JSONObject reqRegister(Map<String, String> map) throws Exception {
+    public JSONObject reqRegister(Map<String, Object> map) throws Exception {
         JSONObject reply = new JSONObject();
         do {
             //全部数据
-            boolean auto = Boolean.parseBoolean(map.get("auto"));
-            int appId = Integer.parseInt(map.get("appId"));
-            int channelId = Integer.parseInt(map.get("channelId"));
-            String channelUid = map.get("channelUid");
-            String channelUname = map.get("channelUname");
-            String channelUnick = map.get("channelUnick");
-            String username = map.get("username");
-            String pwd = map.get("pwd");
-            String phone = map.get("phone");
-            String deviceCode = map.get("deviceCode");
-            String imei = map.get("imei");
-            String addparm = map.get("addparm");
-            String ip = map.get("ip");
+            boolean auto = Boolean.parseBoolean(map.get("auto").toString());
+            int appId = Integer.parseInt(map.get("appId").toString());
+            int channelId = Integer.parseInt(map.get("channelId").toString());
+            String channelUid = map.get("channelUid").toString();
+            String channelUname = map.get("channelUname").toString();
+            String channelUnick = map.get("channelUnick").toString();
+            String username = map.get("username").toString();
+            String pwd = map.get("pwd").toString();
+            String phone = map.get("phone").toString();
+            String deviceCode = map.get("deviceCode").toString();
+            String imei = map.get("imei").toString();
+            String addparm = map.get("addparm").toString();
+            String ip = map.get("ip").toString();
 
             Map<String, Object> tmp = new HashMap<>(6);
             tmp.put("gameId", appId);
@@ -92,20 +95,21 @@ public class AccountWorker {
                 reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
                 break;
             }
-/*            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
+            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
             if (deviceSize > 0) {
                 if (deviceSize == 10) {
-                    reply.put("reason", "设备码非法");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
-                    break;
+//                    reply.put("reason", "设备码非法");
+//                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+//                    break;
                 } else if (deviceSize == 20) {
-                    reply.put("reason", "已到达设备创建账号最大数量");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
-                    break;
+//                    reply.put("reason", "已到达设备创建账号最大数量");
+//                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+//                    break;
                 }
-            }*/
-            //封禁ip
+            }
+
             if (TemplateWorker.hasBanIp(ip)) {
+                //封禁ip
                 TemplateWorker.addBanIp(ip);
                 reply.put("reason", "玩家ip已被封禁");
                 reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
@@ -199,25 +203,25 @@ public class AccountWorker {
     /**
      * 创建用户
      */
-    public Account createAccount(Map<String, String> map) throws Exception {
-        boolean auto = Boolean.parseBoolean(map.get("auto"));
-        String gameId = map.get("gameId");
+    public Account createAccount(Map<String, Object> map) throws Exception {
+        boolean auto = Boolean.parseBoolean(map.get("auto").toString());
+        String gameId = map.get("gameId").toString();
 
-        String channelId = map.get("channelId");
-        String channelUserId = map.get("channelUid");
-        String channelUserName = map.get("channelUname");
-        String channelUserNick = map.get("channelUnick");
+        String channelId = map.get("channelId").toString();
+        String channelUserId = map.get("channelUid").toString();
+        String channelUserName = map.get("channelUname").toString();
+        String channelUserNick = map.get("channelUnick").toString();
 
-        String username = map.get("username");
-        String pwd = map.get("pwd");
+        String username = map.get("username").toString();
+        String pwd = map.get("pwd").toString();
 
-        String phone = map.get("phone");
-        String deviceCode = map.get("deviceCode");
-        String imei = map.get("imei");
+        String phone = map.get("phone").toString();
+        String deviceCode = map.get("deviceCode").toString();
+        String imei = map.get("imei").toString();
 
-        String addparm = map.get("addparm");
+        String addparm = map.get("addparm").toString();
 
-        String ip = map.get("ip");
+        String ip = map.get("ip").toString();
 
         Account account = new Account();
         if (auto) {
@@ -227,7 +231,7 @@ public class AccountWorker {
             account.setName(username);
             account.setPwd(pwd);
         }
-        if (channelId.equals("0")) {
+        if ("0".equals(channelId)) {
             account.setPhone(phone);
             account.setCreateIp(ip);
             account.setCreateTime(DateUtil.getCurrentDateStr());
@@ -249,10 +253,10 @@ public class AccountWorker {
             account.setChannelUserId(account.getId().toString());
 
             //更新uid
-            Map<String, Object> maps = new HashMap<>();
-            maps.put("id", account.getId());
-            maps.put("channelUid", account.getId());
-            accountService.updateAccountUid(maps);
+            map.clear();
+            map.put("id", account.getId());
+            map.put("channelUid", account.getId());
+            accountService.updateAccountUid(map);
 
         } else {
             account.setPhone(phone);
@@ -335,8 +339,14 @@ public class AccountWorker {
 
     /**
      * 根据渠道和玩家所在渠道编号获取user
+     *
+     * @param map isChannel "true"
+     *            channelId channelId
+     *            channelUid channelUid
+     *            name
+     *            pwd
      */
-    public Account getAccount(Map<String, String> map) {
+    public Account getAccount(Map<String, Object> map) {
         List<Account> list = accountService.findUser(map);
         if (list.isEmpty()) {
             return null;

@@ -18,10 +18,10 @@ public interface AccountDao {
     /**
      * 创建账号
      *
-     * @param Account
+     * @param account
      * @return
      */
-    public int create(Account Account);
+    int create(Account account);
 
     /**
      * 查询相同设备码账号条数
@@ -36,10 +36,11 @@ public interface AccountDao {
     /**
      * 查找用户列表
      *
-     * @param map
+     * @param channelId  渠道id
+     * @param channelUid 渠道uid
      * @return
      */
-    List<Account> findAccountSp(Map<String, String> map);
+    List<Account> findAccountSp(@Param("channelId") String channelId, @Param("channelUid") String channelUid);
 
     /**
      * 实体修改
@@ -47,36 +48,11 @@ public interface AccountDao {
      * @param map
      * @return
      */
-    public int updateAccount(Map<String, Object> map);
+    int updateAccount(Map<String, Object> map);
 
+    List<Integer> exist(Map<String, Object> map);
 
-//    /**
-//     * @param map
-//     * @return
-//     */
-//    public Long getTotalAccount(Map<String, Object> map);
-//
-
-//    /**
-//     * 添加用户
-//     *
-//     * @param Account
-//     * @return
-//     */
-//    public int addAccount(Account Account);
-//
-//    /**
-//     * 删除用户
-//     *
-//     * @param id
-//     * @return
-//     */
-//    public int deleteAccount(Integer id);
-//
-
-    List<Integer> exist(Map<String, String> map);
-
-    List<Account> findAccountOF(Map<String, String> map);
+    List<Account> findAccountByname(@Param("name") String name);
 
     int updateAccountUid(Map<String, Object> map);
 

@@ -13,6 +13,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * @author song minghua
+ */
 public class StringUtil {
     public static final String EMPTY = "";
     public static final String SPACE = " ";
@@ -46,6 +49,8 @@ public class StringUtil {
     public static final String CHARSET_UTF8 = "UTF-8";
     private static final Logger log = Logger.getLogger(StringUtil.class);// 日志文件
     private static final char[] HEX_DIGITS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+    private static Pattern intPattern = Pattern.compile("^[-\\+]?[\\d]*$");
 
     public StringUtil() {
     }
@@ -278,7 +283,8 @@ public class StringUtil {
         } else {
             for (int i = 0; i < str.length(); ++i) {
                 char ch = str.charAt(i);
-                if (!Character.isLetter(ch) && ch != '_' && !Character.isDigit(ch) || isChinese(ch)) {
+                boolean res = !Character.isLetter(ch) && ch != '_' && !Character.isDigit(ch);
+                if (res || isChinese(ch)) {
                     return false;
                 }
             }
@@ -312,12 +318,12 @@ public class StringUtil {
 
             reader.close();
         } catch (Exception var12) {
-//            LogUtil.exception(var12);
+            log.info(var12);
         } finally {
             try {
                 is.close();
             } catch (Exception var11) {
-//                LogUtil.exception(var11);
+                log.info(var11);
             }
 
         }
@@ -406,8 +412,7 @@ public class StringUtil {
     }
 
     public static boolean isInteger(String str) {
-        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-        return pattern.matcher(str).matches();
+        return intPattern.matcher(str).matches();
     }
 
     public String getValidNameThrowMsg(String name, int lenMin, int lenMax, Collection<String> badWordList) throws Exception {

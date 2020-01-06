@@ -4,7 +4,9 @@ import com.ssm.promotion.core.entity.Picture;
 
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @author song minghua
+ */
 public interface PictureService {
     /**
      * 返回相应的数据集合

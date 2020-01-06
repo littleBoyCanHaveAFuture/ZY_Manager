@@ -41,7 +41,9 @@ public class DateUtil {
     public static final String FORMAT_YYYY_MMDD_HHmm = "yyyy-MM-dd HH:mm";
     public static final String FORMAT_YYYY_MMDD_HHmmSS = "yyyy-MM-dd HH:mm:ss";
 
-    // 获得某天最小时间 2017-10-15 00:00:00
+    /**
+     * 获得某天最小时间 2017-10-15 00:00:00
+     */
     public static Date getStartOfDay(Date date) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
         LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
@@ -266,7 +268,7 @@ public class DateUtil {
 //        Date s = formatString("2019-12-19 16:20:05.0", DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
 //        System.out.println(s.getTime());
         String currDay = DateUtil.getCurrentDayStr();
-        String nextDay = DateUtil.formatDate(DateUtil.getEndTimestamp()*1000, DateUtil.FORMAT_YYMMDD);
+        String nextDay = DateUtil.formatDate(DateUtil.getEndTimestamp() * 1000, DateUtil.FORMAT_YYMMDD);
         System.out.println(currDay);
         System.out.println(nextDay);
     }

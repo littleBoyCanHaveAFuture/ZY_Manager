@@ -180,7 +180,7 @@ public class ServerController {
     public void deleteGame(Integer gameId,
                            String name,
                            Integer type, HttpServletResponse response) throws Exception {
-        System.out.println("deletegame:");
+        System.out.println("gamedata:");
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
@@ -194,7 +194,8 @@ public class ServerController {
         } else if (type == 2) {
             gameService.updateGame(gameId, name, userId);
         } else if (type == 3) {
-            gameService.addGame(gameId, name, userId);
+          int i =  gameService.addGame(gameId, name, userId);
+          System.out.println(i);
         }
 
         log.info("request: game/gamedata , gameId: " + gameId);
@@ -214,8 +215,6 @@ public class ServerController {
                             String name,
                             Integer spId,
                             HttpServletResponse response) throws Exception {
-        System.out.println("getGameList:");
-
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);

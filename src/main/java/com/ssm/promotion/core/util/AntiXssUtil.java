@@ -1,5 +1,8 @@
 package com.ssm.promotion.core.util;
 
+/**
+ * @author song minghua
+ */
 public class AntiXssUtil {
     /**
      * 滤除content中的危险 HTML 代码, 主要是脚本代码, 滚动字幕代码以及脚本事件处理代码
@@ -22,17 +25,20 @@ public class AntiXssUtil {
                 "onrowexit", "onselectstart", "onload", "onunload",
                 "onbeforeunload", "onblur", "onerror", "onfocus", "onresize",
                 "onscroll", "oncontextmenu", "alert", "href", "window", "script"};
+
         content = replace(content, "<script", "<script", false);
         content = replace(content, "</script", "</script", false);
         content = replace(content, "<marquee", "<marquee", false);
         content = replace(content, "</marquee", "</marquee", false);
-        content = replace(content, "'", "_", false);// 将单引号替换成下划线
-        content = replace(content, "\"", "_", false);// 将双引号替换成下划线
+        // 将单引号替换成下划线
+        content = replace(content, "'", "_", false);
+        // 将双引号替换成下划线
+        content = replace(content, "\"", "_", false);
         // 滤除脚本事件代码
-        for (int i = 0; i < eventKeywords.length; i++) {
-            if (content.toLowerCase().contains(eventKeywords[i].toLowerCase())) {
-                content = replace(content, eventKeywords[i],
-                        "_" + eventKeywords[i], false); // 添加一个"_", 使事件代码无效
+        for (String eventKeyword : eventKeywords) {
+            if (content.toLowerCase().contains(eventKeyword.toLowerCase())) {
+                // 添加一个"_", 使事件代码无效
+                content = replace(content, eventKeyword, "_" + eventKeyword, false);
             }
         }
         return content;

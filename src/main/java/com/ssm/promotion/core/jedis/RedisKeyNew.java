@@ -22,7 +22,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.NEW_ADD_CREATE_ACCOUNT;
-        System.out.println("getKeyAccountCreateDay:" + key);
+        System.out.println("getKeyAccountCreateDay:\t" + key);
         return key;
     }
 
@@ -38,7 +38,7 @@ public class RedisKeyNew {
                 ":" + SP_ID + ":" + channelId +
                 ":" + GAME_ID + ":" + gameId +
                 "#" + RedisKeyTail.GAME_ACCOUNT_ALL_NUMS;
-        System.out.println("getKeyAccountAll:" + key);
+        System.out.println("getKeyAccountAll:\t" + key);
         return key;
     }
 
@@ -57,7 +57,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.ACTIVE_PLAYERS;
-        System.out.println("getKeyRolesActiveDay:" + key);
+        System.out.println("getKeyRolesActiveDay:\t" + key);
         return key;
     }
 
@@ -74,7 +74,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.ONLINE_PLAYERS;
-        System.out.println("getKeyRolesOnlineDay:" + key);
+        System.out.println("getKeyRolesOnlineDay:\t" + key);
         return key;
     }
 
@@ -92,7 +92,7 @@ public class RedisKeyNew {
                 ":" + SERVER_ID + ":" + serverId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
-        System.out.println("getKeyRolesOnlineMin:" + key);
+        System.out.println("getKeyRolesOnlineMin:\t" + key);
         return key;
     }
 
@@ -110,7 +110,7 @@ public class RedisKeyNew {
                 ":" + SP_ID + ":" + channelId +
                 ":" + GAME_ID + ":" + gameId +
                 "#" + RedisKeyTail.GAME_ACCOUNT_HAS_ROLE;
-        System.out.println("getKeyAccountCreateRoles:" + key);
+        System.out.println("getKeyAccountCreateRoles:\t" + key);
         return key;
     }
 
@@ -127,7 +127,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE;
-        System.out.println("getKeyRolesCreateDay:" + key);
+        System.out.println("getKeyRolesCreateDay:\t" + key);
         return key;
     }
 
@@ -144,7 +144,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.ACCOUNT_INFO;
-        System.out.println("getKeyRolesCreateServer:" + key);
+        System.out.println("getKeyRolesCreateServer:\t" + key);
         return key;
     }
 
@@ -162,7 +162,7 @@ public class RedisKeyNew {
                 ":" + SERVER_ID + ":" + serverId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.REALTIME_ADD_ROLES;
-        System.out.println("getKeyRolesCreateMin:" + key);
+        System.out.println("getKeyRolesCreateMin:\t" + key);
         return key;
     }
 
@@ -179,7 +179,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.NEW_ADD_CREATE_ROLE_RM_OLD;
-        System.out.println("getKeyRolesCreateFirst:" + key);
+        System.out.println("getKeyRolesCreateFirst:\t" + key);
         return key;
     }
 //充值
@@ -198,7 +198,7 @@ public class RedisKeyNew {
                 ":" + SERVER_ID + ":" + serverId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.REALTIME_RECHARGE_AMOUNTS;
-        System.out.println("getKeyRolesPaidMin:" + key);
+        System.out.println("getKeyRolesPaidMin:\t" + key);
         return key;
     }
 
@@ -216,7 +216,7 @@ public class RedisKeyNew {
                 ":" + SERVER_ID + ":" + serverId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.RECHARGE_ROLES;
-        System.out.println("getKeyRolesPaidDay:" + key);
+        System.out.println("getKeyRolesPaidDay:\t" + key);
         return key;
     }
 
@@ -233,7 +233,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_ACCOUNT;
-        System.out.println("getKeyRolesPaidServer:" + key);
+        System.out.println("getKeyRolesPaidServer:\t" + key);
         return key;
     }
 
@@ -255,7 +255,7 @@ public class RedisKeyNew {
                 ":" + SERVER_ID + ":" + serverId +
                 ":" + DATE + ":" + currDay +
                 "#" + RedisKeyTail.RECHARGE_INFO;
-        System.out.println("getKeyRolesPayInfoDay:" + key);
+        System.out.println("getKeyRolesPayInfoDay:\t" + key);
         return key;
     }
 
@@ -275,7 +275,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_TOTAL_INFO;
-        System.out.println("getKeyRolesPayInfoServer:" + key);
+        System.out.println("getKeyRolesPayInfoServer:\t" + key);
         return key;
     }
 
@@ -293,7 +293,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_ROLES_NA_CR;
-        System.out.println("getKeyRegisterPaidRoles:" + key);
+        System.out.println("getKeyRegisterPaidRoles:\t" + key);
         return key;
     }
 
@@ -311,7 +311,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_AMOUNTS_NA_CR;
-        System.out.println("getKeyRegisterPaidAmounts:" + key);
+        System.out.println("getKeyRegisterPaidAmounts:\t" + key);
         return key;
     }
 
@@ -329,7 +329,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_FIRST_PAY_ROLES;
-        System.out.println("getKeyFirstPaidRoles:" + key);
+        System.out.println("getKeyFirstPaidRoles:\t" + key);
         return key;
     }
 
@@ -347,7 +347,7 @@ public class RedisKeyNew {
                 ":" + GAME_ID + ":" + gameId +
                 ":" + SERVER_ID + ":" + serverId +
                 "#" + RedisKeyTail.RECHARGE_FIRST_PAY_AMOUNTS;
-        System.out.println("getKeyFirstPaidRolesAmounts:" + key);
+        System.out.println("getKeyFirstPaidRolesAmounts:\t" + key);
         return key;
     }
 }

@@ -3,7 +3,9 @@ package com.ssm.promotion.core.entity;
 import lombok.Data;
 
 import java.util.ArrayList;
-
+/**
+ * @author song minghua
+ */
 @Data
 public class ServerInfo {
     /**

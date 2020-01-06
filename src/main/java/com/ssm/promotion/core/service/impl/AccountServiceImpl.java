@@ -17,6 +17,9 @@ import java.util.Map;
  */
 @Service("AccountService")
 public class AccountServiceImpl implements AccountService {
+    private static String excep_sql = "SQLIntegrityConstraintViolationException";
+    private static String excep_pri = "for key 'PRIMARY'";
+    private static String excep_uni = "for key 'name_unique'";
     @Resource
     private AccountDao accountDao;
 
@@ -29,15 +32,15 @@ public class AccountServiceImpl implements AccountService {
 
             try {
                 int res = accountDao.create(account);
-                System.out.println("success:" + res);
+                System.out.println("createAccount success:" + res);
                 break;
             } catch (DataAccessException e) {
                 String err = e.getMessage();
                 //仅使主键重复异常被忽略
-                if (err.contains("SQLIntegrityConstraintViolationException") && err.contains("for key 'PRIMARY'")) {
+                if (err.contains(excep_sql) && err.contains(excep_pri)) {
                     System.out.println("err1");
                     continue;
-                } else if (err.contains("for key 'name_unique'")) {
+                } else if (err.contains(excep_uni)) {
                     System.out.println("err2");
                     account.setId(-2);
                     return;
@@ -64,7 +67,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int readMaxAccountId(int maxSpid) {
+    public Integer readMaxAccountId(int maxSpid) {
         Integer count = accountDao.readMaxAccountId(maxSpid);
         if (count == null) {
             count = 0;
@@ -73,18 +76,24 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findUser(Map<String, String> map) {
-        boolean isChannel = Boolean.parseBoolean(map.get("isChannel"));
+    public List<Account> findUser(Map<String, Object> map) {
+        boolean isChannel = Boolean.parseBoolean(map.get("isChannel").toString());
         if (isChannel) {
-            if (map.get("channelId").isEmpty() || map.get("channelUid").isEmpty()) {
+            String channelId = map.get("channelId").toString();
+            String channelUid = map.get("channelUid").toString();
+
+            if (channelId.isEmpty() || channelUid.isEmpty()) {
                 return null;
             }
-            return accountDao.findAccountSp(map);
+            return accountDao.findAccountSp(channelId, channelUid);
         } else {
-            if (map.get("name").isEmpty() || map.get("pwd").isEmpty()) {
+            String name = map.get("name").toString();
+            String pwd = map.get("pwd").toString();
+
+            if (name.isEmpty() || pwd.isEmpty()) {
                 return null;
             }
-            return accountDao.findAccountOF(map);
+            return accountDao.findAccountByname(name);
         }
     }
 
@@ -99,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int exist(Map<String, String> map) {
+    public int exist(Map<String, Object> map) {
         return accountDao.exist(map).size();
     }
 

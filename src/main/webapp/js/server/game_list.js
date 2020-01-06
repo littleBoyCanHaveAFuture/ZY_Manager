@@ -78,17 +78,14 @@ function loadServerListTab() {
 }
 
 function saveServerType() {
-    if (t_type === 3) {
-        saveServer(3);
-    } else if (t_type === 2) {
-        saveServer(2);
-    }
+    saveServer(t_type);
 }
 
 // 打开dialog 添加渠道
 function openServerDialog() {
     t_type = 3;
     resetValue();
+    $('#save_gameid').attr('readonly', false);
     $("#dlg").dialog("open").dialog("setTitle", "添加游戏");
 }
 
@@ -100,6 +97,8 @@ function closeServerDialog() {
 
 //打开dialog 修改服务器
 function openServerModifyDialog() {
+    $('#save_gameid').attr('readonly', true);
+
     let dlg = $("#dlg");
     t_type = 2;
     let selectedRows = $("#dg").datagrid('getSelections');
@@ -153,13 +152,14 @@ function deleteServer() {
                     type: "get",
                     dataType: "json",
                     url: "/server/gamedata" + param,
+                    async:false,
                     success: function (result) {
                         if (result.resultCode === 501) {
                             relogin();
                         } else if (result.resultCode === 200) {
-                            $.messager.alert(
-                                "系统提示",
-                                "数据已成功删除！");
+                            // $.messager.alert(
+                            //     "系统提示",
+                            //     "数据已成功删除！");
                             loadServerListTab();
                         } else {
                             $.messager.alert(

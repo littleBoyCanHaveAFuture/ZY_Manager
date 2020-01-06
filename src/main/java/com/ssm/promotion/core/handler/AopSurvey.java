@@ -58,13 +58,13 @@ public class AopSurvey {
         //方法名
         String signature = pjp.getSignature().getName();
 
-        System.out.println("");
-        System.out.println("--------- AopSurvey verifyMethod()------------");
-        //得到方法名
-        System.out.println("function:" + signature);
+        StringBuilder message = new StringBuilder();
+        message.append("--------- AopSurvey verifyMethod()------------");
+        message.append("function:" + signature).append("\t");
+
         int i = 0;
         for (Object o : obj) {
-            System.out.println("args[" + (i++) + "]:" + o);
+            message.append("args[" + (i++) + "]:" + o).append("\t");
         }
 
         if (this.jumpInterface(pjp)) {
@@ -73,7 +73,7 @@ public class AopSurvey {
         if (this.jumpMethod(signature)) {
             return;
         }
-
+        System.out.println(message);
         int len;
         if (obj.length >= 1) {
             len = obj.length - 1;

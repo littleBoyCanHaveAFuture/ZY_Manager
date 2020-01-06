@@ -43,7 +43,8 @@
         where gameId = #{gameId}
     </update>
 
-    <insert id="insert" parameterType="GameName">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="GameName">
+
         insert into zy_servername(gameId, name)
         values (#{gameId}, #{name})
     </insert>

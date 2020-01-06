@@ -2,6 +2,8 @@ package com.ssm.promotion.core.util.enums;
 
 /**
  * 支付状态
+ *
+ * @author Administrator
  */
 public class PayState {
     /**

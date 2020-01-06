@@ -26,7 +26,7 @@ public class ScheduledService {
     /**
      * <渠道,游戏-区服>
      */
-    private static Map<String, String> map = new HashMap<>();
+    private static Map<String, Object> map = new HashMap<>();
 
     @Autowired
     JedisRechargeCache cache;

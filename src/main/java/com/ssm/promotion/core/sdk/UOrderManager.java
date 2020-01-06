@@ -14,7 +14,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @author song minghua
+ */
 @Service("orderManager")
 public class UOrderManager {
     private static final Logger log = Logger.getLogger(UOrderManager.class);

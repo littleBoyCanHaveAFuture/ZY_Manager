@@ -5,6 +5,7 @@ import net.sf.json.JSONObject;
 
 /**
  * 订单对象
+ * @author Administrator
  */
 @Data
 public class UOrder {

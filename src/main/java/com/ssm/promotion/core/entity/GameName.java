@@ -3,10 +3,14 @@ package com.ssm.promotion.core.entity;
 import lombok.Data;
 
 /**
- * @author
+ * @author song minghua
  */
 @Data
 public class GameName {
+    /**
+     * id
+     */
+    private Integer id;
     /**
      * 游戏id
      */
@@ -21,7 +25,7 @@ public class GameName {
         this.name = name;
     }
 
-     GameName() {
+    GameName() {
 
     }
 

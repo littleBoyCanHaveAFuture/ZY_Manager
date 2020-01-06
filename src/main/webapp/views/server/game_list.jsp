@@ -1,24 +1,25 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Insert title here</title>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/icon.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/icon.css">
+    <link rel="stylesheet" type="text/css"
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/demo/demo.css">
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.config.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.all.min.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/game_list.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/server/game_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
@@ -27,8 +28,8 @@
        rownumbers="true" fit="true" showFooter="true" toolbar="#sp">
     <thead data-options="frozen:true">
     <tr>
-<%--        <th field="gameId" width="70" align="center">游戏id</th>--%>
-<%--        <th field="name" width="70" align="center">游戏名</th>--%>
+        <%--        <th field="gameId" width="70" align="center">游戏id</th>--%>
+        <%--        <th field="name" width="70" align="center">游戏名</th>--%>
     </tr>
     </thead>
 </table>
@@ -63,7 +64,7 @@
         <input type="hidden" name="save_id" id="save_id">
         <table>
             <tr>
-                <td>游戏id:</td>
+                <td>游戏id：</td>
                 <td>
                     <label for="save_gameid"></label>
                     <input type="text" name="save_gameid" id="save_gameid"
@@ -72,12 +73,28 @@
                 </td>
             </tr>
             <tr>
-                <td>游戏名称:</td>
+                <td>游戏名称：</td>
                 <td>
                     <label for="save_name"></label>
                     <input type="text" name="save_name" id="save_name"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="游戏名称">
+                </td>
+            </tr>
+            <tr>
+                <td>游戏地址：</td>
+                <td>
+                    <label for="save_loginurl"></label>
+                    <input type="text" name="save_loginurl" id="save_loginurl"
+                           required="false">
+                </td>
+            </tr>
+            <tr>
+                <td>支付回调地址：</td>
+                <td>
+                    <label for="save_paybackurl"></label>
+                    <input type="text" name="save_paybackurl" id="save_paybackurl"
+                           required="false">
                 </td>
             </tr>
         </table>

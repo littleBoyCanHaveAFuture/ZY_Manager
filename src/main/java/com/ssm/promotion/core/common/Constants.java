@@ -5,9 +5,10 @@ package com.ssm.promotion.core.common;
  * @date 2017/6/26
  */
 public class Constants {
-
-    public static final int RESULT_CODE_SUCCESS = 200;  // 成功处理请求
-    public static final int RESULT_CODE_BAD_REQUEST = 412;  // bad request
+    // 成功处理请求
+    public static final int RESULT_CODE_SUCCESS = 200;
+    // bad request
+    public static final int RESULT_CODE_BAD_REQUEST = 412;
     public static final int RESULT_CODE_SERVER_ERROR = 500;  // 没有对应结果
     public static final int RESULT_CODE_SERVER_RELOGIN = 501;//重新登录
     public static final String ARTICLE_CACHE_KEY = "perfect-ssm:article:";//文章key

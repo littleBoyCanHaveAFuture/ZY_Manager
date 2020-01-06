@@ -222,8 +222,8 @@ public class JedisRechargeCache {
                 String target = RedisKeyHeader.REALTIMEDATA + ":" + targetbody + "date:" + currDay + "#" + RedisKeyTail.REALTIME_ONLINE_ACCOUNTS;
                 targetKeyList.add(target);
                 if (isLog) {
-                    System.out.println("src key------>" + mapEntry);
-                    System.out.println("target key--->" + target);
+                    log.info("src key------>" + mapEntry);
+                    log.info("target key--->" + target);
                 }
                 pipeline.zscore(mapEntry, currDay);
             }
@@ -237,7 +237,7 @@ public class JedisRechargeCache {
                 }
                 pipeline.zadd(targetKey, num, currDayMin);
                 if (isLog) {
-                    System.out.println("target key:" + targetKey + "\tmember:" + currDayMin + "\t" + num);
+                    log.info("target key:" + targetKey + "\tmember:" + currDayMin + "\t" + num);
                 }
             }
             targetKeyList.clear();
@@ -245,7 +245,7 @@ public class JedisRechargeCache {
 
             long t2 = System.currentTimeMillis();
             if (isLog) {
-                System.out.println("find " + list.size() + " key,use: " + (t2 - t1) + " ms,cursor:" + cursor);
+                log.info("find " + list.size() + " key,use: " + (t2 - t1) + " ms,cursor:" + cursor);
             }
         } while (!"0".equals(cursor));
 
@@ -286,7 +286,7 @@ public class JedisRechargeCache {
             for (String mapEntry : list) {
                 pipeline.zscore(mapEntry, currDay);
                 if (isLog) {
-                    System.out.println("src key------>" + mapEntry);
+                    log.info("src key------>" + mapEntry);
                 }
             }
 
@@ -302,7 +302,7 @@ public class JedisRechargeCache {
             }
             pipeline.sync();
             if (isLog) {
-                System.out.println("find " + list.size() + " key,use: " + (System.currentTimeMillis() - t1) + " ms,cursor:" + cursor);
+                log.info("find " + list.size() + " key,use: " + (System.currentTimeMillis() - t1) + " ms,cursor:" + cursor);
             }
         } while (!"0".equals(cursor));
     }
@@ -380,9 +380,9 @@ public class JedisRechargeCache {
             String key2 = realtimeSGSKey + currday + "#" + RedisKeyTail.REALTIME_RECHARGE_AMOUNTS;
             String key3 = realtimeSGSKey + currday + "#" + RedisKeyTail.REALTIME_ADD_ROLES;
             if (isLog) {
-                System.out.println("getRealtimeData key:" + key1);
-                System.out.println("getRealtimeData key:" + key2);
-                System.out.println("getRealtimeData key:" + key3);
+                log.info("getRealtimeData key:" + key1);
+                log.info("getRealtimeData key:" + key2);
+                log.info("getRealtimeData key:" + key3);
             }
 
 
@@ -423,22 +423,22 @@ public class JedisRechargeCache {
      * 1.新增创号
      * 2.该游戏所有账号
      */
-    public void register(Map<String, String> map) {
+    public void register(Map<String, Object> map) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
 
-            boolean auto = Boolean.parseBoolean(map.get("auto"));
-            Integer gameId = Integer.parseInt(map.get("appId"));
-            long accountId = Long.parseLong(map.get("accountId"));
+            boolean auto = Boolean.parseBoolean(map.get("auto").toString());
+            Integer gameId = Integer.parseInt(map.get("appId").toString());
+            long accountId = Long.parseLong(map.get("accountId").toString());
             String currday = DateUtil.getCurrentDayStr();
 
             String key1;
             String key2;
             if (auto) {
-                String spId = map.get("channelId");
+                String spId = map.get("channelId").toString();
                 //渠道-游戏
                 String userSGKey = String.format(RedisKey.FORMAT_SG, RedisKeyHeader.USER_INFO, spId, gameId);
                 //新增创号：渠道-游戏-日期

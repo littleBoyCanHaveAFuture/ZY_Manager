@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.util.enums;
 
 /**
+ * @author song minghua
  * 支付状态
  * 点开充值界面	未点充值按钮（取消支付）	0
  * 点击充值按钮跳转到	                    1

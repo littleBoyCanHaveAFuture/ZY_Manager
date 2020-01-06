@@ -3,7 +3,9 @@ package com.ssm.promotion.core.util;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-
+/**
+ * @author song minghua
+ */
 public final class RandomUtil {
     public RandomUtil() {
     }

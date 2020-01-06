@@ -3,8 +3,6 @@ package com.ssm.promotion.core.util;
 import org.apache.log4j.Logger;
 
 import javax.crypto.Cipher;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -15,6 +13,8 @@ import java.util.Map;
 
 /**
  * Created by ant on 2015/4/11.
+ *
+ * @author Administrator
  */
 public class RSAUtils {
     public static final String KEY_ALGORITHM = "RSA";
@@ -31,8 +31,7 @@ public class RSAUtils {
      * @throws Exception
      */
     public static Map<String, Object> generateKeys() throws Exception {
-        KeyPairGenerator keyPairGen = KeyPairGenerator
-                .getInstance(KEY_ALGORITHM);
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
         keyPairGen.initialize(1024);
 
         KeyPair keyPair = keyPairGen.generateKeyPair();
