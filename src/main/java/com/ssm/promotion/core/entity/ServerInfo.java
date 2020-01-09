@@ -1,8 +1,8 @@
 package com.ssm.promotion.core.entity;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
-import java.util.ArrayList;
 /**
  * @author song minghua
  */
@@ -25,10 +25,6 @@ public class ServerInfo {
      */
     private Integer spId;
     /**
-     * 渠道id
-     */
-    private ArrayList<Integer> spIdList;
-    /**
      * 注册开关
      */
     private Integer regState;
@@ -44,32 +40,17 @@ public class ServerInfo {
      * 游戏名称
      */
     private String gamename;
-
     /**
      * 开服天数
      */
     private String openday;
-    /**
-     * RSA2 公钥
-     */
-    private String pubKey;
-    /**
-     * RSA2 私钥
-     */
-    private String priKey;
-    /**
-     * md5 秘钥
-     */
-    private String secertKey;
 
     public ServerInfo() {
 
     }
 
     public ServerInfo(Integer id, Integer gameId, Integer serverId, Integer spId, Integer regState, Integer loginState,
-                      String loginUrl, String openday,
-                      String pubKey, String priKey, String secertKey) {
-        super();
+                      String loginUrl, String openday) {
         this.id = id;
         this.gameId = gameId;
         this.serverId = serverId;
@@ -78,24 +59,21 @@ public class ServerInfo {
         this.loginState = loginState;
         this.loginUrl = loginUrl;
         this.openday = openday;
-        this.pubKey = pubKey;
-        this.priKey = priKey;
-        this.secertKey = secertKey;
-        if (spIdList == null) {
-            spIdList = new ArrayList<>();
-        }
     }
 
     @Override
     public String toString() {
-        return "ServerListVo [id=" + id + "," +
-                "gameId = " + gameId + ", " +
-                "serverId =" + serverId + ", " +
-                "spId =" + spId + ", " +
-                "regState = " + regState + ", " +
-                "loginState = " + loginState + ", " +
-                "loginUrl = " + loginUrl + ", " +
-                "openday = " + openday + ", " +
-                "]";
+        JSONObject json = new JSONObject();
+        json.put("id", this.id);
+        json.put("gameId", this.gameId);
+        json.put("serverId", this.serverId);
+        json.put("spId", this.spId);
+        json.put("regState", this.regState);
+        json.put("loginState", this.loginState);
+        json.put("loginUrl", this.loginUrl);
+        json.put("openday", this.openday);
+
+        return json.toString();
+
     }
 }

@@ -1,10 +1,11 @@
 package com.ssm.promotion.core.dao;
 
+import com.ssm.promotion.core.entity.User;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Map;
-
-import com.ssm.promotion.core.entity.User;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author 1034683568@qq.com
@@ -61,4 +62,6 @@ public interface UserDao {
     public int deleteUser(Integer id);
 
     Long getTotalSameUser(Map<String, Object> map);
+
+    User getUserById(@Param("id") Integer id);
 }

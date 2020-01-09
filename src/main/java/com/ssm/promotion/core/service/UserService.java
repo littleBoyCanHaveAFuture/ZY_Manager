@@ -22,10 +22,19 @@ public interface UserService {
      * 查找用户
      *
      * @param map
-     * @param userId 当前操作的玩家id
+     * @param userId 当前操作的用户id
      * @return
      */
     public List<User> findUser(Map<String, Object> map, Integer userId);
+
+    /**
+     * 查找用户
+     *
+     * @param id     查找的用户id
+     * @param userId 当前操作的用户id
+     * @return
+     */
+    User getUserById(Integer id, Integer userId);
 
     /**
      * 判断是否有该用户

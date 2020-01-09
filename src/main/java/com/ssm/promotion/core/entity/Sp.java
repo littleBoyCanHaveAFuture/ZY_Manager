@@ -28,17 +28,27 @@ public class Sp {
      * 分享链接
      */
     private String shareLinkUrl;
+    /**
+     * icon
+     */
+    private String iconUrl;
+    /**
+     * 版本
+     */
+    private String version;
 
     public Sp() {
 
     }
 
-    public Sp(Integer spId, Integer parent, String name, Integer state, String shareLinkUrl) {
+    public Sp(Integer spId, Integer parent, String name, Integer state, String shareLinkUrl, String iconUrl, String version) {
         this.spId = spId;
         this.parent = parent;
         this.name = name;
         this.state = state;
         this.shareLinkUrl = shareLinkUrl;
+        this.iconUrl = iconUrl;
+        this.version = version;
     }
 
     @Override
@@ -49,6 +59,8 @@ public class Sp {
         json.put("name", this.name);
         json.put("state", this.state);
         json.put("shareLinkUrl", this.shareLinkUrl);
+        json.put("iconUrl", this.iconUrl);
+        json.put("version", this.version);
         return json.toString();
     }
 

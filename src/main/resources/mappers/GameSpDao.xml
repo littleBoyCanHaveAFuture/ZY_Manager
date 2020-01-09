@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.GameSpDao">
+    <resultMap type="GameSp" id="GameSpResult">
+        <result property="id" column="id"/>
+        <result property="gameId" column="game_id"/>
+        <result property="spId" column="sp_id"/>
+        <result property="uid" column="uid"/>
+        <result property="status" column="status"/>
+        <result property="appId" column="app_id"/>
+        <result property="appName" column="app_name"/>
+        <result property="paybackUrl" column="payback_url"/>
+        <result property="loginUrl" column="login_url"/>
+        <result property="loginKey" column="login_key"/>
+        <result property="payKey" column="pay_key"/>
+        <result property="sendKey" column="send_key"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        select id,
+               game_id,
+               sp_id,
+               uid,
+               status,
+               app_id,
+               app_name,
+               payback_url,
+               login_url,
+               login_key,
+               pay_key,
+               send_key
+        from zy_game_sp
+    </sql>
+
+    <select id="selectAllGameSp" resultMap="GameSpResult">
+        <include refid="Base_Column_List"/>
+    </select>
+
+    <select id="selectGameSp" parameterType="map" resultMap="GameSpResult">
+        <include refid="Base_Column_List"/>
+        <where>
+            <if test="id != null and  id!= -1">
+                id=#{id}
+            </if>
+            <if test="gameId != null and  gameId!=-1 ">
+                and game_id=#{gameId}
+            </if>
+            <if test="spId != null and  spId!=-1 ">
+                and sp_id=#{spId}
+            </if>
+            <if test="uid != null and  uid!=-1 ">
+                and uid=#{uid}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="getCountGameSp" resultType="Long">
+        select count(*)
+        from zy_game_sp
+        <where>
+            <if test="gameId != null and  gameId!=-1 ">
+                and game_id=#{gameId}
+            </if>
+            <if test="spId != null and  spId!=-1 ">
+                and sp_id=#{spId}
+            </if>
+            <if test="uid != null and  uid!=-1 ">
+                and uid=#{uid}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteGameSp" parameterType="int">
+        delete
+        from zy_game_sp
+        where id = #{id}
+    </delete>
+
+    <update id="updateGameSp" parameterType="map">
+        update zy_game_sp
+        <set>
+            <if test="status != null and  status!=-1 ">
+                status=#{status},
+            </if>
+            <if test="appId != null and  appId!=-1 ">
+                app_id=#{appId},
+            </if>
+            <if test="appName != null and  appName!='' ">
+                app_name=#{appName},
+            </if>
+            <if test="paybackUrl != null and  paybackUrl!='' ">
+                payback_url=#{paybackUrl},
+            </if>
+            <if test="loginUrl != null and  loginUrl!='' ">
+                login_url=#{loginUrl},
+            </if>
+            <if test="loginKey != null and  loginKey!='' ">
+                login_key=#{loginKey},
+            </if>
+            <if test="payKey != null and  payKey!='' ">
+                pay_key=#{payKey},
+            </if>
+            <if test="sendKey != null and  sendKey!='' ">
+                send_key=#{sendKey},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <insert id="insertGameSp" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="GameSp">
+        insert into zy_game_sp(game_id, sp_id, uid, app_id, app_name, payback_url, login_url, login_key, pay_key,
+                               send_key)
+        values (#{gameId}, #{spId}, #{uid}, #{appId}, #{appName}, #{paybackUrl}, #{loginUrl}, #{loginKey}, #{payKey},
+                #{sendKey})
+    </insert>
+
+</mapper>

@@ -19,7 +19,7 @@
     <meta http-equiv="refresh" content="0;ie.html"/>
     <![endif]-->
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>

@@ -1,22 +1,19 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Insert title here</title>
+    <title></title>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/icon.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/icon.css">
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.config.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.all.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/sp_list.js"></script>
 </head>
@@ -26,8 +23,7 @@
 <table id="dg" title="渠道列表" class="easyui-datagrid" pagination="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#sp">
     <thead data-options="frozen:true">
-    <tr>
-    </tr>
+
     </thead>
 </table>
 
@@ -60,6 +56,15 @@
     <div style="padding-top:50px;  float:left; width:95%; padding-left:30px;">
         <input type="hidden" name="save_id" id="save_id">
         <table>
+            <tr>
+                <td>图标:</td>
+                <td>
+                    <label for="save_icon"></label>
+                    <input type="text" name="save_icon" id="save_icon"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="图标地址">
+                </td>
+            </tr>
             <tr>
                 <td>渠道id:</td>
                 <td>
@@ -94,6 +99,15 @@
                     <input type="text" name="save_state" id="save_state"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="状态">
+                </td>
+            </tr>
+            <tr>
+                <td>版本号:</td>
+                <td>
+                    <label for="save_version"></label>
+                    <input type="text" name="save_version" id="save_version"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="sdk版本">
                 </td>
             </tr>
             <tr>

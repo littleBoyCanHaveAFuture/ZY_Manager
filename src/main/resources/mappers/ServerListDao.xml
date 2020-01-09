@@ -13,9 +13,6 @@
         <result property="loginUrl" column="loginUrl"/>
         <result property="gamename" column="gamename"/>
         <result property="openday" column="openday"/>
-        <result property="priKey" column="priKey"/>
-        <result property="pubKey" column="pubKey"/>
-        <result property="secertKey" column="secertKey"/>
     </resultMap>
 
     <sql id="select_user_column">
@@ -27,8 +24,7 @@
 			loginState,
 			loginUrl,
 			gamename,
-			openday,
-			secertKey
+			openday
 		FROM zy_serverlist
 	</sql>
     <!--   与 selectServers where 条件一致-->
@@ -73,9 +69,8 @@
         spId,
         loginUrl,
         gamename,
-        openday,
-        priKey,pubKey,secertKey)
-        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday},#{priKey},#{pubKey},#{secertKey})
+        openday)
+        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday})
     </insert>
 
     <select id="exist" parameterType="map" resultType="int">

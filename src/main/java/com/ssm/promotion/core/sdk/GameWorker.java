@@ -6,6 +6,7 @@ import com.ssm.promotion.core.entity.ServerInfo;
 import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.service.GameNameService;
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.service.SpService;
 import lombok.Data;
 import org.apache.log4j.Logger;
 
@@ -61,6 +62,8 @@ public class GameWorker {
     private ServerListService serverService;
     @Resource
     private GameNameService gameService;
+    @Resource
+    private SpService spService;
 
     public void init() {
         log.info("------------------GameWorker init start-------------------");
@@ -68,12 +71,12 @@ public class GameWorker {
         //1.查询  zy_servername
         List<GameName> gameNameList = gameService.getGameList(map, -1);
         //2.查询  zy_sp
-        List<Sp> spList = serverService.getAllSp(-1);
+        List<Sp> spList = spService.getAllSp(-1);
         //3.查询  zy_serverlist
         List<ServerInfo> serverList = serverService.getServerList(map, -1);
 
         for (GameName game : gameNameList) {
-            gameMap.put(game.getGameId(), game);
+            gameMap.put(game.getId(), game);
         }
         for (Sp sp : spList) {
             spMap.put(sp.getSpId(), sp);

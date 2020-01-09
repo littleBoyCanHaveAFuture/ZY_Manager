@@ -6,15 +6,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>articleManger</title>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/icon.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/icon.css">
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/kindeditor-4.1.10/themes/default/default.css"/>
     <script charset="utf-8" src="${pageContext.request.contextPath}/kindeditor-4.1.10/kindeditor-all.js"></script>
     <script charset="utf-8" src="${pageContext.request.contextPath}/kindeditor-4.1.10/lang/zh_CN.js"></script>

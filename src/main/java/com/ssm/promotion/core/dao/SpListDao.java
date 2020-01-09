@@ -22,10 +22,18 @@ public interface SpListDao {
     /**
      * 批量查询渠道
      *
-     * @param map item 渠道map
+     * @param map spIdList 渠道map
      * @return List<Sp>
      */
     List<Sp> selectSpByIds(Map<String, Object> map);
+
+    /**
+     * 批量查询渠道
+     *
+     * @param map spIdList 排除的渠道di
+     * @return List<Sp>
+     */
+    List<Sp> selectSpNoByIds(Map<String, Object> map);
 
     /**
      * 通过渠道id 查询渠道信息
@@ -43,4 +51,6 @@ public interface SpListDao {
     int updateSp(Map<String, Object> map);
 
     int addSp(Map<String, Object> map);
+
+
 }

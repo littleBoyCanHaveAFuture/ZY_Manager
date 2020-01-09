@@ -15,15 +15,25 @@
     </resultMap>
 
     <select id="login" parameterType="User" resultMap="UserResult">
-        select id,user_name,password,role_name,func,manager_lv,spId,agents from
-        ssm_user where user_name=#{userName} and password=#{password} limit 1
+        select id,
+               user_name,
+               password,
+               role_name,
+               func,
+               manager_lv,
+               spId,
+               agents
+        from ssm_user
+        where user_name = #{userName}
+          and password = #{password}
+        limit 1
     </select>
 
-    <select id="findUsers" parameterType="Map" resultMap="UserResult">
+    <select id="findUsers" parameterType="map" resultMap="UserResult">
         select id,user_name,password,role_name,func,manager_lv,spId,agents from ssm_user
         <where>
             <if test="userName!=null and userName!='' ">
-                AND user_name like "%#{userName}%"
+                AND user_name like '%${userName}%'
             </if>
         </where>
         <choose>
@@ -51,8 +61,8 @@
     </select>
 
     <insert id="addUser" parameterType="User">
-        insert into ssm_user(user_name,password,role_name,func,manager_lv,spId,agents)
-        values(#{userName},#{password},#{roleName},#{func},#{managerLv},#{spId},#{agents})
+        insert into ssm_user(user_name, password, role_name, func, manager_lv, spId, agents)
+        values (#{userName}, #{password}, #{roleName}, #{func}, #{managerLv}, #{spId}, #{agents})
     </insert>
 
     <update id="updateUser" parameterType="User">
@@ -84,9 +94,11 @@
     </update>
 
     <delete id="deleteUser" parameterType="Integer">
-        delete from ssm_user
-        where id=#{id}
+        delete
+        from ssm_user
+        where id = #{id}
     </delete>
+
     <select id="getTotalSameUser" parameterType="Map" resultType="long">
         select count(*) from ssm_user
         <where>
@@ -94,5 +106,16 @@
                 AND user_name=#{userName}
             </if>
         </where>
+    </select>
+
+    <select id="getUserById" parameterType="int" resultMap="UserResult">
+        select id,user_name,password,role_name,func,manager_lv,spId,agents from
+        ssm_user
+        <where>
+            <if test="id!=null and id>-1 ">
+                and id=#{id}
+            </if>
+        </where>
+
     </select>
 </mapper> 

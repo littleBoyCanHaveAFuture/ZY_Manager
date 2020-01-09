@@ -3,6 +3,7 @@ package com.ssm.promotion.core.service.impl;
 import com.ssm.promotion.core.dao.GameNameDao;
 import com.ssm.promotion.core.entity.GameName;
 import com.ssm.promotion.core.service.GameNameService;
+import com.ssm.promotion.core.util.RandomUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,24 +21,24 @@ public class GameNameServiceImpl implements GameNameService {
 
     @Override
     public List<GameName> getGameList(Map<String, Object> map, Integer userid) {
-        return dao.select(map);
+        return dao.selectGame(map);
     }
 
     @Override
     public int deleteGame(Integer gameId, Integer userid) {
-        return dao.delete(gameId);
+        return dao.deleteGame(gameId);
     }
 
     @Override
-    public int updateGame(Integer id, String name, Integer userId) {
-        return dao.update(new GameName(id, name));
+    public int updateGame(GameName gameName, Integer userId) {
+        return dao.updateGame(gameName);
     }
 
     @Override
-    public int addGame(Integer id, String name, Integer userId) {
-        GameName s = new GameName(id, name);
-        dao.insert(s);
-        return s.getId();
+    public int addGame(GameName gameName, Integer userId) {
+        gameName.setSecertKey(RandomUtil.rndSecertKey());
+        dao.insertGame(gameName);
+        return gameName.getId();
     }
 
 }

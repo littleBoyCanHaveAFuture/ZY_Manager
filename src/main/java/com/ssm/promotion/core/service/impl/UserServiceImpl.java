@@ -51,6 +51,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserById(Integer id, Integer userId) {
+        return userDao.getUserById(id);
+    }
+
+    @Override
     public Long getTotalSameUser(Map<String, Object> map, Integer userId) {
         Long res = userDao.getTotalSameUser(map);
         return res;

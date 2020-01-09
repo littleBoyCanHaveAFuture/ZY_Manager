@@ -7,8 +7,6 @@ $(function () {
         "服务器id": "serverId",
         "渠道id": "spId",
         "开服时间": "openday",
-        "md5秘钥": "secertKey",
-        "登录地址": "loginUrl",
     };
     let activeColumns = [];
     $.each(commonResult, function (index, value) {
@@ -22,25 +20,49 @@ $(function () {
         activeColumns.push(column);
     });
 
-    let dg = $("#serverTable");
-    initDataGrid(dg, activeColumns, loadServerListTab());
+    let dg = $("#dg");
+    initDataGrid(dg, activeColumns, loadServerListTab);
 
-    let opts = getDatagridOptions(dg);
-
-    initFirstPage();
+    loadServerListTab();
     initSelectList();
     initSpGameServer(1);
     initSpGameServer(2);
     initSpGameServer(3);
 });
 
-let t_url = "/server/getServerList";
-var method;
-var type;
+//对话框下拉菜单
+function initSelectList() {
+    console.log("initSelectList");
+    //游戏id
+    $.ajax({
+        //获取下拉
+        url: "/server/getGameList",
+        type: "get",
+        dataType: "json",
+        success: function (result) {
+            if (result.resultCode === 501) {
+                relogin();
+            } else if (result.resultCode === 200) {
+                let select_gameId = $("#save_gameid");
+                select_gameId.find("option").remove();
+                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+                for (let res = 0; res < result.total; res++) {
+                    select_gameId.append("<option value='" + result.rows[res].id + "'>" + result.rows[res].name + "</option>");
+                }
+            }
+        },
+        error: function () {
+            $.messager.alert("ERROR！", "获取游戏列表出错");
+        }
+    });
+}
+
+let method;
+let type;
 
 //查询服务器
 function loadServerListTab() {
-    let dg = $("#serverTable");
+    let dg = $("#dg");
     let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
 
@@ -53,20 +75,20 @@ function loadServerListTab() {
     if (gameId === "" || gameId === undefined) {
         gameId = -1;
     }
-    if (serverId === "" || serverId === undefined) {
+    if (checkParam(gameId)) {
         gameId = -1;
     }
-    if (spId === "" || spId === undefined) {
+    if (checkParam(spId)) {
         spId = null;
     }
-    if (pageNumber === "" || pageNumber === undefined || pageNumber <= 0) {
+    if (checkParam(pageNumber) || pageNumber <= 0) {
         pageNumber = null;
     }
-    if (pageSize === "" || pageSize === undefined || pageSize <= 0) {
+    if (checkParam(pageSize) || pageSize <= 0) {
         pageSize = null;
     }
     $.ajax({
-        url: t_url,
+        url: "/server/getServerList",
         type: "post",
         data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": pageNumber, "rows": pageSize},
         dataType: "json",
@@ -83,7 +105,7 @@ function loadServerListTab() {
                 if (result.total === 0) {
                     $.messager.alert("系统提示", "查询成功 无数据");
                 }
-                $("#serverTable").datagrid("loadData", result);
+                $("#dg").datagrid("loadData", result);
             }
         },
         error: function () {
@@ -95,13 +117,17 @@ function loadServerListTab() {
 // 打开dialog 添加渠道
 function openServerDialog() {
     type = 1;
+    let openday = $("#save_openday").datetimebox("getValue");
+    if (checkParam(openday)) {
+
+    }
     $("#dlg").dialog("open").dialog("setTitle", "添加服务器");
 }
 
 //打开dialog 修改服务器
 function openServerModifyDialog() {
     type = 2;
-    let selectedRows = $("#serverTable").datagrid('getSelections');
+    let selectedRows = $("#dg").datagrid('getSelections');
     let row = selectedRows[0];
     if (selectedRows.length !== 1) {
         $.messager.alert("系统提示", "请选择一条要编辑的数据！");
@@ -144,29 +170,28 @@ function saveServer() {
     let spId = $("#save_spid").val();
     let loginUrl = $("#save_loginurl").val();
     let openday = $("#save_openday").datetimebox("getValue");
-
-    console.log("id" + gameid);
+    if (gameId === "-1") {
+        $.messager.alert("系统提示", "请选择游戏");
+        return;
+    }
     let data = {"gameId": gameId, "serverId": serverId, "spId": spId, "loginUrl": loginUrl, "openday": openday};
     $.ajax({
         url: "/server/addServer",
         type: "post",
         data: JSON.stringify(data),
-        async: false,
         dataType: "json",//预期服务器返回的数据类型
         contentType: "application/json; charset=utf-8",
-
+        async: false,
         success: function (result) {
+            $("#dlg").dialog("close");
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {
                 $.messager.alert("系统提示", "保存成功");
-                $("#dlg").dialog("close");
-                $("#serverTable").datagrid("reload");
                 resetValue();
-                initFirstPage();
+                loadServerListTab();
             } else {
                 $.messager.alert("系统提示", "操作失败");
-                $("#dlg").dialog("close");
                 resetValue();
             }
         },
@@ -208,9 +233,9 @@ function updateServer() {
             } else if (result.resultCode === 200) {
                 $.messager.alert("系统提示", "保存成功");
                 $("#dlg").dialog("close");
-                $("#serverTable").datagrid("reload");
+                $("#dg").datagrid("reload");
                 resetValue();
-                initFirstPage();
+                loadServerListTab();
             } else {
                 $.messager.alert("系统提示", "操作失败");
                 $("#dlg").dialog("close");
@@ -231,7 +256,6 @@ function closeServerDialog() {
 
 function resetValue() {
     $("#save_id").val("");
-    $("#save_gameid").val("");
     $("#save_serverid").val("");
     $("#save_spid").val("");
     $("#save_loginurl").val("");
@@ -240,7 +264,7 @@ function resetValue() {
 
 //删除服务器
 function deleteServer() {
-    let selectedRows = $("#serverTable").datagrid('getSelections');
+    let selectedRows = $("#dg").datagrid('getSelections');
     if (selectedRows.length === 0) {
         $.messager.alert("系统提示", "请选择要删除的数据！");
         return;
@@ -281,69 +305,16 @@ function deleteServer() {
 
 }
 
-function initFirstPage() {
-    let gameId = null;
-    let serverId = null;
-    let spId = null;
-    $.ajax({
-        url: t_url,
-        type: "post",
-        data: {"gameId": gameId, "serverId": serverId, "spId": spId, "page": 1, "rows": 10},
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                result = {
-                    total: result.total,
-                    rows: result.rows
-                }
-                if (result.total === 0) {
-                    $.messager.alert("系统提示", "查询成功 无数据");
-                }
-                $("#serverTable").datagrid("loadData", result);
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "查询失败");
-        }
-    });
-}
-
-//下拉菜单
-function initSelectList() {
-    console.log("initSelectList");
-    //游戏id
-    $.ajax({
-        //获取下拉
-        url: "/server/getGameList",
-        type: "get",
-        async: false,
-        dataType: "json",
-        success: function (result) {
-            if (result.resultCode === 501) {
-                relogin();
-            } else if (result.resultCode === 200) {
-                let select_gameId = $("#gameid");
-                select_gameId.find("option").remove();
-                select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                for (let res = 0; res < result.total; res++) {
-                    // console.log("<option value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
-                    select_gameId.append("<option value='" + result.rows[res].gameId + "'>" + result.rows[res].name + "</option>");
-                }
-            }
-        },
-        error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
-        }
-    });
-}
 
 function initSpGameServer(type) {
-    let gameId = $('#gameid').val();
-    let serverId = $("#serverid").val();
-    let spId = $("#spid").val();
+    let select_spId = $("#spid");
+    let select_gameId = $("#gameid");
+    let select_serverId = $("#serverid");
+
+    let spId = select_spId.val();
+    let gameId = select_gameId.val();
+    let serverId = select_serverId.val();
+    let response;
 
     let data = {
         "gameId": gameId,
@@ -364,47 +335,41 @@ function initSpGameServer(type) {
                 relogin();
             } else if (result.resultCode === 200) {
                 // console.log(result);
-                if (type === 1) {
-                    let select_spId = $("#spid");
-                    select_spId.find("option").remove();
-                    select_spId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_spId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                } else if (type === 2) {
-                    let select_gameId = $("#gameid");
-                    select_gameId.find("option").remove();
-                    select_gameId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        let gameid = result.rows[res].gameId;
-                        let name = result.rows[res].name + "\t" + gameid;
-                        select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
-                    }
-                    let save_gameid = $("#save_gameid");
-                    save_gameid.find("option").remove();
-                    save_gameid.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        let gameid = result.rows[res].gameId;
-                        let name = result.rows[res].name + "\t" + gameid;
-                        save_gameid.append("<option  value='" + gameid + "'>" + name + "</option>");
-                    }
-
-
-                } else if (type === 3) {
-                    let select_serverId = $("#serverid");
-                    select_serverId.find("option").remove();
-                    select_serverId.append("<option value=-1 selected=selected>请选择</option>");
-                    for (let res = 0; res < result.total; res++) {
-                        select_serverId.append("<option value='" + result.rows[res] + "'>" + result.rows[res] + "</option>");
-                    }
-                }
-
+                response = result;
             }
         },
         error: function () {
             $.messager.alert("ERROR！", "获取游戏列表出错");
         }
     });
+
+    switch (type) {
+        case 1:
+            select_spId.find("option").remove();
+            select_spId.append("<option value=-1 selected=selected>请选择</option>");
+            for (let res = 0; res < response.total; res++) {
+                select_spId.append("<option value='" + response.rows[res] + "'>" + response.rows[res] + "</option>");
+            }
+            break;
+        case 2:
+            select_gameId.find("option").remove();
+            select_gameId.append("<option value=-1 selected=selected>请选择</option>");
+            for (let res = 0; res < response.total; res++) {
+                let gameid = response.rows[res].id;
+                let name = response.rows[res].name + "\t" + gameid;
+                select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
+            }
+            break;
+        case 3:
+            select_serverId.find("option").remove();
+            select_serverId.append("<option value=-1 selected=selected>请选择</option>");
+            for (let res = 0; res < response.total; res++) {
+                select_serverId.append("<option value='" + response.rows[res] + "'>" + response.rows[res] + "</option>");
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 //登录超时 重新返回到登录界面

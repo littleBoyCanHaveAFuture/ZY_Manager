@@ -6,24 +6,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Insert title here</title>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/default/easyui.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/jquery-easyui-1.3.3/themes/icon.css">
+          href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/icon.css">
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.config.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/ueditor/ueditor.all.min.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/server_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
 
-<table id="serverTable" title="服务器列表" class="easyui-datagrid" pagination="true"
+<table id="dg" title="服务器列表" class="easyui-datagrid" pagination="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#sp">
     <thead data-options="frozen:true">
     <tr>
@@ -97,6 +95,7 @@
             <tr>
                 <td>区服id</td>
                 <td>
+                    <label for="save_serverid"></label>
                     <input type="text" name="save_serverid" id="save_serverid"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="服务器id不能为空">
@@ -106,6 +105,7 @@
             <tr>
                 <td>登录地址</td>
                 <td>
+                    <label for="save_loginurl"></label>
                     <input type="text" name="save_loginurl" id="save_loginurl"
                            required="false">
                 </td>
@@ -113,6 +113,7 @@
             <tr>
                 <td>开服时间</td>
                 <td>
+                    <label for="save_openday"></label>
                     <input class="easyui-datetimebox" id="save_openday" name="save_openday"
                            data-options="required:true,showSeconds:false" style="width:150px">
                 </td>

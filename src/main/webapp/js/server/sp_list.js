@@ -6,28 +6,35 @@ $(function () {
 });
 
 function initTableColumns() {
-
-    let commonResult = {
-        "渠道id": "spId",
-        "父渠道": "parent",
-        "渠道名称": "name",
-        "状态": "state",
-        "分享链接": "shareLinkUrl",
-    };
-
-    let activeColumns = [];
-    $.each(commonResult, function (index, value) {
-        let column = {};
-        column["field"] = value;
-        column["title"] = index;
-        column["align"] = 'center';
-        // column["width"] = 50;
-        activeColumns.push(column);
+    let dg = $('#dg');
+    dg.datagrid({
+        rownumbers: true,
+        columns: [[
+            {field: 'iconUrl', title: '渠道图标', align: 'center', formatter: showPhoto},
+            {field: 'parent', title: '父渠道', align: 'center'},
+            {field: 'spId', title: '渠道id', align: 'center'},
+            {field: 'name', title: '渠道名称', align: 'center'},
+            {field: 'state', title: '状态', align: 'center'},
+            {field: 'shareLinkUrl', title: '分享链接', align: 'center'},
+            {field: 'version', title: '版本号', align: 'center'},
+        ]],
+        pagination: true,
+        pageSize: 10,
+        pageList: [10, 20],
+        onSelectPage: function (pageNum, pageSize) {
+            opts.pageNumber = pageNum;
+            opts.pageSize = pageSize;
+            loadSpListTab();
+        }
     });
+}
 
-    let dg = $("#dg");
-
-    initDataGrid(dg, activeColumns, loadSpListTab());
+function showPhoto(value, row, index) {
+    if (row.iconUrl) {
+        return '<img src="/images/sdk/' + row.iconUrl + '"style="height:30px;" alt="">'
+    } else {
+        return null;
+    }
 }
 
 let url = "/server/getSpList";
@@ -119,6 +126,8 @@ function openSpModifyDialog() {
     let parent = row.parent;
     let state = row.state;
     let shareLinkUrl = row.shareLinkUrl;
+    let iconUrl = row.iconUrl;
+    let version = row.version;
 
     dlg.dialog({
         onOpen: function () {
@@ -127,6 +136,8 @@ function openSpModifyDialog() {
             $("#save_parent").val(parent);
             $("#save_state").val(state);
             $("#save_shareLinkUrl").val(shareLinkUrl);
+            $("#save_icon").val(iconUrl);
+            $("#save_version").val(version);
         }
     });
     dlg.dialog("open").dialog("setTitle", "修改游戏信息");
@@ -138,6 +149,8 @@ function resetValue() {
     $("#save_parent").val("");
     $("#save_state").val("");
     $("#save_shareLinkUrl").val("");
+    $("#save_icon").val("");
+    $("#save_version").val("");
 }
 
 //删除服务器
@@ -154,12 +167,15 @@ function deleteSp() {
     }
 
     let length = selectedRows.length;
+    let row = selectedRows[0];
 
-    let spId = selectedRows[0].spId;
-    let name = selectedRows[0].name;
-    let parent = selectedRows[0].parent;
-    let state = selectedRows[0].state;
-    let shareLinkUrl = selectedRows[0].shareLinkUrl;
+    let spId = row.spId;
+    let name = row.name;
+    let parent = row.parent;
+    let state = row.state;
+    let shareLinkUrl = row.shareLinkUrl;
+    let iconUrl = row.iconUrl;
+    let version = row.version;
 
     let param =
         "?type=" + type +
@@ -167,7 +183,9 @@ function deleteSp() {
         "&name=" + name +
         "&parent=" + parent +
         "&state=" + state +
-        "&shareLinkUrl=" + shareLinkUrl
+        "&shareLinkUrl=" + shareLinkUrl +
+        "&iconUrl=" + iconUrl +
+        "&version=" + version
     ;
 
     $.messager.confirm("系统提示", "您确认要删除这" + "<font color=red>" + length + "</font>" + "条数据吗？",
@@ -207,6 +225,8 @@ function saveServer(type) {
     let parent = $("#save_parent").val();
     let state = $("#save_state").val();
     let shareLinkUrl = $("#save_shareLinkUrl").val();
+    let iconUrl = $("#save_icon").val();
+    let version = $("#save_version").val();
 
     let param =
         "?type=" + type +
@@ -214,7 +234,10 @@ function saveServer(type) {
         "&name=" + name +
         "&parent=" + parent +
         "&state=" + state +
-        "&shareLinkUrl=" + shareLinkUrl;
+        "&shareLinkUrl=" + shareLinkUrl +
+        "&iconUrl=" + iconUrl +
+        "&version=" + version;
+
     console.info(url);
 
     $.ajax({

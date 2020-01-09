@@ -16,7 +16,6 @@ function getCookies(cname) {
     return "";
 }
 
-
 function delCookie(name) {
     var exp = new Date();
     exp.setTime(exp.getTime() - 1);
@@ -24,7 +23,6 @@ function delCookie(name) {
     if (cval != null)
         document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
 }
-
 
 function checkCookies() {
     console.log("checkCookie");
@@ -122,3 +120,24 @@ function getDatagridOptions(dg) {
     let opts = dg.datagrid('options');
     return opts;
 }
+
+/**
+ * @param {string} title 标题
+ * @param {string}  message 内容
+ * */
+function tip(title, message) {
+    $.messager.show({
+        title: title,
+        msg: message,
+        timeout: 200,  //1秒后消失
+        showType: 'slide',//弹出的方式。类似ppt里的图片弹出方式
+        //弹出框的样式。居中显示
+        style: {
+            right: '',
+            top: document.body.scrollTop + document.documentElement.scrollCenter,
+            bottom: ''
+        }
+    });
+
+}
+

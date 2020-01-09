@@ -1,13 +1,10 @@
 package com.ssm.promotion.core.service.impl;
 
-import com.ssm.promotion.core.dao.GameNameDao;
 import com.ssm.promotion.core.dao.ServerListDao;
 import com.ssm.promotion.core.dao.SpListDao;
 import com.ssm.promotion.core.entity.ServerInfo;
 import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.service.ServerListService;
-import com.ssm.promotion.core.util.RSAUtilsNew;
-import com.ssm.promotion.core.util.RandomUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -22,10 +19,6 @@ import java.util.Map;
 public class ServerListServiceImpl implements ServerListService {
     @Resource
     private ServerListDao serverListdao;
-    @Resource
-    private SpListDao spDao;
-    @Resource
-    private GameNameDao nameDao;
 
     @Override
     public List<ServerInfo> getServerList(Map<String, Object> map, Integer userId) {
@@ -34,11 +27,6 @@ public class ServerListServiceImpl implements ServerListService {
 
     @Override
     public int addServer(ServerInfo server, Integer userId) throws Exception {
-        //生成公钥私钥
-        Map<String, Object> keyMap = RSAUtilsNew.genKeyPair();
-        server.setPriKey(RSAUtilsNew.getPrivateKey(keyMap));
-        server.setPubKey(RSAUtilsNew.getPublicKey(keyMap));
-        server.setSecertKey(RandomUtil.rndStr(12, true));
         return serverListdao.insertServer(server);
     }
 
@@ -65,24 +53,23 @@ public class ServerListServiceImpl implements ServerListService {
 
     /**
      * @param type 同游戏
-     *             1 不同区服
-     *             2 不同渠道
+     *             1 不同渠道id
+     *             2 不同游戏id
+     *             3.不同区服id
+     * @return id合集
      */
     @Override
     public List<Integer> getDistinctServerInfo(Map<String, Object> map, Integer type, Integer userId) {
-        List<Integer> res = null;
-
-        if (type == 1) {
-            //查渠道
-            res = serverListdao.selectDistinctSpId(map);
-        } else if (type == 2) {
-            //查游戏
-            res = serverListdao.selectDistinctGameId(map);
-        } else if (type == 3) {
-            //查渠道-游戏-区服
-            res = serverListdao.selectDistinctServerId(map);
+        switch (type) {
+            case 1:
+                return serverListdao.selectDistinctSpId(map);
+            case 2:
+                return serverListdao.selectDistinctGameId(map);
+            case 3:
+                return serverListdao.selectDistinctServerId(map);
+            default:
+                return null;
         }
-        return res;
     }
 
 
@@ -132,44 +119,6 @@ public class ServerListServiceImpl implements ServerListService {
         return serverListdao.selectPublicKey(map);
     }
 
-    @Override
-    public List<Sp> getAllSp(Integer userId) {
-        return spDao.getAllSp();
-    }
 
-    @Override
-    public List<Sp> selectSpByIds(Map<String, Object> map, Integer userId) {
-        return spDao.selectSpByIds(map);
-    }
-
-    @Override
-    public List<Sp> getSpById(Map<String, Object> map, Integer userId) {
-        return spDao.getSpById(map);
-    }
-
-    @Override
-    public List<Sp> getAllSpByPage(Map<String, Object> map, Integer userId) {
-        return spDao.getAllSpByPage(map);
-    }
-
-    @Override
-    public Long getTotalSp(Integer userId) {
-        return spDao.getTotalSp();
-    }
-
-    @Override
-    public int delSp(Integer id, Integer userId) {
-        return spDao.deleteSp(id);
-    }
-
-    @Override
-    public int updateSp(Map<String, Object> map, Integer userId) {
-        return spDao.updateSp(map);
-    }
-
-    @Override
-    public int addSp(Map<String, Object> map, Integer userId) {
-        return spDao.addSp(map);
-    }
 
 }

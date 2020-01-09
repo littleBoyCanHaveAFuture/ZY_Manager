@@ -123,7 +123,7 @@ function initSpGameServer(type) {
             select_gameId.find("option").remove();
             select_gameId.append("<option value=-1 selected=selected>请选择</option>");
             for (let res = 0; res < response.total; res++) {
-                let gameid = response.rows[res].gameId;
+                let gameid = response.rows[res].id;
                 let name = response.rows[res].name + "\t" + gameid;
                 select_gameId.append("<option  value='" + gameid + "'>" + name + "</option>");
             }

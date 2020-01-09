@@ -3,6 +3,7 @@ package com.ssm.promotion.core.util;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author song minghua
  */
@@ -81,6 +82,23 @@ public final class RandomUtil {
                 sb.append(rndInt(10));
             } else if (rndBool()) {
                 sb.append(Character.toUpperCase(rndWord()));
+            } else {
+                sb.append(Character.toLowerCase(rndWord()));
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 32位随机秘钥
+     * 小写字母+数字
+     */
+    public static String rndSecertKey() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 32; ++i) {
+            if (sb.length() > 0 && rndBool100(40)) {
+                sb.append(rndInt(10));
             } else {
                 sb.append(Character.toLowerCase(rndWord()));
             }

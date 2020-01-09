@@ -8,6 +8,8 @@
         <result property="name" column="name"/>
         <result property="state" column="state"/>
         <result property="shareLinkUrl" column="shareLinkUrl"/>
+        <result property="iconUrl" column="icon_url"/>
+        <result property="version" column="version"/>
     </resultMap>
 
     <sql id="select_sp_column">
@@ -15,7 +17,9 @@
                name,
                parent,
                state,
-               shareLinkUrl
+               shareLinkUrl,
+               icon_url,
+               version
         FROM zy_sp
     </sql>
 
@@ -64,6 +68,24 @@
                 </foreach>
             </if>
         </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="selectSpNoByIds" parameterType="map" resultMap="SpResult">
+        SELECT * FROM zy_sp
+        <where>
+            <if test="spIdList != null">
+                zy_sp.spId not in
+                <foreach collection="spIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
     </select>
 
     <select id="getTotalSp" resultType="Long">
@@ -92,12 +114,18 @@
             <if test="shareLinkUrl != null  and shareLinkUrl !=''">
                 shareLinkUrl=#{shareLinkUrl},
             </if>
+            <if test="iconUrl != null  and iconUrl !=''">
+                icon_url=#{iconUrl},
+            </if>
+            <if test="version != null  and version !=''">
+                version=#{version},
+            </if>
         </set>
         where spId=#{spId}
     </update>
 
     <insert id="addSp" parameterType="map">
-        insert into zy_sp(spId, parent, name, state, shareLinkUrl)
-        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl})
+        insert into zy_sp(spId, parent, name, state, shareLinkUrl, icon_url, version)
+        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl}, #{iconUrl}, #{version})
     </insert>
 </mapper>

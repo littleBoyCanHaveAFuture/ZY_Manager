@@ -3,13 +3,10 @@ package com.ssm.promotion.core.controller;
 import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
-import com.ssm.promotion.core.entity.GameName;
-import com.ssm.promotion.core.entity.PageBean;
-import com.ssm.promotion.core.entity.ServerInfo;
-import com.ssm.promotion.core.entity.Sp;
-import com.ssm.promotion.core.service.GameNameService;
-import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.entity.*;
+import com.ssm.promotion.core.service.*;
 import com.ssm.promotion.core.util.ResponseUtil;
+import com.ssm.promotion.core.util.enums.ManagerType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -35,10 +32,17 @@ public class ServerController {
     private ServerListService serverService;
     @Resource
     private GameNameService gameService;
+    @Resource
+    private GameSpService gameSpService;
+    @Resource
+    private SpService spService;
+    @Resource
+    private UserService userService;
     @Autowired
     private HttpServletRequest request;
 
     private Integer getUserId() {
+        //可以设置缓存 redis 登录时设置过期时间 24小时 todo
         HttpSession session = request.getSession();
         return (Integer) session.getAttribute("userId");
     }
@@ -112,7 +116,6 @@ public class ServerController {
         if (gameNames == null || gameNames.size() == 0) {
             return ResultGenerator.genFailResult("添加失败");
         }
-        //todo 渠道 游戏 区服 不能一样
         serverInfo.setGamename(gameNames.get(0).getName());
         int resultTotal = serverService.addServer(serverInfo, userId);
 
@@ -177,9 +180,13 @@ public class ServerController {
      */
     @RequestMapping(value = "/gamedata", method = RequestMethod.GET)
     @ResponseBody
-    public void deleteGame(Integer gameId,
+    public void changeGame(Integer gameId,
                            String name,
-                           Integer type, HttpServletResponse response) throws Exception {
+                           Integer type,
+                           Integer uid,
+                           String loginUrl,
+                           String paybackUrl,
+                           HttpServletResponse response) throws Exception {
         System.out.println("gamedata:");
         Integer userId = getUserId();
         if (userId == null) {
@@ -189,13 +196,24 @@ public class ServerController {
         System.out.println("gameId:" + gameId);
         System.out.println("name:" + name);
         System.out.println("type:" + type);
+        System.out.println("uid:" + uid);
+        System.out.println("loginUrl:" + loginUrl);
+        System.out.println("paybackUrl:" + paybackUrl);
+
+        GameName gameName = new GameName(name, userId);
+
+        gameName.setLoginUrl(loginUrl);
+        gameName.setPaycallbackUrl(paybackUrl);
+
         if (type == 1) {
             gameService.deleteGame(gameId, userId);
         } else if (type == 2) {
-            gameService.updateGame(gameId, name, userId);
+            if (gameId != null) {
+                gameName.setId(gameId);
+                gameService.updateGame(gameName, userId);
+            }
         } else if (type == 3) {
-          int i =  gameService.addGame(gameId, name, userId);
-          System.out.println(i);
+            gameService.addGame(gameName, userId);
         }
 
         log.info("request: game/gamedata , gameId: " + gameId);
@@ -239,9 +257,9 @@ public class ServerController {
 
             List<Integer> gameIdList = serverService.getDistinctServerInfo(map, 1, userId);
 
-            if (gameIdList != null || gameIdList.size() > 0) {
+            if (gameIdList != null && gameIdList.size() > 0) {
                 for (GameName gameName : serverInfos) {
-                    if (gameIdList.contains(gameName.getGameId())) {
+                    if (gameIdList.contains(gameName.getId())) {
                         res.add(gameName);
                     }
                 }
@@ -279,24 +297,24 @@ public class ServerController {
         map.put("gameId", gameId);
         map.put("serverId", serverId);
 
-        int size;
+        //不同游戏、渠道、区服 id
         List<Integer> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
+        //大小排序
         serverInfos = serverInfos.stream().sorted(Integer::compareTo).collect(Collectors.toList());
+        int size = serverInfos.size();
 
         JSONArray rows;
         if (type == 1) {
             rows = JSONArray.fromObject(serverInfos);
-            size = serverInfos.size();
         } else if (type == 2) {
             //选择已经有的服务器名称
-            Map<String, Object> gamemap = new HashMap<>(1);
-            map.replace("gameId", -1);
-            List<GameName> gameNameList = gameService.getGameList(gamemap, userId);
-
+            map.clear();
+            List<GameName> gameNameList = gameService.getGameList(map, userId);
             Iterator<GameName> it = gameNameList.iterator();
+
             while (it.hasNext()) {
                 GameName gameName = it.next();
-                if (!serverInfos.contains(gameName.getGameId())) {
+                if (!serverInfos.contains(gameName.getId())) {
                     it.remove();
                 }
             }
@@ -304,7 +322,6 @@ public class ServerController {
             size = gameNameList.size();
         } else {
             rows = JSONArray.fromObject(serverInfos);
-            size = serverInfos.size();
         }
 
         JSONObject result = new JSONObject();
@@ -326,8 +343,6 @@ public class ServerController {
                           Integer spId,
                           String name,
                           HttpServletResponse response) throws Exception {
-        System.out.println("getSpList:");
-
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
@@ -344,9 +359,9 @@ public class ServerController {
         }
         map.put("name", name);
         map.put("spId", spId);
-        List<Sp> spInfos = serverService.getAllSpByPage(map, userId);
+        List<Sp> spInfos = spService.getAllSpByPage(map, userId);
 
-        long size = serverService.getTotalSp(userId);
+        long size = spService.getTotalSp(userId);
         result.put("rows", spInfos);
         result.put("total", size);
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
@@ -370,6 +385,8 @@ public class ServerController {
                          Integer parent,
                          Integer state,
                          String shareLinkUrl,
+                         String iconUrl,
+                         String version,
                          Integer type, HttpServletResponse response) throws Exception {
         log.info("changeSp");
         System.out.println("spId:" + spId);
@@ -377,6 +394,8 @@ public class ServerController {
         System.out.println("parent:" + parent);
         System.out.println("state:" + state);
         System.out.println("shareLinkUrl:" + shareLinkUrl);
+        System.out.println("iconUrl:" + iconUrl);
+        System.out.println("version:" + version);
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -392,13 +411,418 @@ public class ServerController {
         map.put("parent", parent);
         map.put("state", state);
         map.put("shareLinkUrl", shareLinkUrl);
+        map.put("iconUrl", iconUrl);
+        map.put("version", version);
 
         if (type == 1) {
-            serverService.delSp(spId, userId);
+            spService.delSp(spId, userId);
         } else if (type == 2) {
-            serverService.updateSp(map, userId);
+            spService.updateSp(map, userId);
         } else if (type == 3) {
-            serverService.addSp(map, userId);
+            spService.addSp(map, userId);
+        }
+
+
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+        log.info("request: changeSp ");
+    }
+
+    /**
+     * 查询用户-该游戏的所有渠道
+     */
+    @RequestMapping(value = "/getGameSpList", method = RequestMethod.POST)
+    public void getGameSpList(@RequestParam(value = "page", required = false) String page,
+                              @RequestParam(value = "rows", required = false) String rows,
+                              Integer gameId,
+                              String name,
+                              HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null) {
+            return;
+        }
+
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        if (page != null && rows != null) {
+            PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
+            map.put("start", pageBean.getStart());
+            map.put("size", pageBean.getPageSize());
+        }
+
+        map.put("gameId", gameId);
+        map.put("name", name);
+        map.put("uid", userId);
+
+        long size = 0;
+        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
+        do {
+            //查询该账号-该游戏的所有渠道
+            List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
+            if (gameSpList == null || gameSpList.size() == 0) {
+                break;
+            }
+            size = gameSpService.getCountGameSp(map, userId);
+            Set<Integer> spIds = new HashSet<>();
+            for (GameSp sp : gameSpList) {
+                spIds.add(sp.getSpId());
+            }
+            System.out.println(spIds.toString());
+
+            //查询详细的渠道信息
+            map.clear();
+            map.put("spIdList", spIds);
+            List<Sp> spList = spService.selectSpByIds(false, map, userId);
+
+            for (GameSp gameSp : gameSpList) {
+                Integer spId = gameSp.getSpId();
+                WebGameSp webGameSp = new WebGameSp();
+                webGameSp.setId(gameSp.getId());
+                webGameSp.setAppid(gameId);
+                webGameSp.setUid(gameSp.getUid());
+                webGameSp.setChannelid(spId);
+                //设置配置状态
+                webGameSp.setConfigStatus(gameSp.getStatus());
+
+                webGameSpMap.put(spId, webGameSp);
+            }
+            for (Sp sp : spList) {
+                Integer spId = sp.getSpId();
+                if (webGameSpMap.containsKey(spId)) {
+                    WebGameSp webGameSp = webGameSpMap.get(spId);
+                    webGameSp.setIcon(sp.getIconUrl());
+                    webGameSp.setName(sp.getName());
+                    webGameSp.setStatus(1);
+                    webGameSp.setVersion(sp.getVersion());
+
+                }
+            }
+
+            if (!name.isEmpty()) {
+                Iterator<Map.Entry<Integer, WebGameSp>> it = webGameSpMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<Integer, WebGameSp> entry = it.next();
+                    WebGameSp webGameSp = entry.getValue();
+                    if (!webGameSp.getName().contains(name)) {
+                        it.remove();
+                    }
+                }
+                size = webGameSpMap.size();
+            }
+
+
+        } while (false);
+
+
+        result.put("rows", webGameSpMap.values());
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameList , map: " + result.toString());
+    }
+
+    /**
+     * 查询所有渠道
+     */
+    @RequestMapping(value = "/getAllGameSpList", method = RequestMethod.POST)
+    public void getAllGameSpList(@RequestParam(value = "page", required = false) String page,
+                                 @RequestParam(value = "rows", required = false) String rows,
+                                 Integer gameId,
+                                 String name,
+                                 HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null || page == null || rows == null) {
+            return;
+        }
+
+        long size = spService.getTotalSp(userId);
+        JSONObject result = new JSONObject();
+
+        List<WebGameSp> webGameSpList = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>(5);
+        //需要将已经存在的放前面
+        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
+
+        PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
+        map.put("start", pageBean.getStart());
+        map.put("size", pageBean.getPageSize());
+
+        do {
+            //已添加的游戏渠道
+            Set<Integer> hasGameSpId = new LinkedHashSet<>();
+
+            map.put("gameId", gameId);
+            map.put("name", name);
+            map.put("uid", userId);
+
+            //查询该账号-该游戏的所有渠道
+            List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
+            if (gameSpList == null) {
+                break;
+            }
+
+            //数据条数
+            int gameSpSize = gameSpList.size();
+            //数据最大条数
+            long gameSpMaxSize = gameSpService.getCountGameSp(map, userId);
+            //计算最大页数
+            long gameSpMaxPage = gameSpMaxSize == 0 ? 0 : gameSpMaxSize / pageBean.getPageSize() + 1;
+
+            long noGameSpStart = 0;
+            long noGameSpPageSize = 0;
+
+            if (gameSpMaxPage > pageBean.getPage()) {
+                //当前页均是已添加的渠道
+                //直接查询
+                for (GameSp sp : gameSpList) {
+                    hasGameSpId.add(sp.getSpId());
+                }
+            } else if (gameSpMaxPage == pageBean.getPage()) {
+                //当前页=已添加的渠道+未添加的渠道
+                for (GameSp sp : gameSpList) {
+                    hasGameSpId.add(sp.getSpId());
+                }
+                noGameSpStart = 0;
+                noGameSpPageSize = pageBean.getStart() + pageBean.getPageSize() - gameSpSize;
+            } else {
+                //当前页均是未添加的渠道
+                noGameSpStart = pageBean.getStart() - gameSpMaxSize + 1;
+                noGameSpPageSize = pageBean.getPageSize();
+            }
+
+            System.out.println("noGameSpStart\t" + noGameSpStart);
+            System.out.println("noGameSpPageSize\t" + noGameSpPageSize);
+            System.out.println("spIds\t" + hasGameSpId.toString());
+
+            //查询详细的渠道信息
+            map.remove("gameId");
+            map.remove("name");
+            map.remove("uid");
+
+            //对应游戏已添加渠道的详细信息
+            if (hasGameSpId.size() != 0) {
+                map.put("spIdList", hasGameSpId);
+                List<Sp> hasSpList = spService.selectSpByIds(false, map, userId);
+
+                System.out.println(hasGameSpId.toString());
+
+                for (GameSp gameSp : gameSpList) {
+                    Integer spId = gameSp.getSpId();
+                    WebGameSp webGameSp = new WebGameSp();
+                    webGameSp.setId(gameSp.getId());
+                    webGameSp.setAppid(gameId);
+                    webGameSp.setUid(gameSp.getUid());
+                    webGameSp.setChannelid(spId);
+                    //设置配置状态
+                    webGameSp.setConfigStatus(gameSp.getStatus());
+                    webGameSpMap.put(spId, webGameSp);
+                    webGameSpList.add(webGameSp);
+                }
+                for (Sp sp : hasSpList) {
+                    Integer spId = sp.getSpId();
+                    if (webGameSpMap.containsKey(spId)) {
+                        WebGameSp webGameSp = webGameSpMap.get(spId);
+                        webGameSp.setIcon(sp.getIconUrl());
+                        webGameSp.setName(sp.getName());
+                        webGameSp.setStatus(1);
+                        webGameSp.setVersion(sp.getVersion());
+                    }
+                }
+            }
+            //对应游戏未添加渠道的详细信息
+            if (hasGameSpId.size() < pageBean.getPageSize()) {
+                List<Sp> noSpList = spService.selectSpByIds(true, map, userId);
+                for (Sp sp : noSpList) {
+                    Integer spId = sp.getSpId();
+                    WebGameSp webGameSp = new WebGameSp();
+                    webGameSp.setAppid(gameId);
+                    webGameSp.setIcon(sp.getIconUrl());
+                    webGameSp.setName(sp.getName());
+                    webGameSp.setChannelid(spId);
+                    webGameSp.setStatus(0);
+                    webGameSp.setVersion(sp.getVersion());
+                    //设置配置状态
+                    webGameSp.setConfigStatus(0);
+                    webGameSpMap.put(spId, webGameSp);
+                    webGameSpList.add(webGameSp);
+                }
+            }
+        } while (false);
+
+
+        result.put("rows", webGameSpList);
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameList , map: " + result.toString());
+    }
+
+    /**
+     * 增加、修改、删除 游戏的渠道信息
+     *
+     * @param id       已添加渠道的主键id zy_game_sp
+     * @param gameId   平台游戏id
+     * @param spId     平台渠道id
+     * @param loginUrl 渠道登录地址
+     * @param appId    渠道游戏id
+     * @param appName  渠道游戏名称
+     * @param loginKey 登录秘钥
+     * @param payKey   支付秘钥
+     * @param sendKey  发货秘钥
+     * @param type     1 删除
+     *                 2 配置
+     *                 3 修改
+     *                 4.添加
+     */
+    @RequestMapping(value = "/changeGameSp", method = RequestMethod.POST)
+    @ResponseBody
+    public void changeGameSp(Integer id,
+                             Integer gameId,
+                             Integer spId,
+                             String loginUrl,
+                             Integer appId,
+                             String appName,
+                             String loginKey,
+                             String payKey,
+                             String sendKey,
+                             Integer type,
+                             HttpServletResponse response) throws Exception {
+        log.info("changeGameSp");
+        System.out.println("type:" + type);
+        System.out.println("gameId:" + gameId);
+        System.out.println("spId:" + spId);
+        System.out.println("loginUrl:" + loginUrl);
+        System.out.println("appId:" + appId);
+        System.out.println("appName:" + appName);
+        System.out.println("loginKey:" + loginKey);
+        System.out.println("payKey:" + payKey);
+        System.out.println("sendKey:" + sendKey);
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null || spId == null) {
+            return;
+        }
+        //目前只能查询自己的
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("gameId", gameId);
+        map.put("spId", spId);
+
+        switch (type) {
+            case 1:
+            case 2:
+            case 3: {
+                //zy_game_sp 已有数据 需要校验
+                boolean isOpt = false;
+
+                //判断与数据库是否相符
+                List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
+                if (gameSpList == null || gameSpList.size() != 1) {
+                    System.out.println("changeGameSp err");
+                    return;
+                }
+                GameSp gameSp = gameSpList.get(0);
+                int gameSpGid = gameSp.getGameId();
+                int gameSpSpId = gameSp.getSpId();
+                int gameSpUid = gameSp.getUid();
+                int gameSpStatus = gameSp.getStatus();
+
+                if (gameSpGid != gameId || gameSpSpId != spId) {
+                    System.out.println("changeGameSp err1");
+                    return;
+                }
+                //操作权限判断
+                System.out.println("id=" + userId + "\tuid=" + gameSpUid);
+                if (userId == gameSpUid) {
+                    //创建者可以直接操作
+                    isOpt = true;
+                } else {
+                    //超级管理员也阔以直接操作
+                    User currUser = userService.getUserById(userId, userId);
+                    if (currUser == null) {
+                        System.out.println("changeGameSp err2");
+                        return;
+                    }
+                    if (currUser.getManagerLv() == ManagerType.SuperManager.getId()) {
+                        isOpt = true;
+                    }
+                }
+                if (!isOpt) {
+                    System.out.println("changeGameSp err3");
+                    return;
+                }
+                map.clear();
+                //开始mysql事务
+                if (type == 1) {
+                    //删除渠道信息
+                    gameSpService.deleteGameSp(id, userId);
+                } else if (type == 2) {
+                    //配置渠道信息
+                    if (gameSpStatus != 0) {
+                        System.out.println("changeGameSp err4\t" + gameSpStatus);
+                        return;
+                    }
+
+                    map.put("appId", appId);
+                    map.put("appName", appName);
+                    map.put("loginKey", loginKey);
+                    map.put("payKey", payKey);
+                    map.put("sendKey", sendKey);
+                    map.put("status", 1);
+                    gameSpService.updateGameSp(map, userId);
+                } else {
+                    //修改渠道信息
+                    if (gameSpStatus != 1) {
+                        System.out.println("changeGameSp err5\t" + gameSpStatus);
+                        return;
+                    }
+                    map.put("appId", appId);
+                    map.put("appName", appName);
+                    map.put("loginKey", loginKey);
+                    map.put("payKey", payKey);
+                    map.put("sendKey", sendKey);
+                    gameSpService.updateGameSp(map, userId);
+                }
+                //2-3修改内容不一致 需要根据实际情况来 todo
+            }
+            break;
+            case 4: {
+                //添加游戏渠道
+                GameSp sp = new GameSp();
+                sp.setGameId(gameId);
+                sp.setSpId(spId);
+                sp.setUid(userId);
+                sp.setStatus(0);
+                sp.setAppId(appId);
+                sp.setAppName(appName);
+                sp.setLoginUrl(loginUrl);
+//                sp.setPaybackUrl();
+                sp.setLoginKey(loginKey);
+                sp.setPayKey(payKey);
+                sp.setSendKey(sendKey);
+                gameSpService.insertGameSp(sp, userId);
+            }
+            break;
+            default:
+                break;
         }
 
 

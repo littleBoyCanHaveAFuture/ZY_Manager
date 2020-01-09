@@ -9,14 +9,14 @@ import java.util.Map;
  * @author Administrator
  */
 public interface GameNameService {
-    public List<GameName> getGameList(Map<String, Object> map, Integer userid);
+    List<GameName> getGameList(Map<String, Object> map, Integer userid);
 
     int deleteGame(Integer gameId, Integer userid);
 
     /**
      * 修改服务器
      */
-    int updateGame(Integer id, String name, Integer userId);
+    int updateGame(GameName gameName, Integer userId);
 
-    int addGame(Integer id, String name, Integer userId);
+    int addGame(GameName gameName, Integer userId);
 }

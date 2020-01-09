@@ -60,11 +60,11 @@ public class AopSurvey {
 
         StringBuilder message = new StringBuilder();
         message.append("--------- AopSurvey verifyMethod()------------");
-        message.append("function:" + signature).append("\t");
+        message.append("function:").append(signature).append("\t");
 
         int i = 0;
         for (Object o : obj) {
-            message.append("args[" + (i++) + "]:" + o).append("\t");
+            message.append("args[").append(i++).append("]:").append(o).append("\t");
         }
 
         if (this.jumpInterface(pjp)) {
@@ -155,7 +155,6 @@ public class AopSurvey {
      */
     private FunctionType checkType(String signature, List<Integer> allFuncsList) {
         FunctionType type = FunctionType.NONE;
-
         switch (signature) {
             case "containGameDetail":
                 type = FunctionType.GameDetail;
@@ -186,13 +185,14 @@ public class AopSurvey {
             case "updateSp":
             case "delSp":
             case "addSp":
-                //文章
-            case "findArticle":
-            case "getTotalArticle":
-            case "addArticle":
-            case "updateArticle":
-            case "deleteArticle":
             case "findById":
+                //GameSpService
+            case "selectGameSp":
+            case "selectAllGameSp":
+            case "deleteGameSp":
+            case "updateGameSp":
+            case "insertGameSp":
+            case "getCountGameSp":
                 type = FunctionType.ServerManagement;
                 break;
             case "login":
@@ -308,13 +308,13 @@ public class AopSurvey {
             case "updateSp":
             case "delSp":
             case "addSp":
-                //文章
-            case "findArticle":
-            case "getTotalArticle":
-            case "addArticle":
-            case "updateArticle":
-            case "deleteArticle":
-            case "findById":
+                //GameSpService
+            case "selectGameSp":
+            case "selectAllGameSp":
+            case "deleteGameSp":
+            case "updateGameSp":
+            case "insertGameSp":
+            case "getCountGameSp":
                 result = true;
                 break;
             default:
