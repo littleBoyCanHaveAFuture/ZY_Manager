@@ -69,6 +69,7 @@
           and gameId = #{gameId}
           and serverId = #{serverId}
     </select>
+    <!--  todo 不需要 accountId  serverId -->
     <select id="findGamerole" parameterType="map" resultMap="GameRoleResult">
         <include refid="select_gamerole_column"/>
         where

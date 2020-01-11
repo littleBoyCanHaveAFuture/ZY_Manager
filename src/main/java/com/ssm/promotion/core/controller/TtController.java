@@ -1,5 +1,6 @@
 package com.ssm.promotion.core.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
@@ -147,56 +148,53 @@ public class TtController {
      * 注册账号
      * SDK 登录接口
      *
-     * @param map boolean     auto          自动注册(限渠道账号,无需username,pwd)
-     *            int         appId         游戏id*
-     *            int         channelId     渠道id*
-     *            string      channelUid    渠道账号id*
-     *            string      channelUname  渠道账号登录名*
-     *            string      channelUnick  渠道账号昵称*
-     *            string      username      指悦账户名(为空即可)
-     *            string      pwd           指悦账号密码(为空即可)
-     *            string      phone         手机号*
-     *            string      deviceCode    硬件设备号*
-     *            string      imei          国际移动设备识别码
-     *            string      addparm       额外参数(为空即可)
+     * @param jsonData boolean     auto          自动注册(限渠道账号,无需username,pwd)<p>
+     *                 int         appId         游戏id*<p>
+     *                 int         channelId     渠道id*<p>
+     *                 string      channelUid    渠道账号id*<p>
+     *                 string      channelUname  渠道账号登录名*<p>
+     *                 string      channelUnick  渠道账号昵称*<p>
+     *                 string      username      指悦账户名(为空即可)<p>
+     *                 string      pwd           指悦账号密码(为空即可)<p>
+     *                 string      phone         手机号*<p>
+     *                 string      deviceCode    硬件设备号*<p>
+     *                 string      imei          国际移动设备识别码<p>
+     *                 string      addparm       额外参数(为空即可)<p>
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public Result sdkRegister(@RequestBody Map<String, Object> map) throws Exception {
-        log.info("register:" + map.toString());
+    public Result sdkRegister(@RequestBody String jsonData) throws Exception {
+        log.info("register:" + jsonData);
+        JSONObject jsonObject = JSON.parseObject(jsonData);
 
-        boolean auto = Boolean.parseBoolean(map.get("auto").toString());
+        boolean auto = jsonObject.getBoolean("auto");
         //参数校验
         if (auto) {
-            for (String key : map.keySet()) {
-                if (StringUtils.isBlank(map.get(key))) {
+            for (String key : jsonObject.keySet()) {
+                if (StringUtils.isBlank(jsonObject.get(key))) {
                     if ("appId".equals(key) || "channelId".equals(key) || "channelUid".equals(key)) {
                         JSONObject result = new JSONObject();
-                        result.put("err", "参数非法:" + key + "为空");
+                        result.put("message", "参数非法:" + key + "为空");
+                        result.put("state", false);
                         return ResultGenerator.genSuccessResult(result);
                     }
                 }
             }
         } else {
-            for (String key : map.keySet()) {
-                if (StringUtils.isBlank(map.get(key))) {
+            for (String key : jsonObject.keySet()) {
+                if (StringUtils.isBlank(jsonObject.get(key))) {
                     if ("appId".equals(key) || "username".equals(key) || "pwd".equals(key)) {
                         JSONObject result = new JSONObject();
-                        result.put("err", "参数非法:" + key + "为空");
+                        result.put("message", "参数非法:" + key + "为空");
+                        result.put("state", false);
                         return ResultGenerator.genSuccessResult(result);
                     }
                 }
             }
         }
         //获取ip
-        map.put("ip", UtilG.getIpAddress(request));
-
-        //注册账号
-        JSONObject result = accountWorker.reqRegister(map);
-        if (result.getString("message").equals(ResultGenerator.DEFAULT_SUCCESS_MESSAGE)) {
-            //注册成功 相关数据存入redis
-            cache.register(map);
-        }
+        jsonObject.put("ip", UtilG.getIpAddress(request));
+        JSONObject result = accountWorker.reqRegister(jsonObject);
         return ResultGenerator.genSuccessResult(result);
     }
 
@@ -571,8 +569,6 @@ public class TtController {
                             String roleId, HttpServletResponse response) throws Exception {
         log.info("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
                 "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
-        log.info("request: ttt/exit , appId: " + appId + "\tserverId:" + serverId +
-                "\tchannelId:" + channelId + "\tchannelUid:" + channelUid + "\troleId:" + roleId);
 
         //查找角色的指悦账号
         Map<String, Object> map = new HashMap<>(6);
@@ -673,7 +669,7 @@ public class TtController {
                            HttpServletResponse response) throws Exception {
         JSONObject request = JSONObject.parseObject(jsonData);
 
-        log.info("request: ttt/payInfo " + request.toString());
+        log.info("request: /ttt/payInfo " + request.toString());
 
         int accountId = request.getInteger("accountID");
         int channelId = request.getInteger("channelID");
@@ -823,4 +819,5 @@ public class TtController {
 
         log.info("request: ttt/payInfo , result\t" + result.toString());
     }
+
 }

@@ -1,8 +1,8 @@
 package com.ssm.promotion.core.sdk;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.service.AccountService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.DateUtil;
@@ -10,6 +10,7 @@ import com.ssm.promotion.core.util.NumberUtil;
 import com.ssm.promotion.core.util.RandomUtil;
 import com.ssm.promotion.core.util.StringUtil;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -50,6 +51,8 @@ public class AccountWorker {
      * 已存在的最大用户编号，不含机器人，
      */
     public static AtomicInteger lastUserId;
+    @Autowired
+    JedisRechargeCache cache;
     @Resource
     private AccountService accountService;
     @Resource
@@ -66,33 +69,33 @@ public class AccountWorker {
     /**
      * 注册账号
      */
-    public JSONObject reqRegister(Map<String, Object> map) throws Exception {
+    public JSONObject reqRegister(JSONObject jsonObject) throws Exception {
         JSONObject reply = new JSONObject();
         do {
             //全部数据
-            boolean auto = Boolean.parseBoolean(map.get("auto").toString());
-            int appId = Integer.parseInt(map.get("appId").toString());
-            int channelId = Integer.parseInt(map.get("channelId").toString());
-            String channelUid = map.get("channelUid").toString();
-            String channelUname = map.get("channelUname").toString();
-            String channelUnick = map.get("channelUnick").toString();
-            String username = map.get("username").toString();
-            String pwd = map.get("pwd").toString();
-            String phone = map.get("phone").toString();
-            String deviceCode = map.get("deviceCode").toString();
-            String imei = map.get("imei").toString();
-            String addparm = map.get("addparm").toString();
-            String ip = map.get("ip").toString();
+            boolean auto = jsonObject.getBoolean("auto");
+            int appId = jsonObject.getInteger("appId");
+            int channelId = jsonObject.getInteger("channelId");
+            String channelUid = jsonObject.getString("channelUid");
+            String channelUname = jsonObject.getString("channelUname");
+            String channelUnick = jsonObject.getString("channelUnick");
+            String username = jsonObject.getString("username");
+            String pwd = jsonObject.getString("pwd");
+            String phone = jsonObject.getString("phone");
+            String deviceCode = jsonObject.getString("deviceCode");
+            String imei = jsonObject.getString("imei");
+            String addparm = jsonObject.getString("addparm");
+            String ip = jsonObject.getString("ip");
 
-            Map<String, Object> tmp = new HashMap<>(6);
-            tmp.put("gameId", appId);
-            tmp.put("spId", channelId);
+            Map<String, Object> map = new HashMap<>(6);
+            map.put("gameId", appId);
+            map.put("spId", channelId);
 
             //某游戏 是否开放注册
-            if (!serverService.isSpCanReg(tmp, -1)) {
+            if (!serverService.isSpCanReg(map, -1)) {
                 //返回结果
-                reply.put("reason", "未开放注册");
-                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                reply.put("state", false);
+                reply.put("message", "未开放注册");
                 break;
             }
             int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
@@ -111,71 +114,76 @@ public class AccountWorker {
             if (TemplateWorker.hasBanIp(ip)) {
                 //封禁ip
                 TemplateWorker.addBanIp(ip);
-                reply.put("reason", "玩家ip已被封禁");
-                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                reply.put("state", false);
+                reply.put("message", "玩家ip已被封禁");
                 break;
             }
             //账号密码注册
             if (!auto) {
                 if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("reason", "用户名长度不对！");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "用户名长度不对！");
                     break;
                 }
                 //名称合法
                 if (!StringUtil.isValidUsername(username)) {
                     //Todo
-                    reply.put("reason", "用户名格式不合法！");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "用户名格式不合法！");
                     break;
                 }
                 // 能包含敏感词
                 if (TemplateWorker.hasBad(username)) {
-                    reply.put("reason", "用户名包含敏感词！");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "用户名包含敏感词！");
                     break;
                 }
                 if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
-                    reply.put("reason", "密码长度不对");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "密码长度不对");
                     break;
                 }
             }
 
             //检查渠道id和渠道用户id是否存在
+            map.clear();
+            map.put("channelId", channelId);
+            map.put("channelUid", channelUid);
             if (channelId != 0 && accountService.exist(map) > 0) {
-                reply.put("reason", "渠道账号已经存在");
-                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                reply.put("state", false);
+                reply.put("message", "渠道账号已经存在");
                 break;
             }
             //创建账号
-            Account account = this.createAccount(map);
+            Account account = this.createAccount(jsonObject);
 
             if (account == null) {
-                reply.put("reason", "注册失败");
-                reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                reply.put("state", false);
+                reply.put("message", "注册失败");
                 break;
             }
             if (account.getId() < 0) {
                 if (account.getId() == -2) {
-                    reply.put("reason", "账号名重复");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "账号名重复");
                     break;
                 } else {
-                    reply.put("reason", "注册失败");
-                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
+                    reply.put("state", false);
+                    reply.put("message", "注册失败");
                     break;
                 }
             }
 
             map.put("accountId", account.getId().toString());
-
-            reply.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);
+            reply.put("state", true);
             reply.put("accountId", account.getId());
             reply.put("account", account.getName());
             reply.put("password", account.getPwd());
             reply.put("channelUid", account.getChannelUserId());
-            reply.put("reason", "注册成功");
+            reply.put("message", "注册成功");
+
+            //注册成功 相关数据存入redis
+//            cache.register(map);
 
         } while (false);
 
@@ -203,25 +211,20 @@ public class AccountWorker {
     /**
      * 创建用户
      */
-    public Account createAccount(Map<String, Object> map) throws Exception {
-        boolean auto = Boolean.parseBoolean(map.get("auto").toString());
-        String gameId = map.get("gameId").toString();
-
-        String channelId = map.get("channelId").toString();
-        String channelUserId = map.get("channelUid").toString();
-        String channelUserName = map.get("channelUname").toString();
-        String channelUserNick = map.get("channelUnick").toString();
-
-        String username = map.get("username").toString();
-        String pwd = map.get("pwd").toString();
-
-        String phone = map.get("phone").toString();
-        String deviceCode = map.get("deviceCode").toString();
-        String imei = map.get("imei").toString();
-
-        String addparm = map.get("addparm").toString();
-
-        String ip = map.get("ip").toString();
+    public Account createAccount(JSONObject jsonObject) throws Exception {
+        boolean auto = jsonObject.getBoolean("auto");
+        int appId = jsonObject.getInteger("appId");
+        String channelId = jsonObject.getString("channelId");
+        String channelUid = jsonObject.getString("channelUid");
+        String channelUname = jsonObject.getString("channelUname");
+        String channelUnick = jsonObject.getString("channelUnick");
+        String username = jsonObject.getString("username");
+        String pwd = jsonObject.getString("pwd");
+        String phone = jsonObject.getString("phone");
+        String deviceCode = jsonObject.getString("deviceCode");
+        String imei = jsonObject.getString("imei");
+        String addparm = jsonObject.getString("addparm");
+        String ip = jsonObject.getString("ip");
 
         Account account = new Account();
         if (auto) {
@@ -253,11 +256,10 @@ public class AccountWorker {
             account.setChannelUserId(account.getId().toString());
 
             //更新uid
-            map.clear();
+            Map<String, Object> map = new HashMap<>();
             map.put("id", account.getId());
             map.put("channelUid", account.getId());
             accountService.updateAccountUid(map);
-
         } else {
             account.setPhone(phone);
             account.setCreateIp(ip);
@@ -265,9 +267,9 @@ public class AccountWorker {
             account.setCreateDevice(deviceCode);
             account.setDeviceCode(deviceCode);
             account.setChannelId(channelId);
-            account.setChannelUserId(channelUserId);
-            account.setChannelUserName(channelUserName);
-            account.setChannelUserNick(channelUserNick);
+            account.setChannelUserId(channelUid);
+            account.setChannelUserName(channelUname);
+            account.setChannelUserNick(channelUnick);
             account.setLastLoginTime(0L);
             account.setToken("");
             account.setAddParam(addparm);

@@ -23,10 +23,22 @@
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/zySdkOffcial.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/libZySdk_v1.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">
-
+<%--<div class="assistive-wrap" id="assistive-wrap" style="transition: all 0.5s ease 0s; opacity: 0.3; left: 1px;">--%>
+<%--    <div class="assistive-touch ">--%>
+<%--        <span></span>--%>
+<%--        <em class="new-msg"></em>--%>
+<%--    </div>--%>
+<%--</div>--%>
+<%--<div class="menuList assistive-menu" style="left: 1px; top: 120px; display: none;">--%>
+<%--    <a class="closeBtn" href="javascript:;"></a>--%>
+<%--    <a class="menulist-item logout" href="javascript:;" onclick="$(this).parent().hide();showLogOutViews();"><em></em><span class="wd">退出</span></a>--%>
+<%--    <a class="menulist-item account" href="javascript:;" onclick="$(this).parent().hide();showServiceViews();"><em></em><span class="wd">账户</span></a>--%>
+<%--</div>--%>
 <div id="sp">
     <div>
         <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton"
@@ -37,25 +49,29 @@
            iconCls=" icon-search" plain="true">查询区服</a>
     </div>
 
+
     <label for="save_spId"></label>
     <span style="color: blue; ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
-        <option value="-1" selected="selected">请选择</option>
+        <%--        <option value="-1" selected="selected">请选择</option>--%>
+        <option value="0" selected="selected">渠道 0</option>
     </select>
 
     <label for="save_gameId"></label>
     <span style="color: blue;margin-left:50px  ">游戏:</span>
     <select title="选择游戏" id="save_gameId" name="gameId">
-        <option value="-1" selected="selected">请选择</option>
+        <%--        <option value="-1" selected="selected">请选择</option>--%>
+        <option value="9" selected="selected">三国游侠 9</option>
     </select>
 
     <label for="save_serverId"></label>
     <span style="color: blue; margin-left:50px">区服:</span>
     <select title="选择区服" id="save_serverId" name="serverId">
-        <option value="-1" selected="selected">请选择</option>
+        <%--        <option value="-1" selected="selected">请选择</option>--%>
+        <option value="1" selected="selected">1 区</option>
     </select>
 
-
+    <div><a href="javascript:init()" class="easyui-linkbutton" iconCls=" icon-search" plain="true">sdk初始化</a></div>
     <div>
         <label for="username">用户名：</label>
         <input type="text" id="username" size="20"/>
@@ -97,7 +113,7 @@
         <label>-------------功能---------------</label>
     </div>
     <div>
-        <a href="javascript:test_Register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
+        <a href="javascript:zy_Register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
     </div>
     <div>
         <a href="javascript:test_Login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
@@ -152,11 +168,52 @@
 </body>
 <script type="text/javascript">
     $(function () {
-        initSpGameServer(1);
-        initSpGameServer(2);
-        initSpGameServer(3);
+        // initSpGameServer(1);
+        // initSpGameServer(2);
+        // initSpGameServer(3);
     });
 
+    function init() {
+        let auto = $("#auto").val();
+        let appId = $("#save_gameId").val();
+        let channelId = $("#save_spId").val();
+        let channelUid = $("#channelUid").val();
+        let username = $("#username").val();
+        let password = $("#password").val();
+        let secretKey = "x889btf66ktzqp6p34t4exz10b5r1hl9";
+        ZySDK.init(appId, secretKey, channelId, function () {
+            console.info("init ok");
+        });
+    }
+
+    function zy_Register() {
+        let regInfo = {};
+        regInfo.auto = $("#auto").val() === "true";
+        regInfo.appId = Number($("#save_gameId").val());
+        regInfo.channelId = Number($("#save_spId").val());
+        regInfo.channelUid = $("#channelUid").val();
+        regInfo.username = $("#username").val();
+        regInfo.password = $("#password").val();
+        regInfo.phone = "18571470846";
+        regInfo.deviceCode = "PC";
+        regInfo.imei = "PC";
+        regInfo.addparm = "";
+        console.info(regInfo);
+        if (regInfo.channelId === 0) {
+            regInfo.channelUid = "0";
+        }
+        sdk_ZyRegister(regInfo, function (callbackData) {
+            if (callbackData.state === false) {
+                console.error(callbackData);
+            } else {
+                console.info(callbackData);
+                $("#username").val(callbackData.account);
+                $("#password").val(callbackData.password);
+                $("#accountId").val(callbackData.uid);
+                $("#channelUid").val(callbackData.channelUid);
+            }
+        });
+    }
 </script>
 
 </html>

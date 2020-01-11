@@ -1,4 +1,6 @@
 /**
+ *   zy sdk 文件
+ * 测试环境
  * @author song minghua
  * @date 2019/12/31
  * @version 0.1.1
@@ -19,22 +21,21 @@ const keys = ["createRole", "levelUp", "enterServer"];
 const messgae = ["SUCCESS", "FAIL"];
 const OrderStatus = [0, 1, 2, 3, 4, 5];
 const OrderStatusDesc = [
-    "点开充值界面     未点充值按钮（取消支付）",
     "选择充值方式界面  未选择充值方式（取消支付）",
     "支付宝微信界面   未支付（取消支付）",
     "支付成功 未发货",
     "支付成功 已发货(交易完成)",
     "支付成功 补单(交易完成)"
 ];
-let OrderStateMsg = [0, "发送成功", 2, 3, 4, 5,
-    "角色不存在", 7, 8, 9, "金额错误",
-    "订单错误", 12, 13, 14, 15,
-    16, "参数与订单参数不一致", "参数为空或非法", "账号不存在"];
-
-const appId_CS = 2;
-const appId_SGYX = 9999;
+let OrderStateMsg = [
+    0, "发送成功", 2, 3, 4,
+    5, "角色不存在", 7, 8, 9,
+    "金额错误", "订单错误", 12, 13, 14,
+    15, 16, "参数与订单参数不一致", "参数为空或非法", "账号不存在"
+];
 
 /**
+ * 检查参数是否为空、未初始化
  * @param param 判断的参数
  * @return {boolean}
  * */
@@ -326,7 +327,7 @@ function loginCheck(appId, accountId, token, sign) {
 //测试用例
 function test_CreateRole() {
     // let appId = $("#save_gameId").val();
-    let appId=9999;
+    let appId = 9999;
     let serverId = $("#save_serverId").val();
     let channelId = $("#save_spId").val();
     let channelUid = $("#channelUid").val();
@@ -663,6 +664,34 @@ function test_UploadPayInfo() {
         completeTime = sdkOrderTime + 1000;
     }
 
+    let data = {
+        "accountID": accountId,
+        "channelID": channelId,
+        "channelUid": channelUid,
+        "appID": appId,
+        "channelOrderID": channelOrderID,
+
+        "productID": productID,
+        "productName": productName,
+        "productDesc": productDesc,
+        "money": money,
+
+        "roleID": roleID,
+        "roleName": roleName,
+        "roleLevel": roleLevel,
+
+        "serverID": serverID,
+        "serverName": serverName,
+
+        "realMoney": realMoney,
+        "completeTime": completeTime,
+        "sdkOrderTime": sdkOrderTime,
+
+        "status": status,
+        "notifyUrl": notifyUrl,
+        "signType": signType,
+        "sign": sign
+    };
 
     let sign = md5(accountId, channelId, channelUid, appId, channelOrderID,
         productID, productName, productDesc, money,
@@ -758,21 +787,16 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
                        status, notifyUrl,
                        signType, sign) {
     let way = "充值上报 ";
-    let isStatus = false;
-    for (let orderStatus of status) {
-        if (orderStatus === status) {
-            isStatus = true;
-            break;
-        }
-    }
-    if (!isStatus) {
+    let isStatus = OrderStatus.findIndex(function (value, index, arr) {
+        return value === status;
+    });
+
+    if (isStatus === -1) {
         console.error("订单状态错误 " + status);
         return null;
     }
+    console.info("订单当前状态 " + OrderStatusDesc[status]);
 
-    if (status >= OrderStatus[3]) {
-        console.info("订单当前状态 " + OrderStatusDesc[status]);
-    }
 
     if (checkParam(accountID) || checkParam(channelId) || checkParam(channelUid) || checkParam(appId)) {
         console.error(way + "账号或游戏参数为空" + " accountID=" + accountID + " channelId=" + channelId + " channelUid=" + channelUid + " appId=" + appId);
@@ -834,7 +858,9 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
         "signType": signType,
         "sign": sign
     };
+
     console.info(data);
+
     let response;
     $.ajax({
         url: t_domain + "/payInfo",
@@ -844,9 +870,13 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
         data: JSON.stringify(data),
         async: false,
         success: function (result) {
+
             console.info(way + "recv " + result.resultCode);
+
             if (result.resultCode === 200) {
+
                 console.info(way + "recv result " + result.message);
+
                 if (result.state !== 1) {
                     console.error(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
                     response = {
@@ -872,194 +902,194 @@ function uploadPayInfo(accountID, channelId, channelUid, appId, channelOrderID,
 
 
 //测试用例
-function test_PayInfo() {
-    let channelUid = $("#channelUid").val();
-    let appId = $("#save_gameId").val();
-    let serverId = $("#save_serverId").val();
-    let channelId = $("#save_spId").val();
-    let roleId = $("#roleId").val();
-    let order_status = $("#payRecord_state").val();
-
-    let accountId = $("#accountId").val();
-    let channelOrderID = "";
-    let productID = "1";
-    let productName = "大还丹";
-    let productDesc = "使用立即回复满血";
-    let money = $("#money").val();
-    let realMoney = money;
-    let roleID = roleId;
-    let roleName = "测试账号1";
-    let roleLevel = 1;
-    let serverID = serverId;
-    let serverName = "区服" + serverId;
-    let extension = "";
-    let status = order_status;
-    let notifyUrl = "47.101.44.31";
-    let signType = "MD5";
-    let completeTime = 0;
-    let sdkOrderTime = new Date().valueOf();
-    if (status >= OrderStatus[4]) {
-        completeTime = sdkOrderTime + 1000;
-    }
-
-    let sign = md5(accountId, channelId, channelUid, appId, "",
-        productID, productName, productDesc, money,
-        roleID, roleName, roleLevel,
-        serverID, serverName,
-        realMoney, completeTime, sdkOrderTime,
-        status, notifyUrl, signType);
-    let result = PayInfo(accountId, channelId, channelUid, appId,
-        productID, productName, productDesc, money,
-        roleID, roleName, roleLevel,
-        serverID, serverName,
-        realMoney, completeTime, sdkOrderTime,
-        status, notifyUrl,
-        signType, sign);
-    console.info("test_PayInfo");
-    console.info(result);
-
-    $("#oderid").val(result.orderId);
-
-}
-
-/**
- * 充值-生成官方订单数据接口
- * @param   {number}      accountID           指悦账号id
- * @param   {number}      channelId           渠道id
- * @param   {number}      channelUid          渠道账号id
- * @param   {number}      appId               游戏id
- * @param   {string}      productID           当前商品ID
- * @param   {string}      productName         商品名称
- * @param   {string}      productDesc         商品描述
- * @param   {number}      money               商品价格,单位:分
- * @param   {number}      roleID              玩家在游戏服中的角色ID
- * @param   {string}      roleName            玩家在游戏服中的角色名称
- * @param   {number}      roleLevel           玩家等级
- * @param   {number}      serverID            玩家所在的服务器ID
- * @param   {string}      serverName          玩家所在的服务器名称
- * @param   {number}      realMoney           订单完成,实际支付金额,单位:分,未完成:-1
- * @param   {number}      completeTime        订单完成时间戳(毫秒，13位),未完成为:-1
- * @param   {number}      sdkOrderTime        订单创建时间戳(毫秒，13位)
- * @param   {number}      status              订单状态 请看OrderStatus、OrderStatusDesc
- * @param   {string}      notifyUrl           支付回调通知的游戏服地址
- * @param   {string}      signType            签名算法,RSA|MD5,默认MD5
- * @param   {string}      sign                签名
- * @return  {json}
- * */
-function PayInfo(accountID, channelId, channelUid, appId,
-                 productID, productName, productDesc, money,
-                 roleID, roleName, roleLevel,
-                 serverID, serverName,
-                 realMoney, completeTime, sdkOrderTime,
-                 status, notifyUrl,
-                 signType, sign) {
-    let way = "充值 ";
-    let isStatus = false;
-    for (let orderStatus of status) {
-        if (orderStatus === status) {
-            isStatus = true;
-            break;
-        }
-    }
-    if (!isStatus) {
-        console.error("订单状态错误 " + status);
-        return null;
-    }
-
-    if (status >= OrderStatus[3]) {
-        console.info("订单当前状态 " + OrderStatusDesc[status]);
-    }
-
-    if (checkParam(accountID) || checkParam(channelId) || checkParam(channelUid) || checkParam(appId)) {
-        console.error(way + "账号或游戏参数为空" + " accountID=" + accountID + " channelId=" + channelId + " channelUid=" + channelUid + " appId=" + appId);
-        return null;
-    }
-    if (checkParam(productID) || checkParam(productName) || checkParam(productDesc)) {
-        console.error(way + "商品参数为空 " + " productID=" + productID + " productName=" + productName + " productDesc=" + productDesc);
-        return null;
-    }
-    if (checkParam(roleID) || checkParam(roleName) || checkParam(roleLevel)) {
-        console.error(way + "角色参数为空 " + " roleID=" + roleID + " roleName=" + roleName + " roleLevel=" + roleLevel);
-        return null;
-    }
-    if (checkParam(serverID) || checkParam(serverName)) {
-        console.error(way + "区服参数为空 " + " serverID=" + serverID + " serverName=" + serverName);
-        return null;
-    }
-    if (checkParam(realMoney)) {
-        console.error(way + "订单参数为空 " + " realMoney=" + realMoney);
-        return null;
-    }
-    if (checkParam(completeTime) || checkParam(sdkOrderTime)) {
-
-    }
-    if (checkParam(sign) || checkParam(signType)) {
-        console.error(way + "签名数为空 ");
-        return null;
-    }
-    if (signType !== "MD5" && signType !== "RSA") {
-        console.error(way + "签名类型错误 ");
-        return null;
-    }
-
-    let data = {
-        "accountID": accountID,
-        "channelID": channelId,
-        "channelUid": channelUid,
-        "appID": appId,
-
-        "productID": productID,
-        "productName": productName,
-        "productDesc": productDesc,
-        "money": money,
-
-        "roleID": roleID,
-        "roleName": roleName,
-        "roleLevel": roleLevel,
-
-        "serverID": serverID,
-        "serverName": serverName,
-
-        "realMoney": realMoney,
-        "completeTime": completeTime,
-        "sdkOrderTime": sdkOrderTime,
-
-        "status": status,
-        "notifyUrl": notifyUrl,
-        "signType": signType,
-        "sign": sign
-    };
-    console.info(data);
-    let response;
-    $.ajax({
-        url: t_domainPay + "/wap",
-        type: "post",
-        dataType: 'json',
-        contentType: "text/plain; charset=utf-8",
-        data: JSON.stringify(data),
-        async: false,
-        success: function (result) {
-            console.info(way + "recv " + result.resultCode);
-            console.info(way + "recv result " + result.message);
-            if (result.state !== 1) {
-                console.error(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
-                response = {
-                    "message": result.message,
-                    "state": result.state
-                }
-            } else {
-                console.info(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
-                response = {
-                    "message": result.message,
-                    "orderId": result.orderId,
-                    "state": result.state
-                }
-            }
-
-        },
-        error: function () {
-            console.error("系统提示", "充值数据上报失败");
-        }
-    });
-    return response;
-}
+// function test_PayInfo() {
+//     let channelUid = $("#channelUid").val();
+//     let appId = $("#save_gameId").val();
+//     let serverId = $("#save_serverId").val();
+//     let channelId = $("#save_spId").val();
+//     let roleId = $("#roleId").val();
+//     let order_status = $("#payRecord_state").val();
+//
+//     let accountId = $("#accountId").val();
+//     let channelOrderID = "";
+//     let productID = "1";
+//     let productName = "大还丹";
+//     let productDesc = "使用立即回复满血";
+//     let money = $("#money").val();
+//     let realMoney = money;
+//     let roleID = roleId;
+//     let roleName = "测试账号1";
+//     let roleLevel = 1;
+//     let serverID = serverId;
+//     let serverName = "区服" + serverId;
+//     let extension = "";
+//     let status = order_status;
+//     let notifyUrl = "47.101.44.31";
+//     let signType = "MD5";
+//     let completeTime = 0;
+//     let sdkOrderTime = new Date().valueOf();
+//     if (status >= OrderStatus[4]) {
+//         completeTime = sdkOrderTime + 1000;
+//     }
+//
+//     let sign = md5(accountId, channelId, channelUid, appId, "",
+//         productID, productName, productDesc, money,
+//         roleID, roleName, roleLevel,
+//         serverID, serverName,
+//         realMoney, completeTime, sdkOrderTime,
+//         status, notifyUrl, signType);
+//     let result = PayInfo(accountId, channelId, channelUid, appId,
+//         productID, productName, productDesc, money,
+//         roleID, roleName, roleLevel,
+//         serverID, serverName,
+//         realMoney, completeTime, sdkOrderTime,
+//         status, notifyUrl,
+//         signType, sign);
+//     console.info("test_PayInfo");
+//     console.info(result);
+//
+//     $("#oderid").val(result.orderId);
+//
+// }
+//
+// /**
+//  * 充值-生成官方订单数据接口
+//  * @param   {number}      accountID           指悦账号id
+//  * @param   {number}      channelId           渠道id
+//  * @param   {number}      channelUid          渠道账号id
+//  * @param   {number}      appId               游戏id
+//  * @param   {string}      productID           当前商品ID
+//  * @param   {string}      productName         商品名称
+//  * @param   {string}      productDesc         商品描述
+//  * @param   {number}      money               商品价格,单位:分
+//  * @param   {number}      roleID              玩家在游戏服中的角色ID
+//  * @param   {string}      roleName            玩家在游戏服中的角色名称
+//  * @param   {number}      roleLevel           玩家等级
+//  * @param   {number}      serverID            玩家所在的服务器ID
+//  * @param   {string}      serverName          玩家所在的服务器名称
+//  * @param   {number}      realMoney           订单完成,实际支付金额,单位:分,未完成:-1
+//  * @param   {number}      completeTime        订单完成时间戳(毫秒，13位),未完成为:-1
+//  * @param   {number}      sdkOrderTime        订单创建时间戳(毫秒，13位)
+//  * @param   {number}      status              订单状态 请看OrderStatus、OrderStatusDesc
+//  * @param   {string}      notifyUrl           支付回调通知的游戏服地址
+//  * @param   {string}      signType            签名算法,RSA|MD5,默认MD5
+//  * @param   {string}      sign                签名
+//  * @return  {json}
+//  * */
+// function PayInfo(accountID, channelId, channelUid, appId,
+//                  productID, productName, productDesc, money,
+//                  roleID, roleName, roleLevel,
+//                  serverID, serverName,
+//                  realMoney, completeTime, sdkOrderTime,
+//                  status, notifyUrl,
+//                  signType, sign) {
+//     let way = "充值 ";
+//     let isStatus = false;
+//     for (let orderStatus of status) {
+//         if (orderStatus === status) {
+//             isStatus = true;
+//             break;
+//         }
+//     }
+//     if (!isStatus) {
+//         console.error("订单状态错误 " + status);
+//         return null;
+//     }
+//
+//     if (status >= OrderStatus[3]) {
+//         console.info("订单当前状态 " + OrderStatusDesc[status]);
+//     }
+//
+//     if (checkParam(accountID) || checkParam(channelId) || checkParam(channelUid) || checkParam(appId)) {
+//         console.error(way + "账号或游戏参数为空" + " accountID=" + accountID + " channelId=" + channelId + " channelUid=" + channelUid + " appId=" + appId);
+//         return null;
+//     }
+//     if (checkParam(productID) || checkParam(productName) || checkParam(productDesc)) {
+//         console.error(way + "商品参数为空 " + " productID=" + productID + " productName=" + productName + " productDesc=" + productDesc);
+//         return null;
+//     }
+//     if (checkParam(roleID) || checkParam(roleName) || checkParam(roleLevel)) {
+//         console.error(way + "角色参数为空 " + " roleID=" + roleID + " roleName=" + roleName + " roleLevel=" + roleLevel);
+//         return null;
+//     }
+//     if (checkParam(serverID) || checkParam(serverName)) {
+//         console.error(way + "区服参数为空 " + " serverID=" + serverID + " serverName=" + serverName);
+//         return null;
+//     }
+//     if (checkParam(realMoney)) {
+//         console.error(way + "订单参数为空 " + " realMoney=" + realMoney);
+//         return null;
+//     }
+//     if (checkParam(completeTime) || checkParam(sdkOrderTime)) {
+//
+//     }
+//     if (checkParam(sign) || checkParam(signType)) {
+//         console.error(way + "签名数为空 ");
+//         return null;
+//     }
+//     if (signType !== "MD5" && signType !== "RSA") {
+//         console.error(way + "签名类型错误 ");
+//         return null;
+//     }
+//
+//     let data = {
+//         "accountID": accountID,
+//         "channelID": channelId,
+//         "channelUid": channelUid,
+//         "appID": appId,
+//
+//         "productID": productID,
+//         "productName": productName,
+//         "productDesc": productDesc,
+//         "money": money,
+//
+//         "roleID": roleID,
+//         "roleName": roleName,
+//         "roleLevel": roleLevel,
+//
+//         "serverID": serverID,
+//         "serverName": serverName,
+//
+//         "realMoney": realMoney,
+//         "completeTime": completeTime,
+//         "sdkOrderTime": sdkOrderTime,
+//
+//         "status": status,
+//         "notifyUrl": notifyUrl,
+//         "signType": signType,
+//         "sign": sign
+//     };
+//     console.info(data);
+//     let response;
+//     $.ajax({
+//         url: t_domainPay + "/wap",
+//         type: "post",
+//         dataType: 'json',
+//         contentType: "text/plain; charset=utf-8",
+//         data: JSON.stringify(data),
+//         async: false,
+//         success: function (result) {
+//             console.info(way + "recv " + result.resultCode);
+//             console.info(way + "recv result " + result.message);
+//             if (result.state !== 1) {
+//                 console.error(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
+//                 response = {
+//                     "message": result.message,
+//                     "state": result.state
+//                 }
+//             } else {
+//                 console.info(way + "recv 订单当前状态 " + OrderStateMsg[result.state]);
+//                 response = {
+//                     "message": result.message,
+//                     "orderId": result.orderId,
+//                     "state": result.state
+//                 }
+//             }
+//
+//         },
+//         error: function () {
+//             console.error("系统提示", "充值数据上报失败");
+//         }
+//     });
+//     return response;
+// }
