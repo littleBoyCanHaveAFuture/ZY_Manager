@@ -21,8 +21,8 @@
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
-    <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/zySdkOffcial.js"></script>
+    <%--    <script type="text/javascript"--%>
+    <%--            src="${pageContext.request.contextPath}/js/zySdkOffcial.js"></script>--%>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/libZySdk_v1.js"></script>
 </head>
@@ -54,7 +54,8 @@
     <span style="color: blue; ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
-        <option value="0" selected="selected">渠道 0</option>
+        <option value="0">渠道 0</option>
+        <option value="1" selected="selected">渠道 1</option>
     </select>
 
     <label for="save_gameId"></label>
@@ -116,12 +117,12 @@
         <a href="javascript:zy_Register()" class="easyui-linkbutton" iconCls="icon-add" plain="true">注册</a>
     </div>
     <div>
-        <a href="javascript:test_Login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
+        <a href="javascript:zy_Login()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">账号登录</a>
     </div>
     <div>
-        <a href="javascript:test_CreateRole()" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>
-        <a href="javascript:test_EnterGame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(游戏场景)</a>
-        <a href="javascript:test_ExitGame()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
+        <a href="javascript:zy_upload(1)" class="easyui-linkbutton" iconCls="icon-add" plain="true">创建角色</a>
+        <a href="javascript:zy_upload(2)" class="easyui-linkbutton" iconCls="icon-edit" plain="true">进入游戏(游戏场景)</a>
+        <a href="javascript:zy_upload(3)" class="easyui-linkbutton" iconCls="icon-edit" plain="true">退出游戏</a>
     </div>
     <div>
         <div>
@@ -147,7 +148,7 @@
         <div>
             <label>--------------------------------------</label>
         </div>
-        <a href="javascript:test_UploadPayInfo()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值上报</a>
+        <a href="javascript:zy_UploadPayInfo()" class="easyui-linkbutton" iconCls="icon-add" plain="true">充值上报</a>
         <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>
     </div>
 
@@ -181,8 +182,14 @@
         let username = $("#username").val();
         let password = $("#password").val();
         let secretKey = "x889btf66ktzqp6p34t4exz10b5r1hl9";
+
         ZySDK.init(appId, secretKey, channelId, function () {
             console.info("init ok");
+        });
+        ZySDK.initUser(channelUid, "", function (data) {
+            if (data.state === false) {
+                setLog(data.message, 1);
+            }
         });
     }
 
@@ -204,15 +211,115 @@
         }
         sdk_ZyRegister(regInfo, function (callbackData) {
             if (callbackData.state === false) {
-                console.error(callbackData);
+                setLog(callbackData.message, 1);
             } else {
-                console.info(callbackData);
-                $("#username").val(callbackData.account);
-                $("#password").val(callbackData.password);
-                $("#accountId").val(callbackData.uid);
-                $("#channelUid").val(callbackData.channelUid);
+                setLog(callbackData.message, 0);
+                setLog(JSON.stringify(callbackData), 0);
+
+                let ZyUid = callbackData.uid;
+                let username = callbackData.account;
+                let password = callbackData.password;
+                let channelUid = callbackData.channelUid;
+
+                $("#accountId").val(ZyUid);
+                $("#username").val(username);
+                $("#password").val(password);
+                $("#channelUid").val(channelUid);
             }
         });
+    }
+
+    function zy_Login() {
+        let loginInfo = {};
+        loginInfo.isAuto = $("#isChannel").val() === "true";
+        loginInfo.username = $("#username").val();
+        loginInfo.password = $("#password").val();
+
+        ZySDK.zyLogin(loginInfo, function (callbackLoginData) {
+            if (callbackLoginData.state === false) {
+                setLog(callbackLoginData.message, 1);
+                if (callbackLoginData.message === "无此渠道用户") {
+                    zy_Register();
+                }
+            } else {
+                setLog(JSON.stringify(callbackLoginData), 0);
+                $("#accountId").val(callbackLoginData.zyUid);
+                $("#username").val(callbackLoginData.username);
+                $("#password").val(callbackLoginData.password);
+                $("#channelUid").val(callbackLoginData.channelUid);
+            }
+        });
+    }
+
+    function zy_upload(type) {
+        let roleInfo = {};
+        roleInfo.roleId = $("#roleId").val();
+        roleInfo.roleName = roleInfo.roleId + "_Name";
+        roleInfo.roleLevel = 1;
+        roleInfo.zoneId = $("#save_serverId").val();
+        roleInfo.zoneName = roleInfo.zoneId + " 区";
+        roleInfo.balance = 0;
+        roleInfo.vip = 1;
+        roleInfo.partyName = "无帮派";
+        let key;
+        if (type === 1) {
+            key = "createRole";
+            roleInfo.roleCTime = new Date().valueOf();
+        } else if (type === 2) {
+            key = "enterGame";
+        } else if (type === 3) {
+            key = "exitGame";
+        } else {
+            key = "levelUp";
+        }
+        let result = sdk_ZyUploadGameRoleInfo(key, roleInfo, function (callbackData) {
+            if (callbackData.state === false) {
+                setLog(callbackData.message, 1);
+                setLog(JSON.stringify(roleInfo), 1);
+            } else {
+                setLog(JSON.stringify(callbackData), 0);
+            }
+        });
+    }
+
+    //测试用例
+    function zy_UploadPayInfo() {
+        let orderInfo = {};
+        orderInfo.accountID = $("#accountId").val();
+        orderInfo.channelOrderID = $("#oderid").val();
+
+        orderInfo.productID = "1";
+        orderInfo.productName = "大还丹";
+        orderInfo.productDesc = "使用立即回复满血";
+        orderInfo.money = $("#money").val();
+
+        orderInfo.roleID = $("#roleId").val();
+        orderInfo.roleName = "测试账号_" + orderInfo.roleID;
+        orderInfo.roleLevel = 1;
+
+        orderInfo.serverID = $("#save_serverId").val();
+        orderInfo.serverName = "区服" + orderInfo.serverID;
+
+        orderInfo.realMoney = "0";
+        orderInfo.completeTime = new Date().valueOf();
+        orderInfo.sdkOrderTime = new Date().valueOf();
+
+        orderInfo.status = $("#payRecord_state").val();
+        orderInfo.notifyUrl = "47.101.44.31";
+        orderInfo.signType = "MD5";
+
+        if (status >= OrderStatus[4]) {
+            orderInfo.completeTime = orderInfo.sdkOrderTime + 1000;
+        }
+        let result = sdk_zyUploadPayInfo(orderInfo, function (callbackData) {
+            if (callbackData.state === false) {
+                setLog(callbackData.message, 1);
+                setLog(JSON.stringify(orderInfo), 1);
+            } else {
+                setLog(JSON.stringify(callbackData), 0);
+            }
+        });
+        console.info("订单当前状态 " + OrderStatusDesc[orderInfo.status]);
     }
 </script>
 

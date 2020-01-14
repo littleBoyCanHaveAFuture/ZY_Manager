@@ -86,5 +86,4 @@ public class GameSpServiceImpl implements GameSpService {
     public Long getCountGameSp(Map<String, Object> map, Integer userId) {
         return gameSpDao.getCountGameSp(map);
     }
-
 }

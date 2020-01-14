@@ -2,6 +2,7 @@ package com.ssm.promotion.core.dao;
 
 
 import com.ssm.promotion.core.entity.GameSp;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -64,4 +65,5 @@ public interface GameSpDao {
      * 总数
      */
     Long getCountGameSp(Map<String, Object> map);
+
 }

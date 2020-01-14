@@ -40,7 +40,8 @@ public class jedisManager {
                 System.out.println("|③.请检查redis启动是否带配置文件启动，也就是是否有密码，是否端口有变化（默认6379）。解决方案，参考第二点。如果需要配置密码和改变端口，请修改spring-cache.xml配置。|");
                 System.out.println("|③.阿里云白名单 公司的网络经常会更换ip，需要更新白名单");
                 System.out.println("项目退出中....生产环境中，请删除这些东西。我来自。JedisManage.java line:53");
-                System.exit(0);//停止项目
+                //停止项目
+                System.exit(0);
             }
             throw new JedisConnectionException(e);
         } catch (Exception e) {

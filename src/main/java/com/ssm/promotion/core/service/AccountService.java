@@ -34,19 +34,43 @@ public interface AccountService {
     List<Account> findUser(Map<String, Object> map);
 
     /**
+     * @param id
+     */
+    Account findAccountById(int id);
+
+    /**
+     * 查找账号
+     *
+     * @return List<Account>
+     */
+    Account findUserBychannelUid(String channelId, String channelUid);
+
+    /**
+     * 查找账号
+     *
+     * @return List<Account>
+     */
+    List<Account> findAccountByname(String username);
+
+    /**
      * 更新数据
+     *
+     * @param map
      */
     void updateAccount(Map<String, Object> map);
 
     /**
      * 查询相同渠道号
+     *
+     * @param map
      */
     int exist(Map<String, Object> map);
 
     /**
      * 更新数据
+     *
+     * @param map
      */
     void updateAccountUid(Map<String, Object> map);
 
-    Account findAccountById(int id);
 }

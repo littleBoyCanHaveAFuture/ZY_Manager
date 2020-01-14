@@ -137,7 +137,7 @@ public class TtController {
             map.put("auto", auto);
             map.put("appId", appid);
             map.put("accountId", acc.getId().toString());
-            cache.register(map);
+//            cache.register(auto,appid,acc.getId());
         }
         reply.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         setResponseAccess(response);
@@ -747,7 +747,7 @@ public class TtController {
                     channelOrderID, productID, productName, productDesc, money,
                     roleID, roleName, roleLevel,
                     serverID, serverName, realMoney,
-                    completeTime, sdkOrderTime, status, notifyUrl, signType, sign)) {
+                    completeTime, sdkOrderTime, status, notifyUrl, signType, sign, "")) {
 
                 log.info("the sign is not valid. sign:" + sign);
                 result.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
@@ -802,7 +802,7 @@ public class TtController {
                 }
             }
             if (updateRedis) {
-                cache.reqpay(role.getGameId(), String.valueOf(serverID), role.getChannelId(), accountId, roleID, money, account.getCreateTime());
+                cache.reqPay(role.getGameId(), String.valueOf(serverID), role.getChannelId(), accountId, roleID, money, account.getCreateTime());
             }
 
             result.put("message", ResultGenerator.DEFAULT_SUCCESS_MESSAGE);

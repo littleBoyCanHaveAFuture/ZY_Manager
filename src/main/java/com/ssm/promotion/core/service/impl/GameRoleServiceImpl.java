@@ -54,6 +54,11 @@ public class GameRoleServiceImpl implements GameRoleService {
     }
 
     @Override
+    public GameRole findGameRole(Map<String, Object> map) {
+        return gameRoleDao.findGameRole(map);
+    }
+
+    @Override
     public int updateGameRole(Map<String, Object> map) {
         return gameRoleDao.updateGameRole(map);
     }

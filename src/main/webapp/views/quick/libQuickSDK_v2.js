@@ -1418,7 +1418,7 @@ function checkOrderObject(orderInfo) {
 
     return result;
 }
-``
+
 var getParamsArr = null;
 
 function getParamsExtQuick(key) {

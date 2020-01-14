@@ -1,11 +1,10 @@
 package com.ssm.promotion.core.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.common.Constants;
-import net.sf.json.JSONObject;
-
-import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 /**
  * @author 1034683568@qq.com
@@ -25,10 +24,12 @@ public class ResponseUtil {
     }
 
     public static void writeRelogin(HttpServletResponse response) throws Exception {
-        JSONObject result = new JSONObject();
-        result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
         response.setContentType("text/html;charset=utf-8");
         response.addHeader("Access-Control-Allow-Origin", "*");
+
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
+
         PrintWriter out = response.getWriter();
         out.println(result.toString());
         out.flush();

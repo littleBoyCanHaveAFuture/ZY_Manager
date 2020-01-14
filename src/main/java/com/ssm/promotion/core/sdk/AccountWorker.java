@@ -5,15 +5,14 @@ import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.service.AccountService;
 import com.ssm.promotion.core.service.ServerListService;
-import com.ssm.promotion.core.util.DateUtil;
-import com.ssm.promotion.core.util.NumberUtil;
-import com.ssm.promotion.core.util.RandomUtil;
-import com.ssm.promotion.core.util.StringUtil;
+import com.ssm.promotion.core.util.*;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +182,7 @@ public class AccountWorker {
             reply.put("message", "注册成功");
 
             //注册成功 相关数据存入redis
-//            cache.register(map);
+            cache.register(auto, appId, account.getId(), channelId);
 
         } while (false);
 
@@ -367,5 +366,38 @@ public class AccountWorker {
      */
     public void updateLoginTime(Map<String, Object> map) {
         accountService.updateAccount(map);
+    }
+
+    /**
+     * 渠道登录检查签名
+     */
+    public boolean checkSign(Boolean isAuto,
+                             Integer GameId,
+                             String channelId,
+                             String channelUid,
+                             String username,
+                             String password,
+                             String timestamp,
+                             String loginKey,
+                             String sign) throws UnsupportedEncodingException {
+        boolean result = false;
+
+        String sb = "isAuto" + "=" + isAuto + "&" +
+                "GameId" + "=" + GameId + "&" +
+                "channelId" + "=" + channelId + "&" +
+                "channelUid" + "=" + channelUid + "&" +
+                "username" + "=" + username + "&" +
+                "password" + "=" + password + "&" +
+                "timestamp" + "=" + timestamp + "&" +
+                loginKey;
+        System.out.println(sb);
+
+        String encoded = URLEncoder.encode(sb, "UTF-8");
+        String newSign = EncryptUtils.md5(encoded).toLowerCase();
+
+        System.out.println(newSign);
+        System.out.println(sign);
+
+        return sign.equals(newSign);
     }
 }

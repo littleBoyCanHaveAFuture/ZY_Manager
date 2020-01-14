@@ -4,6 +4,7 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.*;
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.service.*;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.enums.ManagerType;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/server")
 public class ServerController {
     private static final Logger log = Logger.getLogger(ServerController.class);
+    @Autowired
+    JedisRechargeCache cache;
     @Resource
     private ServerListService serverService;
     @Resource
@@ -819,6 +822,7 @@ public class ServerController {
                 sp.setPayKey(payKey);
                 sp.setSendKey(sendKey);
                 gameSpService.insertGameSp(sp, userId);
+                cache.initGameSp(String.valueOf(gameId), String.valueOf(spId));
             }
             break;
             default:

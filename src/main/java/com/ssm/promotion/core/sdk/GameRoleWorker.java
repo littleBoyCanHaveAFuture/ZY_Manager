@@ -33,4 +33,7 @@ public class GameRoleWorker {
         return gameRoleService.findUser(map);
     }
 
+    public GameRole findGameRole(Map<String, Object> map) {
+        return gameRoleService.findGameRole(map);
+    }
 }

@@ -78,6 +78,15 @@
         and serverId=#{serverId}
         and channelId=#{channelId}
         and channelUid=#{channelUid}
+    </select>
 
+    <select id="findGameRole" parameterType="map" resultMap="GameRoleResult">
+        <include refid="select_gamerole_column"/>
+        where
+        channelId=#{channelId}
+        and channelUid=#{channelUid}
+        and gameId=#{gameId}
+        and serverId=#{serverId}
+        and roleId=#{roleId}
     </select>
 </mapper> 

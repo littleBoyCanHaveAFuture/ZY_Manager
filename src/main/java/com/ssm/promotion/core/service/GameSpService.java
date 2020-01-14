@@ -21,4 +21,5 @@ public interface GameSpService {
     int insertGameSp(GameSp gameSp, Integer userId);
 
     Long getCountGameSp(Map<String, Object> map, Integer userId);
+
 }

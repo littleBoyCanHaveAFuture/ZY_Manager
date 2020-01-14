@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+
 /**
  * @author song minghua
  */
@@ -32,7 +33,7 @@ public class UOrderManager {
                                    int realMoney, String completeTime, String sdkOrderTime,
                                    int status, String notifyUrl,
                                    String signType,
-                                   String sign) throws UnsupportedEncodingException {
+                                   String sign, String gameKey) throws UnsupportedEncodingException {
         if (!signType.equals(MD5Util.KEY_ALGORITHM)) {
             return false;
         }
@@ -60,11 +61,11 @@ public class UOrderManager {
                 .append("sdkOrderTime=").append(sdkOrderTime == null ? "" : sdkOrderTime).append("&")
 
                 .append("status=").append(status).append("&")
-                .append("notifyUrl=").append(notifyUrl == null ? "" : notifyUrl);
+                .append("notifyUrl=").append(notifyUrl == null ? "" : notifyUrl)
+                .append("&").append(gameKey);
         System.out.println("sign\n" + sb.toString());
 
         String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
-        System.out.println("sign url\n" + encoded);
         String newSign = EncryptUtils.md5(encoded).toLowerCase();
 
         System.out.println("Md5 sign recv  \n:" + sign);
@@ -121,7 +122,7 @@ public class UOrderManager {
         if (status < OrderState.STATE_OPEN_SHOP || status > OrderState.STATE_PAY_SUPPLEMENT) {
             return null;
         }
-        String completetiems = "";
+        String completetiems = "0";
         if (status == OrderState.STATE_PAY_SUCCESS || status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT) {
             if (status != OrderState.STATE_PAY_SUCCESS) {
                 completetiems = DateUtil.formatDate(Long.parseLong(completeTime), DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
@@ -135,7 +136,7 @@ public class UOrderManager {
         order.setChannelID(channelId);
         order.setChannelOrderID(channelOrderID);
 
-        order.setCompleteTime(completetiems);
+//        order.setCompleteTime(completetiems);
 
         order.setCreatedTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
         order.setCurrency("RMB");

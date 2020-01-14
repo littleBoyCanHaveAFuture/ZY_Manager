@@ -17,18 +17,14 @@ public interface GameRoleService {
      * @param gameRole
      * @return
      */
-    public boolean createGameRole(GameRole gameRole) throws DataAccessException;
+    boolean createGameRole(GameRole gameRole) throws DataAccessException;
 
 
     int readMaxAccountId(int maxSpid);
 
-    /**
-     * 查找账号
-     *
-     * @param map
-     * @return
-     */
-    public List<GameRole> findUser(Map<String, Object> map);
+    List<GameRole> findUser(Map<String, Object> map);
+
+    GameRole findGameRole(Map<String, Object> map);
 
     /**
      * 更新用户数据
