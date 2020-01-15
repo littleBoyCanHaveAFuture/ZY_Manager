@@ -229,6 +229,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             keyMap.get(RedisKeyTail.ACTIVE_PLAYERS).add(RedisKeyNew.getKeyRolesActiveDay(spId.toString(), gameId.toString(), serverId.toString()));
 //            //在线玩家
 //            keyMap.get(RedisKeyTail.ONLINE_PLAYERS).add(RedisKeyNew.getKeyRolesOnlineDay(spId.toString(), gameId.toString(), serverId.toString()));
+
             //新增创角
             keyMap.get(RedisKeyTail.NEW_ADD_CREATE_ROLE).add(RedisKeyNew.getKeyRolesCreateDay(spId.toString(), gameId.toString(), serverId.toString()));
             //新增创角去除滚服

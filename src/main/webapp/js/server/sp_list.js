@@ -31,7 +31,7 @@ function initTableColumns() {
 
 function showPhoto(value, row, index) {
     if (row.iconUrl) {
-        return '<img src="/images/sdk/' + row.iconUrl + '"style="height:30px;" alt="">'
+        return '<img src="' + row.iconUrl + '"style="height:30px;" alt="">'
     } else {
         return null;
     }

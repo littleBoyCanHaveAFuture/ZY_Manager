@@ -60,7 +60,7 @@
                 <td>图标:</td>
                 <td>
                     <label for="save_icon"></label>
-                    <input type="text" name="save_icon" id="save_icon"
+                    <input type="text" name="save_icon" id="save_icon" style="width: 400px"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="图标地址">
                 </td>

@@ -263,7 +263,7 @@ function changeSdk(row) {
 
 function showPhoto(value, row, index) {
     if (row.icon) {
-        return '<img src="/images/sdk/' + row.icon + '"style="height:30px;" alt="">'
+        return '<img src="' + row.icon + '"style="height:30px;" alt="">'
     } else {
         return null;
     }

@@ -92,8 +92,8 @@
         // 基于准备好的dom，初始化echarts实例
         myChart = echarts.init(document.getElementById('main'));
 
-        $('#save_startTime').datebox('setValue', formatterDate(new Date(new Date().getTime() - 60 * 60 * 1000), 1));
-        $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
+        $('#save_startTime').datetimebox('setValue', formatterDate(new Date(new Date().getTime() - 60 * 60 * 1000), 1));
+        $('#save_endTime').datetimebox('setValue', formatterDate(new Date(), 1));
     }
 
 </script>

@@ -133,8 +133,8 @@ public class SdkController {
             channelParams.put("pay_key", gameSp.getPayKey());
             channelParams.put("send_key", gameSp.getSendKey());
 
-            libUrl.add("http://111.231.244.198:8080/try/login/md5.js");
-            libUrl.add("http://111.231.244.198:8080/try/login/jquery-3.4.1.min.js");
+            libUrl.add("http://zy.hysdgame.cn/sdk/common/md5.js");
+            libUrl.add("http://zy.hysdgame.cn/sdk/common/jquery-3.4.1.min.js");
 
             channelPlatform.put("libUrl", libUrl);
             channelPlatform.put("playUrl", "");
@@ -643,7 +643,7 @@ public class SdkController {
             //检查游戏秘钥
             List<GameName> gameNameList = gameService.getGameList(map, -1);
             if (gameNameList == null || gameNameList.size() != 1) {
-                System.out.println("Game err");
+                log.error("Game err : gameId=" + appId + "\tspId=" + channelId);
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
@@ -657,7 +657,7 @@ public class SdkController {
                     roleID, roleName, roleLevel,
                     serverID, serverName, realMoney,
                     completeTime, sdkOrderTime, status, notifyUrl, signType, sign, gameKey)) {
-                log.info("the sign is not valid. sign:" + sign);
+                log.error("the sign is not valid. sign:" + sign);
                 result.put("message", "签名错误");
                 result.put("state", false);
                 break;
@@ -668,7 +668,7 @@ public class SdkController {
             boolean isPaySuccess = false;
             UOrder order = orderManager.getOrder(String.valueOf(appId), String.valueOf(channelId), channelOrderID);
             if (order == null) {
-                log.info("order is not exist. generateOrder");
+                log.error("order is not exist. generateOrder");
                 order = orderManager.generateOrder(accountId, channelId, channelUid, appId,
                         channelOrderID, productID, productName, productDesc, money,
                         roleID, roleName, roleLevel,

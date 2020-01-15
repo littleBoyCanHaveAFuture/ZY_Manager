@@ -603,9 +603,10 @@ public class TtController {
             //查询redis-移除在线玩家
             String currDay = DateUtil.getCurrentDayStr();
             String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, appId, serverId);
-
-            cache.zincrby(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
-
+            Double score = cache.getZscore(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, currDay);
+            if (score > 1) {
+                cache.zincrby(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
+            }
             //查询mysql-统计玩家在线时间并存储到redis
             map.clear();
             map.put("roleId", roleId);

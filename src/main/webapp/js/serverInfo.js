@@ -47,8 +47,9 @@ function initDatagrid(commonResult) {
 
     let dg = $("#dg");
     initDataGrid(dg, activeColumns, null);
-    $('#save_startTime').datebox('setValue', formatterDate(new Date(), 0));
-    $('#save_endTime').datebox('setValue', formatterDate(new Date(), 1));
+
+    $('#save_startTime').datetimebox('setValue', formatterDate(new Date(), 0));
+    $('#save_endTime').datetimebox('setValue', formatterDate(new Date(), 1));
 }
 
 function exportToLocal() {
@@ -66,11 +67,14 @@ function formatterDate(date, type) {
     let hor = date.getHours();
     let min = date.getMinutes();
     let sec = (date.getSeconds() > 9) ? date.getSeconds() : "0" + date.getSeconds();
+    let times;
     if (type === 0) {
-        return date.getFullYear() + '-' + month + '-' + "01" + " " + "00" + ":" + "00";
+        times = date.getFullYear() + '-' + month + '-' + "01" + " " + "00" + ":" + "00";
     } else {
-        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
+        times = date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min;
     }
+
+    return times;
 }
 
 function initSpGameServer(type) {

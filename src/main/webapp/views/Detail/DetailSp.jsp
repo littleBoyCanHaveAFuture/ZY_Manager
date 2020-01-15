@@ -26,7 +26,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200114"></script>
 </head>
 <body style="margin:1px;">
 
