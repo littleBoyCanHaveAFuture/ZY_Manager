@@ -479,6 +479,174 @@ public class JedisRechargeCache {
     }
 
     /**
+     * 设置游戏
+     */
+    public void setGAMEIDInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKeyTail.GAMEINFO;
+            jds.sadd(key, appId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 获取游戏
+     */
+    public Set<String> getGAMEIDInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKeyTail.GAMEINFO;
+            return jds.smembers(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    /**
+     * 删除游戏渠道信息
+     */
+    public void delGAMEIDInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKeyTail.GAMEINFO;
+            jds.srem(key, appId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 设置游戏渠道信息
+     */
+    public void setSPIDInfo(String appId,
+                            String channelId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = String.format(RedisKey.FORMAT_GAME, appId, RedisKeyTail.SPIDINFO);
+            jds.sadd(key, channelId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 获取游戏渠道
+     */
+    public Set<String> getSPIDInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = String.format(RedisKey.FORMAT_GAME, appId, RedisKeyTail.SPIDINFO);
+            return jds.smembers(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    /**
+     * 删除游戏渠道信息
+     */
+    public void delSPIDInfo(String appId,
+                            String channelId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = String.format(RedisKey.FORMAT_GAME, appId, RedisKeyTail.SPIDINFO);
+            jds.srem(key, channelId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 设置游戏渠道区服信息
+     */
+    public void setServerInfo(String appId,
+                              String channelId,
+                              String serverId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = String.format(RedisKey.FORMAT_SG, RedisKeyTail.SERVERINFO, appId, channelId);
+            jds.sadd(key, serverId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 获取游戏渠道区服信息
+     */
+    public Set<String> getServerInfo(String appId,
+                                     Integer channelId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = String.format(RedisKey.FORMAT_SG, RedisKeyTail.SERVERINFO, appId, channelId);
+            return jds.smembers(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    /**
      * 注册账号
      * 1.新增创号
      * 2.该游戏所有账号
@@ -622,7 +790,7 @@ public class JedisRechargeCache {
             //是否滚服用户
             String key = RedisKeyNew.getKeyAccountCreateRoles(channelId, appId);
 
-            boolean hasRole = jds.sismember(key,String.valueOf(accountId));
+            boolean hasRole = jds.sismember(key, String.valueOf(accountId));
 
             Pipeline pipeline = jds.pipelined();
             //新版
@@ -632,7 +800,7 @@ public class JedisRechargeCache {
                 //新增创角去除滚服
                 pipeline.zincrby(RedisKeyNew.getKeyRolesCreateFirst(channelId, appId, serverId), 1, currDay);
                 //创建过角色的账号
-                pipeline.sadd(RedisKeyNew.getKeyAccountCreateRoles(channelId, appId),String.valueOf(accountId));
+                pipeline.sadd(RedisKeyNew.getKeyAccountCreateRoles(channelId, appId), String.valueOf(accountId));
             }
             //实时创角
             pipeline.zincrby(RedisKeyNew.getKeyRolesCreateMin(channelId, appId, serverId, currDay), 1, currDayMin);
@@ -805,7 +973,7 @@ public class JedisRechargeCache {
         }
     }
 
-    public void zincrby(String key, long score, String member) {
+    public void zIncrBy(String key, long score, String member) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -822,7 +990,7 @@ public class JedisRechargeCache {
 
     }
 
-    public Double getZscore(String key, String member) {
+    public Double getZScore(String key, String member) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -951,7 +1119,6 @@ public class JedisRechargeCache {
         }
     }
 
-
     /**
      * 获取Sorted Set 分数
      * <p>
@@ -969,7 +1136,7 @@ public class JedisRechargeCache {
      *                   key keytail
      *                   value （times，score）
      */
-    public void getDayZscore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
+    public void getDayZScore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1014,48 +1181,6 @@ public class JedisRechargeCache {
                     }
                     resultList.put(entry.getKey(), resultmap);
                 }
-            }
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-    }
-
-    public Long getbitcount(String key) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = this.jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            return jds.bitcount(key);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
-
-    /**
-     * 简单的setbit
-     *
-     * @param key
-     * @param value
-     */
-    public void setbit(String key, long member, boolean value) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            boolean res = jds.setbit(key, member, value);
-            if (isLog) {
-                System.out.println("setbit key:" + key + "\tmember:" + member + "\tvalue" + value + "\tresult:[" + res + "]");
             }
         } catch (Exception e) {
             isBroken = true;

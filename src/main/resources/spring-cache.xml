@@ -25,23 +25,20 @@
         这里之前的配置有问题，因为参数类型不一致，有时候jar和环境的问题，导致参数根据index对应，会处理问题，
         理论上加另一个 name，就可以解决，现在把name 和type都加上，更保险。
     -->
-<!--        <bean id="jedisPool" class="redis.clients.jedis.JedisPool">-->
-<!--            <constructor-arg index="0" ref="jedisPoolConfig"/>-->
-<!--            <constructor-arg index="1" name="host" type="java.lang.String"-->
-<!--                             value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>-->
-<!--            <constructor-arg index="2" name="port" type="int" value="6379"/>-->
-<!--            <constructor-arg index="3" name="timeout" type="int" value="5000"/>-->
-<!--            <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>-->
-<!--        </bean>-->
-<!--    正式服 腾讯云 只能内网连接-->
+    <!--    正式服 腾讯云 只能内网连接-->
     <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
         <constructor-arg index="0" ref="jedisPoolConfig"/>
-        <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>
+        <constructor-arg index="1" name="host" type="java.lang.String"
+                         value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>
         <constructor-arg index="2" name="port" type="int" value="6379"/>
         <constructor-arg index="3" name="timeout" type="int" value="5000"/>
-        <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>
+        <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>
+        <!--        <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>-->
+        <!--        <constructor-arg index="2" name="port" type="int" value="6379"/>-->
+        <!--        <constructor-arg index="3" name="timeout" type="int" value="5000"/>-->
+        <!--        <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>-->
     </bean>
-
+    <!---->
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.ssm.promotion.core.jedis.jedisManager">
         <property name="jedisPool" ref="jedisPool"/>

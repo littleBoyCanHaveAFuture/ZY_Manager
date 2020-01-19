@@ -6,7 +6,7 @@ window.onload = function () {
 };
 
 function EnterGame() {
-    window.location.href = "gamelogin.jsp";
+    window.location.href = "game.jsp";
 }
 
 function EnterGame_Cisha() {

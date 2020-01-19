@@ -87,4 +87,25 @@ public class LoginWorker {
 
         return param.toString();
     }
+
+    public String loadLoginUrl(String loginUrl, Integer accountId, Integer appId, Integer serverId) {
+        StringBuilder param = new StringBuilder();
+
+        switch (appId) {
+            case 11:
+                param.append("qid=").append(accountId);
+                param.append("&server_id=").append(serverId);
+                break;
+            case 9999:
+                param.append("qid=").append(accountId);
+            default:
+                break;
+        }
+        param.append("&time=").append(System.currentTimeMillis());
+
+        String sign = MD5Util.md5(param.toString());
+        param.append("&sign=").append(sign);
+
+        return loginUrl + param.toString();
+    }
 }

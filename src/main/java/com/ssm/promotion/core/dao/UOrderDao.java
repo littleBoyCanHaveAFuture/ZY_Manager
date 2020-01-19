@@ -11,7 +11,9 @@ import java.util.Map;
  * @date 2019/12/9
  */
 public interface UOrderDao {
-    public List<UOrder> getUOrderList(Map<String, Object> param);
+    List<UOrder> getUOrderList(Map<String, Object> param);
+
+    List<UOrder> getOrderById(@Param("orderID") String orderID);
 
     Long getTotalUorders(Map<String, Object> map);
 

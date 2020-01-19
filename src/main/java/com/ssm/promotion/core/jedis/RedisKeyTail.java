@@ -103,4 +103,17 @@ public class RedisKeyTail {
      * 注册付费金额
      */
     public static final String RECHARGE_AMOUNTS_NA_CR = "RE_AM_NA_CR";
+    /**
+     *游戏渠道区服
+     */
+    public static final String SERVERINFO = "SERVERINFO";
+    /**
+     *游戏渠道区服
+     */
+    public static final String SPIDINFO = "SPIDINFO";
+    /**
+     *游戏
+     */
+    public static final String GAMEINFO = "GAMEINFO";
+
 }

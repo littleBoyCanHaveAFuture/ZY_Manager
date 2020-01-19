@@ -1,12 +1,35 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE>
+<html lang="">
 
 <head>
-    <title>index</title>
+    <title>游戏商品列表</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="shortcut icon" href="http://www.zyh5games.com/panda.png" type="image/x-icon"/>
+    <script type="text/javascript"
+            src="../jquery-easyui-1.7.0/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="../jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+    <script type="text/javascript"
+            src="../jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../js/md5.js"></script>
 </head>
+<script type="text/javascript">
+    function getUrlParams(name) {
+        let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        let r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
 
+    let oid = getUrlParams("oid");
+    console.info(oid);
+    let appId = getUrlParams("appId");
+    console.info(appId);
+
+    let secretKey = getUrlParams("secretKey");
+    console.info(secretKey);
+</script>
 <body>
 
 <div class="header">刺沙商品列表</div>
@@ -14,100 +37,133 @@
 <div class="productList">
     <ul>
         <li>
-            <div class="sale">四倍首充</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="" title="商品">
+            <h2>4000 <span style="color: #0E2D5F" title="游戏内货币">钻石</span></h2>
+            <span style="color: #2A2E36">价格:￥0.1</span>
+            <h3><span style="color: #2b542c"
+                      onclick="aliPay(oid,'4000钻石','支付宝测试商品','0.1','1','透传')">-----支付宝-----</span></h3>
+
+        </li>
+        <li>
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
+            <h2>12000 <span style="color: #0E2D5F" title="游戏内货币,可以购买商城道具">钻石</span></h2>
+            <span>价格:￥0.1</span>
+            <h4><a style="color: #2b542c "
+                   onclick="javascript:wxPay(oid,'4000钻石','微信测试商品','0.1','1','透传');">------微信-----</a></h4>
+
+        </li>
+        <li>
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
+            <h2>20000 <span style="color: #0E2D5F" title="游戏内货币,可以购买商城道具">钻石</span></h2>
+            <span>价格:￥0.5</span>
+            <h3><span style="color: #2b542c"
+                      onclick="pay('535051064014148583','20000钻石','测试商品','0.5','1','透传')">点击购买</span></h3>
+        </li>
+        <li>
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
+            <h2>月卡-月卡特权</h2>
+            <h3>立即获得 3000 <span style="color: #0E2D5F" title="游戏内货币,可以购买商城道具">钻石</span></h3>
+            <h4>每日免费领取1000 <span style="color: #0E2D5F" title="游戏内货币,可以购买商城道具">钻石</span></h4>
+            <h5>每日领取10000 <span style="color: #0E2D5F" title="游戏内特殊货币,可以提高知名度">威望</span></h5>
+            <span>价格:￥0.3</span>
+        </li>
+        <li>
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>4000钻石</h2>
-            <span>￥10</span>
+            <span>价格:￥10</span>
         </li>
         <li>
-            <div class="sale">四倍首充</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>12000钻石</h2>
-            <span>￥30</span>
+            <span>价格:￥30</span>
         </li>
         <li>
-            <div class="sale">四倍首充</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏充值</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>20000钻石</h2>
-            <span>￥50</span>
+            <span>价格:￥50</span>
         </li>
         <li>
-            <div class="sale">月卡</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏月卡</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>月卡-月卡特权</h2>
             <h3>立即获得3000钻石</h3>
             <h4>每日免费领取1000钻石</h4>
             <h5>每日领取10000威望</h5>
-            <span>￥30</span>
+            <span>价格:￥30</span>
         </li>
         <li>
-            <div class="sale">月卡</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏月卡</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>至尊月卡-至尊月卡特权</h2>
             <h3>赠送8000钻石</h3>
             <h4> 每日领取2000钻石</h4>
             <h5> 每日领取10000威望</h5>
-            <span>￥88</span>
+            <span>价格:￥88</span>
         </li>
         <li>
-            <div class="sale">月卡</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏月卡</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>超值月卡</h2>
             <h3>月卡+至尊月卡</h3>
-            <span>￥80</span>
+            <span>价格:￥80</span>
         </li>
         <li>
-            <div class="sale">限时直购</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏礼包</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>3200钻石</h2>
             <h3>高级修为丹*2</h3>
             <h3>灃兰若芷图鉴-橙*1</h3>
             <h3>戒灵碎片*100</h3>
-            <span>￥16</span>
+            <span>价格:￥16</span>
         </li>
         <li>
-            <div class="sale">限时直购</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏礼包</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>5200钻石</h2>
             <h3>高级修为丹*3</h3>
             <h3>神装碎片*500</h3>
             <h3>戒灵碎片*200</h3>
-            <span>￥26</span>
+            <span>价格:￥26</span>
         </li>
         <li>
-            <div class="sale">限时直购</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏礼包</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>8050钻石</h2>
             <h3>高级图腾碎片*3</h3>
             <h3>神装碎片*750</h3>
             <h3>冲脉丹*10</h3>
-            <span>￥46</span>
+            <span>价格:￥46</span>
         </li>
         <li>
-            <div class="sale">限时直购</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏礼包</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>12900钻石</h2>
             <h3>圣兽心法*3</h3>
             <h3>红色碎片*100</h3>
             <h3>冲脉丹*15</h3>
-            <span>￥86</span>
+            <span>价格:￥86</span>
         </li>
         <li>
-            <div class="sale">限时直购</div>
-            <img src="https://cdn1.iconfinder.com/data/icons/mammals-i/300/25-512.png" alt="">
+            <div class="sale">游戏礼包</div>
+            <img src="http://www.zyh5games.com/panda.png" alt="">
             <h2>18900钻石</h2>
             <h3>史诗宝箱*3</h3>
             <h3>红色碎片*150</h3>
             <h3>命石碎片*20</h3>
-            <span>￥126</span>
+            <span>价格:￥126</span>
         </li>
 
     </ul>
 
 </div>
-<div class="footer">
-    <a href="http://www.miitbeian.gov.cn">备案号</a>
-</div>
+
 <div id="footer">
     <p id="p1">
         当前网站商品仅供测试，不保证内容的正确性。通过使用本站内容随之而来的风险与本站无关。
@@ -115,16 +171,14 @@
 
     <p id="p2">
         使用条款和隐私条款。版权所有，保留一切权利。
-        <a style="color: #000; margin-left: 20px;" href="mall.html" target="_blank" title="W3School 广告刊例">广告刊例</a>
+        <a style="color: #000; margin-left: 20px;" href="mall.html" target="_blank" title="广告刊例">广告刊例</a>
     </p>
     <p id="p3">
-        <a href="http://www.zygames.vip/">武汉指悦网络科技有限公司</a>。
-        <img src="https://pic3.zhimg.com/80/v2-d0289dc0a46fc5b15b3363ffa78cf6c7.png" alt="">
-        <a target="_blank" href="https://www.miitbeian.gov.cn/">蒙ICP备06004630号</a>
+        <a href="http://www.zyh5games.com">武汉指悦网络科技有限公司</a>。
+        <img src="http://www.zyh5games.com/警徽.png" alt="">
+        <a target="_blank" href="https://www.miitbeian.gov.cn/">鄂ICP备20000901号</a>
     </p>
 </div>
-</body>
-
 <style type="text/css">
     div#footer {
         clear: both;
@@ -134,15 +188,14 @@
         font-family: PingFangSC-Regular, 微软雅黑, Verdana, Arial, 宋体, serif;
         margin: auto;
         border-top: 0 solid rgb(255, 255, 255);
-        background: url(https://www.w3school.com.cn/ui2017/footer.png) left top repeat-x rgb(253, 252, 248);
+        background: url(http://www.zyh5games.com/footer.png) left top repeat-x rgb(253, 252, 248);
     }
 
     div#footer #p1 {
         font-size: 12px;
         color: #777777;
         text-align: center;
-        background: transparent url(https://www.w3school.com.cn/ui2017/alert.png) no-repeat;
-        background-position: 235px 2px;
+        background: transparent url(http://www.zyh5games.com/alert.png) no-repeat 235px 2px;
     }
 
     div#footer #p2, #p3 {
@@ -158,7 +211,66 @@
     }
 
 </style>
+</body>
 
+<script>
+    function aliPay(orderId, body, subject, totalAmount, productId, passBackParams) {
+        let param =
+            "appId=" + appId +
+            "&orderId=" + orderId +
+            "&body=" + body +
+            "&subject=" + subject +
+            "&totalAmount=" + totalAmount +
+            "&productId=" + productId +
+            "&passBackParams=" + passBackParams +
+            "&" + secretKey;
+        console.info(param);
 
+        let sign_uri = encodeURIComponent(param);
+        console.info(sign_uri);
+        let hex_sign_uri = hex_md5(sign_uri);
+
+        param += "&sign=" + hex_sign_uri;
+        let url;
+        // url = "http://localhost:8081/aliPay/wapPaySdk?";
+        url = "http://www.zyh5games.com/pay/aliPay/wapPaySdk?";
+
+        $.ajax({
+            //获取下拉
+            url: url + param,
+            type: "post",
+            success: function (result) {
+                if (result.hasOwnProperty('message')) {
+                    alert(result.message);
+                } else {
+                    $('#footer').html($(result));
+                }
+            },
+        });
+    }
+
+    function wxPay(orderId, body, subject, totalAmount, productId, passBackParams) {
+        let param =
+            "appId=" + appId +
+            "&orderId=" + orderId +
+            "&body=" + body +
+            "&subject=" + subject +
+            "&totalAmount=" + totalAmount +
+            "&productId=" + productId +
+            "&passBackParams=" + passBackParams +
+            "&" + secretKey;
+        console.info(param);
+
+        let sign_uri = encodeURIComponent(param);
+        console.info(sign_uri);
+        let hex_sign_uri = hex_md5(sign_uri);
+
+        param += "&sign=" + hex_sign_uri;
+        let url;
+        // url = "http://localhost:8081/wxPay/wapPaySdk?";
+        url = "http://www.zyh5games.com/pay/wxPay/wapPaySdk?";
+        window.location.href = url + param;
+    }
+</script>
 </html>
 

@@ -1,50 +1,40 @@
-const t_domain = "/ttt";
-const keys = ["createRole", "levelUp", "enterServer"];
-const messgae = ["SUCCESS", "FAIL"];
-const OrderStatus = [0, 1, 2, 3, 4, 5];
-const OrderStatusDesc = [
-    "点开充值界面     未点充值按钮（取消支付）",
-    "选择充值方式界面  未选择充值方式（取消支付）",
-    "支付宝微信界面   未支付（取消支付）",
-    "支付成功 未发货",
-    "支付成功 已发货(交易完成)",
-    "支付成功 补单(交易完成)"
-];
-let OrderStateMsg = [0, "发送成功", 2, 3, 4, 5,
-    "角色不存在", 7, 8, 9, "金额错误",
-    "订单错误", 12, 13, 14, 15,
-    16, "参数与订单参数不一致", "参数为空或非法", "账号不存在"];
-
-const appId_CS = 2;
-const appId_SGYX = 9999;
+let t_url = "/pay/webGame";
+t_url = "/webGame";
 $(function () {
-    let appId = getCookies("appId");
-    let name = getCookies("username");
-    let pwd = getCookies("password");
-    let uid = getCookies("channelUid");
-    let aid = getCookies("accountid");
+    let appId = getCookies("zy_appId");
+    let channelId = getCookies("zy_channelId");
+    let username = getCookies("zy_user");
+    let password = getCookies("zy_pwd");
+    let channelUid = getCookies("zy_channelUid");
+    let uid = getCookies("zy_uid");
 
-    console.info("游戏id" + appId);
-    console.info("账号" + name);
-    console.info("密码" + pwd);
-    console.info("uid" + uid);
-    console.info("aid" + aid);
+    console.info("游戏id=" + appId);
+    console.info("渠道id=" + channelId);
+    console.info("账号=" + username);
+    console.info("密码=" + password);
+    console.info("uid=" + uid);
+    console.info("渠道uid=" + channelUid);
 
     if (checkParam(appId)) {
         alert("请选择游戏");
         window.location.href = "game.html";
+    } else {
+        $('#appId').val(appId);
     }
-    if (!checkParam(name)) {
-        $('#username').val(name);
+    if (!checkParam(channelId)) {
+        $('#channelId').val(channelId);
     }
-    if (!checkParam(pwd)) {
-        $('#password').val(pwd);
+    if (!checkParam(username)) {
+        $('#username').val(username);
+    }
+    if (!checkParam(password)) {
+        $('#password').val(password);
+    }
+    if (!checkParam(channelUid)) {
+        $('#channelUid').val(channelUid);
     }
     if (!checkParam(uid)) {
         $('#uid').val(uid);
-    }
-    if (!checkParam(aid)) {
-        $('#aid').val(aid);
     }
 });
 
@@ -56,471 +46,281 @@ function checkParam(param) {
     return (param == null || param === "" || param === "undefined");
 }
 
-function test_Register() {
-    let auto = "true";
-    let appId = getCookies("appId");
-    let channelId = "0";
-    let channelUid = "";
-
-    let username = $("#username").val();
-    let password = $("#password").val();
-    let phone = "";
-    let deviceCode = "PC";
-    let imei = "PC";
-    let addparm = "";
-
-    let result = register(auto, appId,
-        channelId, channelUid, "account_" + channelUid, "name_" + channelUid,
-        username, password, phone, deviceCode, imei, addparm);
-
-    console.info("test_Register");
-    console.info(result);
-
-    alert(result.reason);
-
-    if (result.message === messgae[0]) {
-        $('#username').val(result.account);
-        $('#password').val(result.password);
-        $('#uid').val(result.channelUid);
-        $('#aid').val(result.uid);
-
-        let res = "账号: " + result.account + " 密码: " + result.password + " Uid: " + result.uid;
-        $('#res').val(res);
-        setCookie("username", result.account);
-        setCookie("password", result.password);
-        setCookie("accountid", result.uid);
-        setCookie("channelUid", result.channelUid);
-    }
+function gameList() {
+    window.location.href = "game.html";
 }
+
+function zy_Register() {
+    let regInfo = {};
+    regInfo.auto = Boolean(true);
+    regInfo.appId = Number($("#appId").val());
+    regInfo.channelId = Number($("#channelId").val());
+    regInfo.channelUid = $("#channelUid").val();
+    regInfo.username = $("#username").val();
+    regInfo.password = $("#password").val();
+    regInfo.phone = "";
+    regInfo.deviceCode = "PC";
+    regInfo.imei = "PC";
+    regInfo.addparm = "官方注册";
+
+    console.info(regInfo);
+
+    sdk_ZyRegister(regInfo, function (callbackData) {
+        if (callbackData.state === false) {
+            console.info(callbackData.message);
+        } else {
+            console.info(callbackData.message);
+            console.info(JSON.stringify(callbackData));
+
+            let ZyUid = callbackData.uid;
+            let username = callbackData.account;
+            let password = callbackData.password;
+            let channelUid = callbackData.channelUid;
+
+            $("#uid").val(ZyUid);
+            $("#username").val(username);
+            $("#password").val(password);
+            $("#channelUid").val(channelUid);
+
+            let res = "账号: " + username + " 密码: " + password + " Uid: " + channelUid;
+            $('#copy').val(res);
+            setCookie("zy_uid", ZyUid);
+            setCookie("zy_user", username);
+            setCookie("zy_pwd", password);
+            setCookie("zy_channelUid", channelUid);
+        }
+    });
+}
+
+function zy_Login() {
+    let loginInfo = {};
+    loginInfo.isAuto = Boolean(true);
+    loginInfo.username = $("#username").val();
+    loginInfo.password = $("#password").val();
+    loginInfo.GameId = $("#appId").val();
+    loginInfo.channelId = $("#channelId").val();
+    loginInfo.channelUid = $("#channelUid").val();
+    loginInfo.timestamp = new Date().valueOf();
+
+    sdk_ZyLogin(loginInfo, function (callbackLoginData) {
+        if (callbackLoginData.state === false) {
+            alert("登录失败", callbackLoginData.message);
+        } else {
+            let ZyUid = callbackLoginData.zyUid;
+            let username = callbackLoginData.username;
+            let password = callbackLoginData.password;
+            let channelUid = callbackLoginData.channelUid;
+            let loginUrl = callbackLoginData.loginUrl;
+
+            $("#uid").val(callbackLoginData.zyUid);
+            $("#username").val(callbackLoginData.username);
+            $("#password").val(callbackLoginData.password);
+            $("#channelUid").val(callbackLoginData.channelUid);
+
+            setCookie("zy_uid", ZyUid);
+            setCookie("zy_user", username);
+            setCookie("zy_pwd", password);
+            setCookie("zy_channelUid", channelUid);
+            alert("登录成功", callbackLoginData.message);
+            window.open(loginUrl);
+        }
+    });
+}
+
 
 /**
  * 注册-接口
- * @param   {boolean}       auto             是否自动注册,无需账号密码
- * @param   {number}        appId            游戏id
- * @param   {number}        channelId        渠道id
- * @param   {string}        channelUid       渠道账号id
- * @param   {string}        channelUname     渠道账号名称
- * @param   {string}        channelUnick     渠道账号昵称
- * @param   {string}        username         指悦账号
- * @param   {string}        password         指悦账号密码
- * @param   {string}        phone            手机号
- * @param   {string}        deviceCode
- * @param   {string}        imei
- * @param   {string}        addparm          额外参数
- * @return  {json}
+ * @param   {object}        regInfo                  注册信息
+ * @param   {boolean}       regInfo.auto             是否无需账号密码注册
+ * @param   {number}        regInfo.appId            游戏id
+ * @param   {number}        regInfo.channelId        渠道id
+ * @param   {string}        regInfo.channelUid       渠道账号id
+ * @param   {string}        regInfo.channelUname     渠道账号名称
+ * @param   {string}        regInfo.channelUnick     渠道账号昵称
+ * @param   {string}        regInfo.username         指悦账号
+ * @param   {string}        regInfo.password         指悦账号密码
+ * @param   {string}        regInfo.phone            手机号
+ * @param   {string}        regInfo.deviceCode
+ * @param   {string}        regInfo.imei
+ * @param   {string}        regInfo.addparm          额外参数
+ * @param   {function}      callback
  * */
-function register(auto, appId,
-                  channelId, channelUid, channelUname, channelUnick,
-                  username, password,
-                  phone, deviceCode, imei,
-                  addparm) {
-    let way = "注册-接口 ";
-    if (auto === "true") {
-        if (checkParam(channelId)) {
-            console.error(way + "参数错误" + " channelId=" + channelId);
-            return null;
-        }
-        if (channelId === "0") {
-            //官方渠道
-            channelUid = "0";
+function sdk_ZyRegister(regInfo, callback) {
+    let rspObject = {};
+    if (!regInfo.hasOwnProperty('auto')) {
+        rspObject.message = "auto 参数为空";
+        rspObject.state = false;
+        callback(rspObject);
+        return;
+    }
+    if (!regInfo.hasOwnProperty('appId')) {
+        rspObject.message = "appId 参数为空";
+        rspObject.state = false;
+        callback(rspObject);
+        return;
+    }
+    if (regInfo.auto === true) {
+        let mustKey = ['channelId', 'channelUid'];
+        if (regInfo.hasOwnProperty('channelId') && regInfo.channelId === 0) {
+
         } else {
-            //其他渠道
-            if (checkParam(channelUid)) {
-                console.error(way + "参数错误" + " channelUid=" + channelUid);
-                return null;
+            for (let keyIndex of mustKey) {
+                if (!regInfo.hasOwnProperty(keyIndex)) {
+                    rspObject.message = "渠道id 或 渠道uid 为空";
+                    rspObject.state = false;
+                    callback(rspObject);
+                    return;
+                }
             }
         }
     } else {
-        if (checkParam(username) || checkParam(password)) {
-            console.error(way + "参数错误" + " username=" + username + " password=" + password);
-            return null;
+        let mustKey = ['channelId', 'username', 'password'];
+        for (let keyIndex of mustKey) {
+            if (!regInfo.hasOwnProperty(keyIndex)) {
+                rspObject.message = "用户名 或 密码 为空";
+                rspObject.state = false;
+                callback(rspObject);
+                return;
+            }
         }
     }
 
-    let data = {
-        "auto": auto,
-        "appId": appId,
-        "channelId": channelId,
-        "channelUid": channelUid,
-        "channelUname": channelUname,
-        "channelUnick": channelUnick,
-
-        "username": username,
-        "pwd": password,
-        "phone": phone,
-        "deviceCode": deviceCode,
-        "imei": imei,
-        "addparm": addparm
-    };
-
-    let response;
     $.ajax({
-        url: t_domain + "/register",
+        url: t_url + "/register",
         type: "post",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(data),
+        contentType: "text/plain; charset=utf-8",
+        data: JSON.stringify(regInfo),
         dataType: "json",
         async: false,
         success: function (result) {
             console.info(result);
-            if (result.resultCode === 200) {
-                if (result.data.message === messgae[0]) {
-                    console.info(way + "recv ", result.data.reason);
-                    console.info(way + "recv 账号 " + result.data.account);
-                    console.info(way + "recv 密码 " + result.data.password);
-                    console.info(way + "recv uid " + result.data.accountId);
-                    console.info(way + "recv channelUid " + result.data.channelUid);
-                    response = {
-                        "account": result.data.account,
-                        "password": result.data.password,
-                        "uid": result.data.accountId,
-                        "channelUid": result.data.channelUid,
-                        "reason": result.data.reason,
-                        "message": result.data.message
-                    }
+            if (result.hasOwnProperty('state')) {
+                if (result.state === true) {
+                    rspObject.state = true;
+                    rspObject.message = result.message;
+
+                    rspObject.uid = result.accountId;
+                    rspObject.account = result.account;
+                    rspObject.password = result.password;
+                    rspObject.channelUid = result.channelUid;
                 } else {
-                    console.error(way + "recv ", result.data.reason);
-                    response = {
-                        "reason": result.data.reason,
-                        "message": result.data.message
-                    }
+                    rspObject.state = false;
+                    rspObject.message = result.message;
                 }
+            } else {
+                rspObject.state = false;
+                rspObject.message = "通信失败";
             }
+            callback(rspObject);
         },
         error: function () {
-            console.error(way + "通信失败");
+            rspObject.message = "通信失败";
+            rspObject.state = false;
+            callback(rspObject);
         }
     });
-    return response;
-}
-
-function test_Login() {
-    let isChannel = "false";
-    let appId = getCookies("appId");
-    let channelId = "0";
-    let accountId = $('#aid').val();
-    let channelUid = $('#uid').val();
-    let username = $('#username').val();
-    let password = $('#password').val();
-
-    if (checkParam(channelUid)) {
-        channelUid = "0";
-    }
-
-
-    let result = login(isChannel, appId, channelId, channelUid, username, password);
-    console.info("test_Login");
-    console.info(result);
-
-    if (result.message === messgae[1]) {
-        alert(result.reason);
-    } else if (result.message === messgae[0]) {
-        let loginResult = loginCheck(result.appid, result.uid, result.token, result.sign);
-        console.info("test_Login");
-        console.info(loginResult);
-
-        if (loginResult.message === messgae[0]) {
-            setCookie("username", username);
-            setCookie("password", password);
-            setCookie("accountid", loginResult.accountId);
-            setCookie("channelUid", channelUid);
-            entergame(loginResult.accountId, appId);
-        } else {
-            alert(loginResult.reason);
-        }
-    }
 }
 
 /**
  * 请求登录-接口
- * @param    {boolean}      isChannel        是否渠道自动注册
- * @param   {number}        appId            游戏id
- * @param   {number}        channelId        渠道id
- * @param   {string}        channelUid       渠道账号id
- * @param   {string}        username         指悦账号
- * @param   {string}        password         指悦账号密码
- * @return  {json}
+ * @param   {Object}        loginInfo
+ * @param   {boolean}       loginInfo.isAuto           是否渠道自动注册
+ * @param   {number}        loginInfo.GameId           游戏id
+ * @param   {number}        loginInfo.channelId        渠道id
+ * @param   {string}        loginInfo.channelUid       渠道账号id
+ * @param   {string}        loginInfo.username         指悦账号
+ * @param   {string}        loginInfo.password         指悦账号密码
+ * @param   {number}        loginInfo.timestamp        时间戳
+ * @param   {string}        loginInfo.sign             签名
+ * @param   {function}      callback                   回调函数
  * */
-function login(isChannel, appId,
-               channelId, channelUid,
-               username, password) {
-    let way = "请求登录-接口 ";
-    if (checkParam(appId)) {
-        console.error(way + "参数错误" + " appId=" + appId);
-        return null;
-    }
+function sdk_ZyLogin(loginInfo, callback) {
+    let rspObject = {};
 
-    if (isChannel === "true") {
-        if (checkParam(channelId)) {
-            console.error(way + "参数错误" + " channelId=" + channelId);
-            return null;
+    let mustKey = ['isAuto', 'GameId', 'channelId'];
+    for (let keyIndex of mustKey) {
+        if (!loginInfo.hasOwnProperty(keyIndex)) {
+            rspObject.state = false;
+            rspObject.message = "参数为空：isAuto GameId channelId";
+            callback(rspObject);
+            return;
         }
-        if (checkParam(channelUid)) {
-            console.error(way + "参数错误" + " channelUid=" + channelUid);
-            return null;
+    }
+    if (loginInfo.isAuto === true) {
+        if (checkParam(loginInfo.channelId) || checkParam(loginInfo.channelUid)) {
+            rspObject.state = false;
+            rspObject.message = "参数为空：channelId  channelUid";
+            callback(rspObject);
+            return;
         }
-    } else if (isChannel === "false") {
-        if (checkParam(username) || checkParam(password)) {
-            console.error(way + "参数错误" + " username=" + username + " password=" + password);
-            return null;
+    } else if (loginInfo.isAuto === false) {
+        if (checkParam(loginInfo.username) || checkParam(loginInfo.password)) {
+            rspObject.state = false;
+            rspObject.message = "参数为空：username  password";
+            callback(rspObject);
+            return;
         }
     } else {
-        console.error(way + "参数错误" + " isChannel=" + isChannel);
-        return null;
+        rspObject.state = false;
+        rspObject.message = "参数错误：isAuto";
+        callback(rspObject);
+        return;
     }
+    let param = "isAuto" + "=" + loginInfo.isAuto + "&" +
+        "GameId" + "=" + loginInfo.GameId + "&" +
+        "channelId" + "=" + loginInfo.channelId + "&" +
+        "channelUid" + "=" + loginInfo.channelUid + "&" +
+        "username" + "=" + loginInfo.username + "&" +
+        "password" + "=" + loginInfo.password + "&" +
+        "timestamp" + "=" + loginInfo.timestamp;
 
-    let data = {
-        "isChannel": isChannel,
-        "appId": appId,
-        "channelId": channelId,
-        "channelUid": channelUid,
-        "name": username,
-        "pwd": password
-    };
-    let response;
+    //md5 加密
+    loginInfo.sign = md5(param, t_key);
+
+    let params = param + "&sign=" + loginInfo.sign;
+
+    console.info(params);
+
     $.ajax({
-        url: t_domain + "/login",
-        type: "post",
+        url: t_url + "/login?" + params,
+        type: "get",
         contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(data),
         dataType: "json",
-        async: false,
         success: function (result) {
-            console.info(result);
-            if (result.message === messgae[0]) {
-                console.info(way + "recv reason " + result.reason);
-                console.info(way + "recv appid " + result.appid);
-                console.info(way + "recv token " + result.token);
-                console.info(way + "recv uid " + result.uid);
-                console.info(way + "recv sign " + result.sign);
-                response = {
-                    "appid": result.appid,
-                    "uid": result.uid,
-                    "token": result.token,
-                    "sign": result.sign,
-                    "reason": result.reason,
-                    "message": result.message
-                };
+            if (result.state === true) {
+                rspObject.message = result.message;
+                rspObject.state = result.state;
+
+                rspObject.GameId = result.GameId;
+                rspObject.channelId = result.channelId;
+                rspObject.channelUid = result.channelUid;
+                rspObject.channelToken = result.channelToken;
+                rspObject.zyUid = result.zyUid;
+                rspObject.username = result.username;
+                rspObject.password = result.password;
+                rspObject.loginUrl = result.loginUrl;
+                rspObject.paybackUrl = result.paybackUrl;
+                callback(rspObject);
             } else {
-                console.error("recv ", result.reason);
-                response = {
-                    "reason": result.reason,
-                    "message": result.message
-                };
+                rspObject.message = result.message;
+                rspObject.state = result.state;
+                callback(rspObject);
             }
         },
         error: function () {
-            console.error(way + "请求登录接口失败");
-        }
-    });
-    return response;
-}
-
-/**
- * 请求登录校验-接口
- * @param   {number}        appId           游戏id
- * @param   {number}        accountId       指悦uid
- * @param   {string}        token           登录token
- * @param   {string}        sign            签名
- * @return  {json}
- * */
-function loginCheck(appId, accountId, token, sign) {
-    let way = "请求登录校验-接口 ";
-    if (checkParam(appId) || checkParam(accountId) || checkParam(token) || checkParam(sign)) {
-        console.error(way + "参数错误" + " appId=" + appId + " accountId=" + accountId + " token=" + token + " sign=" + sign);
-        return null;
-    }
-    let param = "appId=" + appId + "&uid=" + accountId + "&token=" + token + "&sign=" + sign;
-    console.info(way + "send " + param);
-    let response;
-    $.ajax({
-        url: t_domain + "/check?" + param,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            console.info(result);
-            if (result.resultCode === 200) {
-                let rdata = result.data;
-                if (result.data.message === messgae[0]) {
-                    console.info(way + "recv reason " + rdata.reason);
-                    console.info(way + "recv uid " + rdata.accountId);
-
-                    response = {
-                        "accountId": rdata.accountId,
-                        "reason": rdata.reason,
-                        "message": rdata.message
-                    }
-                } else {
-                    console.error(way + "recv ", rdata.reason);
-                    response = {
-                        "reason": rdata.reason,
-                        "message": rdata.message
-                    }
-                }
-            }
-        },
-        error: function () {
-            console.error(way + "登录校验失败");
-        }
-    });
-    return response;
-}
-
-
-function entergame(accountId, appid) {
-    let url = "/ttt/autoGame" + "?accountId=" + accountId + "&appId=" + appid + "&serverId=" + "1";
-    $.ajax({
-        url: url,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            console.info(result);
-            if (result.resultCode === 200) {
-                let loginUrl = result.url;
-                $('#res').val(loginUrl);
-                // window.location.href = loginUrl;
-                window.open(loginUrl);
-            }
-        },
-        error: function () {
-            alert("系统提示", "操作失败");
+            rspObject.message = "通信失败";
+            rspObject.state = false;
+            callback(rspObject);
         }
     });
 }
 
-function auto() {
-    let appId = getCookies("appId");
-    let url = "/ttt/autoReg?auto=true&appid=" + appId;
+function md5(info, secretKey) {
+    let strInfo = info;
+    strInfo += "&" + secretKey;
 
-    $.ajax({
-        url: url,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            console.info(result);
-            if (result.resultCode === 200) {
-                if (result.status === 1) {
-                    $('#username').val(result.account);
-                    $('#password').val(result.pwd);
+    let sign_uri = encodeURIComponent(strInfo);
+    let hex_sign_uri = hex_md5(sign_uri);
 
-                    setCookie("username", result.account);
-                    setCookie("password", result.pwd);
-                    setCookie("accountid", result.accountId);
-
-                    let res = "账号: " + result.account + " 密码: " + result.pwd + " Uid: " + result.accountId;
-                    $('#res').val(res);
-                    alert("注册成功");
-                }
-            }
-        },
-        error: function () {
-            alert("系统提示", "操作失败");
-        }
-    });
-}
-
-let t_appid;
-let t_token;
-let t_accountId;
-let t_sign;
-
-/*
-function login() {
-    let appId = getCookies("appId");
-    let account = $('#username').val();
-    let password = $('#password').val()
-
-    setCookie("username", account);
-    setCookie("password", password);
-
-    if (appId == null || appId === "") {
-        alert("请选择游戏");
-        window.location.href = "game.html";
-    }
-
-    let data = {
-        "appId": appId,
-        "isChannel": "false",
-        "name": account,
-        "pwd": password,
-        "channelId": "0",
-        "channelUid": ""
-    };
-    $.ajax({
-        url: "/ttt/login",
-        type: "post",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(data),
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            if (result.resultCode === 200) {
-
-                t_appid = result.appid;
-                t_token = result.token;
-                t_accountId = result.uid;
-                t_sign = result.sign;
-
-                let data = "appId=" + t_appid + "token=" + t_token + "uid=" + t_accountId + "sign=" + t_sign;
-                console.info(data);
-
-                logincheck();
-            }
-        },
-        error: function (result) {
-            console.info(result);
-            alert(result.err);
-        }
-    });
-}
-
-function logincheck() {
-    let url = "/ttt/check" + "?appId=" + t_appid + "&token=" + t_token + "&uid=" + t_accountId + "&sign=" + t_sign;
-    console.info("logincheck:" + url);
-
-    $.ajax({
-        url: url,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            console.log("result：" + result.status);
-            if (result.resultCode === 200) {
-                entergame();
-            }
-        },
-        error: function () {
-            alert("系统提示", "操作失败");
-        }
-    })
-}
-
-function entergame() {
-    let url = "/ttt/autoGame" + "?accountId=" + t_accountId + "&appId=" + t_appid + "&serverId=" + "1";
-    $.ajax({
-        url: url,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            console.info(result);
-            if (result.resultCode === 200) {
-                let loginUrl = result.url;
-                $('#res').val(loginUrl);
-                // window.location.href = loginUrl;
-                window.open(loginUrl);
-            }
-        },
-        error: function () {
-            alert("系统提示", "操作失败");
-        }
-    });
-}*/
-
-function gameList() {
-    window.location.href = "game.html";
+    return hex_sign_uri;
 }

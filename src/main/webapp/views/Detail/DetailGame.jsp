@@ -37,15 +37,15 @@
 
 <div id="tb" fitcolumns="true">
     <div id="tbs">
-        <label for="save_spId"></label>
-        <span style="color: blue; ">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId">
+        <label for="save_gameId"></label>
+        <span style="color: blue;">游戏:</span>
+        <select title="选择游戏" id="save_gameId" name="gameId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="save_gameId"></label>
-        <span style="color: blue;margin-left:50px  ">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId">
+        <label for="save_spId"></label>
+        <span style="color: blue; margin-left:50px">渠道:</span>
+        <select title="选择渠道" id="save_spId" name="spId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 

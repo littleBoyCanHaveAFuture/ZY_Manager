@@ -58,7 +58,7 @@ public class SdkController {
     @Resource
     private ServerListService serverService;
     @Resource
-    private GameNameService gameService;
+    private GameService gameService;
     @Resource
     private GameSpService gameSpService;
     @Resource
@@ -100,15 +100,15 @@ public class SdkController {
 
         do {
             //检查游戏秘钥
-            List<GameName> gameNameList = gameService.getGameList(map, -1);
-            if (gameNameList == null || gameNameList.size() != 1) {
+            List<Game> gameList = gameService.getGameList(map, -1);
+            if (gameList == null || gameList.size() != 1) {
                 System.out.println("Game err");
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
             }
-            GameName gameName = gameNameList.get(0);
-            if (!gameName.getSecertKey().equals(GameKey)) {
+            Game game = gameList.get(0);
+            if (!game.getSecertKey().equals(GameKey)) {
                 System.out.println("GameKey err");
                 result.put("state", false);
                 result.put("message", "游戏秘钥错误！");
@@ -136,9 +136,9 @@ public class SdkController {
             libUrl.add("http://zy.hysdgame.cn/sdk/common/md5.js");
             libUrl.add("http://zy.hysdgame.cn/sdk/common/jquery-3.4.1.min.js");
 
+
             channelPlatform.put("libUrl", libUrl);
             channelPlatform.put("playUrl", "");
-
 
             result.put("channelToken", "");
             result.put("channelParams", channelParams);
@@ -250,15 +250,15 @@ public class SdkController {
             map.put("spId", channelId);
 
             //检查游戏秘钥
-            List<GameName> gameNameList = gameService.getGameList(map, -1);
-            if (gameNameList == null || gameNameList.size() != 1) {
+            List<Game> gameList = gameService.getGameList(map, -1);
+            if (gameList == null || gameList.size() != 1) {
                 System.out.println("Game err");
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
             }
-            GameName gameName = gameNameList.get(0);
-            String gameKey = gameName.getSecertKey();
+            Game game = gameList.get(0);
+            String gameKey = game.getSecertKey();
 
             List<GameSp> gameSpList = gameSpService.selectGameSp(map, -1);
             if (gameSpList == null || gameSpList.size() != 1) {
@@ -325,6 +325,8 @@ public class SdkController {
             result.put("channelToken", token);
             result.put("username", account.getName());
             result.put("password", account.getPwd());
+            result.put("loginUrl", loginWorker.loadLoginUrl(game.getLoginUrl(), accountId, GameId, 1));
+            result.put("paybackUrl", game.getPaycallbackUrl());
             //数据库-设置账号登录时间
             map.clear();
             map.put("id", accountId);
@@ -498,12 +500,14 @@ public class SdkController {
 
                         //设置活跃玩家、在线玩家
                         cache.enterGame(gameId, String.valueOf(zoneId), channelId, account.getId());
+                        //设置区服信息
+                        cache.setServerInfo(gameId, channelId, String.valueOf(zoneId));
                     } else {
                         //查询redis-移除在线玩家
                         String currDay = DateUtil.getCurrentDayStr();
                         String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, gameId, zoneId);
 
-                        cache.zincrby(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
+                        cache.zIncrBy(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
                         result.put("message", "退出游戏 上报成功");
                         result.put("state", true);
                     }
@@ -641,16 +645,16 @@ public class SdkController {
             map.put("gameId", appId);
             map.put("spId", channelId);
             //检查游戏秘钥
-            List<GameName> gameNameList = gameService.getGameList(map, -1);
-            if (gameNameList == null || gameNameList.size() != 1) {
+            List<Game> gameList = gameService.getGameList(map, -1);
+            if (gameList == null || gameList.size() != 1) {
                 log.error("Game err : gameId=" + appId + "\tspId=" + channelId);
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
             }
-            GameName gameName = gameNameList.get(0);
-            String gameKey = gameName.getSecertKey();
-
+            Game game = gameList.get(0);
+            String gameKey = game.getSecertKey();
+            String notify = game.getPaycallbackUrl();
             //3.验签
             if (!UOrderManager.isSignOK(accountId, channelId, channelUid, appId,
                     channelOrderID, productID, productName, productDesc, money,
@@ -673,7 +677,7 @@ public class SdkController {
                         channelOrderID, productID, productName, productDesc, money,
                         roleID, roleName, roleLevel,
                         serverID, serverName, realMoney,
-                        completeTime, sdkOrderTime, status, notifyUrl);
+                        completeTime, sdkOrderTime, status, notify);
 
                 if (order == null) {
                     result.put("message", "订单不存在");
@@ -716,7 +720,7 @@ public class SdkController {
 
             result.put("message", "上报订单数据成功");
             result.put("state", true);
-            result.put("orderId", order.getOrderID());
+            result.put("orderId", String.valueOf(order.getOrderID()));
         } while (false);
 
         ResponseUtil.write(response, result);

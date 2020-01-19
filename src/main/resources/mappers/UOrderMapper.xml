@@ -177,5 +177,9 @@
         and channelID= #{channelID}
         and channelOrderID=#{channelOrderID}
     </update>
+    <select id="getOrderById" resultType="UOrder">
+        <include refid="select_payRecord_column"/>
+        where orderID=#{orderID}
+    </select>
 
 </mapper>

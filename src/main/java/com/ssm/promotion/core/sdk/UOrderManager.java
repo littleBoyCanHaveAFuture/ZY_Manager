@@ -105,6 +105,10 @@ public class UOrderManager {
         return orderDao.getUOrderList(map);
     }
 
+    public List<UOrder> getUOrderById(String id) {
+        return orderDao.getOrderById(id);
+    }
+
     public Long getTotalUorders(Map<String, Object> map) {
         return orderDao.getTotalUorders(map);
     }

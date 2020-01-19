@@ -20,14 +20,13 @@
     <![endif]-->
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
-    <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/multiple-select-1.5.2/multiple-select.js"></script>
-    <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/jquery.md5.js"></script>
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script src="${pageContext.request.contextPath}/login/gamelogin.js"></script>
+    <script src="${pageContext.request.contextPath}/js/md5.js"></script>
+    <script src="${pageContext.request.contextPath}/login/gamelogin.js?202001181729"></script>
 </head>
 
 <body class="gray-bg">
@@ -49,13 +48,25 @@
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 
+            <label for="appId"></label>
+            <input type="text" name="appId" id="appId" required="" hidden="hidden">
 
-            <input type="text" name="res" id="res" required="" hidden="hidden">
+            <label for="channelId"></label>
+            <input type="text" name="channelId" id="channelId" required="" hidden="hidden">
 
-            <button type="button" class="btn btn-primary block full-width m-b" onclick="test_Register();"> 一 键 注 册
+            <label for="uid"></label>
+            <input type="text" name="uid" id="uid" required="" hidden="hidden">
+
+            <label for="channelUid"></label>
+            <input type="text" name="channelUid" id="channelUid" required="" hidden="hidden">
+
+            <label for="copy"></label>
+            <input type="text" name="copy" id="copy" required="" hidden="hidden">
+
+            <button type="button" class="btn btn-primary block full-width m-b" onclick="zy_Register();"> 一 键 注 册
             </button>
-            <button type="button" class="btn btn-primary block full-width m-b" onclick="test_Login();"> 登 录</button>
-            <button class="copyBtn btn btn-primary block full-width m-b" data-clipboard-target="#res"
+            <button type="button" class="btn btn-primary block full-width m-b" onclick="zy_Login();"> 登 录</button>
+            <button class="copyBtn btn btn-primary block full-width m-b" data-clipboard-target="#copy"
                     alt="Copy to clipboard">
                 点击复制账号密码
             </button>
@@ -63,27 +74,33 @@
                 <a href="##" onclick="adminlogin.reset();return false;" style="float: right">
                     <small>重置账号密码</small>
                 </a>
-                <a onclick="gameList()" style="float: left">返回游戏列表</a>
             </p>
+            <a href="##" onclick="clearGameCookie();return false;" style="float: left">
+                <small>清理缓存</small>
+            </a>
         </form>
     </div>
 </div>
 
 <script type="text/javascript">
-
-    var clipboard = new ClipboardJS('.copyBtn', {
+    setCookie("zy_appId", 11);
+    setCookie("zy_channelId", 0);
+    let clipboard = new ClipboardJS('.copyBtn', {
         text: function () {
-            return $("input:hidden[name='res']").val();
+            return $("input:hidden[name='copy']").val();
         }
     });
-    let name = getCookies("username");
-    let pwd = getCookies("password");
-    let res = "账号: " + name + " 密码: " + pwd;
-    $('#res').val(res);
+    const t_key = "l44i45326jixrlaio9c0025g974125y6";
+
+    let t_name = getCookies("zy_user");
+    let t_pwd = getCookies("zy_pwd");
+    let res = "账号: " + t_name + " 密码: " + t_pwd;
+    $('#copy').val(res);
+
     clipboard.on('success', function (e) {
-        console.info('Action:', e.action);
+        // console.info('Action:', e.action);
         console.info('Text:', e.text);
-        console.info('Trigger:', e.trigger);
+        // console.info('Trigger:', e.trigger);
         alert("复制成功");
         e.clearSelection();
     });
@@ -92,7 +109,6 @@
         console.error('Action:', e.action);
         console.error('Trigger:', e.trigger);
     });
-
 </script>
 
 </body>

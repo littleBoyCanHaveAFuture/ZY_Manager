@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssm.promotion.core.dao.GameNameDao">
-    <resultMap type="GameName" id="GameNameResult">
+<mapper namespace="com.ssm.promotion.core.dao.GameDao">
+    <resultMap type="Game" id="GameNameResult">
         <result property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="uid" column="uid"/>
@@ -53,7 +53,7 @@
         where id = #{gameid}
     </delete>
 
-    <update id="updateGame" parameterType="GameName">
+    <update id="updateGame" parameterType="Game">
         update zy_game
         <set>
             <if test="id != null and  id!= -1">
@@ -75,7 +75,7 @@
         where id = #{id}
     </update>
 
-    <insert id="insertGame" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="GameName">
+    <insert id="insertGame" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="Game">
         insert into zy_game(name, uid, secert_key, login_url, paycallback_url)
         values (#{name}, #{uid}, #{secertKey}, #{loginUrl}, #{paycallbackUrl})
     </insert>

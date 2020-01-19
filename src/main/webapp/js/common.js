@@ -41,10 +41,12 @@ function clearCookie() {
 }
 
 function clearGameCookie() {
-    delCookie("username");
-    delCookie("password");
-    delCookie("channelUid");
-    delCookie("accountid");
+    delCookie("zy_appId");
+    delCookie("zy_channelId");
+    delCookie("zy_user");
+    delCookie("zy_pwd");
+    delCookie("zy_channelUid");
+    delCookie("zy_uid");
 }
 
 function formatterDate(date, type) {

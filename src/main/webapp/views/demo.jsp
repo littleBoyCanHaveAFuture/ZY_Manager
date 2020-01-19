@@ -21,7 +21,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=20200119"></script>
+            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=20200114"></script>
 </head>
 
 <%--<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">--%>
@@ -170,11 +170,7 @@
             <option value="5">支付成功:补单(交易完成)</option>
         </select>
     </div>
-    <div>
-        <label>Step:10----->一键下单/label>
-            <a href="javascript:auto()" class="easyui-linkbutton" iconCls="icon-add" plain="true">一键下单</a>
-            <%--        <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>--%>
-    </div>
+
     <div>
         <label>--------------------------------------</label>
     </div>
@@ -202,27 +198,7 @@
         // initSpGameServer(1);
         // initSpGameServer(2);
         // initSpGameServer(3);
-        let auto = $("#auto").val();
-        let appId = $("#save_gameId").val();
-        let channelId = $("#save_spId").val();
-        let channelUid = $("#channelUid").val();
-        let username = $("#username").val();
-        let password = $("#password").val();
-
     });
-
-    function auto() {
-        let t = 500;
-        setTimeout("init()", 500);
-        $("#channelUid").val(100);
-        setTimeout("SpInit()", 600);
-        setTimeout("zy_Login()", 700);
-        $("#roleId").val(200);
-        setTimeout("zy_upload(2)", 800);
-        $("#oderid").val(new Date().valueOf());
-        $("#money").val(200);
-        setTimeout("zy_UploadPayInfo()", 900);
-    }
 
     function init() {
         let appId = $("#save_gameId").val();
@@ -238,25 +214,18 @@
             alert("无此游戏");
             return;
         }
-        ZySDK.init(appId, GameKey, channelId, function (state) {
-            if (state === true) {
-                console.info("init ok");
-            } else {
-                console.error("init fail");
-            }
+        ZySDK.init(appId, GameKey, channelId, function () {
+            console.info("init ok");
         });
     }
 
     function SpInit() {
-        //渠道用户id
         let channelUid = $("#channelUid").val();
-        //渠道用户登录名
-        let channelUName = "";
-        ZySDK.initUser(channelUid, channelUName, function (data) {
+        ZySDK.initUser(channelUid, "", function (data) {
             if (data.state === false) {
-                console.error(data.message);
+                setLog(data.message, 1);
             } else {
-                console.info(data.message);
+                setLog(data.message, 0);
             }
         });
     }
@@ -277,10 +246,10 @@
         }
         ZySDK.zyRegister(regInfo, function (callbackData) {
             if (callbackData.state === false) {
-                console.error(callbackData.message);
+                setLog(callbackData.message, 1);
             } else {
-                console.info(callbackData.message);
-                console.info(JSON.stringify(callbackData));
+                setLog(callbackData.message, 0);
+                setLog(JSON.stringify(callbackData), 0);
 
                 let ZyUid = callbackData.uid;
                 let username = callbackData.account;
@@ -303,12 +272,12 @@
 
         ZySDK.zyLogin(loginInfo, function (callbackLoginData) {
             if (callbackLoginData.state === false) {
-                console.error(callbackLoginData.message);
+                setLog(callbackLoginData.message, 1);
                 if (callbackLoginData.message === "无此渠道用户") {
                     zy_Register();
                 }
             } else {
-                console.info(JSON.stringify(callbackLoginData));
+                setLog(JSON.stringify(callbackLoginData), 0);
                 $("#accountId").val(callbackLoginData.zyUid);
                 $("#username").val(callbackLoginData.username);
                 $("#password").val(callbackLoginData.password);
@@ -340,10 +309,10 @@
         }
         let result = ZySDK.uploadGameRoleInfo(key, roleInfo, function (callbackData) {
             if (callbackData.state === false) {
-                console.error(callbackData.message);
-                console.error(JSON.stringify(roleInfo));
+                setLog(callbackData.message, 1);
+                setLog(JSON.stringify(roleInfo), 1);
             } else {
-                console.info(JSON.stringify(callbackData));
+                setLog(JSON.stringify(callbackData), 0);
             }
         });
     }
@@ -378,10 +347,10 @@
         }
         let result = ZySDK.pay(orderInfo, function (callbackData) {
             if (callbackData.state === false) {
-                console.error(callbackData.message);
-                console.error(JSON.stringify(orderInfo));
+                setLog(callbackData.message, 1);
+                setLog(JSON.stringify(orderInfo), 1);
             } else {
-                console.info(JSON.stringify(callbackData));
+                setLog(JSON.stringify(callbackData), 0);
 
                 window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
             }

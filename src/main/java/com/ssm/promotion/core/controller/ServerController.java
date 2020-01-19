@@ -34,7 +34,7 @@ public class ServerController {
     @Resource
     private ServerListService serverService;
     @Resource
-    private GameNameService gameService;
+    private GameService gameService;
     @Resource
     private GameSpService gameSpService;
     @Resource
@@ -115,11 +115,11 @@ public class ServerController {
         if (serverService.existSGS(map, userId)) {
             return ResultGenerator.genFailResult("添加失败");
         }
-        List<GameName> gameNames = gameService.getGameList(map, userId);
-        if (gameNames == null || gameNames.size() == 0) {
+        List<Game> games = gameService.getGameList(map, userId);
+        if (games == null || games.size() == 0) {
             return ResultGenerator.genFailResult("添加失败");
         }
-        serverInfo.setGamename(gameNames.get(0).getName());
+        serverInfo.setGamename(games.get(0).getName());
         int resultTotal = serverService.addServer(serverInfo, userId);
 
         log.info("request: article/save , " + serverInfo.toString());
@@ -179,7 +179,7 @@ public class ServerController {
     }
 
     /**
-     * 删除
+     * 增加、修改、删除 游戏
      */
     @RequestMapping(value = "/gamedata", method = RequestMethod.GET)
     @ResponseBody
@@ -203,20 +203,22 @@ public class ServerController {
         System.out.println("loginUrl:" + loginUrl);
         System.out.println("paybackUrl:" + paybackUrl);
 
-        GameName gameName = new GameName(name, userId);
+        Game game = new Game(name, userId);
 
-        gameName.setLoginUrl(loginUrl);
-        gameName.setPaycallbackUrl(paybackUrl);
+        game.setLoginUrl(loginUrl);
+        game.setPaycallbackUrl(paybackUrl);
 
         if (type == 1) {
             gameService.deleteGame(gameId, userId);
+            cache.delGAMEIDInfo(String.valueOf(gameId));
         } else if (type == 2) {
             if (gameId != null) {
-                gameName.setId(gameId);
-                gameService.updateGame(gameName, userId);
+                game.setId(gameId);
+                gameService.updateGame(game, userId);
             }
         } else if (type == 3) {
-            gameService.addGame(gameName, userId);
+            gameService.addGame(game, userId);
+            cache.setGAMEIDInfo(String.valueOf(gameId));
         }
 
         log.info("request: game/gamedata , gameId: " + gameId);
@@ -253,17 +255,17 @@ public class ServerController {
         map.put("gameId", gameId);
         map.put("name", name);
 
-        List<GameName> serverInfos = gameService.getGameList(map, userId);
+        List<Game> serverInfos = gameService.getGameList(map, userId);
 
         if (spId != null) {
-            List<GameName> res = new ArrayList<>();
+            List<Game> res = new ArrayList<>();
 
             List<Integer> gameIdList = serverService.getDistinctServerInfo(map, 1, userId);
 
             if (gameIdList != null && gameIdList.size() > 0) {
-                for (GameName gameName : serverInfos) {
-                    if (gameIdList.contains(gameName.getId())) {
-                        res.add(gameName);
+                for (Game game : serverInfos) {
+                    if (gameIdList.contains(game.getId())) {
+                        res.add(game);
                     }
                 }
                 JSONArray jsonArray = JSONArray.fromObject(res);
@@ -312,17 +314,17 @@ public class ServerController {
         } else if (type == 2) {
             //选择已经有的服务器名称
             map.clear();
-            List<GameName> gameNameList = gameService.getGameList(map, userId);
-            Iterator<GameName> it = gameNameList.iterator();
+            List<Game> gameList = gameService.getGameList(map, userId);
+            Iterator<Game> it = gameList.iterator();
 
             while (it.hasNext()) {
-                GameName gameName = it.next();
-                if (!serverInfos.contains(gameName.getId())) {
+                Game game = it.next();
+                if (!serverInfos.contains(game.getId())) {
                     it.remove();
                 }
             }
-            rows = JSONArray.fromObject(gameNameList);
-            size = gameNameList.size();
+            rows = JSONArray.fromObject(gameList);
+            size = gameList.size();
         } else {
             rows = JSONArray.fromObject(serverInfos);
         }
@@ -777,6 +779,7 @@ public class ServerController {
                 if (type == 1) {
                     //删除渠道信息
                     gameSpService.deleteGameSp(id, userId);
+                    cache.delSPIDInfo(String.valueOf(gameId), String.valueOf(spId));
                 } else if (type == 2) {
                     //配置渠道信息
                     if (gameSpStatus != 0) {
@@ -822,7 +825,8 @@ public class ServerController {
                 sp.setPayKey(payKey);
                 sp.setSendKey(sendKey);
                 gameSpService.insertGameSp(sp, userId);
-                cache.initGameSp(String.valueOf(gameId), String.valueOf(spId));
+                //游戏渠道信息
+                cache.setSPIDInfo(String.valueOf(gameId), String.valueOf(spId));
             }
             break;
             default:

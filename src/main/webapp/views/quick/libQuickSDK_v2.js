@@ -1474,8 +1474,8 @@ function getQuickSDKOrderData(orderData, callback) {
                 rebackObj.message = '请求接口失败无法获取响应';
                 return callback(rebackObj);
             }
-            if (!respData.hasOwnProperty('status') || respData.status == false) {
-                if (rebackObj.message != undefined || rebackObj.message == '' || !respData.hasOwnProperty('message')) {
+            if (!respData.hasOwnProperty('status') || respData.status === false) {
+                if (rebackObj.message !== undefined || rebackObj.message === '' || !respData.hasOwnProperty('message')) {
                     rebackObj.message = '请求接口失败';
                 } else {
                     rebackObj.message = respData.message;

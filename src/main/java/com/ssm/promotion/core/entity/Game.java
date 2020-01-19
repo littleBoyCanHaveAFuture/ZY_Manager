@@ -6,7 +6,7 @@ import lombok.Data;
  * @author song minghua
  */
 @Data
-public class GameName {
+public class Game {
     /**
      * id
      */
@@ -33,12 +33,12 @@ public class GameName {
      */
     private String paycallbackUrl;
 
-    public GameName(String name, Integer uid) {
+    public Game(String name, Integer uid) {
         this.name = name;
         this.uid = uid;
     }
 
-    GameName() {
+    Game() {
 
     }
 

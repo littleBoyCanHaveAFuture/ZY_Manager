@@ -243,7 +243,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //当日首次付费金额
             keyMap.get(RedisKeyTail.RECHARGE_FIRST_PAY_AMOUNTS).add(RedisKeyNew.getKeyFirstPaidRolesAmounts(spId.toString(), gameId.toString(), serverId.toString()));
             //当前渠道的结果
-            cache.getDayZscore(keyMap, timeList, resultList);
+            cache.getDayZScore(keyMap, timeList, resultList);
 
             //活跃玩家
             Map<String, Double> timeActiveAccountMap = resultList.get(RedisKeyTail.ACTIVE_PLAYERS);
@@ -403,7 +403,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //当日首次付费金额
             keyMap.get(RedisKeyTail.RECHARGE_FIRST_PAY_AMOUNTS).add(RedisKeyNew.getKeyFirstPaidRolesAmounts(spId.toString(), gameId.toString(), serverId.toString()));
             //当前渠道的结果
-            cache.getDayZscore(keyMap, timeList, resultList);
+            cache.getDayZScore(keyMap, timeList, resultList);
 
             //活跃玩家
             Map<String, Double> timeActiveAccountMap = resultList.get(RedisKeyTail.ACTIVE_PLAYERS);
@@ -435,13 +435,13 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
             //累计充值
             //充值人数
-            Double timeTotalRechargeNums = cache.getZscore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalRechargeNums = cache.getZScore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_RECHARGE_ACCOUNTS);
             //充值金额
-            Double timeTotalPayment = cache.getZscore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalPayment = cache.getZScore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_RECHARGE_AMOUNTS);
             //累计创角
-            Double timeTotalCreateRole = cache.getZscore(RedisKeyNew.getKeyRolesCreateServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalCreateRole = cache.getZScore(RedisKeyNew.getKeyRolesCreateServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
 
             RechargeSummary rs = map.get(serverId);
@@ -551,7 +551,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //当日首次付费金额
             keyMap.get(RedisKeyTail.RECHARGE_FIRST_PAY_AMOUNTS).add(RedisKeyNew.getKeyFirstPaidRolesAmounts(spId.toString(), gameId.toString(), serverId.toString()));
             //当前渠道的结果
-            cache.getDayZscore(keyMap, timeList, resultList);
+            cache.getDayZScore(keyMap, timeList, resultList);
 
             //活跃玩家
             Map<String, Double> timeActiveAccountMap = resultList.get(RedisKeyTail.ACTIVE_PLAYERS);
@@ -582,13 +582,13 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             Map<String, Double> timeRechargeAmountsMap = resultList.get(RedisKey.RECHARGE_AMOUNTS);
             //累计充值
             //充值人数
-            Double timeTotalRechargeNums = cache.getZscore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalRechargeNums = cache.getZScore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_RECHARGE_ACCOUNTS);
             //充值金额
-            Double timeTotalPayment = cache.getZscore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalPayment = cache.getZScore(RedisKeyNew.getKeyRolesPayInfoServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_RECHARGE_AMOUNTS);
             //累计创角
-            Double timeTotalCreateRole = cache.getZscore(RedisKeyNew.getKeyRolesCreateServer(spId.toString(), gameId.toString(), serverId.toString()),
+            Double timeTotalCreateRole = cache.getZScore(RedisKeyNew.getKeyRolesCreateServer(spId.toString(), gameId.toString(), serverId.toString()),
                     RedisKey.GAME_ACCUMULATION_CREATE_ROLE);
 
             //新增创角

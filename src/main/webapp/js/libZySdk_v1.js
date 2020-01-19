@@ -16,7 +16,7 @@ const OrderStatusDesc = [
 
 //服务器地址
 // const zy_domain = "http://localhost:8080";
-const zy_domain = "http://zy.hysdgame.cn:8080";
+const zy_domain = "http://zyh5games.com:8080/";
 
 let ZySDK = {
     GameId: null,
@@ -47,8 +47,8 @@ let ZySDK = {
         params.channelId = this.channelId;
         params.debug = this.debug;
 
-        doInit(params, function () {
-            callback();
+        doInit(params, function (state) {
+            callback(state);
         });
     },
     /**
@@ -152,11 +152,12 @@ function doInit(params, callback) {
                     ZySDK.LoginKey = data.channelParams.login_key;
                     ZySDK.PayKey = data.channelParams.pay_key;
                     ZySDK.SendKey = data.channelParams.send_key;
-                    callback();
+                    callback(data.state);
                     setLog(JSON.stringify(data), 0);
                 });
             } else {
                 setLog(JSON.stringify(data), 1);
+                callback(data.state);
             }
         }
     })
@@ -352,6 +353,8 @@ function sdk_ZyLogin(loginInfo, callback) {
                 rspObject.zyUid = result.zyUid;
                 rspObject.username = result.username;
                 rspObject.password = result.password;
+                rspObject.loginUrl = result.loginUrl;
+                rspObject.paybackUrl = result.paybackUrl;
 
                 ZySDK.channelToken = result.channelToken;
 
@@ -551,6 +554,7 @@ function sdk_zyUploadPayInfo(orderInfo, callback) {
         data: JSON.stringify(orderInfo),
         dataType: "json",
         success: function (result) {
+            console.info(result);
             if (result.state === true) {
                 rspObject.state = true;
                 rspObject.message = result.message;
@@ -580,6 +584,16 @@ function loadAsyncScript(src, callback) {
     if (checkParam(src)) {
         callback();
         return;
+    }
+    console.info(src);
+    if (src.search("jquery") !== -1) {
+        if (typeof (jQuery) == "undefined") {
+            console.info("jQuery is not imported");
+        } else {
+            console.info("jQuery is imported");
+            callback();
+            return;
+        }
     }
     let scriptElement = document.createElement('script');
     scriptElement.setAttribute('type', 'text/javascript');
