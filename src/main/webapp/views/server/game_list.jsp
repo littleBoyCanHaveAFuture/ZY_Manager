@@ -43,13 +43,6 @@
             </thead>
         </table>
     </div>
-    <%--    <div title="Ajax" data-options="href:'_content.html',closable:true" style="padding:10px"></div>--%>
-    <%--    <div title="Iframe" data-options="closable:true" style="overflow:hidden">--%>
-    <%--        <iframe scrolling="yes" frameborder="0" src="${pageContext.request.contextPath}/views/gameConfig.jsp"--%>
-    <%--                style="width:100%;height:100%;">--%>
-    <%--        </iframe>--%>
-    <%--    </div>--%>
-
 </div>
 
 

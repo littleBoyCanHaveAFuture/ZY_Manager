@@ -66,4 +66,7 @@ public interface GameSpDao {
      */
     Long getCountGameSp(Map<String, Object> map);
 
+    List<Integer> DistSpIdByGameId(@Param("gameId") String gameId);
+
+    List<Integer> DistGameIdBySpId(@Param("spId") String spId);
 }

@@ -71,10 +71,10 @@
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
     <div>
-        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style=""
-           iconCls=" icon-search" plain="true">查询渠道</a>
-        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style=""
            iconCls=" icon-search" plain="true">查询游戏</a>
+        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询渠道</a>
         <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询区服</a>
     </div>
@@ -104,7 +104,7 @@
             "注册付费ARPU": "registeredPaymentARPU",
         };
         initDatagrid(commonResult);
-        initSpGameServer(1);
+        initSpGameServer(2);
     });
 </script>
 </html>

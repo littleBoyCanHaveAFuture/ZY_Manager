@@ -117,4 +117,24 @@
                 #{sendKey})
     </insert>
 
+    <select id="DistSpIdByGameId" parameterType="int" resultType="int">
+        select distinct sp_id
+        from zy_game_sp
+        <where>
+            <if test="gameId != null and gameId != -1 ">
+                game_id = #{gameId}
+            </if>
+        </where>
+    </select>
+
+    <select id="DistGameIdBySpId" parameterType="int" resultType="int">
+        select distinct game_id
+        from zy_game_sp
+        <where>
+            <if test="spId != null  and spId != -1">
+                sp_id =#{spId}
+            </if>
+        </where>
+    </select>
+
 </mapper>

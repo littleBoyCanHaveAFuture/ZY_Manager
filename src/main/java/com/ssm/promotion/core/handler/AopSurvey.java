@@ -193,6 +193,8 @@ public class AopSurvey {
             case "updateGameSp":
             case "insertGameSp":
             case "getCountGameSp":
+            case "DistSpIdByGameId":
+            case "DistGameIdBySpId":
                 type = FunctionType.ServerManagement;
                 break;
             case "login":
@@ -315,6 +317,8 @@ public class AopSurvey {
             case "updateGameSp":
             case "insertGameSp":
             case "getCountGameSp":
+            case "DistSpIdByGameId":
+            case "DistGameIdBySpId":
                 result = true;
                 break;
             default:

@@ -286,6 +286,10 @@ public class ServerController {
 
     /**
      * 查询不同的区服和渠道
+     *
+     * @param type 游戏   1
+     *             渠道   2
+     *             区服   3
      */
     @RequestMapping(value = "/getDistinctServerInfo", method = RequestMethod.POST)
     public void getDistinctServerInfo(Integer spId, Integer gameId, Integer serverId,
@@ -297,42 +301,54 @@ public class ServerController {
             return;
         }
 
+        int size = 0;
         Map<String, Object> map = new HashMap<>(6);
         map.put("spId", spId);
         map.put("gameId", gameId);
         map.put("serverId", serverId);
 
-        //不同游戏、渠道、区服 id
-        List<Integer> serverInfos = serverService.getDistinctServerInfo(map, type, userId);
-        //大小排序
-        serverInfos = serverInfos.stream().sorted(Integer::compareTo).collect(Collectors.toList());
-        int size = serverInfos.size();
-
-        JSONArray rows;
-        if (type == 1) {
-            rows = JSONArray.fromObject(serverInfos);
-        } else if (type == 2) {
-            //选择已经有的服务器名称
-            map.clear();
-            List<Game> gameList = gameService.getGameList(map, userId);
-            Iterator<Game> it = gameList.iterator();
-
-            while (it.hasNext()) {
-                Game game = it.next();
-                if (!serverInfos.contains(game.getId())) {
-                    it.remove();
-                }
-            }
-            rows = JSONArray.fromObject(gameList);
-            size = gameList.size();
-        } else {
-            rows = JSONArray.fromObject(serverInfos);
-        }
-
         JSONObject result = new JSONObject();
-        result.put("rows", rows.toString());
-        result.put("total", size);
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        switch (type) {
+            case 1: {
+                //查渠道
+                List<Integer> spIdList = gameSpService.DistSpIdByGameId(gameId, userId);
+                spIdList = spIdList.stream().sorted(Integer::compareTo).collect(Collectors.toList());
+
+                JSONArray rows = JSONArray.fromObject(spIdList);
+                result.put("rows", rows.toString());
+                result.put("total", spIdList.size());
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+            }
+            break;
+            case 2: {
+                //游戏id
+                List<Integer> gameIdList = gameSpService.DistGameIdBySpId(spId, userId);
+                gameIdList = gameIdList.stream().sorted(Integer::compareTo).collect(Collectors.toList());
+                //查游戏
+                List<Game> gameList = gameService.getGameList(map, userId);
+                Iterator<Game> it = gameList.iterator();
+                while (it.hasNext()) {
+                    Game game = it.next();
+                    if (!gameIdList.contains(game.getId())) {
+                        it.remove();
+                    }
+                }
+                JSONArray rows = JSONArray.fromObject(gameList);
+                result.put("rows", rows.toString());
+                result.put("total", gameList.size());
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+            }
+            break;
+            case 3: {
+                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), spId);
+                result.put("rows", serverIdSet.toString());
+                result.put("total", serverIdSet.size());
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+            }
+            break;
+            default:
+                break;
+        }
 
         ResponseUtil.write(response, result);
 
@@ -820,7 +836,7 @@ public class ServerController {
                 sp.setAppId(appId);
                 sp.setAppName(appName);
                 sp.setLoginUrl(loginUrl);
-//                sp.setPaybackUrl();
+                sp.setPaybackUrl("");
                 sp.setLoginKey(loginKey);
                 sp.setPayKey(payKey);
                 sp.setSendKey(sendKey);

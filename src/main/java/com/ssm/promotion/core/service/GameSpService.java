@@ -22,4 +22,6 @@ public interface GameSpService {
 
     Long getCountGameSp(Map<String, Object> map, Integer userId);
 
+    List<Integer> DistSpIdByGameId(Integer gameId,Integer userId);
+    List<Integer> DistGameIdBySpId(Integer spId,Integer userId);
 }

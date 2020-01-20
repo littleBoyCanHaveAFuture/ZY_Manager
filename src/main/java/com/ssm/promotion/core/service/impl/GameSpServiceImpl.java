@@ -86,4 +86,14 @@ public class GameSpServiceImpl implements GameSpService {
     public Long getCountGameSp(Map<String, Object> map, Integer userId) {
         return gameSpDao.getCountGameSp(map);
     }
+
+    @Override
+    public List<Integer> DistSpIdByGameId(Integer gameId, Integer userId) {
+        return gameSpDao.DistSpIdByGameId(String.valueOf(gameId));
+    }
+
+    @Override
+    public List<Integer> DistGameIdBySpId(Integer spId, Integer userId) {
+        return gameSpDao.DistGameIdBySpId(String.valueOf(spId));
+    }
 }
