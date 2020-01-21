@@ -1,8 +1,10 @@
 package com.ssm.promotion.core.controller;
 
 import com.ssm.promotion.core.common.Constants;
+import com.ssm.promotion.core.entity.GameInfo;
 import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.entity.ServerInfo;
+import com.ssm.promotion.core.jedis.JedisRechargeCache;
 import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.DateUtil;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author song minghua
@@ -32,14 +35,14 @@ import java.util.*;
 @RequestMapping("/rechargeSummary")
 public class RechargeSummaryControllr {
     private static final Logger log = Logger.getLogger(RechargeSummaryControllr.class);
-
+    @Autowired
+    JedisRechargeCache cache;
     @Resource
     private RechargeSummaryService rechargeSummaryServices;
     @Resource
     private ServerListService serverService;
     @Autowired
     private HttpServletRequest request;
-
 
     private void removeSpMap(Map<Integer, Map<Integer, List<Integer>>> tmpMap, int spId) {
         Iterator<Map.Entry<Integer, Map<Integer, List<Integer>>>> it = tmpMap.entrySet().iterator();
@@ -167,8 +170,8 @@ public class RechargeSummaryControllr {
         //1.查询渠道-游戏-区服
         //<渠道,<游戏，区服>>
         Map<Integer, Map<Integer, List<Integer>>> sgsMap = new HashMap<>();
-        List<ServerInfo> serverInfoList = getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
-
+//        List<ServerInfo> serverInfoList = getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
+        getAllGame(sgsMap, spId, gameId, serverId, type);
         if (sgsMap.size() == 0) {
             return null;
         }
@@ -179,18 +182,16 @@ public class RechargeSummaryControllr {
         //todo 查询数据 区服/渠道概况 必须指定 渠道和游戏
         List<RechargeSummary> rs = this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
         //处理开服天数
-        if (type == 2) {
-            Iterator<RechargeSummary> it = rs.iterator();
-            while (it.hasNext()) {
-                RechargeSummary next = it.next();
-                for (ServerInfo info : serverInfoList) {
-                    if (info.getServerId() == next.getServerId()) {
-                        next.setOpenDay(DateUtil.transTimes(info.getOpenday(), DateUtil.getCurrentDateStr(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS).size());
-                        break;
-                    }
-                }
-            }
-        }
+//        if (type == 2) {
+//            for (RechargeSummary rechargeSummary : rs) {
+//                for (ServerInfo info : serverInfoList) {
+//                    if (info.getServerId() == rechargeSummary.getServerId()) {
+//                        rechargeSummary.setOpenDay(DateUtil.transTimes(info.getOpenday(), DateUtil.getCurrentDateStr(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS).size());
+//                        break;
+//                    }
+//                }
+//            }
+//        }
         return rs;
     }
 
@@ -204,7 +205,6 @@ public class RechargeSummaryControllr {
             Integer sSpId = serverInfo.getSpId();
             Integer sGameId = serverInfo.getGameId();
             Integer sServerId = serverInfo.getServerId();
-            String openday = serverInfo.getOpenday();
 
             if (sSpId == null || sGameId == null || sServerId == null) {
                 continue;
@@ -290,5 +290,87 @@ public class RechargeSummaryControllr {
         return serverInfoList;
     }
 
+    public Map<String, GameInfo> getAllGame(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type) {
+        //查询数据结果
+        Map<Integer, Map<Integer, List<Integer>>> tmpMap = new HashMap<>();
+
+        Map<String, GameInfo> gameInfoMap = new HashMap<>();
+
+        //1.筛选
+        //某些条件下不允许查询所有
+        switch (type) {
+            case 1: {
+
+            }
+            break;
+            case 2: {
+                //需要指定 渠道和游戏id 不能为 -1
+                if (spId == -1 || gameId == -1) {
+                    System.out.println("需要指定 渠道和游戏id 不能为 -1");
+                    return null;
+                }
+            }
+            break;
+            case 3: {
+                if (gameId == -1) {
+                    System.out.println("需要指定 游戏id 不能为 -1");
+                    return null;
+                }
+            }
+            break;
+            default:
+                break;
+        }
+
+        //2.满足条件的游戏渠道区服
+        Set<String> gameIdInfo;
+        if (gameId == -1) {
+            gameIdInfo = cache.getGAMEIDInfo(String.valueOf(gameId));
+        } else {
+            gameIdInfo = new HashSet<>();
+            gameIdInfo.add(String.valueOf(gameId));
+        }
+
+        for (String gid : gameIdInfo) {
+            Set<String> spIdInfo;
+            if (spId == -1) {
+                spIdInfo = cache.getSPIDInfo(gid);
+            } else {
+                spIdInfo = new HashSet<>();
+                spIdInfo.add(String.valueOf(spId));
+            }
+            GameInfo gameInfo = new GameInfo(gid);
+            gameInfo.setSpIdSet(spIdInfo);
+
+            for (String spid : spIdInfo) {
+                Set<String> serverIdInfo;
+                if (serverId == -1) {
+                    serverIdInfo = cache.getServerInfo(gid, spid);
+                    gameInfo.addServerInfo(spid, serverIdInfo);
+                } else {
+                    serverIdInfo = new HashSet<>();
+                    serverIdInfo.add(String.valueOf(serverId));
+                }
+            }
+            gameInfoMap.put(gid, gameInfo);
+        }
+
+
+        for (GameInfo gameInfo : gameInfoMap.values()) {
+            System.out.println(gameInfo.toString());
+            String gid = gameInfo.getGameId();
+            Map<String, Set<String>> spInfo = gameInfo.getSpInfo();
+            Map<Integer, List<Integer>> stringListMap = new HashMap<>();
+            for (Map.Entry<String, Set<String>> entry : spInfo.entrySet()) {
+                List<String> stringList = new ArrayList<>(entry.getValue());
+                List<Integer> integerList = stringList.stream().map(Integer::parseInt).collect(Collectors.toList());
+                stringListMap.put(Integer.valueOf(entry.getKey()), integerList);
+            }
+
+            sgsMap.put(Integer.parseInt(gid), stringListMap);
+        }
+
+        return gameInfoMap;
+    }
 }
 

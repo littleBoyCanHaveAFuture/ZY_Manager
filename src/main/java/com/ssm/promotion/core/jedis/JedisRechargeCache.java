@@ -614,7 +614,7 @@ public class JedisRechargeCache {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
 
-            String key = String.format(RedisKey.FORMAT_SG, RedisKeyTail.SERVERINFO, appId, channelId);
+            String key = String.format(RedisKey.FORMAT_SG_SS, RedisKeyTail.SERVERINFO, appId, channelId);
             jds.sadd(key, serverId);
         } catch (Exception e) {
             isBroken = true;
@@ -628,14 +628,14 @@ public class JedisRechargeCache {
      * 获取游戏渠道区服信息
      */
     public Set<String> getServerInfo(String appId,
-                                     Integer channelId) {
+                                     String channelId) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
 
-            String key = String.format(RedisKey.FORMAT_SG, RedisKeyTail.SERVERINFO, appId, channelId);
+            String key = String.format(RedisKey.FORMAT_SG_SS, RedisKeyTail.SERVERINFO, appId, channelId);
             return jds.smembers(key);
         } catch (Exception e) {
             isBroken = true;

@@ -291,6 +291,7 @@
                 $("#username").val(username);
                 $("#password").val(password);
                 $("#channelUid").val(channelUid);
+                SpInit();
             }
         });
     }
@@ -313,6 +314,7 @@
                 $("#username").val(callbackLoginData.username);
                 $("#password").val(callbackLoginData.password);
                 $("#channelUid").val(callbackLoginData.channelUid);
+
             }
         });
     }

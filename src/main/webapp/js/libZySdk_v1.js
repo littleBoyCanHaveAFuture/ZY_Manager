@@ -15,8 +15,8 @@ const OrderStatusDesc = [
 ];
 
 //服务器地址
-// const zy_domain = "http://localhost:8080";
-const zy_domain = "http://zyh5games.com:8080/";
+const zy_domain = "http://localhost:8080";
+// const zy_domain = "http://zyh5games.com:8080/";
 
 let ZySDK = {
     GameId: null,

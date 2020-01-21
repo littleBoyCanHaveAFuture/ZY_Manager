@@ -340,7 +340,7 @@ public class ServerController {
             }
             break;
             case 3: {
-                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), spId);
+                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
                 result.put("rows", serverIdSet.toString());
                 result.put("total", serverIdSet.size());
                 result.put("resultCode", Constants.RESULT_CODE_SUCCESS);

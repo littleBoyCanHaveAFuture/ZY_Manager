@@ -28,15 +28,15 @@
     <!--    正式服 腾讯云 只能内网连接-->
     <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
         <constructor-arg index="0" ref="jedisPoolConfig"/>
-        <constructor-arg index="1" name="host" type="java.lang.String"
-                         value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>
-        <constructor-arg index="2" name="port" type="int" value="6379"/>
-        <constructor-arg index="3" name="timeout" type="int" value="5000"/>
-        <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>
-        <!--        <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>-->
+        <!--        <constructor-arg index="1" name="host" type="java.lang.String"-->
+        <!--                         value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>-->
         <!--        <constructor-arg index="2" name="port" type="int" value="6379"/>-->
         <!--        <constructor-arg index="3" name="timeout" type="int" value="5000"/>-->
-        <!--        <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>-->
+        <!--        <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>-->
+        <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>
+        <constructor-arg index="2" name="port" type="int" value="6379"/>
+        <constructor-arg index="3" name="timeout" type="int" value="5000"/>
+        <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>
     </bean>
     <!---->
     <!-- redis 的缓存 -->

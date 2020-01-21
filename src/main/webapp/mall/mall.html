@@ -32,7 +32,33 @@
 </script>
 <body>
 
-<div class="header">刺沙商品列表</div>
+<div class="header">
+    <!--菜单-->
+    <div class="menus fl menuleft">
+        <a class="home active" href="/">首 页</a>
+        <a class="user" href="/user">用户中心</a>
+        <a class="pay" href="/pay">充值中心</a>
+        <a class="service" href="/service">客服中心</a>
+
+    </div>
+</div>
+<div id="slideBox" class="slideBox">
+    <div class="bd">
+        <ul>
+            <a href="" target="_blank" style="display: none;">
+                <li style="background: url(http://pic.yoozhe.com/Upload/adposition/20191216/2019121607086831.jpg) top center no-repeat;">
+
+                </li>
+            </a>
+            <a href="" target="_blank" style="display: inline;">
+                <li style="background: url(http://pic.yoozhe.com/Upload/adposition/20190924/2019092413126348.jpg) top center no-repeat;">
+
+                </li>
+            </a>
+        </ul>
+    </div>
+    <div class="hd"><span class=""></span><span class="on"></span></div>
+</div>
 <div class="box"><a href="#">TOP</a></div>
 <div class="productList">
     <ul>
@@ -210,6 +236,64 @@
         max-height: 999999px;
     }
 
+    .topheader {
+        height: 90px;
+        line-height: 90px;
+        background: #fff;
+        z-index: 10;
+    }
+
+    .topheader {
+        position: relative;
+        background: url(../images/newyea_2020_bg.png) no-repeat 50% 0;
+        background-size: cover;
+    }
+
+    .header:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 555px;
+        height: 100%;
+        background: url(../images/newyea_2020_left.png?v=1) no-repeat left top;
+        z-index: 1;
+    }
+
+    .header:after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 540px;
+        height: 100%;
+        background: url(../images/newyea_2020_right.png?v=1) no-repeat right top;
+        z-index: 1;
+    }
+
+    @media screen and (max-width: 1700px) {
+        .header:before, .header:after {
+            display: none
+        }
+    }
+
+    .fl {
+        float: left;
+        display: inline;
+    }
+
+
+    .header .menus a {
+        display: inline-block;
+        float: left;
+        height: 20px;
+        padding: 5px 10px;
+        font-size: 17px;
+        color: #333333;
+        margin: 30px 0px 120px 18px;
+        line-height: 20px;
+        position: relative;
+    }
 </style>
 </body>
 
