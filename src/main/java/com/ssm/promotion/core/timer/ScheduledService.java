@@ -1,6 +1,6 @@
 package com.ssm.promotion.core.timer;
 
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.sdk.LoginToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class ScheduledService {
     private static Map<String, Object> map = new HashMap<>();
 
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
 
     public static Date stampForDate(long timestamp) {
         return new Date(timestamp);

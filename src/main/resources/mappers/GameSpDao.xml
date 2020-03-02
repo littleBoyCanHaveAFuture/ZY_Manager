@@ -36,7 +36,7 @@
         <include refid="Base_Column_List"/>
     </select>
 
-    <select id="selectGameSp" parameterType="map" resultMap="GameSpResult">
+    <select id="selectGameSpList" parameterType="map" resultMap="GameSpResult">
         <include refid="Base_Column_List"/>
         <where>
             <if test="id != null and  id!= -1">
@@ -55,6 +55,13 @@
         <if test="start!=null and size!=null">
             limit #{start},#{size}
         </if>
+    </select>
+    <select id="selectGameSp" resultMap="GameSpResult">
+        <include refid="Base_Column_List"/>
+        where
+        game_id=#{gameId,jdbcType=INTEGER}
+        and
+        sp_id=#{spId,jdbcType=INTEGER}
     </select>
 
     <select id="getCountGameSp" resultType="Long">

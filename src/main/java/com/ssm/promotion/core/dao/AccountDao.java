@@ -52,7 +52,7 @@ public interface AccountDao {
 
     List<Integer> exist(Map<String, Object> map);
 
-    List<Account> findAccountByname(@Param("name") String name);
+    Account findAccountByname(@Param("name") String name);
 
     int updateAccountUid(Map<String, Object> map);
 

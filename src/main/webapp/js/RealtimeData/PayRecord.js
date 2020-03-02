@@ -1,14 +1,11 @@
 $(function () {
     initTableColumns();
-    initSpGameServer(1);
-    initSpGameServer(2);
-    initSpGameServer(3);
 });
 
 function initTableColumns() {
     let activeColumns = [];
     let commonResult = {
-        "本地订单编号": "orderID",
+        "本地订单编号": "jsOrderId",
         "游戏ID": "appID",
         "渠道ID": "channelID",
         "用户账号ID": "userID",
@@ -33,7 +30,7 @@ function initTableColumns() {
         "渠道SDK订单交易时间": "sdkOrderTime",
 
         "订单完成时间": "completeTime",
-        "渠道回调游戏url": "notifyUrl"
+        // "渠道回调游戏url": "notifyUrl"
     };
     $.each(commonResult, function (index, value) {
             let column = {};
@@ -60,11 +57,11 @@ function initTableColumns() {
     let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
     pager.pagination({
-        // pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
+        pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
         pageList: [5, 10, 15, 20],//可以设置每页记录条数的列表 　　　　　　　　　　　　
-        // beforePageText: '第',//页数文本框前显示的汉字
-        // afterPageText: '页    共 {pages} 页',
-        // displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+        beforePageText: '第',//页数文本框前显示的汉字
+        afterPageText: '页    共 {pages} 页',
+        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
         onChangePageSize: function () {
         },
         onSelectPage: function (pageNum, pageSize) {
@@ -73,8 +70,8 @@ function initTableColumns() {
             selectPayRecord();
         }
     });
-    $('#payRecord_startTime').datebox('setValue', formatterDate(new Date(), 0));
-    $('#payRecord_endTime').datebox('setValue', formatterDate(new Date(), 1));
+    $('#payRecord_startTime').datetimebox('setValue', formatterDate(new Date(), 0));
+    $('#payRecord_endTime').datetimebox('setValue', formatterDate(new Date(), 1));
 }
 
 function selectPayRecord() {
@@ -145,16 +142,16 @@ function selectPayRecord() {
                     rows: result.rows
                 };
                 if (result.total === 0) {
-                    $.messager.alert("系统提示", "查询成功 无数据");
+                    tip("系统提示", "查询成功 无数据");
                 } else {
-                    $.messager.alert("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
+                    tip("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
                 }
-
+                console.info(result);
                 $("#dg").datagrid("loadData", result);
             }
         },
         error: function () {
-            $.messager.alert("ERROR！", "查询失败");
+            tip("ERROR！", "查询失败");
         }
     });
 }

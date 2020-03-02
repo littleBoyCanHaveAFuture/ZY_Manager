@@ -24,7 +24,9 @@ public interface GameSpDao {
      *            size
      * @return List GameSp
      */
-    List<GameSp> selectGameSp(Map<String, Object> map);
+    List<GameSp> selectGameSpList(Map<String, Object> map);
+
+    GameSp selectGameSp(@Param("gameId") Integer gameId, @Param("spId") Integer channelId);
 
     /**
      * 查询所有

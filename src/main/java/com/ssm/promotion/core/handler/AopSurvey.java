@@ -73,12 +73,12 @@ public class AopSurvey {
         if (this.jumpMethod(signature)) {
             return;
         }
-        System.out.println(message);
+        log.info(message);
         int len;
         if (obj.length >= 1) {
             len = obj.length - 1;
         } else {
-            System.out.println("登陆超时,请重新登陆!");
+            log.info("登陆超时,请重新登陆!");
             throw new RuntimeException("登陆超时,请重新登陆!");
         }
 

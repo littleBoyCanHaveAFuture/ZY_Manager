@@ -4,7 +4,7 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.entity.GameInfo;
 import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.entity.ServerInfo;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.RechargeSummaryService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.DateUtil;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class RechargeSummaryControllr {
     private static final Logger log = Logger.getLogger(RechargeSummaryControllr.class);
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     private RechargeSummaryService rechargeSummaryServices;
     @Resource
@@ -86,7 +86,7 @@ public class RechargeSummaryControllr {
                                        Integer spId, Integer gameId, Integer serverId,
                                        String startTime, String endTime,
                                        HttpServletResponse response) throws Exception {
-        System.out.println("searchRS:");
+        log.info("searchRS:");
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
@@ -142,7 +142,7 @@ public class RechargeSummaryControllr {
 
         String usetime = new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000);
 
-        System.out.println("use:" + usetime);
+        log.info("use:" + usetime);
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         result.put("time", usetime);
@@ -151,7 +151,7 @@ public class RechargeSummaryControllr {
     }
 
     /**
-     * 根据type获取不同的数据
+     * 根据type获取不同的汇总数据
      *
      * @param map    type
      *               gameId
@@ -170,7 +170,6 @@ public class RechargeSummaryControllr {
         //1.查询渠道-游戏-区服
         //<渠道,<游戏，区服>>
         Map<Integer, Map<Integer, List<Integer>>> sgsMap = new HashMap<>();
-//        List<ServerInfo> serverInfoList = getAllSGS(sgsMap, spId, gameId, serverId, type, userId);
         getAllGame(sgsMap, spId, gameId, serverId, type);
         if (sgsMap.size() == 0) {
             return null;
@@ -180,7 +179,7 @@ public class RechargeSummaryControllr {
 
         //3.查询redis
         //todo 查询数据 区服/渠道概况 必须指定 渠道和游戏
-        List<RechargeSummary> rs = this.rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
+        List<RechargeSummary> rs = rechargeSummaryServices.getRechargeSummary(sgsMap, timeList, type, userId);
         //处理开服天数
 //        if (type == 2) {
 //            for (RechargeSummary rechargeSummary : rs) {
@@ -270,7 +269,7 @@ public class RechargeSummaryControllr {
         sgsMap.putAll(tmpMap);
 
         for (Integer sp : sgsMap.keySet()) {
-            System.out.println("sgsMap----->sp:" + sp + ":" + sgsMap.get(sp).toString());
+            log.info("sgsMap----->sp:" + sp + ":" + sgsMap.get(sp).toString());
         }
         Iterator<ServerInfo> it = serverInfoList.iterator();
         while (it.hasNext()) {
@@ -290,30 +289,33 @@ public class RechargeSummaryControllr {
         return serverInfoList;
     }
 
-    public Map<String, GameInfo> getAllGame(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type) {
-        //查询数据结果
-        Map<Integer, Map<Integer, List<Integer>>> tmpMap = new HashMap<>();
+    //筛选游戏渠道区服信息
 
+    /**
+     * @param sgsMap 游戏id-渠道id-
+     *               {渠道区服1
+     *               -渠道区服2
+     *               -渠道区服3
+     *               -渠道区服4
+     *               ...}
+     */
+    public Map<String, GameInfo> getAllGame(Map<Integer, Map<Integer, List<Integer>>> sgsMap, int spId, int gameId, int serverId, int type) {
         Map<String, GameInfo> gameInfoMap = new HashMap<>();
 
         //1.筛选
         //某些条件下不允许查询所有
         switch (type) {
-            case 1: {
-
-            }
-            break;
-            case 2: {
+            case 1:
+            case 2:
                 //需要指定 渠道和游戏id 不能为 -1
                 if (spId == -1 || gameId == -1) {
-                    System.out.println("需要指定 渠道和游戏id 不能为 -1");
+                    log.error("需要指定 渠道和游戏id 不能为 -1");
                     return null;
                 }
-            }
-            break;
+                break;
             case 3: {
                 if (gameId == -1) {
-                    System.out.println("需要指定 游戏id 不能为 -1");
+                    log.error("需要指定 游戏id 不能为 -1");
                     return null;
                 }
             }
@@ -350,6 +352,7 @@ public class RechargeSummaryControllr {
                 } else {
                     serverIdInfo = new HashSet<>();
                     serverIdInfo.add(String.valueOf(serverId));
+                    gameInfo.addServerInfo(spid, serverIdInfo);
                 }
             }
             gameInfoMap.put(gid, gameInfo);
@@ -357,10 +360,13 @@ public class RechargeSummaryControllr {
 
 
         for (GameInfo gameInfo : gameInfoMap.values()) {
-            System.out.println(gameInfo.toString());
+            log.info("RS集合：" + gameInfo.toString());
+
             String gid = gameInfo.getGameId();
+            //渠道id-渠道区服
             Map<String, Set<String>> spInfo = gameInfo.getSpInfo();
             Map<Integer, List<Integer>> stringListMap = new HashMap<>();
+
             for (Map.Entry<String, Set<String>> entry : spInfo.entrySet()) {
                 List<String> stringList = new ArrayList<>(entry.getValue());
                 List<Integer> integerList = stringList.stream().map(Integer::parseInt).collect(Collectors.toList());
@@ -369,7 +375,6 @@ public class RechargeSummaryControllr {
 
             sgsMap.put(Integer.parseInt(gid), stringListMap);
         }
-
         return gameInfoMap;
     }
 }

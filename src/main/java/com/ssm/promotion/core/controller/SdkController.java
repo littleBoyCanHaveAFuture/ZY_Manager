@@ -3,7 +3,7 @@ package com.ssm.promotion.core.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.entity.*;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.jedis.RedisKey;
 import com.ssm.promotion.core.jedis.RedisKeyHeader;
 import com.ssm.promotion.core.jedis.RedisKeyTail;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -48,29 +49,23 @@ public class SdkController {
             "zoneId", "zoneName", "balance", "vip",
             "partyName"};
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     LoginWorker loginWorker;
     @Resource
     AccountWorker accountWorker;
     @Resource
     GameRoleWorker gameRoleWorker;
+    @Autowired
+    private HttpServletRequest request;
     @Resource
-    private ServerListService serverService;
+    private UOrderManager orderManager;
     @Resource
     private GameService gameService;
     @Resource
     private GameSpService gameSpService;
     @Resource
     private AccountService accountService;
-    @Resource
-    private SpService spService;
-    @Resource
-    private UserService userService;
-    @Autowired
-    private HttpServletRequest request;
-    @Resource
-    private UOrderManager orderManager;
 
     /**
      * 1.初始化游戏
@@ -87,43 +82,35 @@ public class SdkController {
                         String GameKey,
                         Integer channelId,
                         HttpServletResponse response) throws Exception {
-        log.info("/webGame/initApi\t" + "{" +
-                "\tGameId=" + GameId +
-                "\tGameKey=" + GameKey +
-                "\tSpId=" + channelId +
-                "}");
+        log.info("start: /webGame/initApi\t" + "{" + "GameId=" + GameId + " GameKey=" + GameKey + " SpId=" + channelId + "}");
         JSONObject result = new JSONObject();
 
         Map<String, Object> map = new HashMap<>();
-        map.put("gameId", GameId);
-        map.put("spId", channelId);
-
         do {
             //检查游戏秘钥
-            List<Game> gameList = gameService.getGameList(map, -1);
-            if (gameList == null || gameList.size() != 1) {
-                System.out.println("Game err");
+            Game game = gameService.selectGame(GameId, -1);
+            if (game == null) {
+                log.error("游戏不存在 GameId=" + GameId);
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
             }
-            Game game = gameList.get(0);
             if (!game.getSecertKey().equals(GameKey)) {
-                System.out.println("GameKey err");
+                log.error("游戏秘钥错误 GameId=" + GameId);
+                log.error("游戏秘钥错误 正确  key=" + game.getSecertKey());
+                log.error("游戏秘钥错误 收到  key=" + GameKey);
                 result.put("state", false);
                 result.put("message", "游戏秘钥错误！");
                 break;
             }
             //检查游戏渠道
-            List<GameSp> gameSpList = gameSpService.selectGameSp(map, -1);
-            if (gameSpList == null || gameSpList.size() != 1) {
-                System.out.println("GameSp err");
+            GameSp gameSp = gameSpService.selectGameSp(GameId, channelId, -1);
+            if (gameSp == null) {
+                log.error("游戏渠道不存在 GameId=" + GameId + " channelId=" + channelId);
                 result.put("state", false);
                 result.put("message", "游戏渠道不存在！");
                 break;
             }
-
-            GameSp gameSp = gameSpList.get(0);
 
             JSONObject channelParams = new JSONObject();
             JSONObject channelPlatform = new JSONObject();
@@ -136,7 +123,6 @@ public class SdkController {
             libUrl.add("http://zy.hysdgame.cn/sdk/common/md5.js");
             libUrl.add("http://zy.hysdgame.cn/sdk/common/jquery-3.4.1.min.js");
 
-
             channelPlatform.put("libUrl", libUrl);
             channelPlatform.put("playUrl", "");
 
@@ -148,7 +134,7 @@ public class SdkController {
         } while (false);
 
         ResponseUtil.write(response, result);
-        log.info("/webGame/initApi\t" + result.toString());
+        log.info("end: /webGame/initApi\t" + result.toString());
     }
 
     /**
@@ -172,40 +158,41 @@ public class SdkController {
     @ResponseBody
     public void sdkRegister(@RequestBody String jsonData,
                             HttpServletResponse response) throws Exception {
-        log.info("/webGame/register:" + jsonData);
-        JSONObject jsonObject = JSONObject.parseObject(jsonData);
-        JSONObject result = new JSONObject();
-        do {
-            boolean auto = jsonObject.getBoolean("auto");
-            //参数校验
-            if (auto) {
-                for (String key : jsonObject.keySet()) {
-                    if (StringUtils.isBlank(jsonObject.get(key))) {
-                        if ("appId".equals(key) || "channelId".equals(key) || "channelUid".equals(key)) {
-                            result.put("message", "参数非法:" + key + "为空");
-                            result.put("state", false);
-                            break;
-                        }
-                    }
-                }
-            } else {
-                for (String key : jsonObject.keySet()) {
-                    if (StringUtils.isBlank(jsonObject.get(key))) {
-                        if ("appId".equals(key) || "username".equals(key) || "pwd".equals(key)) {
-                            result.put("message", "参数非法:" + key + "为空");
-                            result.put("state", false);
-                            break;
-                        }
+        log.info("start: /webGame/register\t" + jsonData);
+
+        JSONObject reqJson = JSONObject.parseObject(jsonData);
+        JSONObject rspJson = new JSONObject();
+
+        //参数校验
+        if (reqJson.getBoolean("auto")) {
+            for (String key : reqJson.keySet()) {
+                if (StringUtils.isBlank(reqJson.get(key))) {
+                    if ("appId".equals(key) || "channelId".equals(key) || "channelUid".equals(key)) {
+                        rspJson.put("message", "参数非法:" + key + "为空");
+                        rspJson.put("state", false);
+                        break;
                     }
                 }
             }
+        } else {
+            for (String key : reqJson.keySet()) {
+                if (StringUtils.isBlank(reqJson.get(key))) {
+                    if ("appId".equals(key) || "username".equals(key) || "pwd".equals(key)) {
+                        rspJson.put("message", "参数非法:" + key + "为空");
+                        rspJson.put("state", false);
+                        break;
+                    }
+                }
+            }
+        }
+        if (!rspJson.containsKey("state")) {
             //获取ip
-            jsonObject.put("ip", UtilG.getIpAddress(request));
-            result = accountWorker.reqRegister(jsonObject);
-        } while (false);
+            reqJson.put("ip", UtilG.getIpAddress(request));
+            rspJson = accountWorker.reqRegister(reqJson);
+        }
 
-        ResponseUtil.write(response, result);
-        log.info("/webGame/initApi\t" + result.toString());
+        ResponseUtil.write(response, rspJson);
+        log.info("end: /webGame/initApi\t" + rspJson.toString());
     }
 
     /**
@@ -233,69 +220,69 @@ public class SdkController {
                          String timestamp,
                          String sign,
                          HttpServletResponse response) throws Exception {
-        log.info("start /webGame/login" + "\t" + "{" + "\t" +
-                "isAuto = " + isAuto + "\t" + "GameId = " + GameId + "\t" + "SpId = " + channelId + "\t" +
-                "channelUid = " + channelUid + "\t" +
-                "username = " + username + "\t" + "password = " + password + "\t" + "}");
+        log.info("start /webGame/login\t" + "{" +
+                " isAuto=" + isAuto + " GameId=" + GameId + " SpId=" + channelId +
+                " channelUid=" + channelUid + "\t" + " username=" + username + " password=" + password + "}");
 
-        JSONObject result = new JSONObject();
+        JSONObject rspJson = new JSONObject();
         do {
             if (isAuto == null || GameId == null) {
-                result.put("message", "渠道uid登录，参数为空:" + "GameId GameId");
-                result.put("state", false);
+                log.error("渠道uid登录，参数为空:" + "isAuto GameId");
+                rspJson.put("message", "渠道uid登录，参数为空:" + "isAuto GameId");
+                rspJson.put("state", false);
                 break;
             }
-            Map<String, Object> map = new HashMap<>();
-            map.put("gameId", GameId);
-            map.put("spId", channelId);
 
             //检查游戏秘钥
-            List<Game> gameList = gameService.getGameList(map, -1);
-            if (gameList == null || gameList.size() != 1) {
-                System.out.println("Game err");
-                result.put("state", false);
-                result.put("message", "游戏不存在！");
+            Game game = gameService.selectGame(GameId, -1);
+            if (game == null) {
+                log.error("游戏不存在 GameId=" + GameId);
+                rspJson.put("state", false);
+                rspJson.put("message", "游戏不存在！");
                 break;
             }
-            Game game = gameList.get(0);
             String gameKey = game.getSecertKey();
 
-            List<GameSp> gameSpList = gameSpService.selectGameSp(map, -1);
-            if (gameSpList == null || gameSpList.size() != 1) {
-                result.put("message", "游戏渠道查询失败");
-                result.put("state", false);
+            GameSp gameSp = gameSpService.selectGameSp(GameId, Integer.parseInt(channelId), -1);
+            if (gameSp == null) {
+                log.error("游戏渠道 不存在 GameId=" + GameId + " channelId=" + channelId);
+                rspJson.put("message", "游戏渠道 不存在");
+                rspJson.put("state", false);
                 break;
             }
 
             if (!accountWorker.checkSign(isAuto, GameId, channelId, channelUid, username, password, timestamp, gameKey, sign)) {
-                result.put("message", "签名错误");
-                result.put("state", false);
+                log.error("签名错误");
+                rspJson.put("message", "签名错误");
+                rspJson.put("state", false);
                 break;
             }
+
             Account account;
             if (isAuto) {
                 account = accountService.findUserBychannelUid(channelId, channelUid);
                 if (account == null) {
-                    result.put("message", "无此渠道用户");
-                    result.put("state", false);
+                    rspJson.put("message", "无此渠道用户");
+                    rspJson.put("state", false);
                     break;
                 }
             } else {
+                //检查用户密码
                 if (username.isEmpty() || password.isEmpty()) {
-                    result.put("message", "账号密码登录，参数为空:" + "username password ");
-                    result.put("state", false);
+                    rspJson.put("message", "账号密码登录，参数为空:" + "username password ");
+                    rspJson.put("state", false);
                     break;
                 }
-                List<Account> accountList = accountService.findAccountByname(username);
-                if (accountList == null || accountList.size() != 1) {
-                    result.put("message", "无此渠道用户");
-                    result.put("state", false);
+                account = accountService.findAccountByname(username);
+                if (account == null) {
+                    rspJson.put("message", "无此渠道用户");
+                    rspJson.put("state", false);
                     break;
                 }
-                account = accountList.get(0);
+
                 if (!account.getPwd().equals(password)) {
-                    result.put("message", "密码错误");
-                    result.put("state", false);
+                    rspJson.put("message", "密码错误");
+                    rspJson.put("state", false);
                     break;
                 }
             }
@@ -316,26 +303,27 @@ public class SdkController {
             String[] tokens = tokenParam.split("#");
             String token = tokens[0];
 
-            result.put("message", "登陆成功");
-            result.put("state", true);
-            result.put("GameId", GameId);
-            result.put("channelId", channelId);
-            result.put("channelUid", channelUid);
-            result.put("zyUid", accountId);
-            result.put("channelToken", token);
-            result.put("username", account.getName());
-            result.put("password", account.getPwd());
-            result.put("loginUrl", loginWorker.loadLoginUrl(game.getLoginUrl(), accountId, GameId, 1));
-            result.put("paybackUrl", game.getPaycallbackUrl());
+            rspJson.put("message", "登陆成功");
+            rspJson.put("state", true);
+            rspJson.put("GameId", GameId);
+            rspJson.put("channelId", account.getChannelId());
+            rspJson.put("channelUid", account.getChannelUserId());
+            rspJson.put("zyUid", account.getId());
+            rspJson.put("channelToken", token);
+            rspJson.put("username", account.getName());
+            rspJson.put("password", account.getPwd());
+            rspJson.put("loginUrl", loginWorker.loadLoginUrl(game.getLoginUrl(), accountId, GameId, 1));
+            rspJson.put("paybackUrl", game.getPaycallbackUrl());
+
             //数据库-设置账号登录时间
-            map.clear();
+            Map<String, Object> map = new HashMap<>();
             map.put("id", accountId);
             map.put("lastLoginTime", DateUtil.getCurrentDateStr());
             accountWorker.updateLoginTime(map);
         } while (false);
 
-        ResponseUtil.write(response, result);
-        log.info("end /webGame/login" + result.toString());
+        ResponseUtil.write(response, rspJson);
+        log.info("end /webGame/login" + rspJson.toString());
     }
 
     /**
@@ -399,7 +387,7 @@ public class SdkController {
             String channelId = roleInfo.getString("channelId");
             String channelUid = roleInfo.getString("channelUid");
             Integer zoneId = roleInfo.getInteger("zoneId");
-            long roleId = roleInfo.getLong("roleId");
+            String roleId = roleInfo.getString("roleId");
             String roleName = roleInfo.getString("roleName");
             BigInteger balance = roleInfo.getBigInteger("balance");
 
@@ -471,21 +459,23 @@ public class SdkController {
                     map.put("channelUid", channelUid);
                     map.put("roleId", roleId);
 
-                    GameRole gameRole;
                     //1.判断用户存不存在 userId
-                    GameRole roleList = gameRoleWorker.findGameRole(map);
-                    if (roleList == null) {
-                        result.put("message", "角色信息不存在 ");
-                        result.put("state", false);
-                        break;
-//                    } else if (roleList.size() > 1) {
-//                        result.put("message", "角色信息异常 请联系平台");
-//                        result.put("state", false);
-//                        break;
-//                    } else {
-//                        gameRole = roleList.get(0);
+                    GameRole gameRole = gameRoleWorker.findGameRole(map);
+                    if (gameRole == null) {
+                        //role 同渠道游戏区服不能重复-创建角色
+                        //如果创建角色失败 这时候重新创建
+                        gameRole = new GameRole();
+                        gameRole.setAccountId(account.getId());
+                        gameRole.setRoleId(roleId);
+                        gameRole.setChannelId(channelId);
+                        gameRole.setChannelUid(channelUid);
+                        gameRole.setGameId(gameId);
+                        gameRole.setServerId(zoneId);
+                        gameRole.setLastLoginTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                        gameRole.setName(roleName);
+                        //插入mysql
+                        gameRoleWorker.createGameRole(gameRole);
                     }
-                    gameRole = roleList;
                     if ("enterGame".equals(key)) {
                         //查询mysql-设置角色登录时间
                         map.clear();
@@ -604,11 +594,13 @@ public class SdkController {
                 result.put("state", false);
                 break;
             }
+
             //1.判断账号是否存在
             Map<String, Object> map = new HashMap<>();
             map.put("isChannel", "true");
             map.put("channelId", String.valueOf(channelId));
             map.put("channelUid", channelUid);
+
             Account account = accountWorker.getAccount(map);
             if (account == null) {
                 result.put("message", "账号不存在");
@@ -645,14 +637,14 @@ public class SdkController {
             map.put("gameId", appId);
             map.put("spId", channelId);
             //检查游戏秘钥
-            List<Game> gameList = gameService.getGameList(map, -1);
-            if (gameList == null || gameList.size() != 1) {
-                log.error("Game err : gameId=" + appId + "\tspId=" + channelId);
+            Game game = gameService.selectGame(appId, -1);
+            if (game == null) {
+                log.info("游戏不存在 GameId=" + appId);
                 result.put("state", false);
                 result.put("message", "游戏不存在！");
                 break;
             }
-            Game game = gameList.get(0);
+
             String gameKey = game.getSecertKey();
             String notify = game.getPaycallbackUrl();
             //3.验签
@@ -672,7 +664,7 @@ public class SdkController {
             boolean isPaySuccess = false;
             UOrder order = orderManager.getOrder(String.valueOf(appId), String.valueOf(channelId), channelOrderID);
             if (order == null) {
-                log.error("order is not exist. generateOrder");
+                log.info("order is not exist. generateOrder");
                 order = orderManager.generateOrder(accountId, channelId, channelUid, appId,
                         channelOrderID, productID, productName, productDesc, money,
                         roleID, roleName, roleLevel,
@@ -726,5 +718,65 @@ public class SdkController {
         ResponseUtil.write(response, result);
 
         log.info("end   /webGame/payInfo \t" + result.toString());
+    }
+
+    @RequestMapping(value = "/UpdateReidsOrder", method = RequestMethod.GET)
+    @ResponseBody
+    public void UpdateReidsOrder(int accountId,
+                                 String orderId,
+                                 String appId,
+                                 String serverId,
+                                 String channelId,
+                                 String roleId,
+                                 long payamounts, HttpServletResponse response) throws Exception {
+        log.info("start /webGame/UpdateReidsOrder ");
+        JSONObject result = new JSONObject();
+
+        //1.判断账号是否存在
+        Account account = accountWorker.getAccountById(accountId);
+        if (account == null) {
+            result.put("message", "账号不存在");
+            result.put("state", false);
+            ResponseUtil.write(response, result);
+            return;
+        }
+        String channelUid = account.getChannelUserId();
+
+        //2.角色信息 可以获取 游戏id、渠道id
+        Map<String, Object> map = new HashMap<>();
+        map.put("gameId", appId);
+        map.put("channelId", channelId);
+        map.put("serverId", serverId);
+        map.put("channelUid", channelUid);
+        map.put("roleId", roleId);
+
+        GameRole gameRole = gameRoleWorker.findGameRole(map);
+        if (gameRole == null) {
+            result.put("message", "角色信息不存在 ");
+            result.put("state", false);
+            ResponseUtil.write(response, result);
+            return;
+        }
+
+        UOrder order = orderManager.getUOrderById(orderId);
+        if (order == null) {
+            result.put("message", "订单信息不存在 ");
+            result.put("state", false);
+            ResponseUtil.write(response, result);
+            return;
+        }
+        if (order.getState() >= OrderState.STATE_PAY_SUCCESS) {
+            cache.reqPay(appId, serverId, channelId, accountId, roleId, payamounts, account.getCreateTime());
+        }
+        result.put("message", "成功 ");
+        result.put("state", true);
+        ResponseUtil.write(response, result);
+        log.info("end /webGame/UpdateReidsOrder ");
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public void test(HttpServletResponse response) throws Exception {
+        ResponseUtil.write(response, "success");
     }
 }

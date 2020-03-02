@@ -4,7 +4,7 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.*;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.*;
 import com.ssm.promotion.core.util.ResponseUtil;
 import com.ssm.promotion.core.util.enums.ManagerType;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class ServerController {
     private static final Logger log = Logger.getLogger(ServerController.class);
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     private ServerListService serverService;
     @Resource
@@ -99,12 +99,13 @@ public class ServerController {
     @ResponseBody
     public Result addServer(@RequestBody ServerInfo serverInfo)
             throws Exception {
+        log.info("start: /server/addServer " + serverInfo.toString());
         Integer userId = getUserId();
         if (userId == null) {
             return ResultGenerator.genRelogin();
         }
         if (serverInfo.getSpId() == null || serverInfo.getGameId() == null || serverInfo.getServerId() == null) {
-            return ResultGenerator.genFailResult("添加失败");
+            return ResultGenerator.genFailResult("添加失败 参数为空");
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -113,13 +114,13 @@ public class ServerController {
         map.put("spId", serverInfo.getSpId());
 
         if (serverService.existSGS(map, userId)) {
-            return ResultGenerator.genFailResult("添加失败");
+            return ResultGenerator.genFailResult("添加失败 区服不存在");
         }
-        List<Game> games = gameService.getGameList(map, userId);
-        if (games == null || games.size() == 0) {
-            return ResultGenerator.genFailResult("添加失败");
+        Game game = gameService.selectGame(serverInfo.getGameId(), -1);
+        if (game == null) {
+            return ResultGenerator.genFailResult("添加失败 游戏不存在");
         }
-        serverInfo.setGamename(games.get(0).getName());
+        serverInfo.setGamename(game.getName());
         int resultTotal = serverService.addServer(serverInfo, userId);
 
         log.info("request: article/save , " + serverInfo.toString());
@@ -190,18 +191,18 @@ public class ServerController {
                            String loginUrl,
                            String paybackUrl,
                            HttpServletResponse response) throws Exception {
-        System.out.println("gamedata:");
+        log.info("gamedata:");
         Integer userId = getUserId();
         if (userId == null) {
             ResponseUtil.writeRelogin(response);
             return;
         }
-        System.out.println("gameId:" + gameId);
-        System.out.println("name:" + name);
-        System.out.println("type:" + type);
-        System.out.println("uid:" + uid);
-        System.out.println("loginUrl:" + loginUrl);
-        System.out.println("paybackUrl:" + paybackUrl);
+        log.info("gameId:" + gameId);
+        log.info("name:" + name);
+        log.info("type:" + type);
+        log.info("uid:" + uid);
+        log.info("loginUrl:" + loginUrl);
+        log.info("paybackUrl:" + paybackUrl);
 
         Game game = new Game(name, userId);
 
@@ -410,13 +411,13 @@ public class ServerController {
                          String version,
                          Integer type, HttpServletResponse response) throws Exception {
         log.info("changeSp");
-        System.out.println("spId:" + spId);
-        System.out.println("name:" + name);
-        System.out.println("parent:" + parent);
-        System.out.println("state:" + state);
-        System.out.println("shareLinkUrl:" + shareLinkUrl);
-        System.out.println("iconUrl:" + iconUrl);
-        System.out.println("version:" + version);
+        log.info("spId:" + spId);
+        log.info("name:" + name);
+        log.info("parent:" + parent);
+        log.info("state:" + state);
+        log.info("shareLinkUrl:" + shareLinkUrl);
+        log.info("iconUrl:" + iconUrl);
+        log.info("version:" + version);
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -485,7 +486,7 @@ public class ServerController {
         Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
         do {
             //查询该账号-该游戏的所有渠道
-            List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
+            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
             if (gameSpList == null || gameSpList.size() == 0) {
                 break;
             }
@@ -494,7 +495,7 @@ public class ServerController {
             for (GameSp sp : gameSpList) {
                 spIds.add(sp.getSpId());
             }
-            System.out.println(spIds.toString());
+            log.info(spIds.toString());
 
             //查询详细的渠道信息
             map.clear();
@@ -589,7 +590,7 @@ public class ServerController {
             map.put("uid", userId);
 
             //查询该账号-该游戏的所有渠道
-            List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
+            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
             if (gameSpList == null) {
                 break;
             }
@@ -623,9 +624,9 @@ public class ServerController {
                 noGameSpPageSize = pageBean.getPageSize();
             }
 
-            System.out.println("noGameSpStart\t" + noGameSpStart);
-            System.out.println("noGameSpPageSize\t" + noGameSpPageSize);
-            System.out.println("spIds\t" + hasGameSpId.toString());
+            log.info("noGameSpStart\t" + noGameSpStart);
+            log.info("noGameSpPageSize\t" + noGameSpPageSize);
+            log.info("spIds\t" + hasGameSpId.toString());
 
             //查询详细的渠道信息
             map.remove("gameId");
@@ -637,7 +638,7 @@ public class ServerController {
                 map.put("spIdList", hasGameSpId);
                 List<Sp> hasSpList = spService.selectSpByIds(false, map, userId);
 
-                System.out.println(hasGameSpId.toString());
+                log.info(hasGameSpId.toString());
 
                 for (GameSp gameSp : gameSpList) {
                     Integer spId = gameSp.getSpId();
@@ -723,15 +724,15 @@ public class ServerController {
                              Integer type,
                              HttpServletResponse response) throws Exception {
         log.info("changeGameSp");
-        System.out.println("type:" + type);
-        System.out.println("gameId:" + gameId);
-        System.out.println("spId:" + spId);
-        System.out.println("loginUrl:" + loginUrl);
-        System.out.println("appId:" + appId);
-        System.out.println("appName:" + appName);
-        System.out.println("loginKey:" + loginKey);
-        System.out.println("payKey:" + payKey);
-        System.out.println("sendKey:" + sendKey);
+        log.info("type:" + type);
+        log.info("gameId:" + gameId);
+        log.info("spId:" + spId);
+        log.info("loginUrl:" + loginUrl);
+        log.info("appId:" + appId);
+        log.info("appName:" + appName);
+        log.info("loginKey:" + loginKey);
+        log.info("payKey:" + payKey);
+        log.info("sendKey:" + sendKey);
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -755,23 +756,22 @@ public class ServerController {
                 boolean isOpt = false;
 
                 //判断与数据库是否相符
-                List<GameSp> gameSpList = gameSpService.selectGameSp(map, userId);
-                if (gameSpList == null || gameSpList.size() != 1) {
-                    System.out.println("changeGameSp err");
+                GameSp gameSp = gameSpService.selectGameSp(gameId, spId, -1);
+                if (gameSp == null) {
+                    log.error("游戏渠道 不存在 GameId=" + gameId + " channelId=" + spId);
                     return;
                 }
-                GameSp gameSp = gameSpList.get(0);
                 int gameSpGid = gameSp.getGameId();
                 int gameSpSpId = gameSp.getSpId();
                 int gameSpUid = gameSp.getUid();
                 int gameSpStatus = gameSp.getStatus();
 
                 if (gameSpGid != gameId || gameSpSpId != spId) {
-                    System.out.println("changeGameSp err1");
+                    log.info("changeGameSp err1");
                     return;
                 }
                 //操作权限判断
-                System.out.println("id=" + userId + "\tuid=" + gameSpUid);
+                log.info("id=" + userId + "\tuid=" + gameSpUid);
                 if (userId == gameSpUid) {
                     //创建者可以直接操作
                     isOpt = true;
@@ -779,7 +779,7 @@ public class ServerController {
                     //超级管理员也阔以直接操作
                     User currUser = userService.getUserById(userId, userId);
                     if (currUser == null) {
-                        System.out.println("changeGameSp err2");
+                        log.info("changeGameSp err2");
                         return;
                     }
                     if (currUser.getManagerLv() == ManagerType.SuperManager.getId()) {
@@ -787,7 +787,7 @@ public class ServerController {
                     }
                 }
                 if (!isOpt) {
-                    System.out.println("changeGameSp err3");
+                    log.info("changeGameSp err3");
                     return;
                 }
                 map.clear();
@@ -799,7 +799,7 @@ public class ServerController {
                 } else if (type == 2) {
                     //配置渠道信息
                     if (gameSpStatus != 0) {
-                        System.out.println("changeGameSp err4\t" + gameSpStatus);
+                        log.info("changeGameSp err4\t" + gameSpStatus);
                         return;
                     }
 
@@ -813,7 +813,7 @@ public class ServerController {
                 } else {
                     //修改渠道信息
                     if (gameSpStatus != 1) {
-                        System.out.println("changeGameSp err5\t" + gameSpStatus);
+                        log.info("changeGameSp err5\t" + gameSpStatus);
                         return;
                     }
                     map.put("appId", appId);

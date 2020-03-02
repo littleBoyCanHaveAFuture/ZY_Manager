@@ -1,12 +1,14 @@
 package com.ssm.promotion.core.sdk;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.AccountService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.*;
 import lombok.Data;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Data
 public class AccountWorker {
+    private static final Logger log = Logger.getLogger(AccountWorker.class);
     /**
      * 用户编号不同运营商的间隔值
      * ：一百万
@@ -51,7 +54,7 @@ public class AccountWorker {
      */
     public static AtomicInteger lastUserId;
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     private AccountService accountService;
     @Resource
@@ -93,24 +96,27 @@ public class AccountWorker {
             //某游戏 是否开放注册
             if (!serverService.isSpCanReg(map, -1)) {
                 //返回结果
+                log.error("未开放注册");
                 reply.put("state", false);
                 reply.put("message", "未开放注册");
                 break;
             }
-            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
-            if (deviceSize > 0) {
-                if (deviceSize == 10) {
+
+//            int deviceSize = this.getDeviceCreateAccount(deviceCode, channelId);
+//            if (deviceSize > 0) {
+//                if (deviceSize == 10) {
 //                    reply.put("reason", "设备码非法");
 //                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
 //                    break;
-                } else if (deviceSize == 20) {
+//                } else if (deviceSize == 20) {
 //                    reply.put("reason", "已到达设备创建账号最大数量");
 //                    reply.put("message", ResultGenerator.DEFAULT_FAIL_MESSAGE);
 //                    break;
-                }
-            }
+//                }
+//            }
 
             if (TemplateWorker.hasBanIp(ip)) {
+                log.error("玩家ip已被封禁  ip=" + ip);
                 //封禁ip
                 TemplateWorker.addBanIp(ip);
                 reply.put("state", false);
@@ -120,24 +126,27 @@ public class AccountWorker {
             //账号密码注册
             if (!auto) {
                 if (username.length() < AccountWorker.UserInfoLenMin || username.length() > AccountWorker.UserInfoLenMax) {
+                    log.error("用户名长度不对 username=" + username + " length=" + username.length());
                     reply.put("state", false);
                     reply.put("message", "用户名长度不对！");
                     break;
                 }
                 //名称合法
                 if (!StringUtil.isValidUsername(username)) {
-                    //Todo
+                    log.error("用户名格式不合法 username=" + username);
                     reply.put("state", false);
                     reply.put("message", "用户名格式不合法！");
                     break;
                 }
                 // 能包含敏感词
                 if (TemplateWorker.hasBad(username)) {
+                    log.error("用户名包含敏感词 username=" + username);
                     reply.put("state", false);
                     reply.put("message", "用户名包含敏感词！");
                     break;
                 }
                 if (pwd.length() < AccountWorker.UserInfoLenMin || pwd.length() > AccountWorker.UserInfoLenMax) {
+                    log.error("密码长度不对 pwd=" + pwd + " length=" + pwd.length());
                     reply.put("state", false);
                     reply.put("message", "密码长度不对");
                     break;
@@ -149,24 +158,28 @@ public class AccountWorker {
             map.put("channelId", channelId);
             map.put("channelUid", channelUid);
             if (channelId != 0 && accountService.exist(map) > 0) {
+                log.error("渠道账号已经存在 channelUid=" + channelUid + " channelId=" + channelId);
                 reply.put("state", false);
                 reply.put("message", "渠道账号已经存在");
                 break;
             }
+
             //创建账号
             Account account = this.createAccount(jsonObject);
-
             if (account == null) {
+                log.error("注册失败");
                 reply.put("state", false);
                 reply.put("message", "注册失败");
                 break;
             }
             if (account.getId() < 0) {
                 if (account.getId() == -2) {
+                    log.error("账号名重复");
                     reply.put("state", false);
                     reply.put("message", "账号名重复");
                     break;
                 } else {
+                    log.error("注册失败");
                     reply.put("state", false);
                     reply.put("message", "注册失败");
                     break;
@@ -249,6 +262,7 @@ public class AccountWorker {
 
             accountService.createAccount(account);
             if (account.getId() == -1 || account.getId() == -2 || account.getId() == -3) {
+                log.error("创建账号失败 err id=" + account.getId());
                 return null;
             }
             //官方
@@ -323,7 +337,7 @@ public class AccountWorker {
     private void AccountWorker() {
         try {
             AccountWorker.lastUserId = this.getLastUserId();
-            System.out.println("init lastUserId:" + AccountWorker.lastUserId);
+            log.info("init lastUserId:" + AccountWorker.lastUserId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -380,8 +394,6 @@ public class AccountWorker {
                              String timestamp,
                              String loginKey,
                              String sign) throws UnsupportedEncodingException {
-        boolean result = false;
-
         String sb = "isAuto" + "=" + isAuto + "&" +
                 "GameId" + "=" + GameId + "&" +
                 "channelId" + "=" + channelId + "&" +
@@ -390,13 +402,13 @@ public class AccountWorker {
                 "password" + "=" + password + "&" +
                 "timestamp" + "=" + timestamp + "&" +
                 loginKey;
-        System.out.println(sb);
+        log.info(sb);
 
         String encoded = URLEncoder.encode(sb, "UTF-8");
         String newSign = EncryptUtils.md5(encoded).toLowerCase();
 
-        System.out.println(newSign);
-        System.out.println(sign);
+        log.info(newSign);
+        log.info(sign);
 
         return sign.equals(newSign);
     }

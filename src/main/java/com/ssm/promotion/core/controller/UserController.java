@@ -155,7 +155,7 @@ public class UserController {
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     @ResponseBody
     public Result save(@RequestBody User user) throws Exception {
-        System.out.println("addUser");
+        log.info("addUser");
         Integer userId = getUserId();
         if (userId == null) {
             return ResultGenerator.genRelogin();
@@ -228,7 +228,7 @@ public class UserController {
         user.setPassword(MD5pwd);
         user.setRoleName(ManagerType.pareseTo(user.getManagerLv()).getName());
 
-        System.out.println("user:" + user.toString());
+        log.info("user:" + user.toString());
 
         int resultTotal = userService.updateUser(user, userId);
         log.info("request: user/update , user: " + user.toString());

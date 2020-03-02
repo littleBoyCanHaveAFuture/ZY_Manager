@@ -23,7 +23,7 @@
         <include refid="Base_Column_List"/>
     </select>
 
-    <select id="selectGame" parameterType="map" resultMap="GameNameResult">
+    <select id="selectGameList" parameterType="map" resultMap="GameNameResult">
         <include refid="Base_Column_List"/>
         <where>
             <if test="gameId != null and  gameId!= -1">
@@ -45,6 +45,11 @@
         <if test="start!=null and size!=null">
             limit #{start},#{size}
         </if>
+    </select>
+
+    <select id="selectGame" parameterType="int" resultMap="GameNameResult">
+        <include refid="Base_Column_List"/>
+        where id = #{gameid}
     </select>
 
     <delete id="deleteGame" parameterType="int">

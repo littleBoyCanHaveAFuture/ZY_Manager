@@ -16,6 +16,11 @@ public class RedisKey {
 
     public static final String FORMAT_SG_SDD = "%s:" + SP_ID + ":%d:" + GAME_ID + ":%d";
     public static final String FORMAT_SGS_SDDD = "%s:" + SP_ID + ":%d:" + GAME_ID + ":%d:" + SERVER_ID + ":%d";
+
+
+    public static final String FORMAT_DATE = ":date:";
+    public static final String FORMAT_SHARP = "#";
+    public static final String FORMAT_SSGD = "%s:%s:gid:%d";
     /**
      * 充值次数
      */

@@ -30,7 +30,7 @@
 </head>
 <body style="margin:1px;">
 
-<table id="dg" title="使用指南：请先选择渠道，然后查询对应的游戏、区服！" class="easyui-datagrid" pagination="true" fitcolumns="true"
+<table id="dg" title="使用指南：请先选择游戏、渠道" class="easyui-datagrid" pagination="true" fitcolumns="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#tb">
     <thead>
 
@@ -41,13 +41,13 @@
     <div id="tbs">
         <label for="save_gameId"></label>
         <span style="color: blue;">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId">
+        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
         <label for="save_spId"></label>
         <span style="color: blue; margin-left:50px">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId">
+        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
@@ -72,14 +72,7 @@
         <a href="javascript:exportToLocal()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
-    <div>
-        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style=""
-           iconCls=" icon-search" plain="true">查询游戏</a>
-        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style="margin-left:50px"
-           iconCls=" icon-search" plain="true">查询渠道</a>
-        <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"
-           iconCls=" icon-search" plain="true">查询区服</a>
-    </div>
+
 </div>
 
 </body>

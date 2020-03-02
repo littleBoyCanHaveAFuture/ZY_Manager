@@ -63,13 +63,13 @@ public class UOrderManager {
                 .append("status=").append(status).append("&")
                 .append("notifyUrl=").append(notifyUrl == null ? "" : notifyUrl)
                 .append("&").append(gameKey);
-        System.out.println("sign\n" + sb.toString());
+        log.info("sign\n" + sb.toString());
 
         String encoded = URLEncoder.encode(sb.toString(), "UTF-8");
         String newSign = EncryptUtils.md5(encoded).toLowerCase();
 
-        System.out.println("Md5 sign recv  \n:" + sign);
-        System.out.println("Md5 sign server\n:" + newSign);
+        log.info("Md5 sign recv  \n:" + sign);
+        log.info("Md5 sign server\n:" + newSign);
 
         return newSign.equals(sign);
     }
@@ -105,7 +105,7 @@ public class UOrderManager {
         return orderDao.getUOrderList(map);
     }
 
-    public List<UOrder> getUOrderById(String id) {
+    public UOrder getUOrderById(String id) {
         return orderDao.getOrderById(id);
     }
 
@@ -124,6 +124,7 @@ public class UOrderManager {
                                 int realMoney, String completeTime, String sdkOrderTime,
                                 int status, String notifyUrl) throws Exception {
         if (status < OrderState.STATE_OPEN_SHOP || status > OrderState.STATE_PAY_SUPPLEMENT) {
+            log.info("generateOrder: status error " + status);
             return null;
         }
         String completetiems = "0";
@@ -163,10 +164,18 @@ public class UOrderManager {
         order.setRoleID(roleID);
         order.setRoleName(roleName);
 
-        System.out.println("Order:\n" + order.toJSON());
+        log.info("generateOrder: Order:\n" + order.toJSON());
 
         int res = orderDao.save(order);
-        System.out.println("saveOrder:" + res);
+        log.info("generateOrder: saveOrder:" + res);
         return order;
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String p = "accountID=1000064&channelID=0&channelUid=1000064&appID=11&channelOrderID=6e90bb15-3dbb-4a7a-87de-97f48713b5fe&productID=59&productName=10元档首充前置&productDesc=10元档首充前置&money=0.01&roleID=5987857551844908&roleName=捂裆派掌门5987857551844908&roleLevel=1&serverID=170&serverName=170服务器170&realMoney=0.01&completeTime=1582600283766&sdkOrderTime=1582600283766&status=1&notifyUrl=47.101.44.31&l44i45326jixrlaio9c0025g974125y6";
+        String encoded = URLEncoder.encode(p, "UTF-8");
+        String newSign = EncryptUtils.md5(encoded).toLowerCase();
+
+        log.info("Md5 sign server\n:" + newSign);
     }
 }

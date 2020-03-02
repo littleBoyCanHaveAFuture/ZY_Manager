@@ -1,6 +1,5 @@
-function getLinesByDate(type) {
-    initChart();
-    myChart.setOption({
+function initOption() {
+    let option = {
         //图表标题
         title: {
             text: '玩家实时数据折线图',
@@ -97,15 +96,13 @@ function getLinesByDate(type) {
                 data: []
             }
         ]
-    });
+    };
     // 开始加载数据
-
-    if (type !== 1) {
-        return;
-    }
+    myChart.setOption(option);
     myChart.showLoading();
+}
 
-
+function loadData(searchType) {
     let gameId = $("#save_gameId").val();
     let serverId = $("#save_serverId").val();
     let spId = $("#save_spId").val();
@@ -114,26 +111,26 @@ function getLinesByDate(type) {
 
     //endTime 大于当前时间 处理下
 
-    let send = {
+    let param = {
+        "type": searchType,
         "startTime": startTime,
         "endTime": endTime,
         "spId": spId,
         "gameId": gameId,
         "serverId": serverId
     };
-    console.info(send);
+    console.info(param);
     // 异步加载数据，并显示
     $.ajax({
         type: "post",
         async: true,
         url: "/realtime/realtimedata",
-        data: send,
+        data: param,
         dataType: "json",
         success: function (result) {
             if (result.resultCode === 200) {
                 let newadd = [];
                 let online = [];
-                let money = [];
                 let times = [];
 
                 newadd = result.newadd;
@@ -212,7 +209,7 @@ function getLinesByDate(type) {
             } else if (result.resultCode === 501) {
                 relogin();
             } else {
-                $.messager.alert("ERROR！", result.err);
+                tip("ERROR！", result.err);
                 // layerUIAlert(result.msg, 5);
                 myChart.hideLoading();
             }

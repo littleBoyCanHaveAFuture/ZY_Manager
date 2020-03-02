@@ -21,7 +21,12 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<Game> getGameList(Map<String, Object> map, Integer userid) {
-        return dao.selectGame(map);
+        return dao.selectGameList(map);
+    }
+
+    @Override
+    public Game selectGame(Integer gameId, Integer userid) {
+        return dao.selectGame(gameId);
     }
 
     @Override

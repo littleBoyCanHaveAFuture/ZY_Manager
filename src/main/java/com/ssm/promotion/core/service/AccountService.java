@@ -50,7 +50,7 @@ public interface AccountService {
      *
      * @return List<Account>
      */
-    List<Account> findAccountByname(String username);
+    Account findAccountByname(String username);
 
     /**
      * 更新数据

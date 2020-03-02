@@ -94,14 +94,14 @@ function zy_Register() {
 
 function zy_Login() {
     let loginInfo = {};
-    loginInfo.isAuto = Boolean(true);
+    loginInfo.isAuto = Boolean(false);
     loginInfo.username = $("#username").val();
     loginInfo.password = $("#password").val();
     loginInfo.GameId = $("#appId").val();
     loginInfo.channelId = $("#channelId").val();
     loginInfo.channelUid = $("#channelUid").val();
     loginInfo.timestamp = new Date().valueOf();
-
+    console.info(loginInfo);
     sdk_ZyLogin(loginInfo, function (callbackLoginData) {
         if (callbackLoginData.state === false) {
             alert("登录失败", callbackLoginData.message);
@@ -116,13 +116,15 @@ function zy_Login() {
             $("#username").val(callbackLoginData.username);
             $("#password").val(callbackLoginData.password);
             $("#channelUid").val(callbackLoginData.channelUid);
-
+            console.info(callbackLoginData);
             setCookie("zy_uid", ZyUid);
             setCookie("zy_user", username);
             setCookie("zy_pwd", password);
             setCookie("zy_channelUid", channelUid);
-            alert("登录成功", callbackLoginData.message);
-            window.open(loginUrl);
+            // alert("登录成功", callbackLoginData.message);
+            // window.open(loginUrl);
+            // window.location.href(loginUrl);
+            window.location.replace(loginUrl);
         }
     });
 }

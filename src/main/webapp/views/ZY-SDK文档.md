@@ -10,7 +10,7 @@
 
 ####1. 引用JS类库.
 ````
-  js文件地址：http://zy.hysdgame.cn/sdk/libZySdk_v1.js  
+  js文件地址：http://zy.hysdgame.cn/sdk/common/libZySdk_v1.js  
 ````  
 注意: 游戏应原样引入此JS,不能随意变更协议为http或在后面附加时间戳。    
 ````        
@@ -276,9 +276,9 @@ function zy_upload(type) {
 |字段|	类型|	说明|必选
 |:-----|:-----:|:-----:|:-----:
 | orderInfo                     |Object     |充值信息
-| orderInfo.accountID           |number     |指悦账号id                 |√ 
+| orderInfo.accountID           |number     |指悦账号uid                |√ 
 | orderInfo.channelId           |number     |渠道id                    |√ 
-| orderInfo.channelUid          |number     |渠道账号id                 |√ 
+| orderInfo.channelUid          |number     |渠道账号uid                |√ 
 | orderInfo.appId               |number     |游戏id                    |√ 
 | orderInfo.channelOrderID      |string     |渠道订单号                 |√ 
 | orderInfo.productID           |string     |当前商品ID                 |√ 
@@ -299,6 +299,8 @@ function zy_upload(type) {
 | orderInfo.sign                |string     |签名                                 |√ 
 
 ````
+ channelId=0 就是官方包 此时qid=accountid=channeluid
+
 function zy_UploadPayInfo() {
         let orderInfo = {};
         orderInfo.accountID;
@@ -350,9 +352,29 @@ function zy_UploadPayInfo() {
 #####6.支付sdk
 1. 调起支付
 ````
-支付地址：
-POST:http://www.zyh5games.com/pay/aliPay/wapPaySdk?
+接口地址：
+1.http://zy.hysdgame.cn/pay/static/pay.html
+
+参数拼接：
+let param =
+    "?orderId=" + orderId +
+    "&body=" + productDesc +
+    "&subject=" + productName +
+    "&totalAmount=" + totalAmount +
+    "&productId=" + productID +
+    "&passBackParams=" + "passBackParams" +
+    "&appId=" + ZySDK.GameId +
+    "&spId=" + ZySDK.channelId;
+window.open("http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param));
 ````
+
+````
+支付地址：
+1.支付宝：POST:http://www.zyh5games.com/pay/aliPay/wapPaySdk?
+2.微信：POST:http://www.zyh5games.com/pay/wxPay/wapPaySdk?
+````
+支付宝和微信请求参数相同
+
 |字段|	类型|	说明|必填
 |:-----|:-----:|:-----:|:-----:
 | appId             |number     | zy平台游戏id|√ 
@@ -360,10 +382,10 @@ POST:http://www.zyh5games.com/pay/aliPay/wapPaySdk?
 | body              |string     | 对一笔交易的具体描述信息。如果是多种商品，请将商品描述字符串累加传给body|√ 
 | subject           |string     | 商品的标题/交易标题/订单标题/订单关键字等。|√ 
 | totalAmount       |string     | 订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]|√ 
+| productId         |string     | 当前商品ID|√ 
 | passBackParams    |string     | 公用回传参数，如果请求时传递了该参数，则返回给商户时会回传该参数。|√ 
 |                   |           | 支付宝只会在同步返回（包括跳转回商户网站）和异步通知时将该参数原样返回。
 |                   |           | 本参数必须进行UrlEncode之后才可以发送给支付宝。没有，则值为空。
-| productId         |string     | 当前商品ID|√ 
 | sign              |string     | RSA签名|√ 
 
 ````
@@ -398,12 +420,18 @@ function pay(orderId, body, subject, totalAmount, productId, passBackParams) {
     });
 }
 ````
+````
 返回参数：
+1.支付宝：下表格所示
+2.微信：无返回参数，会直接跳转到新地址（先接支付宝）
+````
 
 |字段|	类型|	说明|必有
 |:-----|:-----:|:-----:|:-----:
 | rspObject.message     |string     | 提示内容 失败会有此提示
 | rspObject             |string    | 支付宝js文本,以html执行，可以直接跳转到支付宝H5支付页面，调起支付宝APP
+
+
 
 2. 支付回调
 ````

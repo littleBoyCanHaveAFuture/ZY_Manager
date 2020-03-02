@@ -10,7 +10,9 @@ import java.util.Map;
  */
 public interface GameSpService {
 
-    List<GameSp> selectGameSp(Map<String, Object> map, Integer userId);
+    List<GameSp> selectGameSpList(Map<String, Object> map, Integer userId);
+
+    GameSp selectGameSp(Integer gameId, Integer channelId, Integer userId);
 
     List<GameSp> selectAllGameSp(Integer userId);
 
@@ -22,6 +24,7 @@ public interface GameSpService {
 
     Long getCountGameSp(Map<String, Object> map, Integer userId);
 
-    List<Integer> DistSpIdByGameId(Integer gameId,Integer userId);
-    List<Integer> DistGameIdBySpId(Integer spId,Integer userId);
+    List<Integer> DistSpIdByGameId(Integer gameId, Integer userId);
+
+    List<Integer> DistGameIdBySpId(Integer spId, Integer userId);
 }

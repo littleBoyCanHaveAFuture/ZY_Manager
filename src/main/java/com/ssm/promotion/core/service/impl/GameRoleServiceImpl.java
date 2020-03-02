@@ -3,6 +3,7 @@ package com.ssm.promotion.core.service.impl;
 import com.ssm.promotion.core.dao.GameRoleDao;
 import com.ssm.promotion.core.entity.GameRole;
 import com.ssm.promotion.core.service.GameRoleService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.Map;
  */
 @Service("GameRoleService")
 public class GameRoleServiceImpl implements GameRoleService {
+    private static final Logger log = Logger.getLogger(GameRoleServiceImpl.class);
     @Autowired
     GameRoleDao gameRoleDao;
 
@@ -24,20 +26,20 @@ public class GameRoleServiceImpl implements GameRoleService {
         boolean res = true;
         try {
             this.gameRoleDao.create(gameRole);
-            System.out.println("createGameRole success");
+            log.info("createGameRole success");
         } catch (DataAccessException e) {
             String err = e.getMessage();
             //仅使主键重复异常被忽略
             if (err.contains("SQLIntegrityConstraintViolationException") && err.contains("for key 'PRIMARY'")) {
-                System.out.println("err1");
+                log.info("err1");
             } else if (err.contains("for key 'name_unique'")) {
-                System.out.println("err2");
+                log.info("err2");
             } else {
-                System.out.println("err3:" + err);
+                log.info("err3:" + err);
             }
             res = false;
         } catch (Exception e) {
-            System.out.println("err4:" + e.getMessage());
+            log.info("err4:" + e.getMessage());
             res = false;
         }
         return res;

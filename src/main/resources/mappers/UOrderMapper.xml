@@ -71,7 +71,7 @@
             <if test="channelOrderID!=null and channelOrderID!='' and channelOrderID!='-1'">
                 AND channelOrderID = #{channelOrderID}
             </if>
-            <if test="state!=null and state!='' ">
+            <if test="state!=null and state!='' and  state!='-1'">
                 AND state = #{state}
             </if>
             <if test="startTime!=null and startTime!=''">

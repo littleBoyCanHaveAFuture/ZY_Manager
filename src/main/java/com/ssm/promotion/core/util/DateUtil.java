@@ -1,6 +1,8 @@
 package com.ssm.promotion.core.util;
 
+import com.ssm.promotion.core.service.impl.RechargeSummaryImpl;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,6 +21,7 @@ import java.util.List;
  * @date 2017-3-1
  */
 public class DateUtil {
+    private static final Logger log = Logger.getLogger(DateUtil.class);
     public static final long SECOND_MILLIS = 1000L;
     public static final int MINUTE_SECONDS = 60;
     public static final int HOUR_MINUTES = 60;
@@ -93,7 +96,7 @@ public class DateUtil {
      * 时间戳转其他格式
      */
     public static String formatDate(long timestamp, String outFormat) throws Exception {
-        System.out.println("formatDate:" + timestamp);
+        log.info("formatDate:" + timestamp);
         Date dates = new Date(timestamp);
         formatDate(dates, outFormat);
         return formatDate(dates, outFormat);
@@ -105,7 +108,7 @@ public class DateUtil {
      * outFormat
      */
     public static String formatDate(String times, String inFormat, String outFormat) throws Exception {
-        System.out.println("formatDate:" + times);
+        log.info("formatDate:" + times);
         Date date = formatString(times, inFormat);
         return formatDate(date, outFormat);
     }
@@ -157,7 +160,7 @@ public class DateUtil {
     }
 
     /**
-     * 当前时间:yyyyMMdd
+     * 当天时间:年月日=yyyyMMdd
      */
     public static String getCurrentDayStr() throws Exception {
         Date date = new Date();
@@ -213,7 +216,7 @@ public class DateUtil {
      * @return 这段时间的天数 yyyyMMddHHmm
      */
     public static List<String> getDateMinStr(String startTime, String endTime) {
-        SimpleDateFormat sdfIn = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmmSS);
+        SimpleDateFormat sdfIn = new SimpleDateFormat(FORMAT_YYYY_MMDD_HHmm);
         SimpleDateFormat sdfOut = new SimpleDateFormat(FORMAT_YYYYMMddHHmm);
 
         List<String> dateList = new ArrayList<>();

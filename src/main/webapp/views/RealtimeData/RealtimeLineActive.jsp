@@ -27,62 +27,58 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/RealtimeData/RealtimeLineActive.js"></script>
+            src="${pageContext.request.contextPath}/js/RealtimeData/RealtimeLineActive.js?v=20200228"></script>
 
 </head>
 <body>
+<div style="width: 90%">
+    <div>
+        <label for="save_startTime">开始时间:</label>
+        <input class="easyui-datetimebox" id="save_startTime" name="startTime"
+               data-options="required:true,showSeconds:false">
+
+        <label for="save_endTime">结束时间:</label>
+        <input class="easyui-datetimebox" id="save_endTime" name="endTime"
+               data-options="required:true,showSeconds:false">
+
+        <label for="save_gameId"></label>
+        <span style="color: blue; margin-left:50px ">游戏:</span>
+        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
+            <option value="-1" selected="selected">请选择</option>
+        </select>
+
+        <label for="save_spId"></label>
+        <span style="color: blue; margin-left:50px  ">渠道:</span>
+        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)">
+            <option value="-1" selected="selected">请选择</option>
+        </select>
+
+        <label for="save_serverId"></label>
+        <span style="color: blue; margin-left:50px">区服:</span>
+        <select title="选择区服" id="save_serverId" name="serverId">
+            <option value="-1" selected="selected">请选择</option>
+        </select>
+
+        <a href="javascript:loadData(3)" class="easyui-linkbutton" style="margin-left:50px"
+           iconCls=" icon-search" plain="true">查询统计数据</a>
+    </div>
+</div>
+
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div class="text-c">
-    <label for="save_spId"></label>
-    <span style="color: blue; ">渠道:</span>
-    <select title="选择渠道" id="save_spId" name="spId">
-        <option value="-1" selected="selected">请选择</option>
-    </select>
-
-    <label for="save_gameId"></label>
-    <span style="color: blue;margin-left:50px  ">游戏:</span>
-    <select title="选择游戏" id="save_gameId" name="gameId">
-        <option value="-1" selected="selected">请选择</option>
-    </select>
-
-    <label for="save_serverId"></label>
-    <span style="color: blue; margin-left:50px">区服:</span>
-    <select title="选择区服" id="save_serverId" name="serverId">
-        <option value="-1" selected="selected">请选择</option>
-    </select>
-</div>
-<div>
-    <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton" style=""
-       iconCls=" icon-search" plain="true">查询渠道</a>
-    <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style="margin-left:50px"
-       iconCls=" icon-search" plain="true">查询游戏</a>
-    <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"
-       iconCls=" icon-search" plain="true">查询区服</a>
-</div>
-<div>
-    <label for="save_startTime">开始时间:</label>
-    <input class="easyui-datetimebox" id="save_startTime" name="startTime"
-           data-options="required:true,showSeconds:false" style="width:150px">
-
-    <label for="save_endTime">结束时间:</label>
-    <input class="easyui-datetimebox" id="save_endTime" name="endTime"
-           data-options="required:true,showSeconds:false" style="width:150px">
-
-    <a href="javascript:getLinesByDate(1)" class="easyui-linkbutton" style="margin-left:50px"
-       iconCls=" icon-search" plain="true">查询统计数据</a>
-</div>
-<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div id="main" style="width: 1000px;height:600px;margin-left:50px">
+<div id="main" style="width: 90%;height:1000px;margin-left:50px;">
 
 </div>
+
 </body>
+
 <script type="text/javascript">
     let myChart;
     $(function () {
-        initSpGameServer(1);
         initSpGameServer(2);
-        initSpGameServer(3);
-        getLinesByDate(0);
+        $('#save_startTime').datetimebox('setValue', formatterDate(new Date(new Date(new Date().toLocaleDateString()).getTime())));
+        $('#save_endTime').datetimebox('setValue', formatterDate(new Date(new Date().getTime() + 30 * 60 * 1000), 1));
+        initChart();
+        initOption();
     });
 
     function initChart() {
@@ -91,9 +87,6 @@
         }
         // 基于准备好的dom，初始化echarts实例
         myChart = echarts.init(document.getElementById('main'));
-
-        $('#save_startTime').datetimebox('setValue', formatterDate(new Date(new Date().getTime() - 60 * 60 * 1000), 1));
-        $('#save_endTime').datetimebox('setValue', formatterDate(new Date(), 1));
     }
 
 </script>

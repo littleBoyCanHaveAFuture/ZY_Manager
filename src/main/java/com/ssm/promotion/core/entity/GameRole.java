@@ -26,7 +26,7 @@ public class GameRole {
      * index 该区第几个角色
      * String = id + Spid + gameId + ServerId + index  ;
      */
-    long roleId;
+    String roleId;
     /**
      * 渠道id
      */

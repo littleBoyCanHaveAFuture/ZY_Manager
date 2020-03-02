@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <title>游戏商品</title>
+    <title>游戏商品列表</title>
+    <meta charset="utf-8">
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/jquery.easyui.min.js"></script>
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/easyui-lang-zh_CN.js"></script>
+    <style>
+        html, body, .full {
+            width: 100%;
+            background: #fff;
+            font-size: 14px;
+            height: 100%;
+            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+            text-align: center;
+        }
+
+        .main-layer {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            filter: alpha(Opacity=80);
+            /*-moz-opacity: 0.5;*/
+            /*opacity: 0.5;*/
+            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        div {
+            display: block;
+        }
+
+        .h5-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 66;
+            /*background: rgba(0, 0, 0, .7);*/
+        }
+
+
+        .h5-pay-layer {
+            background: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: all .2s linear;
+        }
+
+        .h5-pay-layer.inweb {
+            right: 0;
+            top: 0;
+            margin: auto;
+            /*max-width: 600px;*/
+        }
+
+        .h5-pay-layer.h440 {
+            /*height: 440px;*/
+            height: 880px;
+        }
+
+        .h5-pay-layer .pay-title {
+            height: 96px;
+            position: relative;
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        .h5-pay-layer .pay-title h3 {
+            font-size: 30px;
+            line-height: 60px;
+            font-weight: 400;
+        }
+
+        .h5-pay-layer .pay-title a {
+            position: absolute;
+            padding: 10px;
+            right: 10px;
+            top: 10px;
+        }
+
+        .h5-pay-layer .pay-info-box {
+            margin: 0 15px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        .h5-pay-layer .pay-info-box .pay-amount {
+            font-size: 30px;
+        }
+
+        .h5-pay-layer .pay-info-box p {
+            color: #5e5e5e;
+            font-size: 30px;
+            line-height: 96px;
+            margin-top: 4px;
+        }
+
+        .h5-pay-layer .pay-box {
+            padding: 0 15px;
+            height: 96px;
+            width: 100%;
+            margin: 42px 0 18px;
+        }
+
+        .h5-pay-layer .pay-box .pay-btn {
+            display: block;
+            line-height: 88px;
+            background: #ffde1e;
+            border-radius: 4px;
+            font-size: 30px;
+        }
+
+        .tc {
+            text-align: center;
+        }
+
+        h3 {
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold;
+        }
+
+
+        p {
+            display: block;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+
+        .pay-wrapper . {
+            padding: 15px 0;
+        }
+
+        .pay-wrapper {
+            width: 96px;
+            height: 96px;
+            border: 1px solid #e2e2e2;
+            border-radius: 48px;
+        }
+
+        .pay-wrapper .pay-mode-item > span {
+            font-size: 30px;
+            overflow: hidden;
+            display: block;
+            line-height: 96px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="main-layer">
+    <div>
+        <div class="h5-layer full" style="display: block;" id="paywindow">
+            <div class="h5-pay-layer inweb h440">
+                <div class="pay-info-box">
+                    <a class="pay-amount">支付金额：<span id="cost"></span></a>
+                    <p class="payid" id="des">购买商品：10元档首充前置</p>
+                </div>
+
+                <div class="pay-box">
+                    <a class="pay-btn tc full" id="result">立即支付</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+    function getUrlParams(name) {
+        let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        let r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURI(r[2]);
+        return null;
+    }
+
+    let res = getUrlParams("res");
+    console.info(res);
+    let subject = getUrlParams("subject");
+    console.info(subject);
+    let totalAmount = getUrlParams("totalAmount");
+    console.info(totalAmount);
+
+    $(function () {
+        $('#cost').html("￥" + totalAmount);
+        $('#des').html("购买商品：" + subject);
+
+        if (res === "true") {
+            $('#result').html("支付成功");
+        } else {
+            $('#result').html("支付失败");
+        }
+
+    });
+
+</script>
+</html>
+

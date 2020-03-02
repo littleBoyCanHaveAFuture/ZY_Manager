@@ -4,7 +4,8 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.entity.User;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.RedisKeyNew;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.sdk.UOrderManager;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;
 import com.ssm.promotion.core.util.DateUtil;
@@ -25,10 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Administrator
@@ -38,7 +36,7 @@ import java.util.Map;
 public class RealTimeDataController {
     private static final Logger log = Logger.getLogger(RealTimeDataController.class);
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     private UOrderManager orderManager;
     @Autowired
@@ -56,8 +54,8 @@ public class RealTimeDataController {
     @RequestMapping(value = "/getPayRecord", method = RequestMethod.POST)
     @ResponseBody
     public void getPayRecord(@RequestBody Map<String, Object> param,
-                              HttpServletResponse response) throws Exception {
-        System.out.println("getPayRecord:" + param.toString());
+                             HttpServletResponse response) throws Exception {
+        log.info("getPayRecord:" + param.toString());
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -79,6 +77,7 @@ public class RealTimeDataController {
         long start = System.currentTimeMillis();
 
         List<UOrder> orderList = orderManager.getUOrderList(param);
+        orderList.forEach(UOrder::setJsOrder);
         Long total = orderManager.getTotalUorders(param);
 
         long end = System.currentTimeMillis();
@@ -91,8 +90,6 @@ public class RealTimeDataController {
 
         ResponseUtil.write(response, result);
 
-
-        System.out.println("request: realtime/getPayRecord , map: " + result.toString());
         log.info("request: realtime/getPayRecord , map: " + param.toString());
     }
 
@@ -101,9 +98,11 @@ public class RealTimeDataController {
      */
     @RequestMapping(value = "/realtimedata", method = RequestMethod.POST)
     @ResponseBody
-    public void getRealTimeData(String spId, Integer gameId, Integer serverId, String starttime, String endttime,
+    public void getRealTimeData(Integer type,
+                                String spId, Integer gameId, Integer serverId,
+                                String startTime, String endTime,
                                 HttpServletResponse response) throws Exception {
-        System.out.println("realtimedata:");
+        log.info("realtimedata:");
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -117,39 +116,63 @@ public class RealTimeDataController {
                 result.put("resultCode", Constants.SDK_PARAM);
                 break;
             }
-            if (spId == "-1" || gameId == -1 || serverId == -1) {
+            if (spId.equals("-1") || gameId == -1) {
                 result.put("err", "请选择区服");
                 result.put("resultCode", Constants.SDK_PARAM);
                 break;
             }
-            if (starttime == null || endttime == null) {
-                starttime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
-                endttime = DateUtil.getCurrentDateStr();
+            if (startTime == null || endTime == null) {
+                startTime = DateUtil.formatDate(new Date(System.currentTimeMillis() - DateUtil.HOUR_MILLIS), DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
+                endTime = DateUtil.getCurrentDateStr();
             }
-            List<String> timeDaylist = DateUtil.transTimes(starttime, endttime, DateUtil.FORMAT_YYYY_MMDD_HHmm);
+
+            List<String> timeDaylist = DateUtil.transTimes(startTime, endTime, DateUtil.FORMAT_YYYY_MMDD_HHmm);
             if (timeDaylist.size() != 1) {
                 result.put("err", "请选择同一天的数据");
                 result.put("resultCode", Constants.SDK_PARAM);
                 break;
             }
-            List<String> timeMinlist = DateUtil.getDateMinStr(starttime, endttime);
-            List<Integer> newadd = new ArrayList<>();
-            List<Integer> online = new ArrayList<>();
-            List<Double> money = new ArrayList<>();
 
+            List<String> timeMinlist = DateUtil.getDateMinStr(startTime, endTime);
 
-            cache.getRealtimeData(spId, gameId, serverId, timeDaylist.get(0), timeMinlist, newadd, online, money);
+            if (serverId == -1) {
+                Set<String> serverIdInfo = cache.getServerInfo(String.valueOf(gameId), spId);
+                if (type == 2) {
+                    List<Integer> money = new ArrayList<>();
+                    cache.getRealtimeData(type, spId, gameId, timeDaylist.get(0), timeMinlist, money);
+                    result.put("money", money);
+                } else if (type == 3) {
+                    List<Integer> onlines = new ArrayList<>();
+                    cache.getRealtimeData(type, spId, gameId, timeDaylist.get(0), timeMinlist, onlines);
+                    result.put("onlines", onlines);
 
-            result.put("newadd", newadd);
-            result.put("onlines", online);
-            result.put("money", money);
+                    List<Integer> newadd = new ArrayList<>();
+                    type = 1;
+                    cache.getRealtimeData(type, spId, gameId, timeDaylist.get(0), timeMinlist, newadd);
+                    result.put("newadd", newadd);
+                }
+            } else {
+                if (type == 2) {
+                    List<Integer> money = new ArrayList<>();
+                    cache.getRealtimeData(type, spId, gameId, serverId, timeDaylist.get(0), timeMinlist, money);
+                    result.put("money", money);
+                } else if (type == 3) {
+                    List<Integer> onlines = new ArrayList<>();
+                    cache.getRealtimeData(type, spId, gameId, serverId, timeDaylist.get(0), timeMinlist, onlines);
+                    result.put("onlines", onlines);
+
+                    List<Integer> newadd = new ArrayList<>();
+                    type = 1;
+                    cache.getRealtimeData(type, spId, gameId, serverId, timeDaylist.get(0), timeMinlist, newadd);
+                    result.put("newadd", newadd);
+                }
+            }
+
             result.put("times", timeMinlist);
             result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         } while (false);
 
         ResponseUtil.write(response, result);
-
-        System.out.println("request: realtime/realtimedata , map: " + result.toString());
 
         log.info("request: realtime/realtimedata , map: " + result.toString());
     }

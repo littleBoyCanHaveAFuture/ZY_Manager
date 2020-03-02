@@ -11,6 +11,8 @@ import java.util.Map;
 public interface GameService {
     List<Game> getGameList(Map<String, Object> map, Integer userid);
 
+    Game selectGame(Integer gameId, Integer userid);
+
     int deleteGame(Integer gameId, Integer userid);
 
     /**

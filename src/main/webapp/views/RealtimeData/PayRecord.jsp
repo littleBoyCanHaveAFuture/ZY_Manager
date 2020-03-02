@@ -24,11 +24,11 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/datagrid-export/datagrid-export.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/common.js"></script>
+            src="${pageContext.request.contextPath}/js/common.js?v=20200228"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200228"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/RealtimeData/PayRecord.js"></script>
+            src="${pageContext.request.contextPath}/js/RealtimeData/PayRecord.js?v=202002291338"></script>
 </head>
 <body style="margin:1px;">
 
@@ -46,42 +46,42 @@
         <label for="payRecord_playerId">&nbsp;玩家ID:</label>
         <input id="payRecord_playerId" type="text" class="easyui-textbox" style="width:105px;height: 20px"/>
 
-        <label for="save_spId"></label>
-        <span style="color: blue; ">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId">
+        <label for="save_gameId"></label>
+        <span style="color: blue;margin-left:30px">游戏:</span>
+        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="save_gameId"></label>
-        <span style="color: blue;margin-left:50px  ">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId">
+        <label for="save_spId"></label>
+        <span style="color: blue; margin-left:30px">渠道:</span>
+        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
         <label for="save_serverId"></label>
-        <span style="color: blue; margin-left:50px">区服:</span>
+        <span style="color: blue; margin-left:30px">区服:</span>
         <select title="选择区服" id="save_serverId" name="serverId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <span style="color: blue;margin-left:50px"></span>
+        <span style="color: blue;margin-left:30px"></span>
         <label for="payRecord_state">&nbsp;支付状态:</label>
         <select title="选择订单状态" id="payRecord_state">
-            <option value="">未选择</option>
-            <option value="0">点开充值界面:未点充值按钮(取消支付)</option>
-            <option value="1">选择充值方式界面:未选择充值方式(取消支付)</option>
-            <option value="2">支付宝微信界面:未支付(取消支付)</option>
-            <option value="3">支付成功:未发货</option>
-            <option value="4" selected="selected">支付成功:已发货(交易完成)</option>
-            <option value="5">支付成功:补单(交易完成)</option>
+            <option value="-1">所有订单</option>
+<%--            <option value="0">无</option>--%>
+            <option value="1">选择商品-未支付</option>
+            <option value="2">选择支付方式-未支付</option>
+            <option value="3">支付成功-未发货</option>
+            <option value="4" selected="selected">支付成功-交易完成</option>
+            <option value="5">支付成功-补单完成</option>
         </select>
 
-        <span style="color: blue;margin-left:50px">开始时间:</span>
+        <span style="color: blue;margin-left:30px">开始时间:</span>
         <label for="payRecord_startTime"></label>
         <input class="easyui-datetimebox" id="payRecord_startTime" name="startTime"
                data-options="required:true,showSeconds:false" style="width:150px">
 
-        <span style="color: blue;margin-left:50px">结束时间:</span>
+        <span style="color: blue;margin-left:30px">结束时间:</span>
         <label for="payRecord_endTime"></label>
         <input class="easyui-datetimebox" id="payRecord_endTime" name="endTime"
                data-options="required:true,showSeconds:false" style="width:150px">

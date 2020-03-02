@@ -11,7 +11,9 @@ import java.util.Map;
 public interface GameDao {
     List<Game> selectAllGame();
 
-    List<Game> selectGame(Map<String, Object> map);
+    List<Game> selectGameList(Map<String, Object> map);
+
+    Game selectGame(Integer gameid);
 
     int deleteGame(Integer gameid);
 

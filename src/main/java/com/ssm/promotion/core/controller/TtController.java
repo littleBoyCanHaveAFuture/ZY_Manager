@@ -6,7 +6,7 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.common.Result;
 import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
-import com.ssm.promotion.core.jedis.JedisRechargeCache;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.sdk.*;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.*;
@@ -38,7 +38,7 @@ import java.util.*;
 public class TtController {
     private static final Logger log = Logger.getLogger(TtController.class);
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
     @Resource
     LoginWorker loginWorker;
     @Resource
@@ -68,7 +68,7 @@ public class TtController {
         String[] allowDomain = {"http://127.0.0.1:8080", "http://lh5ds.yy66game.com/", "http://47.101.44.31:8080"};
         Set<String> allowedOrigins = new HashSet<>(Arrays.asList(allowDomain));
 
-        System.out.println("servername = " + request.getServerName());
+        log.info("servername = " + request.getServerName());
         response.addHeader("Access-Control-Allow-Origin", "http://lh5ds.yy66game.com/");
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         response.addHeader("Access-Control-Max-Age", "3600");

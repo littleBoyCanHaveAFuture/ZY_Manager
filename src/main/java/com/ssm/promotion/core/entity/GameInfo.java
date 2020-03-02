@@ -32,7 +32,6 @@ public class GameInfo {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("\n");
         for (Map.Entry<String, Set<String>> entry : spInfo.entrySet()) {
             stringBuilder.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
         }

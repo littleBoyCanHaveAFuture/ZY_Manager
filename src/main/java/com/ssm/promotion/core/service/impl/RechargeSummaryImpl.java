@@ -1,8 +1,10 @@
 package com.ssm.promotion.core.service.impl;
 
+import com.ssm.promotion.core.controller.RechargeSummaryControllr;
 import com.ssm.promotion.core.entity.RechargeSummary;
 import com.ssm.promotion.core.jedis.*;
 import com.ssm.promotion.core.service.RechargeSummaryService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +17,9 @@ import java.util.*;
  */
 @Service("RechargeSummaryService")
 public class RechargeSummaryImpl implements RechargeSummaryService {
+    private static final Logger log = Logger.getLogger(RechargeSummaryImpl.class);
     @Autowired
-    JedisRechargeCache cache;
+    jedisRechargeCache cache;
 
     @Override
     public List<RechargeSummary> getRechargeSummary(Map<Integer, Map<Integer, List<Integer>>> sgsMap,
@@ -39,7 +42,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             rsList = this.setSpRs(sgsMap, timeList);
         }
 
-        System.out.println("RS redis use " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + " s");
+        log.info("RS redis use " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + " s");
 
         //存储查询结果
         return rsList;
@@ -56,13 +59,14 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         //该游戏全区统计<yyyy-MM-dd,RS>
         Map<String, RechargeSummary> totalMap = new LinkedHashMap<>();
 
-        //遍历渠道 游戏 区服
+        //遍历渠道
         for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
-            Integer spId = entry.getKey();
+            Integer gameId = entry.getKey();
             Map<Integer, List<Integer>> listMap = entry.getValue();
-
+            //同渠道 不同游戏 区服
             for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
-                Integer gameId = gameEntry.getKey();
+                //渠道id
+                Integer spId = gameEntry.getKey();
                 List<Integer> serverIdList = gameEntry.getValue();
 
                 //同渠道-游戏 时间排序的结果
@@ -100,11 +104,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
         //遍历渠道 游戏 区服
         for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
-            Integer spId = entry.getKey();
+            Integer gameId = entry.getKey();
             Map<Integer, List<Integer>> listMap = entry.getValue();
 
             for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
-                Integer gameId = gameEntry.getKey();
+                Integer spId = gameEntry.getKey();
                 List<Integer> serverIdList = gameEntry.getValue();
 
                 //同渠道-同游戏- 渠道排序的结果
@@ -146,25 +150,25 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
         //遍历渠道 游戏 区服
         for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : sgsMap.entrySet()) {
-            Integer spId = entry.getKey();
+            Integer gameId = entry.getKey();
             Map<Integer, List<Integer>> listMap = entry.getValue();
 
             RechargeSummary rs = new RechargeSummary();
 
-            //同一游戏
+            //同一游戏 不同渠道
             for (Map.Entry<Integer, List<Integer>> gameEntry : listMap.entrySet()) {
-                Integer gameId = gameEntry.getKey();
+                Integer SpId = gameEntry.getKey();
                 List<Integer> serverIdList = gameEntry.getValue();
                 //所有账号
 //                Long allAccount = cache.getbitcount(RedisKeyNew.getKeyAccountAll(spId.toString(), gameId.toString()));
                 //同渠道-同游戏- 区服排序的结果
-                RechargeSummary rsBySp = this.getRsBySp(spId, gameId, serverIdList, timeList);
+                RechargeSummary rsBySp = this.getRsBySp(SpId, gameId, serverIdList, timeList);
 //                rs.setTotalAccounts(allAccount);
                 rs.add(rsBySp);
+                rs.setSpId(SpId);
+                rs.calculate(3);
+                totalMap.put(SpId, rs);
             }
-            rs.setSpId(spId);
-            rs.calculate(3);
-            totalMap.put(spId, rs);
             break;
         }
 
@@ -189,8 +193,8 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         }
         long s = System.currentTimeMillis();
 
-        System.out.println("spId:" + spId);
-        System.out.println("gameId:" + gameId);
+        log.info("spId:" + spId);
+        log.info("gameId:" + gameId);
 
         //<键值，<天数，分数>>
         Map<String, Map<String, Double>> resultList = new HashMap<>();
@@ -210,15 +214,17 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
         //新增创号
         tailList.add(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
-        cache.getDayBitCount(String.format(RedisKey.FORMAT_SG_SDD, RedisKeyHeader.USER_INFO, spId, gameId), timeList, tailList, resultList);
-        Map<String, Double> timecaMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
+//        String keyBody = String.format(RedisKey.FORMAT_SG_SDD, RedisKeyHeader.USER_INFO, spId, gameId);
+//        cache.getDayBitCount(keyBody, timeList, tailList, resultList);
+        cache.getDayNewAddAccount(String.valueOf(gameId), String.valueOf(spId), timeList, resultList);
+        Map<String, Double> timeCAMap = resultList.get(RedisKeyTail.NEW_ADD_CREATE_ACCOUNT);
 
         //时间排序 逐个增加
         for (String time : timeList) {
             RechargeSummary rs = map.get(time);
             //新增创号
-            if (timecaMap.containsKey(time)) {
-                rs.setNewAddCreateAccount(rs.newAddCreateAccount + timecaMap.get(time).intValue());
+            if (timeCAMap.containsKey(time)) {
+                rs.setNewAddCreateAccount(rs.newAddCreateAccount + timeCAMap.get(time).intValue());
             }
         }
 
@@ -328,7 +334,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 }
             }
 
-            System.out.println("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
+            log.info("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
 
             //重置
             keyMap.get(RedisKeyTail.ACTIVE_PLAYERS).clear();
@@ -366,8 +372,8 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
 
         long s = System.currentTimeMillis();
 
-        System.out.println("spId:" + spId);
-        System.out.println("gameId:" + gameId);
+        log.info("spId:" + spId);
+        log.info("gameId:" + gameId);
 
         //<键值，<天数，分数>>
         Map<String, Map<String, Double>> resultList = new HashMap<>();
@@ -477,7 +483,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //累计创角
             rs.setTotalCreateRole(timeTotalCreateRole == null ? 0 : (int) (double) timeTotalCreateRole);
 
-            System.out.println("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
+            log.info("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
 
             //重置
             keyMap.get(RedisKeyTail.ACTIVE_PLAYERS).clear();
@@ -491,7 +497,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             memberList.clear();
             resultList.clear();
         }
-        System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
+        log.info("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
         return map;
     }
 
@@ -620,7 +626,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             //累计创角
             sgRs.setTotalCreateRole(sgRs.getTotalCreateRole() + (timeTotalCreateRole == null ? 0 : (int) (double) timeTotalCreateRole));
 
-            System.out.println("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
+            log.info("use : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - ss) / 1000));
 
             //重置
             keyMap.get(RedisKeyTail.ACTIVE_PLAYERS).clear();
@@ -636,7 +642,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         }
 
 
-        System.out.println("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
+        log.info("use2 : " + new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - s) / 1000) + "\n");
 
         return sgRs;
     }

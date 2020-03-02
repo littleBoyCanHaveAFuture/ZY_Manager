@@ -4,10 +4,13 @@ import com.ssm.promotion.core.dao.AccountDao;
 import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.sdk.AccountWorker;
 import com.ssm.promotion.core.service.AccountService;
+import com.ssm.promotion.core.timer.ScheduledService;
+import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +20,7 @@ import java.util.Map;
  */
 @Service("AccountService")
 public class AccountServiceImpl implements AccountService {
+    private static final Logger log = Logger.getLogger(AccountServiceImpl.class);
     private static String excep_sql = "SQLIntegrityConstraintViolationException";
     private static String excep_pri = "for key 'PRIMARY'";
     private static String excep_uni = "for key 'name_unique'";
@@ -32,33 +36,33 @@ public class AccountServiceImpl implements AccountService {
 
             try {
                 int res = accountDao.create(account);
-                System.out.println("createAccount success:" + res);
+                log.info("createAccount success:" + res);
                 break;
             } catch (DataAccessException e) {
                 String err = e.getMessage();
                 //仅使主键重复异常被忽略
                 if (err.contains(excep_sql) && err.contains(excep_pri)) {
-                    System.out.println("err1");
+                    log.info("err1");
                     continue;
                 } else if (err.contains(excep_uni)) {
-                    System.out.println("err2");
+                    log.info("err2");
                     account.setId(-2);
                     return;
                 } else {
                     account.setId(-1);
-                    System.out.println("err3:" + err);
+                    log.info("err3:" + err);
                     return;
                 }
             } catch (Exception e) {
                 account.setId(-3);
-                System.out.println("err4:" + e.getMessage());
+                log.info("err4:" + e.getMessage());
                 return;
             }
         } while (true);
 
         AccountWorker.lastUserId.set(id);
 
-        System.out.println(AccountWorker.lastUserId.get());
+        log.info(AccountWorker.lastUserId.get());
     }
 
     @Override
@@ -93,7 +97,15 @@ public class AccountServiceImpl implements AccountService {
             if (name.isEmpty() || pwd.isEmpty()) {
                 return null;
             }
-            return accountDao.findAccountByname(name);
+
+            Account account = accountDao.findAccountByname(name);
+            if (account != null) {
+                List<Account> list = new ArrayList<>();
+                list.add(account);
+                return list;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -108,7 +120,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findAccountByname(String username) {
+    public Account findAccountByname(String username) {
         return accountDao.findAccountByname(username);
     }
 

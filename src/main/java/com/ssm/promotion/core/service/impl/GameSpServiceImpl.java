@@ -41,8 +41,13 @@ public class GameSpServiceImpl implements GameSpService {
      *            uid       账号id<p>
      */
     @Override
-    public List<GameSp> selectGameSp(Map<String, Object> map, Integer userId) {
-        return gameSpDao.selectGameSp(map);
+    public List<GameSp> selectGameSpList(Map<String, Object> map, Integer userId) {
+        return gameSpDao.selectGameSpList(map);
+    }
+
+    @Override
+    public GameSp selectGameSp(Integer gameId, Integer channelId, Integer userId) {
+        return gameSpDao.selectGameSp(gameId, channelId);
     }
 
     /**

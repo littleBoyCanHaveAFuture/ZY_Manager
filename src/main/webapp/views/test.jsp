@@ -21,7 +21,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=20200119"></script>
+            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202002262244"></script>
 </head>
 
 <%--<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">--%>
@@ -40,8 +40,8 @@
     <span style="color: blue; ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
-        <option value="0">官方渠道 0</option>
-        <option value="1" selected="selected">渠道 测试</option>
+        <option value="0" selected="selected">官方渠道 0</option>
+        <option value="1">渠道 测试</option>
         <option value="2">YY</option>
         <option value="3">乐趣</option>
         <option value="4">小度</option>
@@ -56,20 +56,21 @@
     <select title="选择游戏" id="save_gameId" name="gameId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
         <%--        <option value="9" selected="selected">三国游侠 9</option>--%>
-        <option value="10" selected="selected">刺沙 10</option>
-        <option value="11">刺沙-指悦 11</option>
+        <option value="10">刺沙 10</option>
+        <option value="11" selected="selected">刺沙-指悦 11</option>
     </select>
 
     <label for="save_serverId"></label>
     <span style="color: blue; margin-left:50px">区服:</span>
     <select title="选择区服" id="save_serverId" name="serverId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
-        <option value="1" selected="selected">1 区</option>
+        <option value="1">1 区</option>
         <option value="2">2 区</option>
         <option value="3">3 区</option>
         <option value="4">4 区</option>
         <option value="5">5 区</option>
         <option value="6">6 区</option>
+        <option value="170" selected="selected">170 区</option>
     </select>
 
     <div>
@@ -193,8 +194,32 @@
             <option value="false">否</option>
         </select>
     </div>
+    <div>
+        <a href="javascript:showWindow()">show</a>
+    </div>
 </div>
+<!-- 遮罩层 -->
+<div id="cover"
+     style="background: #000; position: absolute; left: 0px; top: 0px; width: 100%; filter: alpha(opacity=30); opacity: 0.3; display: none; z-index: 2 ">
 
+</div>
+<!-- 弹窗 -->
+<div id="showdiv"
+     style="width: 80%; margin: 0 auto; height: 9.5rem; border: 1px solid #999; display: none; position: absolute; top: 40%; left: 10%; z-index: 3; background: #fff">
+    <!-- 标题 -->
+    <div style="background: #F8F7F7; width: 100%; height: 2rem; font-size: 0.65rem; line-height: 2rem; border: 1px solid #999; text-align: center;">
+        提示
+    </div>
+    <!-- 内容 -->
+    <div style="text-indent: 50px; height: 4rem; font-size: 0.5rem; padding: 0.5rem; line-height: 1rem; ">
+        js弹窗 js弹出DIV,并使整个页面背景变暗
+    </div>
+    <!-- 按钮 -->
+    <div style="background: #418BCA; width: 80%; margin: 0 auto; height: 1.5rem; line-height: 1.5rem; text-align: center;color: #fff;margin-top: 1rem; -moz-border-radius: .128rem; -webkit-border-radius: .128rem; border-radius: .128rem;font-size: .59733rem;"
+         onclick="closeWindow()">
+        确 定
+    </div>
+</div>
 
 </body>
 <script type="text/javascript">
@@ -214,13 +239,13 @@
     function auto() {
         let t = 500;
         setTimeout("init()", 500);
-        $("#channelUid").val(100);
+        // $("#channelUid").val(100);
         setTimeout("SpInit()", 600);
         setTimeout("zy_Login()", 700);
-        $("#roleId").val(200);
+        // $("#roleId").val(200);
         setTimeout("zy_upload(2)", 800);
         $("#oderid").val(new Date().valueOf());
-        $("#money").val(200);
+        // $("#money").val(200);
         setTimeout("zy_UploadPayInfo()", 900);
     }
 
@@ -378,17 +403,84 @@
         if (status >= OrderStatus[4]) {
             orderInfo.completeTime = orderInfo.sdkOrderTime + 1000;
         }
+        test();
         let result = ZySDK.pay(orderInfo, function (callbackData) {
+            console.info(orderInfo);
             if (callbackData.state === false) {
                 console.error(callbackData.message);
                 console.error(JSON.stringify(orderInfo));
             } else {
                 console.info(JSON.stringify(callbackData));
+                let yuan;
+                let fen = orderInfo.money;
+                if (fen.length > 2) {
+                    let fen1 = fen.substr(0, fen.length - 2);
+                    let fen2 = fen.substr(fen.length - 2, 2);
+                    console.info(fen1);
+                    console.info(fen2);
+                    yuan = fen1 + "." + fen2;
+                } else {
+                    yuan = "0." + fen;
+                }
 
-                window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
+                // window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
+                let param = "?orderId=" +
+                    + "&body=" + orderInfo.productDesc
+                    + "&subject=" + orderInfo.productName
+                    + "&totalAmount=" + yuan
+                    + "&productId=" + orderInfo.productID
+                    + "&passBackParams=" + "透传参数"
+                    + "&appId=" + ZySDK.GameId + "&spId=" + ZySDK.channelId;
+                console.info(ZySDK.channelId);
+                // window.open("http://localhost:8081/static/pay.html" + encodeURI(param));
+                // window.open("http://localhost:8080/mall/pay.html" + encodeURI(param));
+                window.open("http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param));
+
             }
         });
         console.info("订单当前状态 " + OrderStatusDesc[orderInfo.status]);
+
+    }
+
+    function test() {
+        let order = {
+            accountID: "1000064",
+            channelId: "0",
+            channelUid: "1000064",
+            appId: "11",
+            channelOrderID: "6e90bb15-3dbb-4a7a-87de-97f48713b5fe",
+            productID: "59",
+            productName: "10元档首充前置",
+            productDesc: "10元档首充前置",
+            money: 0.01,
+            roleID: "5987857551844908",
+            roleName: "捂裆派掌门5987857551844908",
+            roleLevel: 1,
+            serverID: "170",
+            serverName: "170服务器170",
+            realMoney: 0.01,
+            completeTime: 1582600283766,
+            sdkOrderTime: 1582600283766,
+            status: 1,
+            notifyUrl: "47.101.44.31",
+            signType: "MD5",
+            sign: "591725af8527d1ce5df76ba4697ec871",
+        };
+        let sign = orderSign(order);
+        console.info(sign);
+    }
+
+    // 弹窗
+    function showWindow() {
+        $('#showdiv').show();  //显示弹窗
+        $('#cover').css('display', 'block'); //显示遮罩层
+        $('#cover').css('height', document.body.clientHeight + 'px'); //设置遮罩层的高度为当前页面高度
+    }
+
+    // 关闭弹窗
+    function closeWindow() {
+        $('#showdiv').hide();  //隐藏弹窗
+        $('#cover').css('display', 'none');   //显示遮罩层
     }
 
 </script>

@@ -111,7 +111,7 @@ function initSpGameServer(type) {
             }
         },
         error: function () {
-            $.messager.alert("ERROR！", "获取游戏列表出错");
+            tip("ERROR！", "获取游戏列表出错");
         }
     });
 
@@ -188,15 +188,15 @@ function search(type) {
                     rows: result.rows
                 };
                 if (result.total === 0) {
-                    $.messager.alert("系统提示", "查询成功 无数据");
+                    tip("系统提示", "查询成功 无数据");
                 } else {
-                    $.messager.alert("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
+                    tip("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
                 }
                 $("#dg").datagrid("loadData", result);
             }
         },
         error: function () {
-            $.messager.alert("ERROR！", "查询失败");
+            tip("ERROR！", "查询失败");
         }
     });
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 public interface UOrderDao {
     List<UOrder> getUOrderList(Map<String, Object> param);
 
-    List<UOrder> getOrderById(@Param("orderID") String orderID);
+    UOrder getOrderById(@Param("orderID") String orderID);
 
     Long getTotalUorders(Map<String, Object> map);
 

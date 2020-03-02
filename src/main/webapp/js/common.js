@@ -131,7 +131,7 @@ function tip(title, message) {
     $.messager.show({
         title: title,
         msg: message,
-        timeout: 200,  //1秒后消失
+        timeout: 300,  //1秒后消失
         showType: 'slide',//弹出的方式。类似ppt里的图片弹出方式
         //弹出框的样式。居中显示
         style: {

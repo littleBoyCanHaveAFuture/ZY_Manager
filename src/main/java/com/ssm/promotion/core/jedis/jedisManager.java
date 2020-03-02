@@ -34,12 +34,12 @@ public class jedisManager {
         } catch (JedisConnectionException e) {
             String message = StringUtils.trim(e.getMessage());
             if ("Could not get a resource from the pool".equalsIgnoreCase(message)) {
-                System.out.println("++++++++++请检查你的redis服务++++++++");
-                System.out.println("|①.请检查是否安装redis服务");
-                System.out.println("|②.请检查redis 服务是否启动。");
-                System.out.println("|③.请检查redis启动是否带配置文件启动，也就是是否有密码，是否端口有变化（默认6379）。解决方案，参考第二点。如果需要配置密码和改变端口，请修改spring-cache.xml配置。|");
-                System.out.println("|③.阿里云白名单 公司的网络经常会更换ip，需要更新白名单");
-                System.out.println("项目退出中....生产环境中，请删除这些东西。我来自。JedisManage.java line:53");
+                log.info("++++++++++请检查你的redis服务++++++++");
+                log.info("|①.请检查是否安装redis服务");
+                log.info("|②.请检查redis 服务是否启动。");
+                log.info("|③.请检查redis启动是否带配置文件启动，也就是是否有密码，是否端口有变化（默认6379）。解决方案，参考第二点。如果需要配置密码和改变端口，请修改spring-cache.xml配置。|");
+                log.info("|③.阿里云白名单 公司的网络经常会更换ip，需要更新白名单");
+                log.info("项目退出中....生产环境中，请删除这些东西。我来自。JedisManage.java line:53");
                 //停止项目
                 System.exit(0);
             }

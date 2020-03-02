@@ -15,8 +15,8 @@ const OrderStatusDesc = [
 ];
 
 //服务器地址
-const zy_domain = "http://localhost:8080";
-// const zy_domain = "http://zyh5games.com:8080/";
+// const zy_domain = "http://localhost:8080";
+const zy_domain = "http://zyh5games.com:8080/";
 
 let ZySDK = {
     GameId: null,
@@ -682,8 +682,7 @@ function checkOrderObject(orderInfo) {
     let mustKeys = [
         'accountID', 'channelId', 'channelUid', 'appId', 'channelOrderID',
         'productID', 'productName', 'productDesc', 'money', 'roleID', 'roleName',
-        'roleLevel', 'serverID', 'serverName', 'sdkOrderTime', 'status', 'notifyUrl',
-        'signType'];
+        'roleLevel', 'serverID', 'serverName', 'sdkOrderTime', 'status', 'signType'];
     for (let keyIndex of mustKeys) {
         if (!orderInfo.hasOwnProperty(keyIndex)) {
             rspObject.state = false;
@@ -767,9 +766,11 @@ function orderSign(orderInfo) {
         "status=" + orderInfo.status + "&" +
         "notifyUrl=" + orderInfo.notifyUrl + "&" +
         ZySDK.GameKey;
-
+    // console.info(signString);
     let urlSign = encodeURIComponent(signString);
+    // console.info(urlSign);
     let hex_sign_uri = hex_md5(urlSign);
+    // console.info(hex_sign_uri);
     return hex_sign_uri;
 }
 
@@ -820,4 +821,12 @@ function getNowHost() {
         requestUri = requestUri.replace('|tempCut|', '?');
     }
     return requestUri;
+}
+
+/**
+ * @param param 判断的参数
+ * @return {boolean}
+ * */
+function checkParam(param) {
+    return (param == null || param === "" || param === "undefined");
 }

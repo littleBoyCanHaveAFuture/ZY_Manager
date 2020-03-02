@@ -1,6 +1,9 @@
 package com.ssm.promotion.core.jedis;
 
 
+import com.ssm.promotion.core.controller.TtController;
+import org.apache.log4j.Logger;
+
 import static com.ssm.promotion.core.util.StringUtil.COLON;
 import static com.ssm.promotion.core.util.StringUtil.NUMBER_SIGN;
 
@@ -9,6 +12,8 @@ import static com.ssm.promotion.core.util.StringUtil.NUMBER_SIGN;
  * @date 2019/11/27
  */
 public class RedisGeneratorKey {
+    private static final Logger log = Logger.getLogger(RedisGeneratorKey.class);
+
     /**
      * {header}:{body}#{tail}
      * ex:
@@ -27,7 +32,7 @@ public class RedisGeneratorKey {
         //尾
         key.append(tail);
 
-        System.out.println(key.toString());
+        log.info(key.toString());
         return key.toString();
     }
 
@@ -47,7 +52,7 @@ public class RedisGeneratorKey {
         //身
         key.append(body);
 
-        System.out.println(key.toString());
+        log.info(key.toString());
         return key.toString();
     }
 

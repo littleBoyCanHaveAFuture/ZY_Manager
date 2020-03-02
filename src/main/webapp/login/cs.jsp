@@ -26,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
     <script src="${pageContext.request.contextPath}/js/md5.js"></script>
-    <script src="${pageContext.request.contextPath}/login/gamelogin.js?202001181729"></script>
+    <script src="${pageContext.request.contextPath}/login/gamelogin.js?1731"></script>
 </head>
 
 <body class="gray-bg">
@@ -85,6 +85,10 @@
 <script type="text/javascript">
     setCookie("zy_appId", 11);
     setCookie("zy_channelId", 0);
+    if (getCookies("zy_channelUid") === "") {
+        setCookie("zy_channelUid", 0);
+    }
+
     let clipboard = new ClipboardJS('.copyBtn', {
         text: function () {
             return $("input:hidden[name='copy']").val();
