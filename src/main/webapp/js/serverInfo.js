@@ -13,7 +13,7 @@ let baseDataGrid = {
     "活跃玩家": "activePlayer",
     "充值次数": "rechargeTimes",
     "充值人数": "rechargeNumber",
-    "充值金额(分)": "rechargePayment",
+    "充值金额(元)": "rechargePayment",
     "活跃付费率": "activePayRate",
     "付费ARPU": "paidARPU",
     "活跃ARPU": "activeARPU",
@@ -133,6 +133,7 @@ function initSpGameServer(type) {
             }
             break;
         case 3:
+        case 4:
             select_serverId.find("option").remove();
             select_serverId.append("<option value=-1 selected=selected>请选择</option>");
             for (let res = 0; res < response.total; res++) {
@@ -154,8 +155,8 @@ function search(type) {
     let data = {
         "type": type,
         "gameId": gameId,
+        "channelId": spId.replace(/,/g, "|"),
         "serverId": serverId,
-        "spId": spId.replace(/,/g, "|"),
         "startTime": startTime,
         "endTime": endTime
     };
@@ -163,16 +164,26 @@ function search(type) {
 
     $.ajax({
         //获取数据
-        url: "/rechargeSummary/searchRechargeSummary",
+        // url: "/rechargeSummary/searchRechargeSummary",
+        url: "/rechargeSummary/getRS",
         type: "post",
         data: data,
         dataType: "json",
-        async: false,
+        async: true,
+        beforeSend: function () {
+            console.info("beforeSend");
+            $('#loadrs').html('(加载中...,请勿再次点击)');
+        },
         success: function (result) {
             console.info(result);
+            $('#loadrs').html('(查询完毕...)');
             if (result.resultCode === 501) {
                 relogin();
-            } else if (result.resultCode === 200) {
+            } else {
+                if (result.state === false) {
+                    tip("系统提示", result.message);
+                    return;
+                }
                 let useTime = result.time;
                 if (result.total !== 0) {
                     let rows = result.rows;
@@ -180,6 +191,8 @@ function search(type) {
                         row.date = row.date.substring(0, 4) + "-" + row.date.substring(4, 6) + "-" + row.date.substring(6);
                         row.createAccountRate = row.createAccountRate + "%";
                         row.activePayRate = row.activePayRate + "%";
+                        let money = row.rechargePayment;
+                        row.rechargePayment = changeMoneyToYuan(money);
                         return row;
                     });
                 }
@@ -193,12 +206,29 @@ function search(type) {
                     tip("系统提示", "查询成功！ 一共 " + result.total + " 条数据" + "，耗时：" + useTime + " 秒");
                 }
                 $("#dg").datagrid("loadData", result);
+
+
             }
         },
         error: function () {
             tip("ERROR！", "查询失败");
         }
     });
+}
+
+function changeMoneyToYuan(tmoney) {
+    let money = tmoney.toString();
+    let realmonet_yuan = 0;
+    if (money.length > 2) {
+        let fen1 = money.substr(0, money.length - 2);
+        let fen2 = money.substr(money.length - 2, 2);
+        realmonet_yuan = fen1 + "." + fen2;
+    } else if (money.length === 2) {
+        realmonet_yuan = "0." + money;
+    } else if (money.length === 1) {
+        realmonet_yuan = "0.0" + money;
+    }
+    return realmonet_yuan;
 }
 
 //登录超时 重新返回到登录界面

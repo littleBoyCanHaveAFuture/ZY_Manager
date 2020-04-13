@@ -152,7 +152,10 @@ public class UOrderManager {
         order.setProductDesc(productDesc);
         order.setProductID(productID);
         order.setProductName(productName);
-        order.setRealMoney(realMoney);
+        if (status <= OrderState.STATE_OPEN_PAY)
+            order.setRealMoney(0);
+        else
+            order.setRealMoney(realMoney);
         order.setSdkOrderTime(DateUtil.formatDate(Long.parseLong(sdkOrderTime), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
 
         order.setServerID(String.valueOf(serverID));

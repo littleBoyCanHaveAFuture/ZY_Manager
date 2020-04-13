@@ -36,4 +36,8 @@ public interface GameRoleService {
      */
     String getLastLoginTime(Map<String, Object> map);
 
+    /**
+     * 该账号是否存在角色
+     */
+    boolean existRole(String accountId);
 }

@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Insert title here</title>
+    <title>测试</title>
     <link rel="stylesheet" type="text/css"
           href="${pageContext.request.contextPath}/jquery-easyui-1.7.0/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css"
@@ -21,33 +21,24 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=20200114"></script>
+<%--            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202003181727"></script>--%>
+            src="http://zy.hysdgame.cn/sdk/common/libZySdk_v1.js?v=202003191115"></script>
 </head>
 
-<%--<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">--%>
 <body style="margin:1px;" id="ff" bgcolor="#7fffd4">
 <div id="sp">
-    <%--    <div>--%>
-    <%--        <a href="javascript:initSpGameServer(1)" class="easyui-linkbutton"--%>
-    <%--           iconCls=" icon-search" plain="true">查询渠道</a>--%>
-    <%--        <a href="javascript:initSpGameServer(2)" class="easyui-linkbutton" style="margin-left:50px"--%>
-    <%--           iconCls=" icon-search" plain="true">查询游戏</a>--%>
-    <!--        <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"-->
-    <%--           iconCls=" icon-search" plain="true">查询区服</a>--%>
-    <%--    </div>--%>
-
     <label for="save_spId"></label>
     <span style="color: blue; ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
         <option value="0">官方渠道 0</option>
-        <option value="1" selected="selected">渠道 测试</option>
-        <option value="2">YY</option>
-        <option value="3">乐趣</option>
-        <option value="4">小度</option>
-        <option value="5">爱点游</option>
-        <option value="6">虫虫游戏</option>
-        <option value="7">闲兔</option>
+        <option value="1" selected="selected">渠道 测试1</option>
+        <option value="2">YY-2</option>
+        <option value="3">乐趣-3</option>
+        <option value="4">小度-4</option>
+        <option value="5">爱点游-5</option>
+        <option value="6">虫虫游戏-6</option>
+        <option value="7">闲兔-7</option>
     </select>
 
 
@@ -352,7 +343,10 @@
             } else {
                 setLog(JSON.stringify(callbackData), 0);
 
-                window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
+                // window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
+                loadZyPayHtml(callbackData.orderId, orderInfo.productDesc, orderInfo.productName, orderInfo.money, orderInfo.productID, "test");
+
+                loadZyPayHtml(callbackData.orderId, orderInfo.productDesc, orderInfo.productName, money, orderInfo.productID, "test");
             }
         });
         console.info("订单当前状态 " + OrderStatusDesc[orderInfo.status]);

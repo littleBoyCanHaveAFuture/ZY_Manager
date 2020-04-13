@@ -31,6 +31,11 @@ public class AopSurvey {
         allJumpFuncMethodList.add("getDistinctServerInfo");
         allJumpFuncMethodList.add("getGameList");
         allJumpFuncMethodList.add("selectLoginUrl");
+        //RechargeSummaryService
+        allJumpFuncMethodList.add("getGameInfo");
+        allJumpFuncMethodList.add("getDayResult");
+        allJumpFuncMethodList.add("getServerResult");
+        allJumpFuncMethodList.add("getChannelResult");
     }
 
     /**
@@ -195,6 +200,14 @@ public class AopSurvey {
             case "getCountGameSp":
             case "DistSpIdByGameId":
             case "DistGameIdBySpId":
+            case "selectGameSpList":
+                //GameDiscountService
+            case "selectGameDiscountList":
+            case "selectGameDiscount":
+            case "deleteGameDiscount":
+            case "updateGameDiscount":
+            case "insertGameDiscount":
+            case "getCountGameDiscount":
                 type = FunctionType.ServerManagement;
                 break;
             case "login":
@@ -226,8 +239,11 @@ public class AopSurvey {
         //详细权限
         switch (signature) {
             case "getRechargeSummary":
+            case "getDayResult":
+            case "getGameInfo":
                 result = true;
                 break;
+
             default:
                 break;
         }
@@ -319,6 +335,14 @@ public class AopSurvey {
             case "getCountGameSp":
             case "DistSpIdByGameId":
             case "DistGameIdBySpId":
+            case "selectGameSpList":
+                //GameDiscountService
+            case "selectGameDiscountList":
+            case "selectGameDiscount":
+            case "deleteGameDiscount":
+            case "updateGameDiscount":
+            case "insertGameDiscount":
+            case "getCountGameDiscount":
                 result = true;
                 break;
             default:

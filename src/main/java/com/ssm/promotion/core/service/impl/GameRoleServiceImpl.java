@@ -74,4 +74,15 @@ public class GameRoleServiceImpl implements GameRoleService {
 
         return null;
     }
+
+    /**
+     * 该账号是否存在角色
+     *
+     * @param accountId
+     */
+    @Override
+    public boolean existRole(String accountId) {
+        String res = gameRoleDao.existRole(accountId);
+        return res != null && res.equals("1");
+    }
 }

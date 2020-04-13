@@ -2,8 +2,8 @@
  *  zy sdk 文件
  * 测试环境
  * @author song minghua
- * @date 2019/12/31
- * @version 0.1.1
+ * @date 2020/03/19
+ * @version 0.2.7
  */
 const OrderStatus = [1, 2, 3, 4, 5];
 const OrderStatusDesc = [
@@ -821,6 +821,75 @@ function getNowHost() {
         requestUri = requestUri.replace('|tempCut|', '?');
     }
     return requestUri;
+}
+
+/**
+ * @param orderId 订单id
+ * @param body 商品详细描述
+ * @param subject 商品名称
+ * @param totalAmount 商品金额：分
+ * @param productId 商品id
+ * @param passBackParams 透传参数*/
+function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackParams) {
+    console.info("to orderId" + orderId);
+    console.info("to money" + totalAmount);
+    let money = changeMoneyToYuan(totalAmount);
+    console.info("real money" + money);
+    let param = "?orderId=" + orderId
+        + "&body=" + body
+        + "&subject=" + subject
+        + "&totalAmount=" + money
+        + "&productId=" + productId
+        + "&passBackParams=" + passBackParams
+        + "&appId=" + ZySDK.GameId + "&spId=" + ZySDK.channelId;
+    console.info(ZySDK.channelId);
+
+    let payUrl = "http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param);
+    // let payUrl = "http://localhost:8080/mall/pay.html" + encodeURI(param);
+    // let payUrl = "http://zy.hysdgame.cn:8080/mall/pay.html" + encodeURI(param);
+    //苹果浏览器
+    let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+        navigator.userAgent &&
+        navigator.userAgent.indexOf('CriOS') === -1 &&
+        navigator.userAgent.indexOf('FxiOS') === -1;
+    if (isSafari) {
+        // alert("苹果");
+        openWin(payUrl);
+    } else {
+        // alert("其他");
+        window.open(payUrl);
+    }
+}
+
+let openWin = function (payUrl) {
+    //打开一个新窗口
+    let winRef = window.open('', "_blank");
+    //假装获取请求支付参数
+    $.ajax({
+        type: 'get',
+        url: zy_domain + '/webGame/test',
+        success: function () {
+            //设置新窗口的跳转地址
+            // winRef.location.href = "www.baidu.com";
+            winRef.location.href = payUrl;
+        }
+    })
+};
+
+//money 为分;10/100/1000/1000/100011
+function changeMoneyToYuan(tmoney) {
+    let money = tmoney.toString();
+    let realmonet_yuan = 0;
+    if (money.length > 2) {
+        let fen1 = money.substr(0, money.length - 2);
+        let fen2 = money.substr(money.length - 2, 2);
+        realmonet_yuan = fen1 + "." + fen2;
+    } else if (money.length === 2) {
+        realmonet_yuan = "0." + money;
+    } else if (money.length === 1) {
+        realmonet_yuan = "0.0" + money;
+    }
+    return realmonet_yuan;
 }
 
 /**

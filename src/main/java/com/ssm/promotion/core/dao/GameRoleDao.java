@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.dao;
 
 import com.ssm.promotion.core.entity.GameRole;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,6 @@ public interface GameRoleDao {
     List<GameRole> findGamerole(Map<String, Object> map);
 
     GameRole findGameRole(Map<String, Object> map);
+
+    String existRole(@Param("accountId") String accountId);
 }

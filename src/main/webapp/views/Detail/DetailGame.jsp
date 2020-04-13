@@ -25,7 +25,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js?v=0228"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200306"></script>
 </head>
 <body style="margin:1px;">
 
@@ -43,15 +43,15 @@
             <option value=" -1" selected="selected">请选择</option>
         </select>
 
-        <label for="save_spId"></label>
-        <span style="color: blue; margin-left:50px">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)">
+        <%--        <label for="save_spId"></label>--%>
+        <%--        <span style="color: blue; margin-left:50px">渠道:</span>--%>
+        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)" hidden="hidden">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="save_serverId"></label>
-        <span style="color: blue; margin-left:50px">区服:</span>
-        <select title="选择区服" id="save_serverId" name="serverId">
+        <%--        <label for="save_serverId"></label>--%>
+        <%--        <span style="color: blue; margin-left:50px">区服:</span>--%>
+        <select title="选择区服" id="save_serverId" name="serverId" hidden="hidden">
             <option value=" -1" selected="selected">请选择</option>
         </select>
 
@@ -67,7 +67,7 @@
 
         <a href="javascript:search(1)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>
-
+        <span id="loadrs">(未查询)</span>
         <a href="javascript:exportToLocal()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>

@@ -361,6 +361,7 @@ function initSpGameServer(type) {
             }
             break;
         case 3:
+        case 4:
             select_serverId.find("option").remove();
             select_serverId.append("<option value=-1 selected=selected>请选择</option>");
             for (let res = 0; res < response.total; res++) {

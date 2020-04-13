@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <title>游戏商品</title>
+    <title>游戏商品列表</title>
+    <meta charset="utf-8">
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/jquery.easyui.min.js"></script>
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript"
+            src="http://www.zyh5games.com/md5.js"></script>
+    <style>
+        html, body, .full {
+            width: 100%;
+            background: #fff;
+            font-size: 14px;
+            height: 100%;
+            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+            text-align: center;
+        }
+
+        .main-layer {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            filter: alpha(Opacity=80);
+            /*-moz-opacity: 0.5;*/
+            /*opacity: 0.5;*/
+            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        div {
+            display: block;
+        }
+
+        .h5-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 66;
+            /*background: rgba(0, 0, 0, .7);*/
+        }
+
+
+        .h5-pay-layer {
+            background: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: all .2s linear;
+        }
+
+        .h5-pay-layer.inweb {
+            right: 0;
+            top: 0;
+            margin: auto;
+            /*max-width: 600px;*/
+        }
+
+        .h5-pay-layer.h440 {
+            /*height: 440px;*/
+            height: 976px;
+        }
+
+        .h5-pay-layer .pay-title {
+            height: 96px;
+            position: relative;
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        .h5-pay-layer .pay-title h3 {
+            font-size: 30px;
+            line-height: 60px;
+            font-weight: 400;
+        }
+
+        .h5-pay-layer .pay-title a {
+            position: absolute;
+            padding: 10px;
+            right: 10px;
+            top: 10px;
+        }
+
+        .h5-pay-layer .pay-info-box {
+            margin: 0 15px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        .h5-pay-layer .pay-info-box .pay-amount {
+            font-size: 30px;
+        }
+
+        .h5-pay-layer .pay-info-box p {
+            color: #5e5e5e;
+            font-size: 30px;
+            line-height: 96px;
+            margin-top: 4px;
+        }
+
+        .h5-pay-layer .pay-box {
+            padding: 0 15px;
+            height: 96px;
+            width: 100%;
+            margin: 42px 0 18px;
+        }
+
+        .h5-pay-layer .pay-box .pay-btn {
+            display: block;
+            line-height: 88px;
+            background: #ffde1e;
+            border-radius: 4px;
+            font-size: 30px;
+        }
+
+        .tc {
+            text-align: center;
+        }
+
+        h3 {
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold;
+        }
+
+        .cz-close {
+            width: 15px;
+            height: 15px;
+            text-align: center;
+            font-size: 16px;
+            color: #999;
+            cursor: pointer;
+            display: inline-block;
+            background: url(http://www.zyh5games.com/icon-close.svg) 50% no-repeat;
+            background-size: 100% 100%;
+        }
+
+        p {
+            display: block;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+
+        .pay-wrapper {
+            background: #fff;
+            margin: 5px 15px 0;
+        }
+
+        .pay-wrapper .pay-mode-item {
+            padding: 15px 0;
+        }
+
+        .pay-wrapper .pay-mode-item .unselected {
+            width: 96px;
+            height: 96px;
+            border: 1px solid #e2e2e2;
+            border-radius: 48px;
+        }
+
+        .pay-wrapper .pay-mode-item > span {
+            font-size: 30px;
+            overflow: hidden;
+            display: block;
+            line-height: 96px;
+        }
+
+
+        .icon-wechat-b {
+            background: url(http://www.zyh5games.com/wxIcon.svg) 50% no-repeat;
+            background-size: 100% 100%;
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+
+        .icon-zfb-b {
+            background: url(http://www.zyh5games.com/zfbIcon.svg) 50% no-repeat;
+            background-size: 100% 100%;
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+
+        .fl {
+            float: left;
+        }
+
+        i {
+            font-style: normal;
+        }
+
+        .icon-gou {
+            width: 96px;
+            height: 96px;
+        }
+
+        .icon {
+            width: 96px;
+            height: 96px;
+            display: inline-block;
+        }
+
+        .icon-2 {
+            background-image: url(http://www.zyh5games.com/icon-gou.png);
+            display: inline-block;
+        }
+
+        .icon-3 {
+            width: 48px;
+            height: 48px;
+            display: inline-block;
+        }
+
+        .pt4 {
+            padding-top: 4px;
+        }
+
+        .pl8 {
+            padding-left: 8px;
+        }
+
+        .mt4 {
+            margin-top: 4px;
+        }
+
+        .fr {
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="main-layer">
+    <div>
+        <div class="h5-layer full" style="display: block;" id="paywindow">
+            <div class="h5-pay-layer inweb h440">
+                <div class="pay-title">
+                    <h3 class="tc">选择支付方式</h3>
+                    <a><i class="icon-3 cz-close" id="close"></i></a>
+                </div>
+                <div class="pay-info-box">
+                    <p class="payid" id="des">购买商品：10元档首充前置</p>
+                    <p class="pay-amount">支付金额：
+                        <span id="cost"></span>
+                        <span id="cost_discount" style="color: #00ee00"></span></p>
+
+                    <p class="pay-discount">使用优惠：
+                        <select title="使用优惠" id="discount" onchange="initPayAmount()" style="font-size: 30px">
+                            <option value="100" selected="selected">无折扣</option>
+                        </select>
+                    </p>
+                </div>
+
+                <div class="pay-wrapper">
+                    <!--                    <div class="pay-mode-item" style="display: none;">-->
+                    <!--                        <i class="icon icon-wallt-b fl"></i>-->
+                    <!--                        <i class="not-enough fr mt3">充值</i>-->
+                    <!--                        <span class="pl8 pt4">-->
+                    <!--                            <span>游戏币支付</span>-->
+                    <!--                            <span class="yue">余额不足</span>-->
+                    <!--                        </span>-->
+                    <!--                    </div>-->
+
+                    <div class="pay-mode-item">
+                        <i class="icon icon-wechat-b fl"></i>
+                        <i class="icon-2 icon-gou fr mt4" id="select-wx"></i>
+                        <span class="pl8 pt4">微信支付</span>
+                    </div>
+
+                    <div class="pay-mode-item">
+                        <i class="icon icon-zfb-b fl"></i>
+                        <i class="unselected fr mt4" id="select-zfb"></i>
+                        <span class="pl8 pt4">支付宝支付</span>
+                    </div>
+                </div>
+
+                <div class="pay-box">
+                    <a class="pay-btn tc full" id="paynow">立即支付</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer"></div>
+</body>
+<script type="text/javascript">
+    function getUrlParams(name) {
+        let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        let r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURI(r[2]);
+        return null;
+    }
+
+    //前一个页面（游戏）
+    let t_referrer;
+
+    let orderId = getUrlParams("orderId");
+    console.info(orderId);
+    let appId = getUrlParams("appId");
+    console.info(appId);
+    let spId = getUrlParams("spId");
+    console.info(spId);
+
+    let body = getUrlParams("body");
+    console.info(body);
+    let subject = getUrlParams("subject");
+    console.info(subject);
+    let totalAmount = getUrlParams("totalAmount");
+    console.info(totalAmount);
+    let productId = getUrlParams("productId");
+    console.info(productId);
+    let passBackParams = getUrlParams("passBackParams");
+    console.info(passBackParams);
+
+    let discountMoney = totalAmount;
+    $('#cost').html("￥" + totalAmount);
+    $('#des').html("购买商品：" + subject);
+    // document.getElementById('cost').innerHTML = "100";
+
+    $(function () {
+        //给返回首页修改密码按钮添加单击事件
+        $("#select-wx").on("click", function () {
+            // alert('你单击了 微信支付 按钮');
+            payWappper(1);
+        });
+
+        //给退出按钮添加单击事件
+        $("#select-zfb").on("click", function () {
+            // alert('你单击了 支付宝支付 按钮');
+            payWappper(2);
+        });
+        //给退出按钮添加单击事件
+        $("#close").on("click", function () {
+            // 关闭当前页面
+            // window.opener = null;
+            // window.location.href = "about:blank";
+            // window.close();
+            // remove();
+        });
+        $("#paynow").on("click", function () {
+            // alert('你单击了 立即支付 按钮');
+            let cls1 = "icon-2 icon-gou fr mt4";
+
+            let btnSwitchWx = document.getElementById("select-wx");
+            let btnSwitchZfb = document.getElementById("select-zfb");
+            let classnameWx = btnSwitchWx.className;
+            let classnameZfb = btnSwitchZfb.className;
+
+            if (classnameWx === cls1) {
+                wxPay(orderId, body, subject, totalAmount, productId, passBackParams);
+            } else if (classnameZfb === cls1) {
+                aliPay(orderId, body, subject, totalAmount, productId, passBackParams);
+            } else {
+                alert("请选择支付方式！");
+            }
+        });
+
+        function payWappper(type) {
+            let btnSwitchWx = document.getElementById("select-wx");
+            let btnSwitchZfb = document.getElementById("select-zfb");
+            let classnameWx = btnSwitchWx.className;
+            let classnameZfb = btnSwitchZfb.className;
+
+            let cls1 = "icon-2 icon-gou fr mt4";
+            let cls2 = "unselected fr mt4";
+
+            if (type === 1) {
+                btnSwitchWx.className = cls1;
+                btnSwitchZfb.className = cls2;
+            } else {
+                btnSwitchWx.className = cls2;
+                btnSwitchZfb.className = cls1;
+            }
+        }
+
+        console.info(document.referrer);
+        t_referrer = document.referrer;
+        checkOrder();
+    });
+
+    /**检查订单状态
+     * 1.查询折扣信息*/
+    function checkOrder() {
+        let url = "http://zy.hysdgame.cn:8080/server/getGameGameDiscount";
+        $.ajax({
+            url: url,
+            type: "post",
+            data: {"gameId": appId, "channelId": spId},
+            dataType: "json",
+            async: false,
+            success: function (result) {
+                if (result.state === false) {
+                    console.info("查询失败" + result.message);
+                } else {
+                    let discount = result.message;
+                    console.info("checkOrder discount=" + discount);
+
+                    if (discount < 0 || discount >= 100 || discount % 10 !== 0) {
+                        discountMoney = "100";
+                    } else {
+                        let select_discount = $("#discount");
+                        select_discount.find("option").remove();
+                        select_discount.append(`<option  value='${discount}'selected=selected>${discount}%</option>`);
+                        select_discount.append(`<option value="100" >无折扣</option>`);
+
+                        let realmoney_fen = changeMoneyToFen(totalAmount) * discount;
+                        let str_discountMonay_fen = realmoney_fen.toString();
+                        let discountMonay_fen = str_discountMonay_fen.substr(0, str_discountMonay_fen.length - 2);
+                        let discountMonay_yuan = changeMoneyToYuan(discountMonay_fen);
+                        discountMoney = discountMonay_yuan;
+
+                        console.info("checkOrder discountMonay_fen=" + discountMonay_fen);
+                        console.info("checkOrder discountMonay_yuan=" + discountMonay_yuan);
+                    }
+                    initPayAmount();
+                }
+            },
+            error: function () {
+                console.info("查询失败" + result.message);
+            }
+        });
+    }
+
+    //money 为元;20.01|20|20.1|20.10
+    function changeMoneyToFen(money) {
+        let realmoney_fen = 0;
+        let part_yuan = 0;
+        let part_fen = 0;
+        console.info(money);
+        console.info("." + money.indexOf("."));
+        if (money.indexOf(".") === -1) {
+            //不存在小数点，分
+            part_yuan = parseInt(money);
+            part_fen = 0;
+            realmoney_fen = part_yuan * 100;
+        } else {
+            let moneyArray = new Array();
+            moneyArray = money.split(".");
+            console.info("moneyArray=" + moneyArray);
+            console.info("moneyArray s=" + moneyArray.length);
+            if (moneyArray.length !== 2) {
+                return null;
+            } else {
+                part_yuan = moneyArray[0];
+                part_fen = moneyArray[1];
+                console.info("part_yuan=" + part_yuan);
+                console.info("part_fen=" + part_fen);
+                let fen = 0;
+                if (part_fen.length === 2) {
+                    let fen1 = parseInt(part_fen[0]);
+                    let fen2 = parseInt(part_fen[1]);
+                    if (fen1 !== 0)
+                        fen += fen1 * 10;
+                    fen += fen2;
+                } else {
+                    fen += part_fen * 10;
+                }
+                realmoney_fen = parseInt(part_yuan) * 100 + fen;
+            }
+        }
+        return realmoney_fen;
+    }
+
+    //money 为分;10/100/1000/1000/100011
+    function changeMoneyToYuan(money) {
+        let realmonet_yuan = 0;
+        if (money.length > 2) {
+            let fen1 = money.substr(0, money.length - 2);
+            let fen2 = money.substr(money.length - 2, 2);
+            console.info(fen1);
+            console.info(fen2);
+            realmonet_yuan = fen1 + "." + fen2;
+        } else if (money.length === 2) {
+            realmonet_yuan = "0." + money;
+        } else if (money.length === 1) {
+            realmonet_yuan = "0.0" + money;
+        }
+        return realmonet_yuan;
+    }
+
+    //折扣信息
+    function initPayAmount() {
+        let discount = $("#discount").val();
+        let tagcost = document.getElementById("cost");
+        if (discount !== "100") {
+            console.info(" initPayAmount discount=" + discount);
+            tagcost.style.cssText = "text-decoration:line-through;";
+
+            $('#cost_discount').html("￥" + discountMoney);
+        } else {
+            console.info(" initPayAmount discount=" + discount);
+            tagcost.removeAttribute("style");
+            $('#cost_discount').html("");
+        }
+
+    }
+
+    let openWin = function (payUrl) {
+        //打开一个新窗口
+        let winRef = window.open('', "_blank");
+        //假装获取请求支付参数
+        $.ajax({
+            type: 'get',
+            url: '/webGame/test',
+            success: function (json) {
+                //设置新窗口的跳转地址
+                //winRef.location.href = "//";
+                winRef.location.href = payUrl;
+            }
+        })
+    };
+
+    function remove() {
+        $("#paywindow").remove();
+        //打开支付页面
+        let payUrl = "http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param);
+        //苹果浏览器
+        let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+            navigator.userAgent &&
+            navigator.userAgent.indexOf('CriOS') === -1 &&
+            navigator.userAgent.indexOf('FxiOS') === -1;
+        if (isSafari) {
+            openWin(payUrl);
+        } else {
+            window.open(payUrl);
+        }
+    }
+
+
+    function aliPay(orderId, body, subject, totalAmount, productId, passBackParams) {
+        let param =
+            "appId=" + appId +
+            "&orderId=" + orderId +
+            "&body=" + body +
+            "&subject=" + subject +
+            "&totalAmount=" + totalAmount +
+            "&productId=" + productId +
+            "&passBackParams=" + passBackParams;
+        console.info(param);
+        let sign;
+        let singUrl = "http://www.zyh5games.com/pay/payInfo/sign?";
+
+        $.ajax({
+            //获取下拉
+            url: singUrl + param + "&spId=" + spId,
+            type: "get",
+            async: false,
+            success: function (result) {
+                console.info(result);
+                sign = result;
+            },
+        });
+
+        param += "&sign=" + sign;
+        param += "&discountAmount=" + discountMoney;
+        let url = "http://www.zyh5games.com/pay/aliPay/wapPaySdk?";
+        $.ajax({
+            //获取下拉
+            url: url + param,
+            type: "post",
+            success: function (result) {
+                if (result.hasOwnProperty('message')) {
+                    alert(result.message);
+                } else {
+                    $('#footer').html($(result));
+                }
+            },
+        });
+    }
+
+    function wxPay(orderId, body, subject, totalAmount, productId, passBackParams) {
+        let param =
+            "appId=" + appId +
+            "&orderId=" + orderId +
+            "&body=" + body +
+            "&subject=" + subject +
+            "&totalAmount=" + totalAmount +
+            "&productId=" + productId +
+            "&passBackParams=" + passBackParams;
+        console.info(param);
+
+        let sign;
+        let singUrl = "http://www.zyh5games.com/pay/payInfo/sign?";
+
+        $.ajax({
+            //获取下拉
+            url: singUrl + param + "&spId=" + spId,
+            type: "get",
+            async: false,
+            success: function (result) {
+                console.info(result);
+                sign = result;
+            },
+        });
+        param += "&sign=" + sign;
+        let url = "http://www.zyh5games.com/pay/wxPay/wapPaySdk?";
+        $.ajax({
+            //获取下拉
+            url: url + param,
+            type: "get",
+            dataType: "json",
+            success: function (result) {
+                if (result.hasOwnProperty('message')) {
+                    alert(result.message);
+                } else {
+                    // alert(result.webUrl);
+                    // let redirectUrl = "&redirect_url=" + encodeURIComponent("http://www.zyh5games.com:8080/login/cs.jsp");
+                    // redirectUrl = "&redirect_url=" + urlencode("www.zyh5games.com:8080/login/cs.jsp");
+                    // window.location.href = result.webUrl + redirectUrl;
+                    window.location.href = result.webUrl;
+                }
+            },
+        });
+    }
+
+</script>
+</html>
+

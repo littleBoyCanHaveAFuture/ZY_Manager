@@ -422,20 +422,19 @@
                 } else {
                     yuan = "0." + fen;
                 }
-
+                ZySDK.loadPayHtml(callbackData.orderId,orderInfo.productDesc,orderInfo.productName,yuan,orderInfo.productID,"sss");
                 // window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
-                let param = "?orderId=" +
-                    + "&body=" + orderInfo.productDesc
-                    + "&subject=" + orderInfo.productName
-                    + "&totalAmount=" + yuan
-                    + "&productId=" + orderInfo.productID
-                    + "&passBackParams=" + "透传参数"
-                    + "&appId=" + ZySDK.GameId + "&spId=" + ZySDK.channelId;
-                console.info(ZySDK.channelId);
-                // window.open("http://localhost:8081/static/pay.html" + encodeURI(param));
-                // window.open("http://localhost:8080/mall/pay.html" + encodeURI(param));
-                window.open("http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param));
-
+                // let param = "?orderId=" +
+                //     + "&body=" + orderInfo.productDesc
+                //     + "&subject=" + orderInfo.productName
+                //     + "&totalAmount=" + yuan
+                //     + "&productId=" + orderInfo.productID
+                //     + "&passBackParams=" + "透传参数"
+                //     + "&appId=" + ZySDK.GameId + "&spId=" + ZySDK.channelId;
+                // console.info(ZySDK.channelId);
+                // // window.open("http://localhost:8081/static/pay.html" + encodeURI(param));
+                // // window.open("http://localhost:8080/mall/pay.html" + encodeURI(param));
+                // window.open("http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param));
             }
         });
         console.info("订单当前状态 " + OrderStatusDesc[orderInfo.status]);

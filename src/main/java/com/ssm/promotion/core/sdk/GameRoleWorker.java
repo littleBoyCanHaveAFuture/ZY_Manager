@@ -36,4 +36,8 @@ public class GameRoleWorker {
     public GameRole findGameRole(Map<String, Object> map) {
         return gameRoleService.findGameRole(map);
     }
+
+    public boolean existRole(String accountId) {
+        return gameRoleService.existRole(accountId);
+    }
 }

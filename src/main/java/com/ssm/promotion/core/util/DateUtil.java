@@ -169,6 +169,15 @@ public class DateUtil {
     }
 
     /**
+     * 昨天时间:年月日=yyyyMMdd
+     */
+    public static String getBeforeDayStr() throws Exception {
+        Date date = DateUtils.addHours(new Date(), -24);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYMMDD);
+        return sdf.format(date);
+    }
+
+    /**
      * 求天数
      *
      * @param startTimes 开始时间
@@ -274,5 +283,6 @@ public class DateUtil {
         String nextDay = DateUtil.formatDate(DateUtil.getEndTimestamp() * 1000, DateUtil.FORMAT_YYMMDD);
         System.out.println(currDay);
         System.out.println(nextDay);
+        System.out.println(DateUtil.getBeforeDayStr());
     }
 }

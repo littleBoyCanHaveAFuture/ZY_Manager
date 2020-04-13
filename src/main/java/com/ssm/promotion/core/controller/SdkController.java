@@ -4,9 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.entity.*;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
-import com.ssm.promotion.core.jedis.RedisKey;
-import com.ssm.promotion.core.jedis.RedisKeyHeader;
-import com.ssm.promotion.core.jedis.RedisKeyTail;
 import com.ssm.promotion.core.sdk.AccountWorker;
 import com.ssm.promotion.core.sdk.GameRoleWorker;
 import com.ssm.promotion.core.sdk.LoginWorker;
@@ -28,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -404,6 +400,8 @@ public class SdkController {
             }
             switch (key) {
                 case "createRole": {
+                    boolean hasRole = gameRoleWorker.existRole(String.valueOf(account.getId()));
+
                     long roleCTime = roleInfo.getLongValue("roleCTime");
 
                     //role 同渠道游戏区服不能重复-创建角色
@@ -426,7 +424,7 @@ public class SdkController {
                     }
                     //redis
                     try {
-                        cache.createRole(gameId, zoneId.toString(), channelId, account.getId(), roleId);
+                        cache.createRole(gameId, zoneId.toString(), channelId, account.getId(), roleId, hasRole);
                         result.put("message", "创建角色 上报成功");
                         result.put("state", true);
                     } catch (Exception e) {
@@ -489,15 +487,13 @@ public class SdkController {
                         result.put("state", true);
 
                         //设置活跃玩家、在线玩家
-                        cache.enterGame(gameId, String.valueOf(zoneId), channelId, account.getId());
+
+                        cache.enterGame(gameId, String.valueOf(zoneId), channelId, gameRole.getId());
                         //设置区服信息
                         cache.setServerInfo(gameId, channelId, String.valueOf(zoneId));
                     } else {
                         //查询redis-移除在线玩家
-                        String currDay = DateUtil.getCurrentDayStr();
-                        String userSGSKey = String.format(RedisKey.FORMAT_SGS_SSS, RedisKeyHeader.USER_INFO, channelId, gameId, zoneId);
-
-                        cache.zIncrBy(userSGSKey + "#" + RedisKeyTail.ACTIVE_PLAYERS, -1, currDay);
+                        cache.exitGame(gameId, channelId, String.valueOf(zoneId), account.getId());
                         result.put("message", "退出游戏 上报成功");
                         result.put("state", true);
                     }

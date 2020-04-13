@@ -4,7 +4,6 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.entity.UOrder;
 import com.ssm.promotion.core.entity.User;
-import com.ssm.promotion.core.jedis.RedisKeyNew;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.sdk.UOrderManager;
 import com.ssm.promotion.core.service.impl.UserServiceImpl;

@@ -89,4 +89,10 @@
         and serverId=#{serverId}
         and roleId=#{roleId}
     </select>
-</mapper> 
+    <select id="existRole" parameterType="string" resultType="string">
+        select 1
+        from zy_role
+        where accountId = #{accountId}
+        limit 1
+    </select>
+</mapper>

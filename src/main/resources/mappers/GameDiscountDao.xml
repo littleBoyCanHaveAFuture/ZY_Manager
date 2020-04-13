@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.GameDiscountDao">
+    <resultMap type="GameDiscount" id="GameDiscountResult">
+        <result property="id" column="id"/>
+        <result property="gameId" column="gameid"/>
+        <result property="name" column="name"/>
+        <result property="channelId" column="channelid"/>
+        <result property="disCount" column="discount"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        select id,
+               gameid,
+               name,
+               channelid,
+               uid,
+               discount
+        from zy_discount
+    </sql>
+
+    <select id="selectGameDiscountList" parameterType="map" resultMap="GameDiscountResult">
+        <include refid="Base_Column_List"/>
+        <where>
+            <if test="gameId != null and  gameId!= -1">
+                gameid=#{gameId}
+            </if>
+            <if test="name != null and  name!='' ">
+                and name like '%${name}%'
+            </if>
+            <if test="discount != null and  discount!=-1 ">
+                and discount=#{discount}
+            </if>
+            <if test="channelId != null and  channelId!=-1 ">
+                and channelid=#{channelId}
+            </if>
+            <if test="uid != null and  uid!=-1 ">
+                and uid=#{uid}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="getCountGameDiscount" resultType="Long">
+        select count(*)
+        from zy_discount
+        <where>
+            <if test="gameId != null and  gameId!= -1">
+                gameid=#{gameId}
+            </if>
+            <if test="name != null and  name!='' ">
+                and name like '%${name}%'
+            </if>
+            <if test="discount != null and  discount!=-1 ">
+                and discount=#{discount}
+            </if>
+            <if test="channelId != null and  channelId!=-1 ">
+                and channelid=#{channelId}
+            </if>
+            <if test="uid != null and  uid!=-1 ">
+                and uid=#{uid}
+            </if>
+        </where>
+    </select>
+    <select id="selectGameDiscount" parameterType="int" resultMap="GameDiscountResult">
+        <include refid="Base_Column_List"/>
+        where gameid = #{gameId,jdbcType=INTEGER}
+        and
+        channelid=#{channelId,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteGameDiscount" parameterType="int">
+        delete
+        from zy_discount
+        where gameid = #{gameId,jdbcType=INTEGER}
+          and channelid = #{channelId,jdbcType=INTEGER}
+    </delete>
+
+    <update id="updateGameDiscount" parameterType="GameDiscount">
+        update zy_discount
+        <set>
+            <if test="disCount != null and  disCount> 0 ">
+                discount=#{disCount},
+            </if>
+            <if test="channelId != null and  channelId!=-1 ">
+                channelid=#{channelId},
+            </if>
+            <if test="uid != null and  uid!=-1 ">
+                uid=#{uid}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <insert id="insertGameDiscount" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
+            parameterType="GameDiscount">
+        insert into zy_discount(gameId, name, channelId, discount, uid)
+        values (#{gameId}, #{name}, #{channelId}, #{disCount}, #{uid})
+    </insert>
+
+</mapper>

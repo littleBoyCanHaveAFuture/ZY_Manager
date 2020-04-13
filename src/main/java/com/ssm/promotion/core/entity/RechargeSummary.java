@@ -1,8 +1,13 @@
 package com.ssm.promotion.core.entity;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.util.UtilG;
 import lombok.Data;
-import net.sf.json.JSONObject;
+import org.springframework.context.annotation.Bean;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author song minghua
@@ -54,7 +59,8 @@ public class RechargeSummary {
     //通用
     /**
      * 活跃玩家
-     * :当日上线的角色数目
+     * :当日上线的不同角色
+     * 时间段：一个角色只算一次
      */
     public int activePlayer;
     /**
@@ -64,7 +70,7 @@ public class RechargeSummary {
     public int rechargeTimes;
     /**
      * 充值人数
-     * :当日充值成功的角色数目
+     * :当日充值成功的角色数目(不同的角色数目)
      */
     public int rechargeNumber;
     /**
@@ -99,7 +105,7 @@ public class RechargeSummary {
     public int nofPayment;
     /**
      * 注册付费人数
-     * : 当日注册并且充值的角色数目
+     * : 当日注册并且充值的账号数目
      */
     public int registeredPayers;
     /**
@@ -125,7 +131,7 @@ public class RechargeSummary {
     public int openDay;
 
     /**
-     * 新增玩家
+     * 新增创号
      */
     public int newaddplayer;
 
@@ -176,81 +182,6 @@ public class RechargeSummary {
     public RechargeSummary() {
     }
 
-    public String toJSONString() {
-        JSONObject json = new JSONObject();
-        json.put("date", date);
-        json.put("newAddCreateAccount", newAddCreateAccount);
-
-
-        json.put("newAddCreateRole", newAddCreateRole);
-        json.put("newAddCreateRoleRemoveOld", newAddCreateRoleRemoveOld);
-
-        json.put("createAccountRate", createAccountRate);
-        json.put("createAccountTransRate", createAccountTransRate);
-        json.put("activePlayer", activePlayer);
-        json.put("rechargeTimes", rechargeTimes);
-        json.put("rechargeNumber", rechargeNumber);
-        json.put("rechargePayment", rechargePayment);
-        json.put("activePayRate", activePayRate);
-        json.put("paidARPU", paidARPU);
-        json.put("activeARPU", activeARPU);
-        json.put("nofPayers", nofPayers);
-        json.put("nofPayment", nofPayment);
-        json.put("registeredPayers", registeredPayers);
-        json.put("registeredPayment", registeredPayment);
-        json.put("registeredPaymentARPU", registeredPaymentARPU);
-        json.put("serverId", serverId);
-        json.put("openDay", openDay);
-        json.put("newaddplayer", newaddplayer);
-        json.put("totalPayment", totalPayment);
-        json.put("totalCreateRole", totalCreateRole);
-        json.put("totalRechargeNums", totalRechargeNums);
-        json.put("totalRechargeRates", totalRechargeRates);
-        json.put("spId", spId);
-        json.put("zhushoubi", zhushoubi);
-        json.put("addzhushoubi", addzhushoubi);
-        json.put("totalAccounts", totalAccounts);
-        return json.toString();
-    }
-
-    @Override
-    public String toString() {
-        String objectS = "date:" + "\t" + date + "\n" + "\t" +
-
-                "newAddCreateAccount:" + "\t" + newAddCreateAccount + "\n" + "\t" +
-                "newAddCreateRole:" + "\t" + newAddCreateRole + "\n" + "\t" +
-                "newAddCreateRoleRemoveOld:" + "\t" + newAddCreateRoleRemoveOld + "\n" + "\t" +
-                "createAccountRate:" + "\t" + createAccountRate + "\n" + "\t" +
-
-                "createAccountTransRate:" + "\t" + createAccountTransRate + "\n" + "\t" +
-
-                "activePlayer:" + "\t" + activePlayer + "\n" + "\t" +
-                "rechargeTimes:" + "\t" + rechargeTimes + "\n" + "\t" +
-                "rechargeNumber:" + "\t" + rechargeNumber + "\n" + "\t" +
-                "rechargePayment:" + "\t" + rechargePayment + "\n" + "\t" +
-                "activePayRate:" + "\t" + activePayRate + "\n" + "\t" +
-                "paidARPU:" + "\t" + paidARPU + "\n" + "\t" +
-                "activeARPU:" + "\t" + activeARPU + "\n" + "\t" +
-                "nofPayers:" + "\t" + nofPayers + "\n" + "\t" +
-                "nofPayment:" + "\t" + nofPayment + "\n" + "\t" +
-                "registeredPayers:" + "\t" + registeredPayers + "\n" + "\t" +
-                "registeredPayment:" + "\t" + registeredPayment + "\n" + "\t" +
-                "registeredPaymentARPU" + "\t" + registeredPaymentARPU + "\n" + "\t" +
-
-                "serverId:" + "\t" + serverId + "\n" + "\t" +
-                "openDay:" + "\t" + openDay + "\n" + "\t" +
-                "newaddplayer:" + "\t" + newaddplayer + "\n" + "\t" +
-
-                "totalPayment:" + "\t" + totalPayment + "\n" + "\t" +
-                "totalCreateRole:" + "\t" + totalCreateRole + "\n" + "\t" +
-                "totalRechargeNums:" + "\t" + totalRechargeNums + "\n" + "\t" +
-                "totalRechargeRates:" + "\t" + totalRechargeRates + "\n" + "\t" +
-
-                "spId:" + "\t" + spId + "\n" + "\t" +
-                "zhushoubi:" + "\t" + zhushoubi + "\n" + "\t" +
-                "addzhushoubi:" + "\t" + addzhushoubi + "\n";
-        return objectS;
-    }
 
     /**
      * 计算各种
@@ -336,7 +267,6 @@ public class RechargeSummary {
         newAddCreateRoleRemoveOld += add.newAddCreateRoleRemoveOld;
 
         //通用
-        activePlayer += add.activePlayer;
         rechargeTimes += add.rechargeTimes;
         rechargeNumber += add.rechargeNumber;
         rechargePayment += add.rechargePayment;
@@ -344,14 +274,27 @@ public class RechargeSummary {
         nofPayment += add.nofPayment;
         registeredPayers += add.registeredPayers;
         registeredPayment += add.registeredPayment;
-
-        //2
-        newaddplayer += newaddplayer;
-
-        //2/3
-        totalPayment += add.totalPayment;
-        totalCreateRole += add.totalCreateRole;
-        totalRechargeNums += add.totalRechargeNums;
+        newaddplayer += add.newaddplayer;
 
     }
+
+    public static void main(String[] args) {
+//        RechargeSummary s = new RechargeSummary();
+//        s.date = "11111";
+//        String json = JSONObject.toJSONString(s);
+//        RechargeSummary ss = JSONObject.parseObject(json, RechargeSummary.class);
+//        System.out.println(json);
+
+
+        Set<String> set = new HashSet<>();
+
+        set.add("20200303");
+        set.add("20180103");
+        set.add("20180104");
+        set.add("20180105");
+        set.add("20180101");
+        set.stream().sorted(Comparator.reverseOrder());
+        System.out.println(set.toString());
+    }
+
 }

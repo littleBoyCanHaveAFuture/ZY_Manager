@@ -4,8 +4,8 @@ package com.ssm.promotion.core.jedis;
  * @author song minghua
  * @date 2019/11/28
  */
-public class RedisKeyTail {
-    /**
+public class RedisKey_Tail {
+    /*
      * bitmap
      * namespace
      */
@@ -13,6 +13,10 @@ public class RedisKeyTail {
      * 当日新建账号
      */
     public static final String NEW_ADD_CREATE_ACCOUNT = "NA_CA";
+    /**
+     * 首次创建的账号进入游戏区服
+     */
+    public static final String NEW_ADD_FIRST_ACCOUNT = "NA_FIRST_CA";
     /**
      * 当日新建角色
      */
@@ -33,17 +37,13 @@ public class RedisKeyTail {
      */
     public static final String GAME_ACCOUNT_ALL_NUMS = "G_AC_ANUMS";
     /**
-     * 活跃玩家
-     */
-    public static final String ACTIVE_PLAYERS = "ACT_PL";
-    /**
      * 在线账号
      */
     public static final String ONLINE_PLAYERS = "ON_PL";
     /**
-     * 付费玩家
+     * 付费账号
      */
-    public static final String RECHARGE_ACCOUNT = "RE_AC";
+    public static final String RECHARGE_ACCOUNTS = "RE_AC";
 
     /**
      * 有序集合
@@ -55,13 +55,21 @@ public class RedisKeyTail {
      */
     public static final String RECHARGE_INFO = "RE_INFO";
     /**
-     * 当日累积充值信息
+     * 开服纸巾累积充值信息
      */
     public static final String RECHARGE_TOTAL_INFO = "RE_TO_INFO";
     /**
-     * 存储充值汇总查询结果
+     * 每日累积充值信息
      */
-    public static final String RECHARGE_SUMMARY = "RE_SUMMARY";
+    public static final String RECHARGE_TOTAL_DAY_INFO_AMOUNTS = "RE_DAY_INFO_MONEY";
+    /**
+     * 每日累积新增创角
+     */
+    public static final String RECHARGE_TOTAL_DAY_INFO_CREATE_ROLE = "RE_DAY_INFO_CREATE_ROLE";
+    /**
+     * 每日累积新增创角
+     */
+    public static final String RECHARGE_TOTAL_DAY_INFO_TIMES = "RE_DAY_INFO_TIMES";
 
     /**
      * 实时数据 过期时间 一个月
@@ -98,22 +106,35 @@ public class RedisKeyTail {
     /**
      * 注册付费玩家
      */
-    public static final String RECHARGE_ROLES_NA_CR = "RE_RO_NA_CR";
+    public static final String RECHARGE_ACCOUNT_NA_CA = "RE_AC_NA_CA";
     /**
      * 注册付费金额
      */
-    public static final String RECHARGE_AMOUNTS_NA_CR = "RE_AM_NA_CR";
+    public static final String RECHARGE_ACCOUNTS_AMOUNTS = "RE_AC_AM";
     /**
-     *游戏渠道区服
+     * 游戏
+     */
+    public static final String GAMEINFO = "GAMEINFO";
+    /**
+     * 游戏渠道
+     */
+    public static final String SPIDINFO = "SPIDINFO";
+
+    /**
+     * 游戏渠道区服
      */
     public static final String SERVERINFO = "SERVERINFO";
     /**
-     *游戏渠道区服
+     * 全服概况 每日
      */
-    public static final String SPIDINFO = "SPIDINFO";
+    public static final String RS_DAY_INFO = "RS_DAY_INFO";
     /**
-     *游戏
+     * 区服概况 每日
      */
-    public static final String GAMEINFO = "GAMEINFO";
+    public static final String RS_SERVER_INFO = "RS_SERVER_INFO";
+    /**
+     * 渠道概况 每日
+     */
+    public static final String RS_CHANNEL_INFO = "RS_CHANNEL_INFO";
 
 }

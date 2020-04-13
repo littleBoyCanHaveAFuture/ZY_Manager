@@ -402,4 +402,20 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
         }
     }
 
+    public static Set<String> changeSet(Set<String> set) {
+        Set<Integer> integerSet = new HashSet<>(set.size());
+        for (String strings : set) {
+            integerSet.add(Integer.valueOf(strings));
+        }
+        //该游戏所有区服：从小到大排序
+        Set<Integer> sortSet = new TreeSet<>(Comparator.naturalOrder());
+        sortSet.addAll(integerSet);
+        System.out.println(sortSet);
+        Set<String> strings = new HashSet<>();
+        for (Integer integer : sortSet) {
+            strings.add(String.valueOf(integer));
+        }
+        return strings;
+    }
+
 }

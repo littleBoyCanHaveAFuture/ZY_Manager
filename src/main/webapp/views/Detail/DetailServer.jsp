@@ -26,7 +26,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200114"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200306"></script>
 </head>
 <body style="margin:1px;">
 
@@ -45,18 +45,19 @@
     <div id="tbs">
         <label for="save_gameId"></label>
         <span style="color: blue;">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
+        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(4)">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="save_spId"></label>
-        <span style="color: blue; margin-left:50px">渠道:</span>
-        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)">
+        <%--        <label for="save_spId"></label>--%>
+        <%--        <span style="color: blue; margin-left:50px">渠道:</span>--%>
+        <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)" hidden="true">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
         <label for="save_serverId"></label>
         <span style="color: blue; margin-left:50px">区服:</span>
+        <%--    改变宽度得改变样式 需要从url读取下拉 todo    --%>
         <select title="选择区服" id="save_serverId" name="serverId">
             <option value="-1" selected="selected">请选择</option>
         </select>
@@ -71,8 +72,11 @@
         <input class="easyui-datetimebox" id="save_endTime" name="endTime"
                data-options="required:true,showSeconds:false" style="width:150px">
 
-        <a href="javascript:search(2)" class="easyui-linkbutton" style="margin-left:50px"
+        <a href="javascript:search(3)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>
+
+        <span id="loadrs">(未查询)</span>
+
         <a href="javascript:exportToLocal()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
@@ -84,7 +88,8 @@
         let commonResult = {
             "服务器": "serverId",
             "开服天数": "openDay",
-            "新增玩家": "newaddplayer",
+            "新增账号": "newaddplayer",
+            "新增创角": "newAddCreateRole",
 
             "活跃玩家": "activePlayer",
             "充值次数": "rechargeTimes",
@@ -104,6 +109,9 @@
             "累计充值次数": "totalRechargeNums",
             "总付费率": "totalRechargeRates",
         };
+        // $("#save_serverId").multipleSelect({
+        // maxHeight: 10
+        // });
         initDatagrid(commonResult);
         initSpGameServer(2);
     });

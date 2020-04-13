@@ -87,18 +87,18 @@
 <div region="west" style="width: 200px;height:500px;" title="导航菜单" split="true">
 
     <div id="aa" class="easyui-accordion">
-<%--        <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
-<%--            <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
-<%--               class="easyui-linkbutton"--%>
-<%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-<%--               style="width: 150px;">测试--%>
-<%--            </a>--%>
-<%--            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"--%>
-<%--               class="easyui-linkbutton"--%>
-<%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-<%--               style="width: 150px;">quick--%>
-<%--            </a>--%>
-<%--        </div>--%>
+        <%--        <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+        <%--            <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
+        <%--               class="easyui-linkbutton"--%>
+        <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+        <%--               style="width: 150px;">测试--%>
+        <%--            </a>--%>
+        <%--            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"--%>
+        <%--               class="easyui-linkbutton"--%>
+        <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+        <%--               style="width: 150px;">quick--%>
+        <%--            </a>--%>
+        <%--        </div>--%>
 
         <div title="游戏概况" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab('全服概况','Detail/DetailGame.jsp','icon-wenzhang')"
@@ -106,16 +106,17 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">全服概况
             </a>
-            <a href="javascript:openTab('分服概况','Detail/DetailServer.jsp','icon-wenzhang')"
-               class="easyui-linkbutton"
-               data-options="plain:true,iconCls:'icon-wenzhang'"
-               style="width: 150px;">分服概况
-            </a>
             <a href="javascript:openTab('分渠道概况','Detail/DetailSp.jsp','icon-wenzhang')"
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">分渠道概况
             </a>
+            <a href="javascript:openTab('分服概况','Detail/DetailServer.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">分服概况
+            </a>
+
         </div>
 
         <div title="实时数据" data-options="selected:true,iconCls:'icon-wenzhangs'">
@@ -160,6 +161,11 @@
                class="easyui-linkbutton"
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">服务器列表
+            </a>
+            <a href="javascript:openTab('游戏折扣列表','server/discount_list.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">游戏折扣列表
             </a>
         </div>
 

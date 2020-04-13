@@ -41,8 +41,13 @@ public class ServerController {
     private SpService spService;
     @Resource
     private UserService userService;
+    @Resource
+    private GameDiscountService gameDiscountService;
     @Autowired
     private HttpServletRequest request;
+    @Resource
+    private RechargeSummaryService rsService;
+
 
     private Integer getUserId() {
         //可以设置缓存 redis 登录时设置过期时间 24小时 todo
@@ -218,8 +223,8 @@ public class ServerController {
                 gameService.updateGame(game, userId);
             }
         } else if (type == 3) {
-            gameService.addGame(game, userId);
-            cache.setGAMEIDInfo(String.valueOf(gameId));
+            Integer addGameId = gameService.addGame(game, userId);
+            cache.setGAMEIDInfo(String.valueOf(addGameId));
         }
 
         log.info("request: game/gamedata , gameId: " + gameId);
@@ -302,7 +307,6 @@ public class ServerController {
             return;
         }
 
-        int size = 0;
         Map<String, Object> map = new HashMap<>(6);
         map.put("spId", spId);
         map.put("gameId", gameId);
@@ -347,6 +351,27 @@ public class ServerController {
                 result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
             }
             break;
+            case 4:
+                if (gameId == -1) {
+                    return;
+                }
+                //输入游戏id 查询所有区服
+                Map<String, GameInfo> gameInfoMap = rsService.getGameInfo(gameId, spId, serverId);
+                GameInfo gameInfo = gameInfoMap.get(String.valueOf(gameId));
+                //获取不同渠道所有的区服
+                Set<String> distServerSet = gameInfo.getServerInfo();
+                //不同区服 转int
+                Set<Integer> integerSet = new HashSet<>(distServerSet.size());
+                for (String s : distServerSet) {
+                    integerSet.add(Integer.valueOf(s));
+                }
+                //该游戏所有区服：从小到大排序
+                Set<Integer> sortSet = new TreeSet<>(Comparator.naturalOrder());
+                sortSet.addAll(integerSet);
+                result.put("rows", sortSet.toString());
+                result.put("total", sortSet.size());
+                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+                break;
             default:
                 break;
         }
@@ -854,5 +879,215 @@ public class ServerController {
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
         log.info("request: changeSp ");
+    }
+
+    /**
+     * 增加、修改、删除 游戏的折扣信息
+     *
+     * @param id        已添加渠道的主键id
+     * @param gameId    平台游戏id
+     * @param channelId 平台渠道id
+     * @param discount  折扣信息
+     * @param type      1 删除
+     *                  2 修改
+     *                  3.添加
+     */
+    @RequestMapping(value = "/changeGameDiscount", method = RequestMethod.POST)
+    @ResponseBody
+    public void changeGameDiscount(Integer id,
+                                   Integer gameId,
+                                   Integer channelId,
+                                   Integer discount,
+                                   Integer type,
+                                   HttpServletResponse response) throws Exception {
+        log.info("changeGameDiscount");
+        log.info("gameId:" + gameId);
+        log.info("channelId:" + channelId);
+        log.info("discount:" + discount);
+        log.info("type:" + type);
+
+        JSONObject result = new JSONObject();
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null || channelId == null) {
+            result.put("state", false);
+            result.put("message", "游戏id 或 渠道id 为空");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        if (channelId < 0) {
+            result.put("state", false);
+            result.put("message", "渠道id 非法");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        if (type == 2 || type == 3) {
+            //检查折扣信息
+            if (discount <= 0 || discount > 100) {
+                result.put("state", false);
+                result.put("message", "请填入正确的折扣数值");
+                ResponseUtil.write(response, result);
+                return;
+            } else {
+                //只能取10的倍数
+                if (discount % 10 != 0) {
+                    System.out.println("discount =" + discount);
+                    result.put("state", false);
+                    result.put("message", "折扣数值 只能取10的倍数");
+                    ResponseUtil.write(response, result);
+                    return;
+                }
+            }
+        }
+
+        Game game = gameService.selectGame(gameId, -1);
+        if (game == null) {
+            log.error("游戏不存在 GameId=" + gameId);
+            result.put("state", false);
+            result.put("message", "游戏 非法");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        GameSp gameSp = gameSpService.selectGameSp(gameId, channelId, userId);
+        if (gameSp == null) {
+            result.put("state", false);
+            result.put("message", "渠道 非法");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        GameDiscount gameDiscount = gameDiscountService.selectGameDiscount(gameId, channelId, userId);
+        switch (type) {
+            case 1:
+            case 2:
+                if (gameDiscount == null) {
+                    log.error("游戏折扣 不存在 GameId=" + gameId + " channelId=" + channelId);
+                    result.put("state", false);
+                    result.put("message", "游戏折扣信息不存在");
+                    ResponseUtil.write(response, result);
+                    return;
+                }
+                if (type == 1) {
+                    gameDiscountService.deleteGameDiscount(gameId, channelId, userId);
+                }
+                if (type == 2) {
+                    gameDiscount = new GameDiscount(id, gameId, "");
+                    gameDiscount.setDisCount(discount);
+                    gameDiscount.setUid(userId);
+                    gameDiscountService.updateGameDiscount(gameDiscount, userId);
+                }
+                break;
+            case 3: {
+                //判断与数据库是否相符
+                if (gameDiscount != null) {
+                    log.error("游戏渠道 已存在 GameId=" + gameId + " channelId=" + channelId);
+                    result.put("state", false);
+                    result.put("message", "游戏折扣信息已存在");
+                    ResponseUtil.write(response, result);
+                    return;
+                }
+                //操作权限判断
+                String name = game.getName();
+                gameDiscount = new GameDiscount();
+                gameDiscount.setGameId(gameId);
+                gameDiscount.setName(name);
+                gameDiscount.setChannelId(channelId);
+                gameDiscount.setDisCount(discount);
+                gameDiscount.setUid(userId);
+                gameDiscountService.insertGameDiscount(gameDiscount, userId);
+
+            }
+            break;
+            default:
+                break;
+        }
+
+        result.put("state", true);
+        result.put("message", "设置成功");
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+    }
+
+    /**
+     * 查询所有折扣信息
+     */
+    @RequestMapping(value = "/getAllGameGameDiscount", method = RequestMethod.POST)
+    public void getAllGameDiscount(@RequestParam(value = "page", required = false) String page,
+                                   @RequestParam(value = "rows", required = false) String rows,
+                                   Integer gameId,
+                                   String name,
+                                   HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null || page == null || rows == null) {
+            return;
+        }
+
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        map.put("gameId", gameId);
+        map.put("name", name);
+
+        long size = gameDiscountService.getCountGameDiscount(map, userId);
+
+        PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
+        map.put("start", pageBean.getStart());
+        map.put("size", pageBean.getPageSize());
+
+
+        List<GameDiscount> discountList = gameDiscountService.selectGameDiscountList(map, userId);
+
+
+        result.put("rows", discountList);
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getAllGameGameDiscount , map: " + result.toString());
+    }
+
+    /**
+     * 查询所有折扣信息
+     */
+    @RequestMapping(value = "/getGameGameDiscount", method = RequestMethod.POST)
+    public void getAllGameDiscount(Integer gameId,
+                                   Integer channelId,
+                                   HttpServletResponse response) throws Exception {
+        JSONObject result = new JSONObject();
+        if (gameId == null || channelId == null) {
+            result.put("state", false);
+            result.put("message", "游戏id 或 渠道id 为空");
+            ResponseUtil.write(response, result);
+            return;
+        }
+
+        GameDiscount gameDiscount = gameDiscountService.selectGameDiscount(gameId, channelId, -1);
+        if (gameDiscount == null) {
+            result.put("state", false);
+            result.put("message", "折扣信息不存在");
+            ResponseUtil.write(response, result);
+            return;
+        } else {
+            Integer discount = gameDiscount.getDisCount();
+            if (discount < 0 || discount > 100 || discount % 10 != 0) {
+                result.put("message", 100);
+            } else {
+                result.put("message", discount);
+            }
+
+            result.put("state", true);
+            ResponseUtil.write(response, result);
+        }
+
+
+        log.info("request: server/geGameGameDiscount , map: " + result.toString());
     }
 }
