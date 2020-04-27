@@ -21,7 +21,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/server/game_list.js"></script>
+            src="${pageContext.request.contextPath}/js/server/game_list.js?202004211146"></script>
 </head>
 
 <body style="margin:1px;height: 100%;" id="ff">
@@ -35,10 +35,10 @@
                 <th field="id" width="80" align="center">游戏id</th>
                 <th field="name" width="80" align="center">游戏名称</th>
                 <th field="uid" width="80" align="center">创建者id</th>
-                <th field="secertKey" align="center">app秘钥</th>
-                <th field="loginUrl">登陆地址</th>
-                <th field="paycallbackUrl" align="center">支付回调地址</th>
-                <th field="config" width="60" align="center" formatter="formatOpt">配置</th>
+                <th field="secertKey" align="center" hidden="hidden">app秘钥</th>
+                <th field="loginUrl" hidden="hidden">登陆地址</th>
+                <th field="paycallbackUrl" align="center" hidden="hidden">支付回调地址</th>
+                <th field="config" width="60" align="center" formatter="formatOpt">操作</th>
             </tr>
             </thead>
         </table>
@@ -57,11 +57,11 @@
     </div>
     <div>
         <a href="javascript:openServerDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">
-            添加</a>
+            创建游戏</a>
         <a href="javascript:openServerModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">
-            修改</a>
+            修改游戏</a>
         <a href="javascript:deleteServer()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">
-            删除</a>
+            删除游戏</a>
     </div>
 </div>
 
@@ -103,7 +103,7 @@
                 <td>游戏地址：</td>
                 <td>
                     <label for="save_loginurl"></label>
-                    <input type="text" name="save_loginurl" id="save_loginurl" style="width: 400px">
+                    <input type="text" name="save_loginurl" id="save_loginurl" style="width: 400px" >
                 </td>
             </tr>
             <tr>

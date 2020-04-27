@@ -82,7 +82,7 @@ public class AccountWorker {
             String channelUname = jsonObject.getString("channelUname");
             String channelUnick = jsonObject.getString("channelUnick");
             String username = jsonObject.getString("username");
-            String pwd = jsonObject.getString("pwd");
+            String pwd = jsonObject.getString("password");
             String phone = jsonObject.getString("phone");
             String deviceCode = jsonObject.getString("deviceCode");
             String imei = jsonObject.getString("imei");
@@ -231,7 +231,7 @@ public class AccountWorker {
         String channelUname = jsonObject.getString("channelUname");
         String channelUnick = jsonObject.getString("channelUnick");
         String username = jsonObject.getString("username");
-        String pwd = jsonObject.getString("pwd");
+        String pwd = jsonObject.getString("password");
         String phone = jsonObject.getString("phone");
         String deviceCode = jsonObject.getString("deviceCode");
         String imei = jsonObject.getString("imei");
@@ -263,7 +263,7 @@ public class AccountWorker {
             accountService.createAccount(account);
             if (account.getId() == -1 || account.getId() == -2 || account.getId() == -3) {
                 log.error("创建账号失败 err id=" + account.getId());
-                return null;
+                return account;
             }
             //官方
             account.setChannelUserId(account.getId().toString());

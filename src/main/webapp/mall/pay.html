@@ -16,11 +16,12 @@
     <style>
         html, body, .full {
             width: 100%;
-            background: #fff;
+            /*background: #fff;*/
             font-size: 14px;
             height: 100%;
-            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+            /*background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");*/
             text-align: center;
+            background-color: #827b7b;
         }
 
         .main-layer {
@@ -30,7 +31,7 @@
             filter: alpha(Opacity=80);
             /*-moz-opacity: 0.5;*/
             /*opacity: 0.5;*/
-            background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");
+            /*background: url("http://www.zyh5games.com/wallhaven-xl3x3d.jpg");*/
         }
 
         * {
@@ -57,8 +58,9 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
+            width: 86%;
             transition: all .2s linear;
+            border-radius: 15px;
         }
 
         .h5-pay-layer.inweb {
@@ -80,7 +82,7 @@
         }
 
         .h5-pay-layer .pay-title h3 {
-            font-size: 30px;
+            font-size: 36px;
             line-height: 60px;
             font-weight: 400;
         }
@@ -99,14 +101,20 @@
         }
 
         .h5-pay-layer .pay-info-box .pay-amount {
-            font-size: 30px;
+            font-size: 36px;
         }
 
         .h5-pay-layer .pay-info-box p {
             color: #5e5e5e;
             font-size: 30px;
-            line-height: 96px;
+            line-height: 48px;
             margin-top: 4px;
+            font-family: 黑体, serif;
+        }
+
+        .h5-pay-layer .pay-info-box .payid {
+            color: #595959;
+            font-size: 32px;
         }
 
         .h5-pay-layer .pay-box {
@@ -122,6 +130,7 @@
             background: #ffde1e;
             border-radius: 4px;
             font-size: 30px;
+            margin-top: 10%;
         }
 
         .tc {
@@ -136,6 +145,7 @@
             margin-inline-start: 0px;
             margin-inline-end: 0px;
             font-weight: bold;
+            font-family: 黑体, sans-serif;
         }
 
         .cz-close {
@@ -259,11 +269,14 @@
                 <div class="pay-info-box">
                     <p class="payid" id="des">购买商品：10元档首充前置</p>
                     <p class="pay-amount">支付金额：
-                        <span id="cost"></span>
-                        <span id="cost_discount" style="color: #00ee00"></span></p>
+                        <span id="cost" style="color: #ff6d01"></span>
+                    </p>
+                    <p class="pay-amount">实际支付金额：
+                        <span id="cost_discount" style="color: #ff6d01"></span>
+                    </p>
 
-                    <p class="pay-discount">使用优惠：
-                        <select title="使用优惠" id="discount" onchange="initPayAmount()" style="font-size: 30px">
+                    <p class="pay-discount" style="display: none">使用优惠：
+                        <select title="使用优惠" id="discount" onchange="initPayAmount()" style="font-size: 36px">
                             <option value="100" selected="selected">无折扣</option>
                         </select>
                     </p>
@@ -333,6 +346,7 @@
     let discountMoney = totalAmount;
     $('#cost').html("￥" + totalAmount);
     $('#des').html("购买商品：" + subject);
+    $('#cost_discount').html("￥" + totalAmount);
     // document.getElementById('cost').innerHTML = "100";
 
     $(function () {

@@ -50,8 +50,64 @@ function gameList() {
     window.location.href = "game.html";
 }
 
+/**测试用
+ * @param isAuto boolean
+ * */
+function test_zy_Register(isAuto) {
+    let regInfo = {};
+    if (isAuto === true) {
+        regInfo.auto = Boolean(true);
+    } else {
+        regInfo.auto = Boolean(false);
+    }
+    regInfo.appId = Number($("#appId").val());
+    regInfo.channelId = Number($("#channelId").val());
+    regInfo.channelUid = $("#channelUid").val();
+    regInfo.username = $("#reg_username").val();
+    regInfo.password = $("#reg_password").val();
+    regInfo.phone = "";
+    regInfo.deviceCode = "PC";
+    regInfo.imei = "PC";
+    regInfo.addparm = "官方注册-账号密码";
+
+    console.info(regInfo);
+
+    sdk_ZyRegister(regInfo, function (callbackData) {
+        if (callbackData.state === false) {
+            console.info(callbackData.message);
+            alert(callbackData.message);
+        } else {
+            console.info(callbackData.message);
+            console.info(JSON.stringify(callbackData));
+
+            let ZyUid = callbackData.uid;
+            let username = callbackData.account;
+            let password = callbackData.password;
+            let channelUid = callbackData.channelUid;
+
+            $("#uid").val(ZyUid);
+            $("#username").val(username);
+            $("#password").val(password);
+            $("#channelUid").val(channelUid);
+
+            $("#reg_username").val("");
+            $("#reg_password").val("");
+
+            let res = "账号: " + username + " 密码: " + password + " Uid: " + channelUid;
+            $('#copy').val(res);
+            setCookie("zy_uid", ZyUid);
+            setCookie("zy_user", username);
+            setCookie("zy_pwd", password);
+            setCookie("zy_channelUid", channelUid);
+            showLoginPage();
+            // zy_Login();
+        }
+    });
+}
+
 function zy_Register() {
     let regInfo = {};
+
     regInfo.auto = Boolean(true);
     regInfo.appId = Number($("#appId").val());
     regInfo.channelId = Number($("#channelId").val());
@@ -88,11 +144,17 @@ function zy_Register() {
             setCookie("zy_user", username);
             setCookie("zy_pwd", password);
             setCookie("zy_channelUid", channelUid);
+            showLoginPage();
+            zy_Login();
         }
     });
 }
 
 function zy_Login() {
+    if (is_select === false) {
+        alert("登录失败,请同意用户协议");
+        return;
+    }
     let loginInfo = {};
     loginInfo.isAuto = Boolean(false);
     loginInfo.username = $("#username").val();

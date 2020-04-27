@@ -31,7 +31,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/server/gameConfig.js?v202001091026"></script>
+            src="${pageContext.request.contextPath}/views/server/gameConfig.js?v202004201102"></script>
 </head>
 <body>
 

@@ -72,14 +72,14 @@ public class ScheduledService {
      */
     @Scheduled(cron = "10 * * * * ?")
     public void redis() {
-        //reids 统计在线
-        cache.setRealtimeData();
+        //reids 统计在线 todo 临时注释20200421
+//        cache.setRealtimeData();
     }
 
     @Scheduled(cron = "50 59 23 * * ?")
     public void redisOffline() {
-        //reids 将前一天的在线玩家数据转移
-        cache.updateNextDayOnlineData();
+        //reids 将前一天的在线玩家数据转移todo 临时注释20200421
+//        cache.updateNextDayOnlineData();
     }
 }
 

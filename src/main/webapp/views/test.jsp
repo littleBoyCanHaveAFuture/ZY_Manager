@@ -413,16 +413,16 @@
                 console.info(JSON.stringify(callbackData));
                 let yuan;
                 let fen = orderInfo.money;
-                if (fen.length > 2) {
-                    let fen1 = fen.substr(0, fen.length - 2);
-                    let fen2 = fen.substr(fen.length - 2, 2);
-                    console.info(fen1);
-                    console.info(fen2);
-                    yuan = fen1 + "." + fen2;
-                } else {
-                    yuan = "0." + fen;
-                }
-                ZySDK.loadPayHtml(callbackData.orderId,orderInfo.productDesc,orderInfo.productName,yuan,orderInfo.productID,"sss");
+                // if (fen.length > 2) {
+                //     let fen1 = fen.substr(0, fen.length - 2);
+                //     let fen2 = fen.substr(fen.length - 2, 2);
+                //     console.info(fen1);
+                //     console.info(fen2);
+                //     yuan = fen1 + "." + fen2;
+                // } else {
+                //     yuan = "0." + fen;
+                // }
+                loadZyPayHtml(callbackData.orderId,orderInfo.productDesc,orderInfo.productName,fen,orderInfo.productID,"sss");
                 // window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
                 // let param = "?orderId=" +
                 //     + "&body=" + orderInfo.productDesc

@@ -33,7 +33,7 @@ $(function () {
             {field: 'channelid', title: '渠道id', width: 180, align: 'center'},
             {field: 'version', title: '版本号', width: 180, align: 'center'},
             {field: 'status', title: '状态', width: 180, align: 'center', hidden: true},
-            {field: 'operation', title: '操作', align: 'center', formatter: config},
+            {field: 'operation', title: '配置', align: 'center', formatter: config},
         ]],
         fit: true,
         showFooter: true,
@@ -52,7 +52,7 @@ $(function () {
             {field: 'channelid', title: '渠道id', width: 180, align: 'center'},
             {field: 'version', title: '版本号', width: 180, align: 'center'},
             {field: 'status', title: '状态', width: 180, align: 'center', hidden: true},
-            {field: 'operation', title: '操作', width: 150, align: 'center', formatter: set_select},
+            {field: 'operation', title: '配置', width: 150, align: 'center', formatter: set_select},
         ]],
         pagination: true,
         pageSize: 10,
@@ -146,7 +146,7 @@ function config(val, row, index) {
             '<a href="javascript:void(0)" style="color: grey" οnclick="config(' + index + ')">已配置</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">修改</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">打包</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + '))">测试</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">测试</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">分发</a>&nbsp;&nbsp;';
     }
 

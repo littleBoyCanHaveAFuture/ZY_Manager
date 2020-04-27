@@ -70,14 +70,16 @@
                     alt="Copy to clipboard">
                 点击复制账号密码
             </button>
-<%--            <p class="text-muted text-center">--%>
-<%--                <a href="##" onclick="adminlogin.reset();return false;" style="float: right">--%>
-<%--                    <small>重置账号密码</small>--%>
-<%--                </a>--%>
-<%--            </p>--%>
+            <%--            <p class="text-muted text-center">--%>
+            <%--                <a href="##" onclick="adminlogin.reset();return false;" style="float: right">--%>
+            <%--                    <small>重置账号密码</small>--%>
+            <%--                </a>--%>
+            <%--            </p>--%>
             <a href="##" onclick="clearGameCookie();return false;" style="float: left">
                 <small>清理缓存</small>
             </a>
+            <input type="text" name="copy" id="reg_username" required="" hidden="hidden">
+            <input type="text" name="copy" id="reg_password" required="" hidden="hidden">
         </form>
     </div>
 </div>
@@ -85,9 +87,9 @@
 <script type="text/javascript">
     setCookie("zy_appId", 11);
     setCookie("zy_channelId", 0);
-//渠道为官方
-//     if (getCookies("zy_channelUid") === "") {
-        setCookie("zy_channelUid", 0);
+    //渠道为官方
+    //     if (getCookies("zy_channelUid") === "") {
+    setCookie("zy_channelUid", 0);
     // }
 
     let clipboard = new ClipboardJS('.copyBtn', {
@@ -101,7 +103,7 @@
     let t_pwd = getCookies("zy_pwd");
     let res = "账号: " + t_name + " 密码: " + t_pwd;
     $('#copy').val(res);
-
+    let is_select = true;
     clipboard.on('success', function (e) {
         // console.info('Action:', e.action);
         console.info('Text:', e.text);

@@ -42,7 +42,7 @@
 <div region="north" style="height: 78px;background-color: #ffff">
     <table width="100%">
         <tr>
-            <td valign="bottom" style="font-size: 20px;color:#8b004c;font-family: '楷体',serif;" align="left" width="50%">
+            <td valign="bottom" style="font-size: 20px;color:#8b004c;" align="left" width="50%">
                 <span style="font-size: medium; ">
                     &nbsp;&nbsp;<strong>当前用户：</strong><%=username%>
                 </span>[<%=roleName%>]
@@ -87,18 +87,18 @@
 <div region="west" style="width: 200px;height:500px;" title="导航菜单" split="true">
 
     <div id="aa" class="easyui-accordion">
-        <%--        <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
-        <%--            <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
-        <%--               class="easyui-linkbutton"--%>
-        <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-        <%--               style="width: 150px;">测试--%>
-        <%--            </a>--%>
+        <%--                <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+        <%--                    <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
+        <%--                       class="easyui-linkbutton"--%>
+        <%--                       data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+        <%--                       style="width: 150px;">测试--%>
+        <%--                    </a>--%>
         <%--            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"--%>
         <%--               class="easyui-linkbutton"--%>
         <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
         <%--               style="width: 150px;">quick--%>
         <%--            </a>--%>
-        <%--        </div>--%>
+        <%--                </div>--%>
 
         <div title="游戏概况" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab('全服概况','Detail/DetailGame.jsp','icon-wenzhang')"
@@ -137,14 +137,14 @@
             </a>
         </div>
 
-        <div title="玩家信息" data-options="selected:true,iconCls:'icon-wenzhangs'">
-        </div>
+        <%--        <div title="玩家信息" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+        <%--        </div>--%>
 
-        <div title="数据分析" data-options="selected:true,iconCls:'icon-wenzhangs'">
-        </div>
+        <%--        <div title="数据分析" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+        <%--        </div>--%>
 
-        <div title="GM功能" data-options="selected:true,iconCls:'icon-wenzhangs'">
-        </div>
+        <%--        <div title="GM功能" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+        <%--        </div>--%>
 
         <div title="服务器管理" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab('游戏列表','server/game_list.jsp','icon-wenzhang')"

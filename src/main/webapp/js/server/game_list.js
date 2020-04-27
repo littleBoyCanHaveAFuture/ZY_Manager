@@ -25,7 +25,7 @@ $(function () {
 });
 
 function formatOpt(val, row, index) {
-    return '<a href="#" onclick="editSp(' + index + ')">修改</a>';
+    return '<a href="#" onclick="editSp(' + index + ')">配置</a>';
 }
 
 function editSp(index) {
@@ -35,7 +35,8 @@ function editSp(index) {
     if (row) {
         let tab = $('#tabs');
         let param = "?gameId=" + row.id + "&name=" + row.name;
-        openTab(tab, "渠道配置", "server/gameConfig.jsp" + param, "icon-ok");
+        // openTab(tab, "渠道配置", "server/gameConfig.jsp" + param, "icon-ok");
+        openTab(tab, "渠道配置", "server/game_index.jsp" + param, "icon-ok");
     }
 }
 
