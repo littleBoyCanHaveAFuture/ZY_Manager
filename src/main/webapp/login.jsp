@@ -49,7 +49,7 @@
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 
-            <button type="button" class="btn btn-primary block full-width m-b" onclick="login();">
+            <button type="button" id="login" class="btn btn-primary block full-width m-b" onclick="login();">
                 登 录
             </button>
 
@@ -61,7 +61,17 @@
         </form>
     </div>
 </div>
+<script>
+    $(document).keydown(function (e) {
+        if (!e) {
+            e = window.event;
+        }
+        if ((e.keyCode || e.which) === 13) {
+            login();
 
+        }
+    });
+</script>
 </body>
 
 </html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="utf-8">
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/jquery-easyui-1.7.0/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/jquery-easyui-1.7.0/themes/icon.css">
+    <link rel="stylesheet" href="/bootstrap-3.3.7-dist/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="/jquery-easyui-1.7.0/jquery.min.js"></script>
+    <script type="text/javascript" src="/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/multiple-select-1.5.2/multiple-select.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery.tips.js"></script>
+    <style>
+        body:before {
+            content: "";
+            display: block;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            max-height: 100%;
+            min-height: 100%;
+            width: 100%;
+            z-index: -1;
+            background-color: #FFF;
+        }
+
+        .td1 {
+            width: 100px;
+            text-align: left;
+            padding-top: 13px;
+        }
+
+        .td2 {
+            padding-top: 13px;
+            color: #888;
+        }
+
+        .td3 {
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .f-r {
+            float: right;
+        }
+
+        .m-r4 {
+            margin-right: 4%;
+        }
+
+        .w-70 {
+            width: 70%;
+        }
+
+        .pt-20px {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="zhongxin" style="height: 869px;">
+    <table id="table_report" class="table table-striped table-bordered table-hover" style="border: 0">
+        <tbody>
+
+        <tr>
+            <td class="td1">游戏类型:</td>
+            <td class="td2">
+                <input type="hidden" id="type" value="1">
+                <span id="game_type"></span>
+            </td>
+        </tr>
+
+        <tr id="tr_appId">
+            <td class="td1">APPID:</td>
+            <td class="td2">
+                <input type="hidden" name="app_id" value="">
+                <span id="game_id"></span>
+            </td>
+        </tr>
+
+        <tr id="skey">
+            <td class="td1">secret_key:</td>
+            <td class="td2" id="seceret_key">
+                <input class="w-70" type="hidden" name="seceret_key" maxlength="32"
+                       value=""
+                       onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9]/g,'')"
+                       onpaste="value=value.replace(/[^\a-\z\A-\Z0-9]/g,'')"
+                       oncontextmenu="value=value.replace(/[^\a-\z\A-\Z0-9]/g,'')">
+                <span id="span_secertkey"></span>
+                <a class="btn btn-small btn-primary f-r m-r4" onclick="buildKey();">自定义seceret_key</a>
+                <div>
+                    <font color="#aaa">必须由32位英文和字母组成</font>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1">游戏类别:</td>
+            <td>
+                <select id="cate_type" style="width:60%;outline: medium none;">
+                    <option value="0" selected="">未知</option>
+                    <option value="1">动作游戏</option>
+                    <option value="2">探险游戏</option>
+                    <option value="3">街机游戏</option>
+                    <option value="4">桌面游戏</option>
+                    <option value="5">扑克牌游戏</option>
+                    <option value="6">娱乐场游戏</option>
+                    <option value="7">骰子游戏</option>
+                    <option value="8">教育游戏</option>
+                    <option value="9">家庭游戏</option>
+                    <option value="10">儿童游戏</option>
+                    <option value="11">音乐游戏</option>
+                    <option value="12">智力游戏</option>
+                    <option value="13">赛车游戏</option>
+                    <option value="14">角色扮演游戏</option>
+                    <option value="15">模拟游戏</option>
+                    <option value="16">体育游戏</option>
+                    <option value="17">策略游戏</option>
+                    <option value="18">小游戏</option>
+                    <option value="19">文字游戏</option>
+                </select>
+
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1">题材类别:</td>
+            <td>
+                <select id="cate_type1" style="width:60%;outline: medium none;">
+                    <option value="0" selected="">其他</option>
+                    <option value="1">修仙</option>
+                    <option value="2">武侠</option>
+                    <option value="3">玄幻</option>
+                    <option value="4">三国</option>
+                    <option value="5">西游</option>
+                    <option value="6">封神</option>
+                    <option value="7">日漫</option>
+                    <option value="8">宫斗官斗</option>
+                    <option value="9">现代都市</option>
+                    <option value="10">女性向</option>
+                    <option value="11">西方玄幻</option>
+                </select>
+                <input type="hidden" name="cate_type2" placeholder="输入题材类别" value="">
+            </td>
+        </tr>
+
+        <tr>
+            <td>核心玩法：</td>
+            <td>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox1" type="checkbox" value="1"><span class="lbl"> MMO</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox2" type="checkbox" value="2"><span class="lbl">卡牌</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox3" type="checkbox" value="3"><span class="lbl">休闲游戏</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox4" type="checkbox" value="4"><span class="lbl">RPG</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox5" type="checkbox" value="5"><span class="lbl">ARPG</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox6" type="checkbox" value="6"><span class="lbl">类传奇</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td>
+
+                <label>
+                    <input name="playCheckbox[]" id="checkbox7" type="checkbox" value="7"><span
+                        class="lbl">轻竞技/io</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox8" type="checkbox" value="8"><span class="lbl">SLG</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox9" type="checkbox" value="9"><span class="lbl">解谜</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox10" type="checkbox" value="10"><span
+                        class="lbl">模拟经营</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox11" type="checkbox" value="11"><span class="lbl">换装</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox12" type="checkbox" value="12"><span
+                        class="lbl">文字冒险</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox13" type="checkbox" value="13"><span class="lbl">战棋</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox14" type="checkbox" value="14"><span class="lbl">沙盒</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox15" type="checkbox" value="15"><span
+                        class="lbl">moba</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox16" type="checkbox" value="16"><span class="lbl">竞速</span>
+                </label>
+                <label>
+                    <input name="playCheckbox[]" id="checkbox17" type="checkbox" value="17"><span
+                        class="lbl">传统武侠</span>
+                </label>
+                <label style="width: 200px">
+                    <input id="playother" name="playCheckbox[]" value="18" type="checkbox"><span class="lbl">其他</span>
+                    <input style="width: 100px" id="playtype" name="playtype" type="hidden" placeholder="请输入玩法"
+                           value="">
+                </label>
+            </td>
+
+        </tr>
+
+        <tr>
+            <td>
+                ip类型:
+            </td>
+            <td>
+                <label>
+                    <input type="radio" name="iptype" value="0"><span class="lbl">电影ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="1"><span class="lbl">小说ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="2"><span class="lbl">国漫ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="3"><span class="lbl">日漫ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="4"><span class="lbl">游戏ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="5"><span class="lbl">电视剧ip</span>
+                </label>
+                <label>
+                    <input type="radio" name="iptype" value="6"><span class="lbl">原创ip</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1 td3">游戏名称:</td>
+            <td class="td3">
+                <input style="width:95%;" type="text" name="product_name" id="product_name" value="" maxlength="20"
+                       title="游戏名称"></td>
+        </tr>
+
+        <tr>
+            <td class="td1 td3">游戏链接:</td>
+            <td class="td3 pt-20px">
+                <input style="width:95%;" type="text" name="source_url" id="source_url" maxlength="180" title="游戏链接"
+                       placeholder="开发者游戏地址，必须以http或https开头"
+                       value="https://source.huojianos.com/g1/game/index_zy_suyi.html"
+                       onfocus="if (placeholder ==='开发者游戏地址，必须以http或https开头'){placeholder ='';}"
+                       onblur="if (placeholder ===''){placeholder='开发者游戏地址，必须以http或https开头';}">
+                <span class="payAddress icon-info-sign"></span>
+                <div class="omsdk-cps-point-article" style="display: none;">
+                    <p>开发者游戏地址，必须以http或https开头</p>
+                    <span></span>
+                </div>
+                <div><font color="#aaa">请不要多于80字</font></div>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1 td3">支付回调地址:</td>
+            <td class="td3">
+                <input style="width:95%;" type="text" name="back_address" id="back_address" maxlength="500"
+                       title="支付回调地址"
+                       value="http://39.99.201.75:60880/recharge_zy_suyi"
+                       placeholder="支付结果同步地址，必须以http或https开头"
+                       onfocus="if (placeholder ==='支付结果同步地址，必须以http或https开头'){placeholder ='';}"
+                       onblur="if (placeholder ===''){placeholder='支付结果同步地址，必须以http或https开头';}">
+                <span class="payAddress icon-info-sign"></span>
+                <div class="omsdk-cps-point-article" style="display: none;">
+                    <p>支付结果同步地址，该地址由游戏方提供，支付成功之后会通知该地址，必须以http或https开头（渠道配置界面的回调地址提供给渠道使用）</p>
+                    <span></span>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1">横竖屏:</td>
+            <td class="pt-20px">
+                <label style="float:left;">
+                    <input name="screen" type="radio" value="11">
+                    <span class="lbl">&nbsp;&nbsp;横屏</span>
+                </label>
+                <label style="float:left;padding-left: 60px;">
+                    <input name="screen" type="radio" value="21" checked="checked">
+                    <span class="lbl">&nbsp;&nbsp;竖屏</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="td1 td3">游戏简介:</td>
+            <td class="pt-20px">
+                <textarea style="width:95%;height:100px;" rows="10" cols="10" name="memo" id="memo"
+                          title="游戏简介" maxlength="500">
+
+                </textarea>
+                <div><font color="#aaa">请不要多于500字</font></div>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+</div>
+<div class="bottomBtn">
+    <div style="position:fixed;bottom:10px;right:30px;">
+        <div colspan="10" id="cGame" hidden="hidden">
+            <a class="btn btn-small btn-primary" onclick="save();">创建游戏</a>
+        </div>
+        <div colspan="10" id="eGame" hidden="hidden">
+            <a class="btn btn-small btn-primary" onclick="edit();">确认修改</a>
+        </div>
+    </div>
+</div>
+<div id="zhongxin2" class="center" style="display:none">
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <img src="http://res.soeasysdk.com/soeasy/images/jiazai.gif"><br><h4 class="lighter block green">提交中...</h4>
+</div>
+<script>
+    let t_appId = -1;
+    let t_appName = "";
+    let t_type = 0;
+
+    $(function () {
+        let url = document.location.toString();//获取url地址
+        let urlParmStr = url.slice(url.indexOf('?') + 1);//获取问号后所有的字符串
+        let arr = urlParmStr.split('&');
+        let appId = arr[0].split("=")[1];
+        let appName = arr[1].split("=")[1];
+        let type = arr[2].split("=")[1];
+        let iscreate = arr[3].split("=")[1];
+
+        iscreate = parseInt(iscreate);
+        appName = decodeURI(appName);//转码将解码方式unscape换为decodeURI，将中文参数获取
+        if (iscreate === 1) {
+            document.getElementById("cGame").hidden = false;
+            document.getElementById("skey").hidden = true;
+            document.getElementById("tr_appId").hidden = true;
+        } else {
+            document.getElementById("eGame").hidden = false;
+        }
+        t_appId = appId;
+        t_appName = appName;
+        t_type = type;
+        getGameInfo(iscreate);
+    });
+
+    // $(top.hangge());
+    $(function () {
+        //单选框
+        // $(".chzn-select").chosen();
+        // $(".chzn-select-deselect").chosen({allow_single_deselect: true});
+    });
+
+
+    function buildKey() {
+        $("#seceret_key span").hide();
+        $("#seceret_key input").attr("type", "text");
+    }
+
+    //加载对应的游戏信息
+    function getGameInfo(isCreate) {
+        if (isCreate === 1) {
+            let result = {
+                appId: "",
+                appName: "",
+                type: t_type,
+                genres: "0",
+                secertKey: "",
+                ipType: "0",
+                theme: "",
+                loginUrl: "",
+                paybackUrl: "",
+                direction: "0",
+                description: ""
+            };
+            setGameInfo(result);
+        } else {
+            //服务器查询
+            let param = "?gameId=" + t_appId + "&name=" + t_appName;
+            $.ajax({
+                url: "/game/getGameList" + param,
+                type: "get",
+                dataType: "json",
+                async: false,
+                success: function (result) {
+                    if (result.resultCode === 501) {
+                        relogin();
+                    } else if (result.resultCode === 200) {
+                        result = result.rows;
+
+                    }
+                },
+                error: function () {
+                    tip("ERROR！", "查询失败");
+                }
+            });
+        }
+    }
+
+    let type = $("#type");
+    let appid = $("#app_id");
+    let secertKey = $("#seceret_key");
+    let cateType = $("#cate_type");
+    let productName = $("#product_name");
+    let sourceUrl = $("#source_url");
+    let backAddress = $("#back_address");
+    let meMo = $("#memo");
+    let seceretKeyInput = $("#seceret_key input");
+    let checkBox1 = $("#checkbox1");
+
+
+    /**
+     * @param result.appId          游戏id
+     * @param result.appName        游戏名称
+     * @param result.type           游戏类型： 1.h5游戏；2.单机游戏； 3.网络游戏； 4.H5转Android游戏；
+     * @param result.genres         游戏类别：
+     * @param result.theme          题材类别：
+     * @param result.keyConcept     核心玩法(多选)
+     * @param result.ipType         ip类型
+     * @param result.loginUrl       login_url
+     * @param result.paybackUrl     支付回调地址：
+     * @param result.direction      横屏竖屏：0.横屏；1.竖屏；
+     * @param result.description    游戏描述
+     * @param result.secertKey      秘钥 32位小写字母和数字
+     * */
+    function setGameInfo(result) {
+        console.log(result);
+
+        appid.val(result.appId);
+        $("#game_id").html(result.appId);
+
+        productName.html(result.appName);
+        console.info("productName=" + productName.val());
+
+        type.val(result.type);
+        let types = ["未知", "h5游戏", "单机游戏", "网络游戏", "H5转Android游戏"];
+        $("#game_type").html(types[parseInt(type.val())]);
+
+        document.getElementById("cate_type").selectedIndex = parseInt(result.genres);
+
+        document.getElementById("cate_type1").selectedIndex = parseInt(result.theme);
+
+        // document.getElementById("cate_type2").selectedIndex = parseInt(result.keyConcept);
+
+        let ipType = parseInt(result.ipType);
+        let radios = document.getElementsByName("iptype");
+        for (let i = 0; i < radios.length; i++) {
+            if (parseInt(radios[i].value) === ipType) {
+                radios[i].setAttribute("checked", true);
+            }
+        }
+
+        sourceUrl.val(result.loginUrl);
+
+        backAddress.val(result.paybackUrl);
+
+        let direction = parseInt(result.direction);
+        let screens = document.getElementsByName("screen");
+        for (let i = 0; i < screens.length; i++) {
+            if (parseInt(screens[i].value) === direction) {
+                screens[i].setAttribute("checked", true);
+            }
+        }
+
+        meMo.val(result.description);
+
+        secertKey.val(result.secertKey);
+        $("#span_secertkey").html(secertKey.val());
+    }
+
+    /**
+     * @return {boolean}
+     */
+    function IsURL(urlString) {
+        regExp = /(http|ftp|https):\/\/[\w]+(.[\w]+)([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])/;
+        return !!urlString.match(regExp);
+    }
+
+    //保存
+    function save() {
+        if (productName.val().trim() === "") {
+            productName.tips({
+                side: 3,
+                msg: '请输入游戏名称',
+                bg: '#AE81FF',
+                time: 2
+            });
+            productName.focus();
+            return false;
+        }
+        if (sourceUrl.val().trim() === "") {
+            sourceUrl.tips({
+                side: 3,
+                msg: '请填写游戏链接',
+                bg: '#AE81FF',
+                time: 2
+            });
+            sourceUrl.focus();
+            return false;
+        } else if (IsURL(sourceUrl.val().trim()) === false) {
+            sourceUrl.tips({
+                side: 3,
+                msg: '请填写正确的地址，并以http或https开头',
+                bg: '#AE81FF',
+                time: 2
+            });
+            sourceUrl.focus();
+            return false;
+        }
+        if (backAddress.val().trim() === "") {
+            backAddress.tips({
+                side: 3,
+                msg: '请填写回调地址',
+                bg: '#AE81FF',
+                time: 2
+            });
+            backAddress.focus();
+            return false;
+        } else if (IsURL(backAddress.val().trim()) === false) {
+            backAddress.tips({
+                side: 3,
+                msg: '请填写正确的地址，并以http或https开头',
+                bg: '#AE81FF',
+                time: 2
+            });
+            backAddress.focus();
+            return false;
+        }
+        if (meMo.val().trim() === "") {
+            meMo.tips({
+                side: 3,
+                msg: '请填写简介',
+                bg: '#AE81FF',
+                time: 2
+            });
+            meMo.focus();
+            return false;
+        }
+        //服务器查询
+        let game = {
+            id:"",
+            ownerId:"",
+            appId: "",
+            appName: "",
+            type: t_type,
+            genres: "0",
+            theme:"0",
+            keyConcept:"",
+            secertKey: "",
+            ipType: "0",
+            loginUrl: "",
+            paybackUrl: "",
+            direction: "0",
+            description: ""
+        };
+        $.ajax({
+            url: "/game/addGame",
+            type: "post",
+            data: JSON.stringify(game),
+            dataType: "json",//预期服务器返回的数据类型
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            success: function (result) {
+                console.info(result);
+                if (result.resultCode === 501) {
+                    relogin();
+                } else if (result.resultCode === 200) {
+                    $("#zhongxin").show();
+                    $("#zhongxin2").hide();
+
+                }
+            },
+            error: function () {
+                tip("ERROR！", "查询失败");
+            }
+        });
+        $("#Form").submit();
+        $("#zhongxin").hide();
+        $("#zhongxin2").show();
+    }
+
+
+    function edit() {
+        var seceret_key = "7cebc716f1b9372d3af60dbea5c5bf47";
+        if (seceretKeyInput.val().trim().length < 32) {
+            seceretKeyInput.tips({
+                side: 3,
+                msg: '长度必须为32位',
+                bg: '#AE81FF',
+                time: 2
+            });
+            seceretKeyInput.focus();
+            return false;
+        }
+
+        //这里是判断让复选框至少有一个被选
+        if ($("input[type='checkbox']").is(':checked') === false) {
+            checkBox1.tips({
+                side: 3,
+                msg: '至少选择一个',
+                bg: '#AE81FF',
+                time: 2
+            });
+            checkBox1.focus();
+            return false;
+        }
+
+
+        if (productName.val().trim() === "") {
+            productName.tips({
+                side: 3,
+                msg: '请输入游戏名称',
+                bg: '#AE81FF',
+                time: 2
+            });
+            productName.focus();
+            return false;
+        }
+        if (sourceUrl.val().trim() === "") {
+            sourceUrl.tips({
+                side: 3,
+                msg: '请填写游戏链接',
+                bg: '#AE81FF',
+                time: 2
+            });
+            sourceUrl.focus();
+            return false;
+        } else if (IsURL(sourceUrl.val().trim()) === false) {
+            sourceUrl.tips({
+                side: 3,
+                msg: '请填写正确的地址，并以http或https开头',
+                bg: '#AE81FF',
+                time: 2
+            });
+            sourceUrl.focus();
+            return false;
+        }
+        if (backAddress.val().trim() === "") {
+            backAddress.tips({
+                side: 3,
+                msg: '请填写回调地址',
+                bg: '#AE81FF',
+                time: 2
+            });
+            backAddress.focus();
+            return false;
+        } else if (IsURL(backAddress.val().trim()) === false) {
+            backAddress.tips({
+                side: 3,
+                msg: '请填写正确的地址，并以http或https开头',
+                bg: '#AE81FF',
+                time: 2
+            });
+            backAddress.focus();
+            return false;
+        }
+        if (meMo.val().trim() === "") {
+            meMo.tips({
+                side: 3,
+                msg: '请填写简介',
+                bg: '#AE81FF',
+                time: 2
+            });
+            meMo.focus();
+            return false;
+        }
+        if (seceretKeyInput.val().trim() !== seceret_key) {
+            var confirmVal = false;
+            top.showConfirm("当前已检测到seceret_key发生改变，请确定是否要更改？", function () {
+                location.reload();
+            }, function () {
+                $("#Form").submit();
+                $("#zhongxin").hide();
+                $("#zhongxin2").show();
+            });
+        } else {
+            $("#Form").submit();
+            $("#zhongxin").hide();
+            $("#zhongxin2").show();
+        }
+    }
+
+    var p = "1,2,";
+    var ps = p.split(',');
+    for (var i = 0; i < ps.length; i++) {
+        if (ps[i] === 1) {
+            $("#checkbox1").prop("checked", true);
+        }
+        if (ps[i] === 2) {
+            $("#checkbox2").prop("checked", true);
+        }
+        if (ps[i] === 3) {
+            $("#checkbox3").prop("checked", true);
+        }
+        if (ps[i] === 4) {
+            $("#checkbox4").prop("checked", true);
+        }
+        if (ps[i] === 5) {
+            $("#checkbox5").prop("checked", true);
+        }
+        if (ps[i] === 6) {
+            $("#checkbox6").prop("checked", true);
+        }
+        if (ps[i] === 7) {
+            $("#checkbox7").prop("checked", true);
+        }
+        if (ps[i] === 8) {
+            $("#checkbox8").prop("checked", true);
+        }
+        if (ps[i] === 9) {
+            $("#checkbox9").prop("checked", true);
+        }
+        if (ps[i] === 10) {
+            $("#checkbox10").prop("checked", true);
+        }
+        if (ps[i] === 11) {
+            $("#checkbox11").prop("checked", true);
+        }
+        if (ps[i] === 12) {
+            $("#checkbox12").prop("checked", true);
+        }
+        if (ps[i] === 13) {
+            $("#checkbox13").prop("checked", true);
+        }
+        if (ps[i] === 14) {
+            $("#checkbox14").prop("checked", true);
+        }
+        if (ps[i] === 15) {
+            $("#checkbox15").prop("checked", true);
+        }
+        if (ps[i] === 16) {
+            $("#checkbox16").prop("checked", true);
+        }
+        if (ps[i] === 17) {
+            $("#checkbox17").prop("checked", true);
+        }
+        if (ps[i] === 18) {
+            $("#playother").prop("checked", true);
+        }
+    }
+
+    //如果已选其他  直接显示后边的input框
+    if ($("#gametype").val() == 13) {
+        $("input[name='cate_type2']").prop("type", "text");
+    }
+
+    //监听游戏类别的 ···其他··· 点击事件
+    $("#gametype").change(function () {
+        if ($(this).val() == 13) {
+            $("input[name='cate_type2']").prop("type", "text");
+        } else {
+            $("input[name='cate_type2']").prop("type", "hidden");
+        }
+    });
+
+    //监听核心玩法的··· 其他··· 点击事件
+    if ($("#playother").prop('checked')) {
+        $("input[name='playtype']").prop("type", "text");
+    }
+
+    $('input[type=radio][name=iptype]').change(function () {
+        // 获取input radio选中值，方法一
+        // var myvalue = $('input:radio[name="iptype"]:checked').val();
+        // 获取input radio选中值，方法二
+        var myvalue2 = $(this).val();
+        // console.info("myvalue1:" + myvalue);
+        console.info("myvalue2:" + myvalue2);
+
+    });
+
+
+</script>
+</body>
+</html>

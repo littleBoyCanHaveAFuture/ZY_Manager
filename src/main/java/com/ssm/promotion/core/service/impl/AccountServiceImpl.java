@@ -4,7 +4,7 @@ import com.ssm.promotion.core.dao.AccountDao;
 import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.sdk.AccountWorker;
 import com.ssm.promotion.core.service.AccountService;
-import com.ssm.promotion.core.timer.ScheduledService;
+import com.ssm.promotion.core.util.MysqlUtil;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,7 @@ import java.util.Map;
 @Service("AccountService")
 public class AccountServiceImpl implements AccountService {
     private static final Logger log = Logger.getLogger(AccountServiceImpl.class);
-    private static String excep_sql = "SQLIntegrityConstraintViolationException";
-    private static String excep_pri = "for key 'PRIMARY'";
-    private static String excep_uni = "for key 'name_unique'";
+
     @Resource
     private AccountDao accountDao;
 
@@ -41,10 +39,10 @@ public class AccountServiceImpl implements AccountService {
             } catch (DataAccessException e) {
                 String err = e.getMessage();
                 //仅使主键重复异常被忽略
-                if (err.contains(excep_sql) && err.contains(excep_pri)) {
+                if (err.contains(MysqlUtil.excep_sql) && err.contains(MysqlUtil.excep_pri)) {
                     log.info("err1");
                     continue;
-                } else if (err.contains(excep_uni)) {
+                } else if (err.contains(MysqlUtil.excep_uni)) {
                     log.info("err2");
                     account.setId(-2);
                     return;

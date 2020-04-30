@@ -35,9 +35,9 @@
                 <th field="id" width="80" align="center">游戏id</th>
                 <th field="name" width="80" align="center">游戏名称</th>
                 <th field="uid" width="80" align="center">创建者id</th>
-                <th field="secertKey" align="center" hidden="hidden">app秘钥</th>
-                <th field="loginUrl" hidden="hidden">登陆地址</th>
-                <th field="paycallbackUrl" align="center" hidden="hidden">支付回调地址</th>
+                <th field="secertKey" align="center">app秘钥</th>
+                <th field="loginUrl">登陆地址</th>
+                <th field="paycallbackUrl" align="center">支付回调地址</th>
                 <th field="config" width="60" align="center" formatter="formatOpt">操作</th>
             </tr>
             </thead>
@@ -103,7 +103,7 @@
                 <td>游戏地址：</td>
                 <td>
                     <label for="save_loginurl"></label>
-                    <input type="text" name="save_loginurl" id="save_loginurl" style="width: 400px" >
+                    <input type="text" name="save_loginurl" id="save_loginurl" style="width: 400px">
                 </td>
             </tr>
             <tr>

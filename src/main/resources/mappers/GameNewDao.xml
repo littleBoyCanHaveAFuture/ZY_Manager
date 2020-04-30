@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.GameNewDao">
+    <resultMap type="GameNew" id="GameResult">
+        <result property="id" column="id"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="appId" column="app_id"/>
+        <result property="appName" column="app_name"/>
+        <result property="type" column="type"/>
+        <result property="genres" column="genres"/>
+        <result property="keyConcept" column="key_concept"/>
+        <result property="ipType" column="ip_type"/>
+        <result property="loginUrl" column="login_url"/>
+        <result property="paybackUrl" column="payback_url"/>
+        <result property="direction" column="direction"/>
+        <result property="description" column="description"/>
+    </resultMap>
+    <sql id="select_all">
+        select id,
+               owner_id,
+               app_id,
+               app_name,
+               type,
+               genres,
+               theme,
+               key_concept,
+               ip_type,
+               login_url,
+               payback_url,
+               direction,
+               description
+        from zy_gamen
+    </sql>
+
+    <select id="selectGameList" parameterType="map" resultMap="GameResult">
+        <include refid="select_all"/>
+        <where>
+            <if test="ownerId != null and  ownerId!= -1">
+                owner_id=#{ownerId}
+            </if>
+            <if test="appId != null and  appId!= -1">
+                and app_id=#{appId}
+            </if>
+            <if test="appName != null and  appName!='' ">
+                and app_name like '%${appName}%'
+            </if>
+            <if test="type != null and  type!=-1 ">
+                and type=#{type}
+            </if>
+            <if test="genres != null and  genres!=-1 ">
+                and genres=#{genres}
+            </if>
+            <if test="theme != null and  theme!=-1 ">
+                and theme=#{theme}
+            </if>
+            <if test="ipType != null and  ipType!=-1 ">
+                and ip_type=#{ipType}
+            </if>
+            <if test="loginUrl != null and  loginUrl!='' ">
+                and login_url=#{loginUrl}
+            </if>
+            <if test="paybackUrl != null and  paybackUrl!='' ">
+                and payback_url=#{paybackUrl}
+            </if>
+            <if test="direction != null and  direction!=-1 ">
+                and direction=#{direction}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="getCountGame" parameterType="map" resultType="int">
+        select count(*) from zy_gamen
+        <where>
+            <if test="ownerId != null and  ownerId!= -1">
+                owner_id=#{ownerId}
+            </if>
+            <if test="appId != null and  appId!= -1">
+                and app_id=#{appId}
+            </if>
+            <if test="appName != null and  appName!='' ">
+                and app_name like '%${appName}%'
+            </if>
+            <if test="type != null and  type!=-1 ">
+                and type=#{type}
+            </if>
+            <if test="genres != null and  genres!=-1 ">
+                and genres=#{genres}
+            </if>
+            <if test="theme != null and  theme!=-1 ">
+                and theme=#{theme}
+            </if>
+            <if test="ipType != null and  ipType!=-1 ">
+                and ip_type=#{ipType}
+            </if>
+            <if test="loginUrl != null and  loginUrl!='' ">
+                and login_url=#{loginUrl}
+            </if>
+            <if test="paybackUrl != null and  paybackUrl!='' ">
+                and payback_url=#{paybackUrl}
+            </if>
+            <if test="direction != null and  direction!=-1 ">
+                and direction=#{direction}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectGame" parameterType="int" resultMap="GameResult">
+        <include refid="select_all"/>
+        where app_id = #{gameId,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteGame" parameterType="int">
+        delete
+        from zy_gamen
+        where app_id = #{gameId,jdbcType=INTEGER}
+    </delete>
+
+    <update id="updateGame" parameterType="Game">
+        update zy_gamen
+        <set>
+            <if test="appName != null and  appName!='' ">
+                app_name =#{appName}
+            </if>
+            <if test="type != null and  type!=-1 ">
+                and type=#{type}
+            </if>
+            <if test="genres != null and  genres!=-1 ">
+                and genres=#{genres}
+            </if>
+            <if test="theme != null and  theme!=-1 ">
+                and theme=#{theme}
+            </if>
+            <if test="ipType != null and  ipType!=-1 ">
+                and ip_type=#{ipType}
+            </if>
+            <if test="loginUrl != null and  loginUrl!='' ">
+                and login_url=#{loginUrl}
+            </if>
+            <if test="paybackUrl != null and  paybackUrl!='' ">
+                and payback_url=#{paybackUrl}
+            </if>
+            <if test="direction != null and  direction!=-1 ">
+                and direction=#{direction}
+            </if>
+        </set>
+        where app_id=#{appId}
+    </update>
+
+    <insert id="insertGame" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="Game">
+        insert into zy_gamen(owner_id,
+                             app_id,
+                             app_name,
+                             type,
+                             genres,
+                             theme,
+                             key_concept,
+                             ip_type,
+                             login_url,
+                             payback_url,
+                             direction,
+                             description)
+        values (#{ownerId},
+                #{ appId},
+                #{ appName},
+                #{ type},
+                #{ genres},
+                #{ theme},
+                #{keyConcept},
+                #{ipType},
+                #{loginUrl},
+                #{paybackUrl},
+                #{direction},
+                #{description})
+    </insert>
+
+    <select id="readMaxAppId" parameterType="int" resultType="int">
+        select max(app_id)
+        from zy_gamen
+    </select>
+</mapper>

@@ -143,3 +143,24 @@ function tip(title, message) {
 
 }
 
+/**
+ * @return {string[]}
+ */
+function GetArgsFromHref(sHref, sArgName) {
+    let args = sHref.split("?");
+    let retval = "";
+
+    if (args[0] === sHref) /*参数为空*/
+    {
+        return retval; /*无需做任何处理*/
+    }
+    let str = args[1];
+    args = str.split("&");
+    for (let i = 0; i < args.length; i++) {
+        str = args[i];
+        let arg = str.split("=");
+        if (arg.length <= 1) continue;
+        if (arg[0] === sArgName) retval = arg[1];
+    }
+    return retval;
+}

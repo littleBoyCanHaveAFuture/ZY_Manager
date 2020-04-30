@@ -1,10 +1,10 @@
 package com.ssm.promotion.core.sdk;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.Account;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.AccountService;
+import com.ssm.promotion.core.service.GameNewService;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.*;
 import lombok.Data;
@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Data
 public class AccountWorker {
-    private static final Logger log = Logger.getLogger(AccountWorker.class);
     /**
      * 用户编号不同运营商的间隔值
      * ：一百万
@@ -37,6 +36,7 @@ public class AccountWorker {
      * 真实用户编号起始值
      */
     public static final int USERID_BEGIN = USERID_SP_INTERVAL;
+    private static final Logger log = Logger.getLogger(AccountWorker.class);
     /**
      * 用户名和密码长度限制
      */
@@ -53,12 +53,18 @@ public class AccountWorker {
      * 已存在的最大用户编号，不含机器人，
      */
     public static AtomicInteger lastUserId;
+    /**
+     * 已存在的最大appid
+     */
+    public static AtomicInteger lastAppId;
     @Autowired
     jedisRechargeCache cache;
     @Resource
     private AccountService accountService;
     @Resource
     private ServerListService serverService;
+    @Resource
+    private GameNewService gameNewService;
 
     /**
      * 返回某运营商用户编号起始值
@@ -338,9 +344,23 @@ public class AccountWorker {
         try {
             AccountWorker.lastUserId = this.getLastUserId();
             log.info("init lastUserId:" + AccountWorker.lastUserId);
+
+            AccountWorker.lastAppId = this.lastAppId();
+            log.info("init lastUserId:" + AccountWorker.lastAppId);
+            System.out.println("init lastUserId:" + AccountWorker.lastAppId);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private AtomicInteger lastAppId() {
+        int lastUserId = 0;
+        Integer maxAppid = gameNewService.getMaxAppid();
+        if (maxAppid != null) {
+            lastUserId = maxAppid;
+        }
+
+        return new AtomicInteger(lastUserId);
     }
 
     private AtomicInteger getLastUserId() {

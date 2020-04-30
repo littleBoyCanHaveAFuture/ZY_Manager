@@ -168,7 +168,13 @@
                style="width: 150px;">游戏折扣列表
             </a>
         </div>
-
+        <div title="游戏管理" data-options="selected:true,iconCls:'icon-wenzhangs'">
+            <a href="javascript:openTab('H5游戏','game/h5game.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">H5游戏
+            </a>
+        </div>
         <div title="账号管理" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab(' 管理员列表','userManage.jsp','icon-lxr')"
                class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">
@@ -236,6 +242,17 @@
                     }
                 });
     }
+
+    $(document).keydown(function (e) {
+        if (!e) {
+            e = window.event;
+        }
+        if ((e.keyCode || e.which) === 13) {
+            login();
+        } else if ((e.keyCode || e.which) === 27) {
+            logout();
+        }
+    });
 </script>
 
 <style type="text/css">

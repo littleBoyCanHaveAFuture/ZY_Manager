@@ -36,6 +36,8 @@ public class AopSurvey {
         allJumpFuncMethodList.add("getDayResult");
         allJumpFuncMethodList.add("getServerResult");
         allJumpFuncMethodList.add("getChannelResult");
+        allJumpFuncMethodList.add("getCountGame");
+        allJumpFuncMethodList.add("getMaxAppid");
     }
 
     /**
