@@ -28,7 +28,7 @@ $(function () {
         rownumbers: true,
         columns: [[
             {field: 'appid', title: '游戏id', width: 180, align: 'center', hidden: true},
-            {field: 'icon', title: '渠道图标', width: 180, align: 'center', formatter: showPhoto},
+            {field: 'icon', title: '已选渠道图标', width: 180, align: 'center', formatter: showPhoto},
             {field: 'name', title: '渠道名称', width: 180, align: 'center'},
             {field: 'channelid', title: '渠道id', width: 180, align: 'center'},
             {field: 'version', title: '版本号', width: 180, align: 'center'},
@@ -138,18 +138,29 @@ function loadGameSpTab(type) {
 
 function config(val, row, index) {
     if (row.configStatus === 0) {
-        return '<a href="javascript:void(0)" style="color: blueviolet" οnclick="config(' + index + ')">配置</a>' +
+        return '<a href="javascript:void(0)" style="color: blueviolet" onclick="openConfig(' + index + ')">配置</a>' +
             '&nbsp;&nbsp;&nbsp;&nbsp;' +
             '<a style="color: grey">打包</a>';
     } else {
         return '<img style="width:12px;float:left;margin-top:5px;" src="/images/step_finish.png">' +
-            '<a href="javascript:void(0)" style="color: grey" οnclick="config(' + index + ')">已配置</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">修改</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">打包</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">测试</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet"οnclick="config(' + index + ')">分发</a>&nbsp;&nbsp;';
+            '<a href="javascript:void(0)" style="color: grey" onclick="config(' + index + ')">已配置</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">修改</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">打包</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">测试</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">分发</a>&nbsp;&nbsp;';
     }
+}
 
+function openConfig(index) {
+    console.info("openConfig");
+    $("#dlg").dialog("open").dialog("setTitle", "添加游戏");
+    // $('#dd3').dialog('open').dialog({
+    //     title: "添加流程",
+    //     width: 400,
+    //     height: 300,
+    //     iconCls: 'icon-add',                 //弹出框图标
+    //     modal: true,
+    // });
 }
 
 function sp_select() {

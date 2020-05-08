@@ -64,7 +64,6 @@ public class GameNewServiceImpl implements GameNewService {
                 //仅使主键重复异常被忽略
                 if (err.contains(MysqlUtil.excep_sql) && err.contains(MysqlUtil.excep_pri)) {
                     log.info("err1");
-                    continue;
                 } else if (err.contains(MysqlUtil.excep_uni)) {
                     log.info("err2");
                     return -2;

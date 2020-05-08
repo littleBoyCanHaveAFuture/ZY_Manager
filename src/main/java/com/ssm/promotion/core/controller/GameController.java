@@ -1,13 +1,12 @@
 package com.ssm.promotion.core.controller;
 
 import com.ssm.promotion.core.common.Constants;
-import com.ssm.promotion.core.common.Result;
-import com.ssm.promotion.core.common.ResultGenerator;
 import com.ssm.promotion.core.entity.GameNew;
 import com.ssm.promotion.core.entity.PageBean;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.GameNewService;
 import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.util.RandomUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -98,40 +97,121 @@ public class GameController {
      */
     @RequestMapping(value = "/addGame", method = RequestMethod.POST)
     @ResponseBody
-    public Result addServer(@RequestBody GameNew game) throws Exception {
+    public void addServer(@RequestBody GameNew game, HttpServletResponse response) throws Exception {
         log.info("start: /game/addGame " + game.toString());
         Integer userId = getUserId();
-        if (userId == null) {
-            return ResultGenerator.genRelogin();
-        }
-        if (game.getAppName() == null || game.getType() == null || game.getGenres() == null || game.getIpType() == null || game.getDirection() == null) {
-            return ResultGenerator.genFailResult("添加失败 参数为空");
-        }
-        if (game.getType() < 0 || game.getType() > 4) {
-            return ResultGenerator.genFailResult("添加失败 游戏类型非法");
-        }
-        if (game.getGenres() < 0 || game.getGenres() > 19) {
-            return ResultGenerator.genFailResult("添加失败 游戏类别非法");
-        }
-        if (game.getTheme() < 0 || game.getTheme() > 11) {
-            return ResultGenerator.genFailResult("添加失败 题材类别非法");
-        }
-        if (game.getDirection() < 0 || game.getDirection() > 1) {
-            return ResultGenerator.genFailResult("添加失败 屏幕方向非法");
-        }
-        if (game.getDescription().length() > 500) {
-            return ResultGenerator.genFailResult("添加失败 游戏描述过长");
-        }
-        game.setOwnerId(userId);
-        int res = gameNewService.addGame(game, userId);
 
-        log.info("request: article/save , " + game.toString());
-        System.out.println("request: article/save , " + game.toString());
-        if (res > 0) {
-            return ResultGenerator.genSuccessResult();
-        } else {
-            return ResultGenerator.genFailResult("添加失败");
-        }
+        JSONObject result = new JSONObject();
+        do {
+            if (userId == null) {
+                result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
+                break;
+            }
+            if (game.getAppName() == null || game.getType() == null || game.getGenres() == null || game.getIpType() == null || game.getDirection() == null) {
+                result.put("reason", "添加失败 参数为空");
+                break;
+            }
+            if (game.getType() < 0 || game.getType() > 4) {
+                result.put("reason", "添加失败 游戏类型非法");
+                break;
+            }
+            if (game.getGenres() < 0 || game.getGenres() > 19) {
+                result.put("reason", "添加失败 游戏类别非法");
+                break;
+            }
+            if (game.getTheme() < 0 || game.getTheme() > 11) {
+                result.put("reason", "添加失败 题材类别非法");
+                break;
+            }
+            if (game.getDirection() < 0 || game.getDirection() > 1) {
+                result.put("reason", "添加失败 屏幕方向非法");
+                break;
+            }
+            if (game.getDescription().length() > 500) {
+                result.put("reason", "添加失败 游戏描述过长");
+                break;
+            }
+            game.setOwnerId(userId);
+            game.setSecertKey(RandomUtil.rndSecertKey());
+            int res = gameNewService.addGame(game, userId);
+
+            log.info("request: game/save , " + game.toString());
+            System.out.println("request: game/save , " + game.toString());
+
+            if (res > 0) {
+                result.put("appid", game.getAppId());
+            }
+        } while (false);
+
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
     }
 
+    /**
+     * 添加
+     */
+    @RequestMapping(value = "/updateGame", method = RequestMethod.POST)
+    @ResponseBody
+    public void updateServer(@RequestBody GameNew game, HttpServletResponse response) throws Exception {
+        log.info("start: /game/addGame " + game.toString());
+        Integer userId = getUserId();
+
+        JSONObject result = new JSONObject();
+        do {
+            if (userId == null) {
+                result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
+                break;
+            }
+            if (game.getAppName() == null || game.getType() == null || game.getGenres() == null || game.getIpType() == null || game.getDirection() == null) {
+                result.put("reason", "添加失败 参数为空");
+                break;
+            }
+            if (game.getType() < 0 || game.getType() > 4) {
+                result.put("reason", "添加失败 游戏类型非法");
+                break;
+            }
+            if (game.getGenres() < 0 || game.getGenres() > 19) {
+                result.put("reason", "添加失败 游戏类别非法");
+                break;
+            }
+            if (game.getTheme() < 0 || game.getTheme() > 11) {
+                result.put("reason", "添加失败 题材类别非法");
+                break;
+            }
+            if (game.getDirection() < 0 || game.getDirection() > 1) {
+                result.put("reason", "添加失败 屏幕方向非法");
+                break;
+            }
+            if (game.getDescription().length() > 500) {
+                result.put("reason", "添加失败 游戏描述过长");
+                break;
+            }
+            game.setOwnerId(-1);
+            int res = gameNewService.updateGame(game, userId);
+
+            log.info("request: game/updateGame , " + game.toString());
+            System.out.println("request: game/updateGame , " + game.toString());
+
+            if (res > 0) {
+                result.put("appid", game.getAppId());
+            }
+        } while (false);
+
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+    }
+
+    /**
+     * 添加
+     */
+    @RequestMapping(value = "/channelConfig", method = RequestMethod.POST)
+    @ResponseBody
+    public void loadGameChannelConfig(@RequestBody GameNew game, HttpServletResponse response) throws Exception {
+        log.info("start: /game/addGame " + game.toString());
+        Integer userId = getUserId();
+
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+    }
 }

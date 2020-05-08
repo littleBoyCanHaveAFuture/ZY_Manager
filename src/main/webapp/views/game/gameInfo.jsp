@@ -18,7 +18,7 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/views/server/game_index.css?1505">
+          href="${pageContext.request.contextPath}/views/server/game_index.css?202005071137">
 </head>
 <body>
 
@@ -91,15 +91,15 @@
 
     let param = "?appId=" + t_appid.val() + "&appName=" + t_appname.val() + "&type=" + t_type.val() + "&create=" + t_isCreate.val();
     //创建游戏 只能查看基本资料
-    if (t_isCreate === 1) {
+    if (t_isCreate.val() === 1) {
         document.getElementById("gamestep2").className = '';
         document.getElementById("gamestep3").className = '';
     }
     document.getElementById("confframe").src = url_gameData + param;
 
     function changeStep(url, name, callback, opttype, gametype) {
-        console.info(t_isCreate);
-        if (t_isCreate === 1 || t_isCreate === "1") {
+        console.info(t_isCreate.val());
+        if (t_isCreate.val() === 1 || t_isCreate.val() === "1") {
             return;
         }
         if (name === 'gameStep1') {
@@ -138,6 +138,12 @@
         window.location.href = "/views/game/h5game.jsp";
     }
 
+    function parentFunction(appid) {
+        t_isCreate.val(0);
+        t_appid.val(appid);
+        console.log("parentFunction appid:" + appid);
+        changeStep('', 'gameStep2', $(this), 'sdk', 'h5');
+    }
 
 </script>
 </html>

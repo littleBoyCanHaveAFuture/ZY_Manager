@@ -76,7 +76,7 @@
         <tr id="tr_appId">
             <td class="td1">APPID:</td>
             <td class="td2">
-                <input type="hidden" name="app_id" value="">
+                <input type="hidden" id="app_id" value="">
                 <span id="game_id"></span>
             </td>
         </tr>
@@ -302,11 +302,11 @@
             <td class="td1">横竖屏:</td>
             <td class="pt-20px">
                 <label style="float:left;">
-                    <input name="screen" type="radio" value="11">
+                    <input name="screen" type="radio" value="0">
                     <span class="lbl">&nbsp;&nbsp;横屏</span>
                 </label>
                 <label style="float:left;padding-left: 60px;">
-                    <input name="screen" type="radio" value="21" checked="checked">
+                    <input name="screen" type="radio" value="1" checked="checked">
                     <span class="lbl">&nbsp;&nbsp;竖屏</span>
                 </label>
             </td>
@@ -373,14 +373,6 @@
         getGameInfo(iscreate);
     });
 
-    // $(top.hangge());
-    $(function () {
-        //单选框
-        // $(".chzn-select").chosen();
-        // $(".chzn-select-deselect").chosen({allow_single_deselect: true});
-    });
-
-
     function buildKey() {
         $("#seceret_key span").hide();
         $("#seceret_key input").attr("type", "text");
@@ -415,8 +407,8 @@
                     if (result.resultCode === 501) {
                         relogin();
                     } else if (result.resultCode === 200) {
-                        result = result.rows;
-
+                        result = result.rows[0];
+                        setGameInfo(result);
                     }
                 },
                 error: function () {
@@ -428,15 +420,15 @@
 
     let type = $("#type");
     let appid = $("#app_id");
-    let secertKey = $("#seceret_key");
     let cateType = $("#cate_type");
+    let cateType1 = $("#cate_type1");
     let productName = $("#product_name");
     let sourceUrl = $("#source_url");
     let backAddress = $("#back_address");
     let meMo = $("#memo");
     let seceretKeyInput = $("#seceret_key input");
+    let seceretKeySpan = $("#seceret_key span");
     let checkBox1 = $("#checkbox1");
-
 
     /**
      * @param result.appId          游戏id
@@ -455,11 +447,11 @@
     function setGameInfo(result) {
         console.log(result);
 
-        appid.val(result.appId);
+        $("#app_id").val(result.appId);
+
         $("#game_id").html(result.appId);
 
-        productName.html(result.appName);
-        console.info("productName=" + productName.val());
+        productName.val(result.appName);
 
         type.val(result.type);
         let types = ["未知", "h5游戏", "单机游戏", "网络游戏", "H5转Android游戏"];
@@ -469,7 +461,7 @@
 
         document.getElementById("cate_type1").selectedIndex = parseInt(result.theme);
 
-        // document.getElementById("cate_type2").selectedIndex = parseInt(result.keyConcept);
+        editCoreInfos(result.keyConcept);
 
         let ipType = parseInt(result.ipType);
         let radios = document.getElementsByName("iptype");
@@ -484,6 +476,7 @@
         backAddress.val(result.paybackUrl);
 
         let direction = parseInt(result.direction);
+
         let screens = document.getElementsByName("screen");
         for (let i = 0; i < screens.length; i++) {
             if (parseInt(screens[i].value) === direction) {
@@ -493,8 +486,8 @@
 
         meMo.val(result.description);
 
-        secertKey.val(result.secertKey);
-        $("#span_secertkey").html(secertKey.val());
+        seceretKeyInput.val(result.secertKey);
+        seceretKeySpan.html(seceretKeyInput.val());
     }
 
     /**
@@ -503,6 +496,20 @@
     function IsURL(urlString) {
         regExp = /(http|ftp|https):\/\/[\w]+(.[\w]+)([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])/;
         return !!urlString.match(regExp);
+    }
+
+    function jqueryFun() {
+        let keyConcept = "";
+        let ids = [];
+        $("input[name='playCheckbox[]']:checked").each(function (i) {
+            ids.push($(this).val())
+            // $("body").append("<p>" + $(this).val() + "</p>")
+            keyConcept += $(this).val();
+            keyConcept += "|";
+        });
+        console.log(ids);
+        console.log(keyConcept);
+        return keyConcept;
     }
 
     //保存
@@ -517,6 +524,7 @@
             productName.focus();
             return false;
         }
+
         if (sourceUrl.val().trim() === "") {
             sourceUrl.tips({
                 side: 3,
@@ -536,6 +544,7 @@
             sourceUrl.focus();
             return false;
         }
+
         if (backAddress.val().trim() === "") {
             backAddress.tips({
                 side: 3,
@@ -555,6 +564,7 @@
             backAddress.focus();
             return false;
         }
+
         if (meMo.val().trim() === "") {
             meMo.tips({
                 side: 3,
@@ -565,23 +575,27 @@
             meMo.focus();
             return false;
         }
+
         //服务器查询
         let game = {
-            id:"",
-            ownerId:"",
+            id: "",
+            ownerId: "",
             appId: "",
-            appName: "",
+            appName: productName.val(),
             type: t_type,
-            genres: "0",
-            theme:"0",
-            keyConcept:"",
+            genres: cateType.val(),
+            theme: cateType1.val(),
+            keyConcept: jqueryFun(),
             secertKey: "",
-            ipType: "0",
-            loginUrl: "",
-            paybackUrl: "",
-            direction: "0",
-            description: ""
+            ipType: $('input[name="iptype"]:checked').val(),
+            loginUrl: sourceUrl.val(),
+            paybackUrl: backAddress.val(),
+            direction: $('input[name="screen"]:checked').val(),
+            description: meMo.val()
         };
+        // $("#Form").submit();
+        $("#zhongxin").hide();
+        $("#zhongxin2").show();
         $.ajax({
             url: "/game/addGame",
             type: "post",
@@ -594,23 +608,23 @@
                 if (result.resultCode === 501) {
                     relogin();
                 } else if (result.resultCode === 200) {
-                    $("#zhongxin").show();
-                    $("#zhongxin2").hide();
-
+                    if (result.hasOwnProperty("reason")) {
+                        tip(result.reason);
+                    } else {
+                        window.parent.parentFunction(result.appid);
+                    }
                 }
             },
             error: function () {
                 tip("ERROR！", "查询失败");
             }
         });
-        $("#Form").submit();
-        $("#zhongxin").hide();
-        $("#zhongxin2").show();
+
     }
 
 
     function edit() {
-        var seceret_key = "7cebc716f1b9372d3af60dbea5c5bf47";
+        console.log("edit:" + seceretKeyInput.val().trim().length);
         if (seceretKeyInput.val().trim().length < 32) {
             seceretKeyInput.tips({
                 side: 3,
@@ -634,7 +648,6 @@
             return false;
         }
 
-
         if (productName.val().trim() === "") {
             productName.tips({
                 side: 3,
@@ -645,6 +658,7 @@
             productName.focus();
             return false;
         }
+
         if (sourceUrl.val().trim() === "") {
             sourceUrl.tips({
                 side: 3,
@@ -664,6 +678,7 @@
             sourceUrl.focus();
             return false;
         }
+
         if (backAddress.val().trim() === "") {
             backAddress.tips({
                 side: 3,
@@ -683,6 +698,7 @@
             backAddress.focus();
             return false;
         }
+
         if (meMo.val().trim() === "") {
             meMo.tips({
                 side: 3,
@@ -693,99 +709,151 @@
             meMo.focus();
             return false;
         }
-        if (seceretKeyInput.val().trim() !== seceret_key) {
-            var confirmVal = false;
-            top.showConfirm("当前已检测到seceret_key发生改变，请确定是否要更改？", function () {
-                location.reload();
-            }, function () {
-                $("#Form").submit();
-                $("#zhongxin").hide();
-                $("#zhongxin2").show();
-            });
+        //服务器查询
+        let game = {
+            id: type.val(),
+            ownerId: "",
+            appId: appid.val(),
+            appName: productName.val(),
+            type: t_type,
+            genres: cateType.val(),
+            theme: cateType1.val(),
+            keyConcept: jqueryFun(),
+            secertKey: seceretKeyInput.val(),
+            ipType: $('input[name="iptype"]:checked').val(),
+            loginUrl: sourceUrl.val(),
+            paybackUrl: backAddress.val(),
+            direction: $('input[name="screen"]:checked').val(),
+            description: meMo.val()
+        };
+
+        if (seceretKeyInput.val().trim() !== seceretKeySpan.val()) {
+            let confirmVal = false;
+            // showConfirm("当前已检测到seceret_key发生改变，请确定是否要更改？", function () {
+            //     location.reload();
+            // }, function () {
+            updateGame(game);
+            // });
         } else {
-            $("#Form").submit();
-            $("#zhongxin").hide();
-            $("#zhongxin2").show();
+            updateGame(game);
         }
+
     }
 
-    var p = "1,2,";
-    var ps = p.split(',');
-    for (var i = 0; i < ps.length; i++) {
-        if (ps[i] === 1) {
-            $("#checkbox1").prop("checked", true);
-        }
-        if (ps[i] === 2) {
-            $("#checkbox2").prop("checked", true);
-        }
-        if (ps[i] === 3) {
-            $("#checkbox3").prop("checked", true);
-        }
-        if (ps[i] === 4) {
-            $("#checkbox4").prop("checked", true);
-        }
-        if (ps[i] === 5) {
-            $("#checkbox5").prop("checked", true);
-        }
-        if (ps[i] === 6) {
-            $("#checkbox6").prop("checked", true);
-        }
-        if (ps[i] === 7) {
-            $("#checkbox7").prop("checked", true);
-        }
-        if (ps[i] === 8) {
-            $("#checkbox8").prop("checked", true);
-        }
-        if (ps[i] === 9) {
-            $("#checkbox9").prop("checked", true);
-        }
-        if (ps[i] === 10) {
-            $("#checkbox10").prop("checked", true);
-        }
-        if (ps[i] === 11) {
-            $("#checkbox11").prop("checked", true);
-        }
-        if (ps[i] === 12) {
-            $("#checkbox12").prop("checked", true);
-        }
-        if (ps[i] === 13) {
-            $("#checkbox13").prop("checked", true);
-        }
-        if (ps[i] === 14) {
-            $("#checkbox14").prop("checked", true);
-        }
-        if (ps[i] === 15) {
-            $("#checkbox15").prop("checked", true);
-        }
-        if (ps[i] === 16) {
-            $("#checkbox16").prop("checked", true);
-        }
-        if (ps[i] === 17) {
-            $("#checkbox17").prop("checked", true);
-        }
-        if (ps[i] === 18) {
-            $("#playother").prop("checked", true);
-        }
+    function updateGame(game) {
+        console.log("updateGame:" + game)
+        $.ajax({
+            url: "/game/updateGame",
+            type: "post",
+            data: JSON.stringify(game),
+            dataType: "json",//预期服务器返回的数据类型
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            success: function (result) {
+                console.info(result);
+                if (result.resultCode === 501) {
+                    relogin();
+                } else if (result.resultCode === 200) {
+                    if (result.hasOwnProperty("reason")) {
+                        tip(result.reason);
+                    } else {
+                        t_appName = "";
+                        window.parent.parentFunction(result.appid);
+                    }
+                }
+            },
+            error: function () {
+                tip("ERROR！", "查询失败");
+            }
+        });
     }
 
-    //如果已选其他  直接显示后边的input框
-    if ($("#gametype").val() == 13) {
-        $("input[name='cate_type2']").prop("type", "text");
-    }
-
-    //监听游戏类别的 ···其他··· 点击事件
-    $("#gametype").change(function () {
-        if ($(this).val() == 13) {
-            $("input[name='cate_type2']").prop("type", "text");
-        } else {
-            $("input[name='cate_type2']").prop("type", "hidden");
+    function editCoreInfos(coreInfos) {
+        let p = "1,2,";
+        p = coreInfos;
+        if (checkParam(coreInfos)) {
+            return;
         }
-    });
+        console.info("coreInfos:" + coreInfos);
+        let ps = p.split("|");
+        console.info("ps:" + ps);
+        for (let i = 0; i < ps.length; i++) {
+            ps[i] = parseInt(ps[i]);
+            if (ps[i] === 1) {
+                $("#checkbox1").prop("checked", true);
+            }
+            if (ps[i] === 2) {
+                $("#checkbox2").prop("checked", true);
+            }
+            if (ps[i] === 3) {
+                $("#checkbox3").prop("checked", true);
+            }
+            if (ps[i] === 4) {
+                $("#checkbox4").prop("checked", true);
+            }
+            if (ps[i] === 5) {
+                $("#checkbox5").prop("checked", true);
+            }
+            if (ps[i] === 6) {
+                $("#checkbox6").prop("checked", true);
+            }
+            if (ps[i] === 7) {
+                $("#checkbox7").prop("checked", true);
+            }
+            if (ps[i] === 8) {
+                $("#checkbox8").prop("checked", true);
+            }
+            if (ps[i] === 9) {
+                $("#checkbox9").prop("checked", true);
+            }
+            if (ps[i] === 10) {
+                $("#checkbox10").prop("checked", true);
+            }
+            if (ps[i] === 11) {
+                $("#checkbox11").prop("checked", true);
+            }
+            if (ps[i] === 12) {
+                $("#checkbox12").prop("checked", true);
+            }
+            if (ps[i] === 13) {
+                $("#checkbox13").prop("checked", true);
+            }
+            if (ps[i] === 14) {
+                $("#checkbox14").prop("checked", true);
+            }
+            if (ps[i] === 15) {
+                $("#checkbox15").prop("checked", true);
+            }
+            if (ps[i] === 16) {
+                $("#checkbox16").prop("checked", true);
+            }
+            if (ps[i] === 17) {
+                $("#checkbox17").prop("checked", true);
+            }
+            if (ps[i] === 18) {
+                $("#playother").prop("checked", true);
+            }
+        }
+    }
 
     //监听核心玩法的··· 其他··· 点击事件
     if ($("#playother").prop('checked')) {
         $("input[name='playtype']").prop("type", "text");
     }
+
+    //如果已选其他  直接显示后边的input框
+    if ($("#gametype").val() === 13) {
+        $("input[name='cate_type2']").prop("type", "text");
+    }
+
+    //监听游戏类别的 ···其他··· 点击事件
+    $("#gametype").change(function () {
+        if ($(this).val() === 13) {
+            $("input[name='cate_type2']").prop("type", "text");
+        } else {
+            $("input[name='cate_type2']").prop("type", "hidden");
+        }
+    });
 
     $('input[type=radio][name=iptype]').change(function () {
         // 获取input radio选中值，方法一
@@ -797,6 +865,26 @@
 
     });
 
+    function showConfirm(str, callback, submitback) {
+        var confirmVal = false;
+        $("body")
+            .append(
+                "<div class='showConfirm'><div class='bootbox modal fade in' tabindex='-1' style='overflow:hidden;' aria-hidden='false'>"
+                + "<div class='modal-body'>"
+                + str
+                + "</div>"
+                + "<div class='modal-footer'><a data-handler='0' class='btn null' href='javascript:;'>取消</a><a data-handler='1' class='btn btn-primary' href='javascript:;'>确定</a></div>"
+                + "</div>"
+                + "<div class='modal-backdrop fade in'></div></div>");
+        $(".showConfirm a.null").unbind("click").click(function () {
+            $(".showConfirm").remove();
+            callback();
+        });
+        $(".showConfirm a.btn-primary").unbind("click").click(function () {
+            $(".showConfirm").remove();
+            submitback();
+        });
+    }
 
 </script>
 </body>

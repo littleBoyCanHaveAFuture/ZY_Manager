@@ -174,6 +174,7 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">H5游戏
             </a>
+
         </div>
         <div title="账号管理" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab(' 管理员列表','userManage.jsp','icon-lxr')"

@@ -2,13 +2,13 @@
 <%
     String path = request.getContextPath();
     String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
-    String str = request.getParameter("appId");
-    int gameId = Integer.parseInt(str);
-
-    String name = request.getParameter("appName");
-
-    String str3 = request.getParameter("type");
-    int type = Integer.parseInt(str3);
+//    String str = request.getParameter("appId");
+//    int gameId = Integer.parseInt(str);
+//
+//    String name = request.getParameter("appName");
+//
+//    String str3 = request.getParameter("type");
+//    int type = Integer.parseInt(str3);
 %>
 <!DOCTYPE html>
 <html lang="utf-8">
@@ -36,7 +36,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/server/gameConfig.js?v202004201102"></script>
+            src="${pageContext.request.contextPath}/views/game/gameChannel.js?v202005071"></script>
 </head>
 <body>
 
@@ -74,9 +74,51 @@
 <div id="dd">
     <table id="dg2" fit="true"></table>
 </div>
+
+
+<div id="dlg" style="padding: 10px 20px; position: relative; z-index:1000;">
+    <div style="padding-top:20px;  float:left; width:95%; padding-left:30px;">
+        <table cellpadding="0" cellspacing="0" style="width:100%" class="cc">
+            <tr>
+                <td style="width:100px;text-align: left;padding-top: 13px;">渠道支付回调:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
+                    <input type="hidden" name="callback_url" id="callback_url">http://cn.soeasysdk.com/ret/h5_yy/10654/3799
+                </td>
+            </tr>
+            <tr>
+                <td style="width:100px;text-align: left;padding-top: 13px;">渠道入口地址:</td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">
+                    <input class="showNormal" style="width:94%;font-weight: bold;color:#000;"
+                           type="text" name="url"
+                           id="url" maxlength="500" title="渠道入口地址">
+                    <div id="soeasyurl" class="showNormal" style="color:red;">
+                        注：提供给渠道的地址
+                        <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/
+                        <br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="width:100px;text-align: left;padding-top: 13px;">key:</td>
+                <td>
+                    <input style="width:94%;" type="text" name="key" id="key" value="" maxlength="100000000" title="key"
+                           check="1">
+                    <div>
+                        <font color="#aaa">注：渠道提供的key</font>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="javascript:alert('save')">Save</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel"
+       onclick="javascript:$('#dlg').dialog('close')">Close</a>
+</div>
+
 </body>
-
-
 <script>
     $("#appid").val("${param.appId}");
     $("#appname").val("${param.appName}");
@@ -117,6 +159,15 @@
     .inline div {
         color: #ddd;
         pointer-events: none;
+    }
+
+
+    .cc th, .cc td {
+        border-top: 0;
+        padding: 8px;
+        line-height: 20px;
+        text-align: left;
+        vertical-align: top;
     }
 </style>
 </html>

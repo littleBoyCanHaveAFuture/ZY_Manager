@@ -18,8 +18,6 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
-    <%--    <script type="text/javascript"--%>
-    <%--            src="${pageContext.request.contextPath}/js/server/game_list.js?20200427"></script>--%>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/views/game/game.js?202004281101"></script>
 </head>
@@ -32,7 +30,7 @@
                toolbar="#sp">
             <thead data-options="frozen:true">
             <tr>
-                <th field="id" align="center">APPID</th>
+                <th field="appId" align="center">APPID</th>
                 <th field="appName" align="center">游戏名称</th>
                 <th field="ownerId" align="center">创建者id</th>
                 <th field="type" align="center">游戏类别</th>
@@ -108,7 +106,7 @@
         let row = dg.datagrid('getSelected');
         if (row) {
             // type=0 配置 type=1 创建游戏
-            let param = "?gameId=" + row.id + "&name=" + row.appName + "&type=1" + "&create=" + 0;
+            let param = "?gameId=" + row.appId + "&name=" + row.appName + "&type=1" + "&create=" + 0;
             window.location.href = "/views/game/gameInfo.jsp" + param;
         }
     }

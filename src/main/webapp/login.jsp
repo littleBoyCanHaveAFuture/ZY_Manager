@@ -49,7 +49,7 @@
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 
-            <button type="button" id="login" class="btn btn-primary block full-width m-b" onclick="login();">
+            <button type="button"  class="btn btn-primary block full-width m-b" onclick="login();">
                 登 录
             </button>
 
