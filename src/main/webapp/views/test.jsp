@@ -175,6 +175,7 @@
         <label>Step:10----->一键下单/label>
             <a href="javascript:auto()" class="easyui-linkbutton" iconCls="icon-add" plain="true">一键下单</a>
             <%--        <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>--%>
+            <a href="javascript:ttt()" class="easyui-linkbutton" iconCls="icon-add" plain="true">测试</a>
     </div>
     <div>
         <label>--------------------------------------</label>
@@ -422,7 +423,7 @@
                 // } else {
                 //     yuan = "0." + fen;
                 // }
-                loadZyPayHtml(callbackData.orderId,orderInfo.productDesc,orderInfo.productName,fen,orderInfo.productID,"sss");
+                loadZyPayHtml(callbackData.orderId, orderInfo.productDesc, orderInfo.productName, fen, orderInfo.productID, "sss");
                 // window.open("../mall/mall.html?oid=" + callbackData.orderId + "&appId=" + ZySDK.GameId + "&secretKey=" + ZySDK.GameKey);
                 // let param = "?orderId=" +
                 //     + "&body=" + orderInfo.productDesc
@@ -482,6 +483,81 @@
         $('#cover').css('display', 'none');   //显示遮罩层
     }
 
+    function ttt() {
+        let data = {
+            id: 1,
+            openId: 2,
+            itemId: 3,
+            exchangeTime: 4,
+            status: 1,
+            message: 2,
+            finishedTime: 5
+        };
+        // $.ajax({
+        //     url: "/h5/addExRecord",
+        //     type: "post",
+        //     data: JSON.stringify(data),
+        //     dataType: "json",//预期服务器返回的数据类型
+        //     contentType: "application/json; charset=utf-8",
+        //     async: false,
+        //     success: function (result) {
+        //         console.info(result);
+        //
+        //     },
+        //     error: function () {
+        //         tip("ERROR！", "查询失败");
+        //     }
+        // });
+        test();
+        return;
+        send("/h5/addExRecord","json",data);
+
+    }
+
+    function send(url,type,data) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("post", url, true);
+        if (type === "formdata") {
+            data = new FormData();
+            data.append("key", "value");
+        } else if (type === "json") {
+            xhr.setRequestHeader("Content-Type", "application/json");
+            data = JSON.stringify(data);
+        } else if (type === "text") {
+            data = "key=value";
+        } else if (type === "www") {
+            // 这个header 其实是 传统post 表单的格式
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            data = "key=value";
+        }
+        xhr.send(data);
+    }
+    function test() {
+        var httpdata = {
+            id: 1,
+            openId: 123456,
+            itemId: 3,
+            exchangeTime: 4,
+            status: 1,
+            message: 2,
+            finishedTime: 5,
+            address:"11",
+            phone:"22",
+            name:"33"
+        };
+        var url = "http://111.231.244.198:8080/huoguo/h5/addExRecord";
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 400)) {
+                var response = xhr.responseText;
+                console.log(response);
+            }
+        };
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(JSON.stringify(httpdata));
+    }
 </script>
 
 </html>

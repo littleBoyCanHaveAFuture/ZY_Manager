@@ -1,5 +1,6 @@
 $(function () {
     initTableColumns();
+    initSpGameServer(2);
 });
 
 function initTableColumns() {
@@ -95,12 +96,13 @@ function selectPayRecord() {
         "appID": save_gameId,
         "channelID": save_spId,
         "channelOrderID": orderId,
-        "state": payRecord_state,
+        "state": parseInt(payRecord_state),
         "startTime": payRecord_startTime,
         "endTime": payRecord_endTime,
         "page": pageNumber,
         "rows": pageSize
     };
+    console.log(data);
     $.ajax({
         //获取数据
         url: "/realtime/getPayRecord",
@@ -110,6 +112,7 @@ function selectPayRecord() {
         dataType: "json",
         async: false,
         success: function (result) {
+            console.log(result);
             if (result.resultCode === 501) {
                 relogin();
             } else if (result.resultCode === 200) {

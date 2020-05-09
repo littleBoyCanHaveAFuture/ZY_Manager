@@ -28,7 +28,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200228"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/RealtimeData/PayRecord.js?v=202002291338"></script>
+            src="${pageContext.request.contextPath}/js/RealtimeData/PayRecord.js?v=20200509"></script>
 </head>
 <body style="margin:1px;">
 

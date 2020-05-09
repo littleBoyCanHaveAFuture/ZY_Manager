@@ -74,7 +74,10 @@ public class RealTimeDataController {
         param.put("spId", ServerInfoUtil.spiltStr(currUser.getSpId()));
 
         long start = System.currentTimeMillis();
-
+//        String startTime = DateUtil.formatDate(param.get("startTime").toString(), DateUtil.FORMAT_YYYY_MMDD_HHmm, DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
+//        String endTime = DateUtil.formatDate(param.get("endTime").toString(), DateUtil.FORMAT_YYYY_MMDD_HHmm, DateUtil.FORMAT_YYYY_MMDD_HHmmSS);
+//        param.replace("startTime", startTime);
+//        param.replace("endTime", endTime);
         List<UOrder> orderList = orderManager.getUOrderList(param);
         orderList.forEach(UOrder::setJsOrder);
         Long total = orderManager.getTotalUorders(param);

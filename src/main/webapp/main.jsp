@@ -87,18 +87,18 @@
 <div region="west" style="width: 200px;height:500px;" title="导航菜单" split="true">
 
     <div id="aa" class="easyui-accordion">
-        <%--                <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
-        <%--                    <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
-        <%--                       class="easyui-linkbutton"--%>
-        <%--                       data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-        <%--                       style="width: 150px;">测试--%>
-        <%--                    </a>--%>
-        <%--            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"--%>
-        <%--               class="easyui-linkbutton"--%>
-        <%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
-        <%--               style="width: 150px;">quick--%>
-        <%--            </a>--%>
-        <%--                </div>--%>
+<%--        <div title="测试----->" data-options="selected:true,iconCls:'icon-wenzhangs'">--%>
+<%--            <a href="javascript:openTab('注册、登录、支付','test.jsp','icon-wenzhang')"--%>
+<%--               class="easyui-linkbutton"--%>
+<%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+<%--               style="width: 150px;">测试--%>
+<%--            </a>--%>
+<%--            <a href="javascript:openTab('quick','quick/login.jsp','icon-wenzhang')"--%>
+<%--               class="easyui-linkbutton"--%>
+<%--               data-options="plain:true,iconCls:'icon-wenzhang'"--%>
+<%--               style="width: 150px;">quick--%>
+<%--            </a>--%>
+<%--        </div>--%>
 
         <div title="游戏概况" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab('全服概况','Detail/DetailGame.jsp','icon-wenzhang')"
@@ -174,8 +174,16 @@
                data-options="plain:true,iconCls:'icon-wenzhang'"
                style="width: 150px;">H5游戏
             </a>
-
         </div>
+
+        <div title="火锅H5" data-options="selected:true,iconCls:'icon-wenzhangs'">
+            <a href="javascript:openTab('火锅乐翻天发货','game/h5fahuo.jsp','icon-wenzhang')"
+               class="easyui-linkbutton"
+               data-options="plain:true,iconCls:'icon-wenzhang'"
+               style="width: 150px;">火锅乐翻天发货
+            </a>
+        </div>
+
         <div title="账号管理" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab(' 管理员列表','userManage.jsp','icon-lxr')"
                class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-lxr'" style="width: 150px;">

@@ -20,11 +20,13 @@
     <!--[if lt IE 9]>
     <meta http-equiv="refresh" content="0;ie.html"/>
     <![endif]-->
-    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
+    <script  type="text/javascript"
+             src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="${pageContext.request.contextPath}/js/login.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
 </head>
 
 <body class="gray-bg">
