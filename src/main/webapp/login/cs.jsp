@@ -26,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
     <script src="${pageContext.request.contextPath}/js/md5.js"></script>
-    <script src="${pageContext.request.contextPath}/login/gamelogin.js?04231401"></script>
+    <script src="${pageContext.request.contextPath}/login/gamelogin.js?202005121050"></script>
 
 </head>
 
@@ -155,7 +155,7 @@
         console.info('Text:', e.text);
         // console.info('Trigger:', e.trigger);
         alert("已复制到剪贴板" + "\n账号: " + t_name + "\n密码: " + t_pwd);
-        e.clearSelection();
+        // e.clearSelection();
     });
 
     clipboard.on('error', function (e) {

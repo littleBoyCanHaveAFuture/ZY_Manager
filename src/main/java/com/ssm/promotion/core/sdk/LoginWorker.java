@@ -93,6 +93,7 @@ public class LoginWorker {
 
         switch (appId) {
             case 11:
+                //指悦刺沙
                 param.append("qid=").append(accountId);
                 param.append("&server_id=").append(serverId);
                 break;
