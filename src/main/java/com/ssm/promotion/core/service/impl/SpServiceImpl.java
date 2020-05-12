@@ -49,6 +49,11 @@ public class SpServiceImpl implements SpService {
     }
 
     @Override
+    public Sp getSp(Integer spId,Integer userId) {
+        return spDao.getSp(spId);
+    }
+
+    @Override
     public int delSp(Integer id, Integer userId) {
         return spDao.deleteSp(id);
     }

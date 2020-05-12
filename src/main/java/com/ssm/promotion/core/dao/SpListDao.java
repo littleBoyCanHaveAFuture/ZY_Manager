@@ -42,6 +42,8 @@ public interface SpListDao {
      */
     List<Sp> getSpById(Map<String, Object> map);
 
+    Sp getSp(@Param("spId") int spId);
+
     List<Sp> getAllSpByPage(Map<String, Object> map);
 
     Long getTotalSp();

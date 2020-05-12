@@ -2,13 +2,6 @@
 <%
     String path = request.getContextPath();
     String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
-//    String str = request.getParameter("appId");
-//    int gameId = Integer.parseInt(str);
-//
-//    String name = request.getParameter("appName");
-//
-//    String str3 = request.getParameter("type");
-//    int type = Integer.parseInt(str3);
 %>
 <!DOCTYPE html>
 <html lang="utf-8">
@@ -35,8 +28,11 @@
             src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script src="${pageContext.request.contextPath}/js/md5.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/game/gameChannel.js?v202005071"></script>
+            src="${pageContext.request.contextPath}/js/jquery.tips.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/views/game/gameChannel.js?v2020052143"></script>
 </head>
 <body>
 
@@ -63,7 +59,7 @@
         </i>
     </span>
 
-    <div class="btn btn-small btn-primary create_game" onclick="sp_select();" id="selectSp">
+    <div class="btn btn-small btn-primary create_game" onclick="sp_Select();" id="selectSp">
         渠道选择
     </div>
     <div class="create_game" style="color: #3f89ec;line-height: 30px;" onclick="fee_manage();">
@@ -76,13 +72,15 @@
 </div>
 
 
-<div id="dlg" style="padding: 10px 20px; position: relative; z-index:1000;">
+<div id="dlg" style="padding: 10px 20px; position: relative; z-index:1000;" hidden="hidden">
     <div style="padding-top:20px;  float:left; width:95%; padding-left:30px;">
-        <table cellpadding="0" cellspacing="0" style="width:100%" class="cc">
-            <tr>
+        <table style="border:0px;margin-bottom: 0px;" id="table_top"
+               class="table table-striped table-bordered table-hover">
+            <tbody>
+            <tr id="channel_callback_url">
                 <td style="width:100px;text-align: left;padding-top: 13px;">渠道支付回调:</td>
                 <td style="padding-top: 13px;color:#000;font-weight: bold;">
-                    <input type="hidden" name="callback_url" id="callback_url">http://cn.soeasysdk.com/ret/h5_yy/10654/3799
+                    <input type="hidden" name="callback_url" id="callback_url" style="width: 94%">
                 </td>
             </tr>
             <tr>
@@ -98,24 +96,34 @@
                     </div>
                 </td>
             </tr>
-            <tr>
-                <td style="width:100px;text-align: left;padding-top: 13px;">key:</td>
+            </tbody>
+        </table>
+        <table style="border:0px;" id="table_report" class="table table-striped table-bordered table-hover">
+            <tbody>
+            <tr id="gameTest" style="display: none;">
+                <td style="width:100px;text-align: left;padding-top: 13px;">游戏测试地址:</td>
                 <td>
-                    <input style="width:94%;" type="text" name="key" id="key" value="" maxlength="100000000" title="key"
-                           check="1">
+                    <input style="width: 94%;color:#000;font-weight: bold;" type="text" name="testUrl" id="testUrl"
+                           value="" maxlength="500" readonly="readonly">
                     <div>
-                        <font color="#aaa">注：渠道提供的key</font>
+                        <font id="testTip1" color="red" style="display: block;">注：保存即可激活测试游戏按钮</font>
+                        <font color="#aaa" style="display: block;">游戏中心接入操作指南
+                            <a target="_blank"
+                               onclick="javascript:window.open('http://www.soeasysdk.com/website_download.html')"><i>（查看）</i></a></font>
                     </div>
                 </td>
             </tr>
+            </tbody>
         </table>
     </div>
 </div>
 
 <div id="dlg-buttons">
-    <a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="javascript:alert('save')">Save</a>
+    <input id="dlg-appid" hidden="hidden" value="">
+    <input id="dlg-channelid" hidden="hidden" value="">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="save();">保存</a>
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel"
-       onclick="javascript:$('#dlg').dialog('close')">Close</a>
+       onclick="javascript:$('#dlg').dialog('close')">关闭</a>
 </div>
 
 </body>
@@ -162,7 +170,15 @@
     }
 
 
-    .cc th, .cc td {
+    .table_report th, .table_report td {
+        border-top: 0;
+        padding: 8px;
+        line-height: 20px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .table_top th, .table_top td {
         border-top: 0;
         padding: 8px;
         line-height: 20px;

@@ -18,9 +18,7 @@ $(function () {
                 dlg.dialog("close");
                 loadGameSpTab(1);
             }
-
         }]
-
     });
     let dg1 = $('#dg1');
     dg1.datagrid({
@@ -71,7 +69,7 @@ $(function () {
         total: rows.length,
         rows: rows
     };
-    dg2.datagrid('loadData', data);
+    // dg2.datagrid('loadData', data);
     loadGameSpTab(1);
 });
 
@@ -137,40 +135,43 @@ function loadGameSpTab(type) {
 }
 
 function config(val, row, index) {
-    if (row.configStatus === 0) {
-        return '<a href="javascript:void(0)" style="color: blueviolet" onclick="openConfig(' + index + ')">配置</a>' +
+    if (showTip === 0) {
+        return '<a href="javascript:void(0)" style="color: blueviolet" onclick="openConfig(' + row.appid + ',' + row.channelid + ')">配置</a>' +
             '&nbsp;&nbsp;&nbsp;&nbsp;' +
             '<a style="color: grey">打包</a>';
     } else {
         return '<img style="width:12px;float:left;margin-top:5px;" src="/images/step_finish.png">' +
             '<a href="javascript:void(0)" style="color: grey" onclick="config(' + index + ')">已配置</a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">修改</a>&nbsp;&nbsp;' +
+            '<a href="javascript:void(0)" style="color: blueviolet" onclick="openConfig(' + row.appid + ',' + row.channelid + ')">修改</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">打包</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">测试</a>&nbsp;&nbsp;' +
             '<a href="javascript:void(0)" style="color: blueviolet" onclick="config(' + index + ')">分发</a>&nbsp;&nbsp;';
     }
 }
 
-function openConfig(index) {
+function openConfig(appId, channelId) {
     console.info("openConfig");
     let dlg = $("#dlg");
     dlg.dialog({
         title: '渠道配置',//弹出框的标题
         modal: true,//模态框
         closed: true,//默认弹出框关闭
-        width: 800,//弹出框宽度
-        height: 400,//弹出框高度
+        width: 1200,//弹出框宽度
+        height: 600,//弹出框高度
         buttons: '#dlg-buttons',//弹出框底部按钮。#xx代表按钮所在的div。
     });
     dlg.dialog({
         onOpen: function () {
+            loadChannelConfig(appId, channelId);
+        }, onClose: function () {
+            console.log("close");
         }
     });
     dlg.dialog("open");
 
 }
 
-function sp_select() {
+function sp_Select() {
     let dlg = $("#dd");
     dlg.dialog({
         onOpen: function () {
@@ -200,18 +201,6 @@ function editOpt(index) {
         changeSdk(row);
         loadGameSpTab(2);
     }
-    /*    let data = {
-            "id": row.id,
-            "gameId": $("#appid").val(),
-            "spId": row.channelid,
-            "loginUrl": row.loginUrl,
-            "appId": row.appId,
-            "appName": row.appName,
-            "loginKey": row.loginKey,
-            "payKey": row.payKey,
-            "sendKey": row.sendKey,
-            "type": type,
-        };*/
 }
 
 function sdkCancel(app_id, channel_id) {
@@ -287,112 +276,242 @@ function showPhoto(value, row, index) {
     }
 }
 
+let arr = {};
+let bodyjson = {};
+let parapame = {};
+let showTip = "0";
+let feeArr = [];
+let channel_sdk_name = "";
+let feeConfig;
+
 //配置游戏的渠道参数
-function loadChannelConfig() {
-    let arr = {};
-    let bodyjson = {};
-    let parapame = {};
-    let showTip = "0";
-    let feeArr = [];
-    let channel_sdk_name = "";
-    let feeConfig;
-    feeArr = {
-        "screen": "0",
-        "product_name": "测试122",
-        "feeTempletList": [],
-        "channel_sub_icon_url": "",
-        "channel_callback_url": "http://cn.soeasysdk.com/ret/{channel_code}/{sdkindex}/{appid}",
-        "h5_html_path": "",
-        "h5_html_url": "",
-        "meta_data": "",
-        "channel_id": 806,
-        "cate_type": "1",
-        "id": 25923,
-        "is_screen": "1",
-        "sdkindex": 10654,
-        "screen_url": "",
-        "del_permission": "0",
-        "reinforce": "0",
-        "app_id": 3799,
-        "channel_sdk_name": "yy渠道",
-        "channel_config_key": "[{\"name\":\"key\",\"required\":\"1\",\"showName\":\"key\",\"desc\":\"渠道提供的key\",\"alert\":\"1\"},\r\n{\"name\":\"gamename\",\"required\":\"1\",\"showName\":\"gamename\",\"desc\":\"游戏名称\"}]",
-        "h5_url": "https://source.huojianos.com/g1/game/index_zy_suyi.html",
-        "channel_sdk_code": "h5_yy",
-        "channel_feecode_config": "0"
-    }
+function loadChannelConfig(appId, channelId) {
+    $("#dlg-appid").val(appId);
+    $("#dlg-channelid").val(channelId);
+    console.info($("#dlg-appid").val());
+    console.info($("#dlg-channelid").val());
 
     $.ajax({
         type: 'post',
         url: '/game/channelConfig',
         data: {
-            "id": "25923"
+            "appId": appId,
+            "channelId": channelId
         },
+        dataType: 'json',
         success: function (res) {
-            console.info(JSON.stringify(res));
+            console.info(res);
+            if (res.hasOwnProperty("resultCode") && res.resultCode === 501) {
+                relogin();
+                return;
+            }
             parapame = res;
             channel_sdk_name = res.channel_sdk_name;
+
             if (res.channel_config_key != null && res.channel_config_key !== "") {
-                arr = JSON.parse(parapame.channel_config_key);
-                if (res.sdkindex === "315") {
-                    $("#gameTest").show();
-                    $("#testUrl").val("http://hlgame.mz30.cn/?code=" + res.fAppCode + "");
-                    configZMKey(arr, res.fCpKey, res.fAppCode, res.fSecretKey, "table_report");
-                    if (res.h5_html_path === "") {
-                        $("#testTip1").show();
-                    } else {
-                        $("#testTip1").hide();
-                    }
-                } else {
-                    configKey(arr, "table_report");
-                    $("#gameTest").hide();
-                }
-            } else {
-                $("#table_report").hide();
-            }
-            if (res.feeTempletList != null && res.feeTempletList != "") {
-                var feeTempletList = res.feeTempletList;
-                for (var i = 0; i < feeTempletList.length; i++) {
-                    $("#feeUl").append(feeOption(feeTempletList[i]))
-                }
-            }
-            feeConfig = res.channel_feecode_config;
-            if (res.channel_feecode_config != null && res.channel_feecode_config != "") {
-                if (res.channel_feecode_config == "1") {
-                    $("#feeDiv").show();
-                } else if (res.channel_feecode_config == "0") {
-                    $("#feeDiv").hide();
-                }
-            } else {
-                $("#feeDiv").hide();
+                // arr = JSON.parse(parapame.channel_config_key);
+                arr = parapame.channel_config_key;
+                configKey(arr, "table_report");
+                $("#gameTest").hide();
             }
             setValue(res);
-
-        },
-        dataType: 'json'
+        }
     });
 }
 
-function configZMKey(arr, fCpKey, fAppCode, fSecretKey, id) {
+function configKey(arr, id) {
     let c = "";
     for (let o in arr) {
-        c += addZMTr(arr[o], fCpKey, fAppCode, fSecretKey);
+        let res = addTr(arr[o]);
+        c += res;
+        // console.log(res);
     }
-    $("#" + id + "").prepend(c);
+    $("#" + id + "").append(c);
 }
 
-function addZMTr(o, fCpKey, fAppCode, fSecretKey) {
-    let str = "";
-    if (o.showName === "APPCODE") {
-        str = fAppCode;
-    } else if (o.showName === "CPKEY") {
-        str = fCpKey;
-    } else if (o.showName === "secretkey") {
-        str = fSecretKey;
+function addTr(o) {
+    let valData = "";
+    let valView = "";
+    let valStyle = "style='width:94%;'";
+    if (o["alert"]) showTip = o["alert"];
+    if (o["val"]) {
+        valData = o["val"];
+        valView = "readonly='readonly'";
+        valStyle = "style='width:94%;font-weight:bold;border: 0;color:#000;'";
     }
     return '<tr>' +
         '<td style="width:100px;text-align: left;padding-top: 13px;">' + o.showName + ':</td>' +
-        '<td><input style="width:94%;" type="text" name="' + o.name + '" id="' + o.name + '" readonly="readonly" value="' + str + '" maxlength="1000" title="' + o.showName + '" check="' + o.required + '">' +
+        '<td>' +
+        '<input ' + valStyle + ' type="text" ' + valView + ' name="' + o.name + '" id="' + o.name + '" value="' + valData + '"  maxlength="100000000" title="' + o.showName + '" check="' + o.required + '">' +
         '<div><font color="#aaa">注：' + o.desc + '</font></div>' +
         '</td>' +
         '</tr>';
+}
+
+
+function setValue(res) {
+    let gotourl = "";
+    if (res.h5_url) {
+        gotourl = res.h5_url;
+        let fileName = hex_md5(encodeURIComponent(res.app_id + "" + res.channel_id));
+        if (gotourl.indexOf("zycon") < 0) {
+            if (gotourl.indexOf("?") > 0) {
+                gotourl += "&zycon=" + fileName;
+            } else {
+                gotourl += "?zycon=" + fileName;
+            }
+        }
+
+        document.getElementById("url").value = gotourl;
+    }
+    if (res.channel_callback_url != null && res.channel_callback_url !== "") {
+        $("#channel_callback_url").show();
+        let callback = res.channel_callback_url;
+        callback = callback.replace("{appid}", res.app_id);
+        callback = callback.replace("{sdkindex}", res.sdkindex);
+        callback = callback.replace("{channel_code}", res.channel_sdk_code);
+
+        $("#callback_url").after("" + callback + "");
+    } else {
+        $("#channel_callback_url").hide();
+    }
+
+    if (res.config_key != null && res.config_key !== "") {
+        // let arr = JSON.parse(res.config_key);
+        let arr = res.config_key;
+        for (let o in arr) {
+            if (document.getElementById(o))
+                document.getElementById(o).value = arr[o];
+        }
+        if (showTip === "1") {
+            $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
+        }
+    } else {
+        if (showTip === "1") {
+            $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
+        }
+    }
+
+
+}
+
+function updateConfigKey() {
+    console.info($("#dlg-appid").val());
+    console.info($("#dlg-channelid").val());
+    $.ajax({
+        type: 'post',
+        url: '/game/updateConfig',
+        data: {
+            "appId": $("#dlg-appid").val(),
+            "channelId": $("#dlg-channelid").val()
+        },
+        dataType: 'json',
+        success: function (res) {
+            console.info(res);
+            if (res.hasOwnProperty("resultCode") && res.resultCode === 501) {
+                relogin();
+                return;
+            }
+            parapame = res;
+            channel_sdk_name = res.channel_sdk_name;
+
+            if (res.channel_config_key != null && res.channel_config_key !== "") {
+                // arr = JSON.parse(parapame.channel_config_key);
+                arr = parapame.channel_config_key;
+                configKey(arr, "table_report");
+                $("#gameTest").hide();
+            }
+            setValue(res);
+        }
+    });
+}
+
+//保存
+function save() {
+    feeArr.length = 0;
+    var flag = true;
+
+    if (!checkParamS()) return false;
+    if ($("#url").val() === "") {
+        $("#url").tips({
+            side: 3,
+            msg: "渠道入口地址不能为空！",
+            bg: '#AE81FF',
+            time: 2
+        });
+        return false;
+    } else if (IsURL($("#url").val()) === false) {
+        $("#url").tips({
+            side: 3,
+            msg: '请填写正确的源地址，并以http或https开头',
+            bg: '#AE81FF',
+            time: 2
+        });
+        $("#url").focus();
+        return false;
+    } else if ($("#url").val().indexOf("zycon") < 0) {
+        $("#url").tips({
+            side: 3,
+            msg: '请带上zycon参数',
+            bg: '#AE81FF',
+            time: 2
+        });
+        $("#url").focus();
+        return false;
+    }
+    if (feeConfig === "1") {
+        if (feeArr.length < 1) {
+            if ($('#feelist').children().length === 0) {
+                top.showInfo("请先填写计费点！");
+                return false;
+            }
+        }
+    }
+
+    parapame.config_key = JSON.stringify(bodyjson);
+    parapame.h5_url = $("#url").val().trim();
+    var p = "";
+    if ("" === "1") {
+        parapame.t = "1";
+    }
+    if (flag === true) {
+        $.ajax({
+            type: 'post',
+            url: '/game/updateChannelConfig',
+            data: parapame,
+            dataType: 'json',
+            success: function (res) {
+                $('#dlg').dialog('close');
+            }
+        });
+    }
+
+}
+
+/**
+ * @return {boolean}
+ */
+function IsURL(urlString) {
+    let regExp = /(http|ftp|https):\/\/[\w]+(.[\w]+)([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])/;
+    return !!urlString.match(regExp);
+}
+
+function checkParamS() {
+    for (var o in arr) {
+        val = document.getElementById(arr[o].name).value;
+        var check = document.getElementById(arr[o].name).getAttribute("check");
+        val = val.trim();
+        if (val === "" && check === "1") {
+            $("#" + arr[o].name).tips({
+                side: 3,
+                msg: arr[o].showName + "不能为空！",
+                bg: '#AE81FF',
+                time: 2
+            });
+            return false;
+        } else {
+            bodyjson[arr[o].name] = val;
+        }
+    }
+    return true;
 }

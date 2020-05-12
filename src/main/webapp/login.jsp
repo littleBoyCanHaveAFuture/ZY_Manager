@@ -3,10 +3,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 
     <title>perfect-ssm - 登录</title>
     <meta name="keywords" content="perfect-ssm">
@@ -17,16 +15,19 @@
 
     <link href="css/animate.min.css" rel="stylesheet">
     <link href="css/style.min862f.css" rel="stylesheet">
+    <link rel="shortcut icon"
+          href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
     <!--[if lt IE 9]>
     <meta http-equiv="refresh" content="0;ie.html"/>
     <![endif]-->
+
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
-    <script  type="text/javascript"
-             src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="${pageContext.request.contextPath}/js/login.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
-    <link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
+
 </head>
 
 <body class="gray-bg">
@@ -51,7 +52,7 @@
                 <input type="password" class="form-control" placeholder="密码" name="password" id="password" required="">
             </div>
 
-            <button type="button"  class="btn btn-primary block full-width m-b" onclick="login();">
+            <button type="button" class="btn btn-primary block full-width m-b" onclick="login();">
                 登 录
             </button>
 

@@ -10,6 +10,8 @@
         <result property="shareLinkUrl" column="shareLinkUrl"/>
         <result property="iconUrl" column="icon_url"/>
         <result property="version" column="version"/>
+        <result property="code" column="channel_sdk_code"/>
+        <result property="config" column="channel_config_key"/>
     </resultMap>
 
     <sql id="select_sp_column">
@@ -19,7 +21,9 @@
                state,
                shareLinkUrl,
                icon_url,
-               version
+               version,
+               channel_sdk_code,
+               channel_config_key
         FROM zy_sp
     </sql>
 
@@ -57,6 +61,12 @@
         </if>
     </select>
 
+    <select id="getSp" resultMap="SpResult">
+        <include refid="select_sp_column"/>
+
+        where spId=#{spId}
+
+    </select>
 
     <select id="selectSpByIds" parameterType="map" resultMap="SpResult">
         SELECT * FROM zy_sp
@@ -120,12 +130,16 @@
             <if test="version != null  and version !=''">
                 version=#{version},
             </if>
+            <if test="channelConfigKey != null and  channelConfigKey!='' ">
+                channel_config_key=#{channelConfigKey},
+            </if>
+
         </set>
         where spId=#{spId}
     </update>
 
     <insert id="addSp" parameterType="map">
-        insert into zy_sp(spId, parent, name, state, shareLinkUrl, icon_url, version)
-        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl}, #{iconUrl}, #{version})
+        insert into zy_sp(spId, parent, name, state, shareLinkUrl, icon_url, version,channel_sdk_code,channel_config_key)
+        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl}, #{iconUrl}, #{version},#{code}, #{config})
     </insert>
 </mapper>

@@ -17,6 +17,8 @@ function initTableColumns() {
             {field: 'state', title: '状态', align: 'center'},
             {field: 'shareLinkUrl', title: '分享链接', align: 'center'},
             {field: 'version', title: '版本号', align: 'center'},
+            {field: 'code', title: '简写', align: 'center'},
+            {field: 'config', title: 'json配置', align: 'center', hidden: true},
         ]],
         pagination: true,
         pageSize: 10,
@@ -227,7 +229,7 @@ function saveServer(type) {
     let shareLinkUrl = $("#save_shareLinkUrl").val();
     let iconUrl = $("#save_icon").val();
     let version = $("#save_version").val();
-
+    let code = $("#save_code").val();
     let param =
         "?type=" + type +
         "&spId=" + spId +
@@ -236,7 +238,8 @@ function saveServer(type) {
         "&state=" + state +
         "&shareLinkUrl=" + shareLinkUrl +
         "&iconUrl=" + iconUrl +
-        "&version=" + version;
+        "&version=" + version +
+        "&code=" + code;
 
     console.info(url);
 

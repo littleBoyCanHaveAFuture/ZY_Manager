@@ -36,6 +36,14 @@ public class Sp {
      * 版本
      */
     private String version;
+    /**
+     * 简写地址
+     */
+    private String code;
+    /**
+     * json 配置
+     */
+    private String config;
 
     public Sp() {
 

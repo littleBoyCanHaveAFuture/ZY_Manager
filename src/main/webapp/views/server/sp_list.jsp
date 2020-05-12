@@ -15,7 +15,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/sp_list.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/sp_list.js?20200511"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
@@ -119,6 +119,15 @@
                            missingMessage="分享链接">
                 </td>
             </tr>
+            <tr>
+                <td>简写:</td>
+                <td>
+                    <label for="save_code"></label>
+                    <input type="text" name="save_shareLinkUrl" id="save_code"
+                           required="true" class="easyui-validatebox" validType="namerules"
+                           missingMessage="jianxie ">
+                </td>
+            </tr>save_code
         </table>
     </div>
 </div>

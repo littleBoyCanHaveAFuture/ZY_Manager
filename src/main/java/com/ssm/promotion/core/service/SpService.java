@@ -20,6 +20,7 @@ public interface SpService {
 
     Long getTotalSp(Integer userId);
 
+    Sp getSp(Integer spId,Integer userId);
     /**
      * 删除渠道信息
      */

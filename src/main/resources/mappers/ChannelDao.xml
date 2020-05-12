@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.ChannelConfigDao">
+    <resultMap type="ChannelConfig" id="ConfigResult">
+        <result property="id" column="id"/>
+        <result property="appId" column="app_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="configKey" column="config_Key"/>
+        <result property="channelCallbackUrl" column="channel_callback_url"/>
+        <result property="h5Url" column="h5_url"/>
+
+    </resultMap>
+    <sql id="Base_Column_List">
+        select id,
+               app_id,
+               channel_id,
+               config_key,
+               channel_callback_url,
+               h5_url
+        from zy_channel
+    </sql>
+    <insert id="insertConfig" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="ChannelConfig">
+        insert into zy_channel(app_id,
+                               channel_id,
+                               config_key,
+                               channel_callback_url,
+                               h5_url)
+        values (#{appId}, #{channelId}, #{configKey}, #{channelCallbackUrl}, #{h5Url})
+    </insert>
+
+    <update id="updateConfig" parameterType="ChannelConfig">
+        update zy_channel
+        <set>
+            <if test="h5Url != null and  h5Url!= ''">
+                h5_url=#{h5Url},
+            </if>
+            <if test="configKey != null and  configKey != ''">
+                config_key=#{configKey},
+            </if>
+            <if test="channelCallbackUrl != null and  channelCallbackUrl != ''">
+                channel_callback_url=#{channelCallbackUrl},
+            </if>
+        </set>
+        where app_id=#{appId}
+        and channel_id=#{channelId}
+    </update>
+
+    <select id="selectConfig" parameterType="int" resultMap="ConfigResult">
+        <include refid="Base_Column_List"/>
+        where app_id = #{appId}
+        and channel_id = #{channelId}
+    </select>
+
+    <delete id="deleteConfig" parameterType="int">
+        delete
+        from zy_channel
+        where app_id = #{appId}
+          and channel_id = #{channelId}
+    </delete>
+
+
+</mapper>

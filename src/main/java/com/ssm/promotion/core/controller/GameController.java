@@ -1,11 +1,14 @@
 package com.ssm.promotion.core.controller;
 
 import com.ssm.promotion.core.common.Constants;
+import com.ssm.promotion.core.entity.ChannelConfig;
 import com.ssm.promotion.core.entity.GameNew;
 import com.ssm.promotion.core.entity.PageBean;
+import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
+import com.ssm.promotion.core.service.ChannelConfigService;
 import com.ssm.promotion.core.service.GameNewService;
-import com.ssm.promotion.core.service.ServerListService;
+import com.ssm.promotion.core.service.SpService;
 import com.ssm.promotion.core.util.RandomUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
 import net.sf.json.JSONArray;
@@ -33,9 +36,11 @@ public class GameController {
     @Autowired
     jedisRechargeCache cache;
     @Resource
-    private ServerListService serverService;
-    @Resource
     private GameNewService gameNewService;
+    @Resource
+    private ChannelConfigService channelConfigService;
+    @Resource
+    private SpService spService;
     @Autowired
     private HttpServletRequest request;
 
@@ -202,16 +207,129 @@ public class GameController {
     }
 
     /**
-     * 添加
+     * 获取 游戏渠道配置
      */
     @RequestMapping(value = "/channelConfig", method = RequestMethod.POST)
     @ResponseBody
-    public void loadGameChannelConfig(@RequestBody GameNew game, HttpServletResponse response) throws Exception {
-        log.info("start: /game/addGame " + game.toString());
+    public void loadGameChannelConfig(@RequestParam(value = "appId", required = false) Integer appId,
+                                      @RequestParam(value = "channelId", required = false) Integer channelId,
+                                      HttpServletResponse response) throws Exception {
+        log.info("start: /game/channelConfig " + channelId);
         Integer userId = getUserId();
-
         JSONObject result = new JSONObject();
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        if (userId == null) {
+            result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
+            ResponseUtil.write(response, result);
+            return;
+        }
+        ChannelConfig config = channelConfigService.selectConfig(appId, channelId, -1);
+        Sp sp = spService.getSp(channelId, -1);
+        if (sp == null) {
+            result.put("result", "fail");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        if (sp.getConfig() == null || sp.getConfig().isEmpty()) {
+            result.put("result", "fail");
+            ResponseUtil.write(response, result);
+            return;
+        }
+
+        JSONArray ccArray = JSONArray.fromObject(sp.getConfig());
+
+        if (config == null) {
+            config = new ChannelConfig();
+
+            config.setAppId(appId);
+            config.setChannelId(channelId);
+
+            config.setChannelCallbackUrl("http://cn.soeasysdk.com/ret/{channel_code}/{sdkindex}/{appid}");
+            config.setH5Url("https://source.huojianos.com/g1/game/index_zy_suyi.html");
+
+            config.setChannelSdkName(sp.getName());
+            config.setChannelSdkCode(sp.getCode());
+            config.setChannelConfigKey(sp.getConfig());
+
+            JSONObject jsonObject = new JSONObject();
+
+            for (int i = 0; i < ccArray.size(); i++) {
+                //3、把里面的对象转化为JSONObject
+                JSONObject job = ccArray.getJSONObject(i);
+                // 4、把里面想要的参数一个个用.属性名的方式获取到
+                String name = job.getString("name");
+                jsonObject.put(name, "");
+            }
+            config.setConfigKey(jsonObject.toString());
+
+            int index = channelConfigService.insertConfig(config, -1);
+
+            String url = "http://cn.soeasysdk.com/ret/" + sp.getCode() + "/" + index + "/" + appId;
+            config.setChannelCallbackUrl(url);
+            channelConfigService.updateConfig(config, -1);
+        }
+        config.setChannelSdkName(sp.getName());
+        config.setChannelSdkCode(sp.getCode());
+        config.setChannelConfigKey(sp.getConfig());
+
+        result.put("sdkindex", config.getId());
+        result.put("app_id", config.getAppId());
+        result.put("channel_id", config.getChannelId());
+        result.put("config_key", config.getConfigKey());
+        result.put("channel_sdk_name", config.getChannelSdkName());
+        result.put("channel_sdk_code", config.getChannelSdkCode());
+        result.put("channel_config_key", config.getChannelConfigKey());
+        result.put("channel_callback_url", config.getChannelCallbackUrl());
+        result.put("h5_url", config.getH5Url());
+
         ResponseUtil.write(response, result);
     }
+
+    /**
+     * 获取 游戏渠道配置
+     */
+    @RequestMapping(value = "/updateChannelConfig", method = RequestMethod.POST)
+    @ResponseBody
+    public void updateChannelConfig(@RequestParam(value = "app_id", required = false) Integer appId,
+                                    @RequestParam(value = "channel_id", required = false) Integer channelId,
+                                    @RequestParam(value = "config_key", required = false) String configKey,
+                                    @RequestParam(value = "h5_url", required = false) String h5Url,
+                                    HttpServletResponse response) throws Exception {
+        log.info("start: /game/setConfig " + channelId);
+        Integer userId = getUserId();
+        JSONObject result = new JSONObject();
+        if (userId == null) {
+            result.put("resultCode", Constants.RESULT_CODE_SERVER_RELOGIN);
+            ResponseUtil.write(response, result);
+            return;
+        }
+        ChannelConfig config = channelConfigService.selectConfig(appId, channelId, -1);
+        Sp sp = spService.getSp(channelId, -1);
+
+        if (sp == null || config == null) {
+            result.put("result", "fail");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        JSONObject jsonObject = JSONObject.fromObject(configKey);
+        if (jsonObject.isEmpty()) {
+            result.put("result", "fail");
+            ResponseUtil.write(response, result);
+            return;
+        }
+        JSONArray ccArray = JSONArray.fromObject(sp.getConfig());
+        for (int i = 0; i < ccArray.size(); i++) {
+            JSONObject job = ccArray.getJSONObject(i);
+            String name = job.getString("name");
+            if (jsonObject.containsKey(name)) {
+                break;
+            }
+        }
+
+        config.setConfigKey(configKey);
+        config.setH5Url(h5Url);
+        channelConfigService.updateConfig(config, -1);
+
+        ResponseUtil.write(response, result);
+    }
+
 }

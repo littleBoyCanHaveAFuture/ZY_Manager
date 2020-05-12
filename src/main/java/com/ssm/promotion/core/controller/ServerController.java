@@ -434,6 +434,7 @@ public class ServerController {
                          String shareLinkUrl,
                          String iconUrl,
                          String version,
+                         String code,
                          Integer type, HttpServletResponse response) throws Exception {
         log.info("changeSp");
         log.info("spId:" + spId);
@@ -443,6 +444,7 @@ public class ServerController {
         log.info("shareLinkUrl:" + shareLinkUrl);
         log.info("iconUrl:" + iconUrl);
         log.info("version:" + version);
+        log.info("code:" + code);
 
         Integer userId = getUserId();
         if (userId == null) {
@@ -466,6 +468,9 @@ public class ServerController {
         } else if (type == 2) {
             spService.updateSp(map, userId);
         } else if (type == 3) {
+            if (code != null || !code.isEmpty()) {
+                map.put("code", code);
+            }
             spService.addSp(map, userId);
         }
 
