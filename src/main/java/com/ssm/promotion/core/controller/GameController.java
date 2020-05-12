@@ -243,8 +243,8 @@ public class GameController {
             config.setAppId(appId);
             config.setChannelId(channelId);
 
-            config.setChannelCallbackUrl("http://cn.soeasysdk.com/ret/{channel_code}/{sdkindex}/{appid}");
-            config.setH5Url("https://source.huojianos.com/g1/game/index_zy_suyi.html");
+            config.setChannelCallbackUrl("http://www.zyh5games.com/pay/payInfo/{channel_code}/{sdkindex}/{appid}");
+            config.setH5Url("http://www.zyh5games.com:8080/login/cs.jsp");
 
             config.setChannelSdkName(sp.getName());
             config.setChannelSdkCode(sp.getCode());
@@ -263,7 +263,7 @@ public class GameController {
 
             int index = channelConfigService.insertConfig(config, -1);
 
-            String url = "http://cn.soeasysdk.com/ret/" + sp.getCode() + "/" + index + "/" + appId;
+            String url = "http://www.zyh5games.com/pay/payInfo/" + sp.getCode() + "/" + index + "/" + appId;
             config.setChannelCallbackUrl(url);
             channelConfigService.updateConfig(config, -1);
         }
@@ -331,5 +331,6 @@ public class GameController {
 
         ResponseUtil.write(response, result);
     }
+
 
 }

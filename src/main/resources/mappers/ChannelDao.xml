@@ -51,6 +51,11 @@
         and channel_id = #{channelId}
     </select>
 
+    <select id="selectGameConfig" parameterType="int" resultType="int">
+        select distinct channel_id from zy_channel
+        where app_id = #{appId}
+    </select>
+
     <delete id="deleteConfig" parameterType="int">
         delete
         from zy_channel

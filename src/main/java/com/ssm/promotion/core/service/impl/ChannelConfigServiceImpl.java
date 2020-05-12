@@ -6,6 +6,8 @@ import com.ssm.promotion.core.service.ChannelConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("ChannelConfigService")
 public class ChannelConfigServiceImpl implements ChannelConfigService {
     @Autowired
@@ -30,6 +32,11 @@ public class ChannelConfigServiceImpl implements ChannelConfigService {
     @Override
     public int deleteConfig(Integer appId, Integer channelId, Integer userId) {
         return dao.deleteConfig(appId, channelId);
+    }
+
+    @Override
+    public List<Integer> selectGameConfig(Integer appId,Integer userId) {
+        return dao.selectGameConfig(appId);
     }
 }
 

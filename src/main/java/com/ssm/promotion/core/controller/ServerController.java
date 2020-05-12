@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Administrator
@@ -46,8 +45,7 @@ public class ServerController {
     @Autowired
     private HttpServletRequest request;
     @Resource
-    private RechargeSummaryService rsService;
-
+    private ChannelConfigService channelConfigService;
 
     private Integer getUserId() {
         //可以设置缓存 redis 登录时设置过期时间 24小时 todo
@@ -98,46 +96,6 @@ public class ServerController {
     }
 
     /**
-     * 添加
-     */
-    @RequestMapping(value = "/addServer", method = RequestMethod.POST)
-    @ResponseBody
-    public Result addServer(@RequestBody ServerInfo serverInfo)
-            throws Exception {
-        log.info("start: /server/addServer " + serverInfo.toString());
-        Integer userId = getUserId();
-        if (userId == null) {
-            return ResultGenerator.genRelogin();
-        }
-        if (serverInfo.getSpId() == null || serverInfo.getGameId() == null || serverInfo.getServerId() == null) {
-            return ResultGenerator.genFailResult("添加失败 参数为空");
-        }
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("gameId", serverInfo.getGameId());
-        map.put("serverId", serverInfo.getServerId());
-        map.put("spId", serverInfo.getSpId());
-
-        if (serverService.existSGS(map, userId)) {
-            return ResultGenerator.genFailResult("添加失败 区服不存在");
-        }
-        Game game = gameService.selectGame(serverInfo.getGameId(), -1);
-        if (game == null) {
-            return ResultGenerator.genFailResult("添加失败 游戏不存在");
-        }
-        serverInfo.setGamename(game.getName());
-        int resultTotal = serverService.addServer(serverInfo, userId);
-
-        log.info("request: article/save , " + serverInfo.toString());
-
-        if (resultTotal > 0) {
-            return ResultGenerator.genSuccessResult();
-        } else {
-            return ResultGenerator.genFailResult("添加失败");
-        }
-    }
-
-    /**
      * 修改
      */
     @RequestMapping(value = "updateServer", method = RequestMethod.PUT)
@@ -182,545 +140,6 @@ public class ServerController {
 
         log.info("request: server/delete , ids: " + ids);
         return ResultGenerator.genSuccessResult();
-    }
-
-    /**
-     * 增加、修改、删除 游戏
-     */
-    @RequestMapping(value = "/gamedata", method = RequestMethod.GET)
-    @ResponseBody
-    public void changeGame(Integer gameId,
-                           String name,
-                           Integer type,
-                           Integer uid,
-                           String loginUrl,
-                           String paybackUrl,
-                           HttpServletResponse response) throws Exception {
-        log.info("gamedata:");
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        log.info("gameId:" + gameId);
-        log.info("name:" + name);
-        log.info("type:" + type);
-        log.info("uid:" + uid);
-        log.info("loginUrl:" + loginUrl);
-        log.info("paybackUrl:" + paybackUrl);
-
-        Game game = new Game(name, userId);
-
-        game.setLoginUrl(loginUrl);
-        game.setPaycallbackUrl(paybackUrl);
-
-        if (type == 1) {
-            gameService.deleteGame(gameId, userId);
-            cache.delGAMEIDInfo(String.valueOf(gameId));
-        } else if (type == 2) {
-            if (gameId != null) {
-                game.setId(gameId);
-                gameService.updateGame(game, userId);
-            }
-        } else if (type == 3) {
-            Integer addGameId = gameService.addGame(game, userId);
-            cache.setGAMEIDInfo(String.valueOf(addGameId));
-        }
-
-        log.info("request: game/gamedata , gameId: " + gameId);
-
-        JSONObject result = new JSONObject();
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-        ResponseUtil.write(response, result);
-    }
-
-    /**
-     * 查询服务器列表
-     */
-    @RequestMapping(value = "/getGameList", method = RequestMethod.GET)
-    public void getGameList(@RequestParam(value = "page", required = false) String page,
-                            @RequestParam(value = "rows", required = false) String rows,
-                            Integer gameId,
-                            String name,
-                            Integer spId,
-                            HttpServletResponse response) throws Exception {
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        JSONObject result = new JSONObject();
-
-        Map<String, Object> map = new HashMap<>(5);
-        if (page != null && rows != null) {
-            PageBean pageBean = new PageBean(Integer.parseInt(page),
-                    Integer.parseInt(rows));
-            map.put("start", pageBean.getStart());
-            map.put("size", pageBean.getPageSize());
-        }
-        map.put("gameId", gameId);
-        map.put("name", name);
-
-        List<Game> serverInfos = gameService.getGameList(map, userId);
-
-        if (spId != null) {
-            List<Game> res = new ArrayList<>();
-
-            List<Integer> gameIdList = serverService.getDistinctServerInfo(map, 1, userId);
-
-            if (gameIdList != null && gameIdList.size() > 0) {
-                for (Game game : serverInfos) {
-                    if (gameIdList.contains(game.getId())) {
-                        res.add(game);
-                    }
-                }
-                JSONArray jsonArray = JSONArray.fromObject(res);
-                result.put("rows", jsonArray);
-            }
-        } else {
-            JSONArray jsonArray = JSONArray.fromObject(serverInfos);
-            result.put("rows", jsonArray);
-        }
-
-        result.put("total", serverInfos.size());
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-
-        ResponseUtil.write(response, result);
-
-        log.info("request: server/getGameList , map: " + result.toString());
-    }
-
-    /**
-     * 查询不同的区服和渠道
-     *
-     * @param type 游戏   1
-     *             渠道   2
-     *             区服   3
-     */
-    @RequestMapping(value = "/getDistinctServerInfo", method = RequestMethod.POST)
-    public void getDistinctServerInfo(Integer spId, Integer gameId, Integer serverId,
-                                      Integer type,
-                                      HttpServletResponse response) throws Exception {
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-
-        Map<String, Object> map = new HashMap<>(6);
-        map.put("spId", spId);
-        map.put("gameId", gameId);
-        map.put("serverId", serverId);
-
-        JSONObject result = new JSONObject();
-        switch (type) {
-            case 1: {
-                //查渠道
-                List<Integer> spIdList = gameSpService.DistSpIdByGameId(gameId, userId);
-                spIdList = spIdList.stream().sorted(Integer::compareTo).collect(Collectors.toList());
-
-                JSONArray rows = JSONArray.fromObject(spIdList);
-                result.put("rows", rows.toString());
-                result.put("total", spIdList.size());
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            }
-            break;
-            case 2: {
-                //游戏id
-                List<Integer> gameIdList = gameSpService.DistGameIdBySpId(spId, userId);
-                gameIdList = gameIdList.stream().sorted(Integer::compareTo).collect(Collectors.toList());
-                //查游戏
-                List<Game> gameList = gameService.getGameList(map, userId);
-                Iterator<Game> it = gameList.iterator();
-                while (it.hasNext()) {
-                    Game game = it.next();
-                    if (!gameIdList.contains(game.getId())) {
-                        it.remove();
-                    }
-                }
-                JSONArray rows = JSONArray.fromObject(gameList);
-                result.put("rows", rows.toString());
-                result.put("total", gameList.size());
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            }
-            break;
-            case 3: {
-                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
-                result.put("rows", serverIdSet.toString());
-                result.put("total", serverIdSet.size());
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-            }
-            break;
-            case 4:
-                if (gameId == -1) {
-                    return;
-                }
-                //输入游戏id 查询所有区服
-                Map<String, GameInfo> gameInfoMap = rsService.getGameInfo(gameId, spId, serverId);
-                GameInfo gameInfo = gameInfoMap.get(String.valueOf(gameId));
-                //获取不同渠道所有的区服
-                Set<String> distServerSet = gameInfo.getServerInfo();
-                //不同区服 转int
-                Set<Integer> integerSet = new HashSet<>(distServerSet.size());
-                for (String s : distServerSet) {
-                    integerSet.add(Integer.valueOf(s));
-                }
-                //该游戏所有区服：从小到大排序
-                Set<Integer> sortSet = new TreeSet<>(Comparator.naturalOrder());
-                sortSet.addAll(integerSet);
-                result.put("rows", sortSet.toString());
-                result.put("total", sortSet.size());
-                result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-                break;
-            default:
-                break;
-        }
-
-        ResponseUtil.write(response, result);
-
-        log.info("request: server/getDistinctServerInfo , map: " + result.toString());
-    }
-
-    /**
-     * 查询服务器列表
-     */
-    @RequestMapping(value = "/getSpList", method = RequestMethod.GET)
-    public void getSpList(@RequestParam(value = "page", required = false) String page,
-                          @RequestParam(value = "rows", required = false) String rows,
-                          Integer spId,
-                          String name,
-                          HttpServletResponse response) throws Exception {
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        JSONObject result = new JSONObject();
-
-        Map<String, Object> map = new HashMap<>(5);
-        if (page != null && rows != null) {
-            PageBean pageBean = new PageBean(Integer.parseInt(page),
-                    Integer.parseInt(rows));
-            map.put("start", pageBean.getStart());
-            map.put("size", pageBean.getPageSize());
-        }
-        map.put("name", name);
-        map.put("spId", spId);
-        List<Sp> spInfos = spService.getAllSpByPage(map, userId);
-
-        long size = spService.getTotalSp(userId);
-        result.put("rows", spInfos);
-        result.put("total", size);
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-
-        ResponseUtil.write(response, result);
-
-        log.info("request: server/getGameList , map: " + result.toString());
-    }
-
-    /**
-     * 增加、修改、删除 渠道信息
-     *
-     * @param type 1 删除
-     *             2 更新
-     *             3 增加
-     */
-    @RequestMapping(value = "/changeSp", method = RequestMethod.GET)
-    @ResponseBody
-    public void changeSp(Integer spId,
-                         String name,
-                         Integer parent,
-                         Integer state,
-                         String shareLinkUrl,
-                         String iconUrl,
-                         String version,
-                         String code,
-                         Integer type, HttpServletResponse response) throws Exception {
-        log.info("changeSp");
-        log.info("spId:" + spId);
-        log.info("name:" + name);
-        log.info("parent:" + parent);
-        log.info("state:" + state);
-        log.info("shareLinkUrl:" + shareLinkUrl);
-        log.info("iconUrl:" + iconUrl);
-        log.info("version:" + version);
-        log.info("code:" + code);
-
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        if (spId == null) {
-            return;
-        }
-        Map<String, Object> map = new HashMap<>();
-        map.put("spId", spId);
-        map.put("name", name);
-        map.put("parent", parent);
-        map.put("state", state);
-        map.put("shareLinkUrl", shareLinkUrl);
-        map.put("iconUrl", iconUrl);
-        map.put("version", version);
-
-        if (type == 1) {
-            spService.delSp(spId, userId);
-        } else if (type == 2) {
-            spService.updateSp(map, userId);
-        } else if (type == 3) {
-            if (code != null || !code.isEmpty()) {
-                map.put("code", code);
-            }
-            spService.addSp(map, userId);
-        }
-
-
-        JSONObject result = new JSONObject();
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-        ResponseUtil.write(response, result);
-        log.info("request: changeSp ");
-    }
-
-    /**
-     * 查询用户-该游戏的所有渠道
-     */
-    @RequestMapping(value = "/getGameSpList", method = RequestMethod.POST)
-    public void getGameSpList(@RequestParam(value = "page", required = false) String page,
-                              @RequestParam(value = "rows", required = false) String rows,
-                              Integer gameId,
-                              String name,
-                              HttpServletResponse response) throws Exception {
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        if (gameId == null) {
-            return;
-        }
-
-        JSONObject result = new JSONObject();
-
-        Map<String, Object> map = new HashMap<>(5);
-        if (page != null && rows != null) {
-            PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
-            map.put("start", pageBean.getStart());
-            map.put("size", pageBean.getPageSize());
-        }
-
-        map.put("gameId", gameId);
-        map.put("name", name);
-        map.put("uid", userId);
-
-        long size = 0;
-        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
-        do {
-            //查询该账号-该游戏的所有渠道
-            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
-            if (gameSpList == null || gameSpList.size() == 0) {
-                break;
-            }
-            size = gameSpService.getCountGameSp(map, userId);
-            Set<Integer> spIds = new HashSet<>();
-            for (GameSp sp : gameSpList) {
-                spIds.add(sp.getSpId());
-            }
-            log.info(spIds.toString());
-
-            //查询详细的渠道信息
-            map.clear();
-            map.put("spIdList", spIds);
-            List<Sp> spList = spService.selectSpByIds(false, map, userId);
-
-            for (GameSp gameSp : gameSpList) {
-                Integer spId = gameSp.getSpId();
-                WebGameSp webGameSp = new WebGameSp();
-                webGameSp.setId(gameSp.getId());
-                webGameSp.setAppid(gameId);
-                webGameSp.setUid(gameSp.getUid());
-                webGameSp.setChannelid(spId);
-                //设置配置状态
-                webGameSp.setConfigStatus(gameSp.getStatus());
-
-                webGameSpMap.put(spId, webGameSp);
-            }
-            for (Sp sp : spList) {
-                Integer spId = sp.getSpId();
-                if (webGameSpMap.containsKey(spId)) {
-                    WebGameSp webGameSp = webGameSpMap.get(spId);
-                    webGameSp.setIcon(sp.getIconUrl());
-                    webGameSp.setName(sp.getName());
-                    webGameSp.setStatus(1);
-                    webGameSp.setVersion(sp.getVersion());
-
-                }
-            }
-
-            if (!name.isEmpty()) {
-                Iterator<Map.Entry<Integer, WebGameSp>> it = webGameSpMap.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, WebGameSp> entry = it.next();
-                    WebGameSp webGameSp = entry.getValue();
-                    if (!webGameSp.getName().contains(name)) {
-                        it.remove();
-                    }
-                }
-                size = webGameSpMap.size();
-            }
-
-
-        } while (false);
-
-
-        result.put("rows", webGameSpMap.values());
-        result.put("total", size);
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-
-        ResponseUtil.write(response, result);
-
-        log.info("request: server/getGameList , map: " + result.toString());
-    }
-
-    /**
-     * 查询所有渠道
-     */
-    @RequestMapping(value = "/getAllGameSpList", method = RequestMethod.POST)
-    public void getAllGameSpList(@RequestParam(value = "page", required = false) String page,
-                                 @RequestParam(value = "rows", required = false) String rows,
-                                 Integer gameId,
-                                 String name,
-                                 HttpServletResponse response) throws Exception {
-        Integer userId = getUserId();
-        if (userId == null) {
-            ResponseUtil.writeRelogin(response);
-            return;
-        }
-        if (gameId == null || page == null || rows == null) {
-            return;
-        }
-
-        long size = spService.getTotalSp(userId);
-        JSONObject result = new JSONObject();
-
-        List<WebGameSp> webGameSpList = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>(5);
-        //需要将已经存在的放前面
-        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
-
-        PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
-        map.put("start", pageBean.getStart());
-        map.put("size", pageBean.getPageSize());
-
-        do {
-            //已添加的游戏渠道
-            Set<Integer> hasGameSpId = new LinkedHashSet<>();
-
-            map.put("gameId", gameId);
-            map.put("name", name);
-            map.put("uid", userId);
-
-            //查询该账号-该游戏的所有渠道
-            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
-            if (gameSpList == null) {
-                break;
-            }
-
-            //数据条数
-            int gameSpSize = gameSpList.size();
-            //数据最大条数
-            long gameSpMaxSize = gameSpService.getCountGameSp(map, userId);
-            //计算最大页数
-            long gameSpMaxPage = gameSpMaxSize == 0 ? 0 : gameSpMaxSize / pageBean.getPageSize() + 1;
-
-            long noGameSpStart = 0;
-            long noGameSpPageSize = 0;
-
-            if (gameSpMaxPage > pageBean.getPage()) {
-                //当前页均是已添加的渠道
-                //直接查询
-                for (GameSp sp : gameSpList) {
-                    hasGameSpId.add(sp.getSpId());
-                }
-            } else if (gameSpMaxPage == pageBean.getPage()) {
-                //当前页=已添加的渠道+未添加的渠道
-                for (GameSp sp : gameSpList) {
-                    hasGameSpId.add(sp.getSpId());
-                }
-                noGameSpStart = 0;
-                noGameSpPageSize = pageBean.getStart() + pageBean.getPageSize() - gameSpSize;
-            } else {
-                //当前页均是未添加的渠道
-                noGameSpStart = pageBean.getStart() - gameSpMaxSize + 1;
-                noGameSpPageSize = pageBean.getPageSize();
-            }
-
-            log.info("noGameSpStart\t" + noGameSpStart);
-            log.info("noGameSpPageSize\t" + noGameSpPageSize);
-            log.info("spIds\t" + hasGameSpId.toString());
-
-            //查询详细的渠道信息
-            map.remove("gameId");
-            map.remove("name");
-            map.remove("uid");
-
-            //对应游戏已添加渠道的详细信息
-            if (hasGameSpId.size() != 0) {
-                map.put("spIdList", hasGameSpId);
-                List<Sp> hasSpList = spService.selectSpByIds(false, map, userId);
-
-                log.info(hasGameSpId.toString());
-
-                for (GameSp gameSp : gameSpList) {
-                    Integer spId = gameSp.getSpId();
-                    WebGameSp webGameSp = new WebGameSp();
-                    webGameSp.setId(gameSp.getId());
-                    webGameSp.setAppid(gameId);
-                    webGameSp.setUid(gameSp.getUid());
-                    webGameSp.setChannelid(spId);
-                    //设置配置状态
-                    webGameSp.setConfigStatus(gameSp.getStatus());
-                    webGameSpMap.put(spId, webGameSp);
-                    webGameSpList.add(webGameSp);
-                }
-                for (Sp sp : hasSpList) {
-                    Integer spId = sp.getSpId();
-                    if (webGameSpMap.containsKey(spId)) {
-                        WebGameSp webGameSp = webGameSpMap.get(spId);
-                        webGameSp.setIcon(sp.getIconUrl());
-                        webGameSp.setName(sp.getName());
-                        webGameSp.setStatus(1);
-                        webGameSp.setVersion(sp.getVersion());
-                    }
-                }
-            }
-            //对应游戏未添加渠道的详细信息
-            if (hasGameSpId.size() < pageBean.getPageSize()) {
-                List<Sp> noSpList = spService.selectSpByIds(true, map, userId);
-                for (Sp sp : noSpList) {
-                    Integer spId = sp.getSpId();
-                    WebGameSp webGameSp = new WebGameSp();
-                    webGameSp.setAppid(gameId);
-                    webGameSp.setIcon(sp.getIconUrl());
-                    webGameSp.setName(sp.getName());
-                    webGameSp.setChannelid(spId);
-                    webGameSp.setStatus(0);
-                    webGameSp.setVersion(sp.getVersion());
-                    //设置配置状态
-                    webGameSp.setConfigStatus(0);
-                    webGameSpMap.put(spId, webGameSp);
-                    webGameSpList.add(webGameSp);
-                }
-            }
-        } while (false);
-
-
-        result.put("rows", webGameSpList);
-        result.put("total", size);
-        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
-
-        ResponseUtil.write(response, result);
-
-        log.info("request: server/getGameList , map: " + result.toString());
     }
 
     /**
@@ -1094,5 +513,407 @@ public class ServerController {
 
 
         log.info("request: server/geGameGameDiscount , map: " + result.toString());
+    }
+
+
+    /**
+     * 查询服务器列表
+     */
+    @RequestMapping(value = "/getGameList", method = RequestMethod.GET)
+    public void getGameList(@RequestParam(value = "page", required = false) String page,
+                            @RequestParam(value = "rows", required = false) String rows,
+                            Integer gameId,
+                            String name,
+                            Integer spId,
+                            HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        if (page != null && rows != null) {
+            PageBean pageBean = new PageBean(Integer.parseInt(page),
+                    Integer.parseInt(rows));
+            map.put("start", pageBean.getStart());
+            map.put("size", pageBean.getPageSize());
+        }
+        map.put("gameId", gameId);
+        map.put("name", name);
+
+        List<Game> serverInfos = gameService.getGameList(map, userId);
+
+        if (spId != null) {
+            List<Game> res = new ArrayList<>();
+
+            List<Integer> gameIdList = serverService.getDistinctServerInfo(map, 1, userId);
+
+            if (gameIdList != null && gameIdList.size() > 0) {
+                for (Game game : serverInfos) {
+                    if (gameIdList.contains(game.getId())) {
+                        res.add(game);
+                    }
+                }
+                JSONArray jsonArray = JSONArray.fromObject(res);
+                result.put("rows", jsonArray);
+            }
+        } else {
+            JSONArray jsonArray = JSONArray.fromObject(serverInfos);
+            result.put("rows", jsonArray);
+        }
+
+        result.put("total", serverInfos.size());
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameList , map: " + result.toString());
+    }
+
+
+    /**
+     * 查询服务器列表
+     */
+    @RequestMapping(value = "/getSpList", method = RequestMethod.GET)
+    public void getSpList(@RequestParam(value = "page", required = false) String page,
+                          @RequestParam(value = "rows", required = false) String rows,
+                          Integer spId,
+                          String name,
+                          HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        if (page != null && rows != null) {
+            PageBean pageBean = new PageBean(Integer.parseInt(page),
+                    Integer.parseInt(rows));
+            map.put("start", pageBean.getStart());
+            map.put("size", pageBean.getPageSize());
+        }
+        map.put("name", name);
+        map.put("spId", spId);
+        List<Sp> spInfos = spService.getAllSpByPage(map, userId);
+
+        long size = spService.getTotalSp(userId);
+        result.put("rows", spInfos);
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getSpList , map: " + result.toString());
+    }
+
+    /**
+     * 增加、修改、删除 渠道信息
+     *
+     * @param type 1 删除
+     *             2 更新
+     *             3 增加
+     */
+    @RequestMapping(value = "/changeSp", method = RequestMethod.GET)
+    @ResponseBody
+    public void changeSp(Integer spId,
+                         String name,
+                         Integer parent,
+                         Integer state,
+                         String shareLinkUrl,
+                         String iconUrl,
+                         String version,
+                         String code,
+                         Integer type, HttpServletResponse response) throws Exception {
+        log.info("changeSp");
+        log.info("spId:" + spId);
+        log.info("name:" + name);
+        log.info("parent:" + parent);
+        log.info("state:" + state);
+        log.info("shareLinkUrl:" + shareLinkUrl);
+        log.info("iconUrl:" + iconUrl);
+        log.info("version:" + version);
+        log.info("code:" + code);
+
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (spId == null) {
+            return;
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("spId", spId);
+        map.put("name", name);
+        map.put("parent", parent);
+        map.put("state", state);
+        map.put("shareLinkUrl", shareLinkUrl);
+        map.put("iconUrl", iconUrl);
+        map.put("version", version);
+
+        if (type == 1) {
+            spService.delSp(spId, userId);
+        } else if (type == 2) {
+            spService.updateSp(map, userId);
+        } else if (type == 3) {
+            if (code != null || !code.isEmpty()) {
+                map.put("code", code);
+            }
+            spService.addSp(map, userId);
+        }
+
+
+        JSONObject result = new JSONObject();
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+        log.info("request: changeSp ");
+    }
+
+    /**
+     * 查询用户-该游戏的所有渠道
+     */
+    @RequestMapping(value = "/getGameSpList", method = RequestMethod.POST)
+    public void getGameSpList(@RequestParam(value = "page", required = false) String page,
+                              @RequestParam(value = "rows", required = false) String rows,
+                              Integer gameId,
+                              String name,
+                              HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null) {
+            return;
+        }
+
+        JSONObject result = new JSONObject();
+
+        Map<String, Object> map = new HashMap<>(5);
+        if (page != null && rows != null) {
+            PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
+            map.put("start", pageBean.getStart());
+            map.put("size", pageBean.getPageSize());
+        }
+
+        map.put("gameId", gameId);
+        map.put("name", name);
+        map.put("uid", userId);
+
+        long size = 0;
+        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
+        do {
+            //查询该账号-该游戏的所有渠道
+            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
+            if (gameSpList == null || gameSpList.size() == 0) {
+                break;
+            }
+//            List<ChannelConfig> configs =channelConfigService.
+
+            size = gameSpService.getCountGameSp(map, userId);
+            Set<Integer> spIds = new HashSet<>();
+            for (GameSp sp : gameSpList) {
+                spIds.add(sp.getSpId());
+            }
+            log.info(spIds.toString());
+
+            //查询详细的渠道信息
+            map.clear();
+            map.put("spIdList", spIds);
+            List<Sp> spList = spService.selectSpByIds(false, map, userId);
+
+            for (GameSp gameSp : gameSpList) {
+                Integer spId = gameSp.getSpId();
+                WebGameSp webGameSp = new WebGameSp();
+                webGameSp.setId(gameSp.getId());
+                webGameSp.setAppid(gameId);
+                webGameSp.setUid(gameSp.getUid());
+                webGameSp.setChannelid(spId);
+                //设置配置状态
+                webGameSp.setConfigStatus(gameSp.getStatus());
+
+                webGameSpMap.put(spId, webGameSp);
+            }
+            for (Sp sp : spList) {
+                Integer spId = sp.getSpId();
+                if (webGameSpMap.containsKey(spId)) {
+                    WebGameSp webGameSp = webGameSpMap.get(spId);
+                    webGameSp.setIcon(sp.getIconUrl());
+                    webGameSp.setName(sp.getName());
+                    webGameSp.setStatus(1);
+                    webGameSp.setVersion(sp.getVersion());
+
+                }
+            }
+
+            if (!name.isEmpty()) {
+                Iterator<Map.Entry<Integer, WebGameSp>> it = webGameSpMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<Integer, WebGameSp> entry = it.next();
+                    WebGameSp webGameSp = entry.getValue();
+                    if (!webGameSp.getName().contains(name)) {
+                        it.remove();
+                    }
+                }
+                size = webGameSpMap.size();
+            }
+
+
+        } while (false);
+
+
+        result.put("rows", webGameSpMap.values());
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getGameSpList , map: " + result.toString());
+    }
+
+    /**
+     * 查询所有渠道
+     */
+    @RequestMapping(value = "/getAllGameSpList", method = RequestMethod.POST)
+    public void getAllGameSpList(@RequestParam(value = "page", required = false) String page,
+                                 @RequestParam(value = "rows", required = false) String rows,
+                                 Integer gameId,
+                                 String name,
+                                 HttpServletResponse response) throws Exception {
+        Integer userId = getUserId();
+        if (userId == null) {
+            ResponseUtil.writeRelogin(response);
+            return;
+        }
+        if (gameId == null || page == null || rows == null) {
+            return;
+        }
+
+        long size = spService.getTotalSp(userId);
+        JSONObject result = new JSONObject();
+
+        List<WebGameSp> webGameSpList = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>(5);
+        //需要将已经存在的放前面
+        Map<Integer, WebGameSp> webGameSpMap = new HashMap<>();
+
+        PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
+        map.put("start", pageBean.getStart());
+        map.put("size", pageBean.getPageSize());
+
+        do {
+            //已添加的游戏渠道
+            Set<Integer> hasGameSpId = new LinkedHashSet<>();
+
+            map.put("gameId", gameId);
+            map.put("name", name);
+            map.put("uid", userId);
+
+            //查询该账号-该游戏的所有渠道
+            List<GameSp> gameSpList = gameSpService.selectGameSpList(map, userId);
+            if (gameSpList == null) {
+                break;
+            }
+
+            //数据条数
+            int gameSpSize = gameSpList.size();
+            //数据最大条数
+            long gameSpMaxSize = gameSpService.getCountGameSp(map, userId);
+            //计算最大页数
+            long gameSpMaxPage = gameSpMaxSize == 0 ? 0 : gameSpMaxSize / pageBean.getPageSize() + 1;
+
+            long noGameSpStart = 0;
+            long noGameSpPageSize = 0;
+
+            if (gameSpMaxPage > pageBean.getPage()) {
+                //当前页均是已添加的渠道
+                //直接查询
+                for (GameSp sp : gameSpList) {
+                    hasGameSpId.add(sp.getSpId());
+                }
+            } else if (gameSpMaxPage == pageBean.getPage()) {
+                //当前页=已添加的渠道+未添加的渠道
+                for (GameSp sp : gameSpList) {
+                    hasGameSpId.add(sp.getSpId());
+                }
+                noGameSpStart = 0;
+                noGameSpPageSize = pageBean.getStart() + pageBean.getPageSize() - gameSpSize;
+            } else {
+                //当前页均是未添加的渠道
+                noGameSpStart = pageBean.getStart() - gameSpMaxSize + 1;
+                noGameSpPageSize = pageBean.getPageSize();
+            }
+
+            log.info("noGameSpStart\t" + noGameSpStart);
+            log.info("noGameSpPageSize\t" + noGameSpPageSize);
+            log.info("spIds\t" + hasGameSpId.toString());
+
+            //查询详细的渠道信息
+            map.remove("gameId");
+            map.remove("name");
+            map.remove("uid");
+
+            //对应游戏已添加渠道的详细信息
+            if (hasGameSpId.size() != 0) {
+                map.put("spIdList", hasGameSpId);
+                List<Sp> hasSpList = spService.selectSpByIds(false, map, userId);
+
+                log.info(hasGameSpId.toString());
+
+                for (GameSp gameSp : gameSpList) {
+                    Integer spId = gameSp.getSpId();
+                    WebGameSp webGameSp = new WebGameSp();
+                    webGameSp.setId(gameSp.getId());
+                    webGameSp.setAppid(gameId);
+                    webGameSp.setUid(gameSp.getUid());
+                    webGameSp.setChannelid(spId);
+                    //设置配置状态
+                    webGameSp.setConfigStatus(gameSp.getStatus());
+                    webGameSpMap.put(spId, webGameSp);
+                    webGameSpList.add(webGameSp);
+                }
+                for (Sp sp : hasSpList) {
+                    Integer spId = sp.getSpId();
+                    if (webGameSpMap.containsKey(spId)) {
+                        WebGameSp webGameSp = webGameSpMap.get(spId);
+                        webGameSp.setIcon(sp.getIconUrl());
+                        webGameSp.setName(sp.getName());
+                        webGameSp.setStatus(1);
+                        webGameSp.setVersion(sp.getVersion());
+                    }
+                }
+            }
+            //对应游戏未添加渠道的详细信息
+            if (hasGameSpId.size() < pageBean.getPageSize()) {
+                List<Sp> noSpList = spService.selectSpByIds(true, map, userId);
+                for (Sp sp : noSpList) {
+                    Integer spId = sp.getSpId();
+                    WebGameSp webGameSp = new WebGameSp();
+                    webGameSp.setAppid(gameId);
+                    webGameSp.setIcon(sp.getIconUrl());
+                    webGameSp.setName(sp.getName());
+                    webGameSp.setChannelid(spId);
+                    webGameSp.setStatus(0);
+                    webGameSp.setVersion(sp.getVersion());
+                    //设置配置状态
+                    webGameSp.setConfigStatus(0);
+                    webGameSpMap.put(spId, webGameSp);
+                    webGameSpList.add(webGameSp);
+                }
+            }
+        } while (false);
+
+
+        result.put("rows", webGameSpList);
+        result.put("total", size);
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+
+        ResponseUtil.write(response, result);
+
+        log.info("request: server/getAllGameSpList , map: " + result.toString());
     }
 }

@@ -18,4 +18,6 @@ public interface ChannelConfigService {
     ChannelConfig selectConfig(Integer appId, Integer channelId,Integer userId);
 
     int deleteConfig(Integer appId, Integer channelId,Integer userId);
+
+    List<Integer> selectGameConfig(Integer appId,Integer userId);
 }

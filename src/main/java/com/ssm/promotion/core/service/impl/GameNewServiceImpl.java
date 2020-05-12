@@ -34,6 +34,11 @@ public class GameNewServiceImpl implements GameNewService {
     }
 
     @Override
+    public List<GameNew> selectGameIdList(Integer userId) {
+        return dao.selectGameIdList();
+    }
+
+    @Override
     public GameNew selectGame(Integer gameId, Integer userId) {
         return dao.selectGame(gameId);
     }

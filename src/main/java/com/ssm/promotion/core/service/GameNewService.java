@@ -1,6 +1,7 @@
 package com.ssm.promotion.core.service;
 
 import com.ssm.promotion.core.entity.GameNew;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,10 @@ public interface GameNewService {
      * @return list
      */
     Integer getCountGame(Map<String, Object> map, Integer userId);
-
+    /**
+     * 查找不同的游戏id
+     */
+    List<GameNew> selectGameIdList(Integer userId);
     /**
      * 查询单条
      *

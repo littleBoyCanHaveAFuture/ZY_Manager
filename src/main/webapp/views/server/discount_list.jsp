@@ -30,6 +30,7 @@
     <thead>
     </thead>
 </table>
+
 <div id="tb">
     <div>
         <label for="save_gameId"></label>
@@ -342,18 +343,22 @@
 
         let response;
 
-        let data = {
-            "gameId": gameId,
-            "serverId": serverId,
-            "spId": spId,
-            "type": type
-        };
-
+        let url = "";
+        if (type === 1) {
+            url = "/channel/getAllChannel";
+            url += "?gameId=" + gameId;
+        } else if (type === 2) {
+            //查询游戏
+            url = "/channel/getAllGame";
+        } else {
+            url = "/channel/getAllServerId";
+            url += "?gameId=" + gameId;
+            url += "&spId=" + spId;
+        }
         $.ajax({
             //获取下拉
-            url: "/server/getDistinctServerInfo",
-            type: "post",
-            data: data,
+            url: url,
+            type: "get",
             async: false,
             dataType: "json",
             success: function (result) {

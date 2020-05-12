@@ -14,8 +14,10 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/sp_list.js?20200511"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/js/common.js"></script>
+    <script type="text/javascript"
+            src="${pageContext.request.contextPath}/views/channel/channel_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
@@ -50,15 +52,16 @@
     <a href="javascript:saveSpType()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
     <a href="javascript:closeSpDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
 </div>
-
-<div id="dlg" class="easyui-dialog" closed="true" buttons="#dlg-buttons"
-     style="width: 600px;height:350px;padding: 10px 20px; position: relative; z-index:1000;">
-    <div style="padding-top:50px;  float:left; width:95%; padding-left:30px;">
+<div id="dlg" style="padding: 10px 20px; position: relative; z-index:1000;" hidden="hidden" class="easyui-dialog"
+     closed="true" buttons="#dlg-buttons">
+    <div style="padding-top:20px;  float:left; width:95%; padding-left:30px;">
         <input type="hidden" name="save_id" id="save_id">
-        <table>
+        <table style="border:0;margin-bottom: 0;" id="table_top"
+               class="table table-striped table-bordered table-hover">
+            <tbody>
             <tr>
-                <td>图标:</td>
-                <td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">icon地址:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_icon"></label>
                     <input type="text" name="save_icon" id="save_icon" style="width: 400px"
                            required="true" class="easyui-validatebox" validType="namerules"
@@ -66,8 +69,8 @@
                 </td>
             </tr>
             <tr>
-                <td>渠道id:</td>
-                <td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">渠道id:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_spId"></label>
                     <input type="text" name="save_spId" id="save_spId"
                            required="true" class="easyui-validatebox" validType="'number','length[5,10]'"
@@ -75,44 +78,44 @@
                 </td>
             </tr>
             <tr>
-                <td>渠道名称:</td>
-                <td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">渠道名称:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_name"></label>
                     <input type="text" name="save_name" id="save_name"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="渠道名称">
                 </td>
             </tr>
-            <tr>
-                <td>父渠道:</td>
-                <td>
+            <tr hidden="hidden">
+                <td style="width:100px;text-align: left;padding-top: 13px;">父渠道:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_parent"></label>
-                    <input type="text" name="save_parent" id="save_parent"
+                    <input type="text" name="save_parent" id="save_parent" value="0"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="父渠道">
                 </td>
             </tr>
-            <tr>
-                <td>状态:</td>
-                <td>
+            <tr hidden="hidden">
+                <td style="width:100px;text-align: left;padding-top: 13px;">状态:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_state"></label>
-                    <input type="text" name="save_state" id="save_state"
+                    <input type="text" name="save_state" id="save_state" value="0"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="状态">
                 </td>
             </tr>
             <tr>
-                <td>版本号:</td>
-                <td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">版本号:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_version"></label>
                     <input type="text" name="save_version" id="save_version"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="sdk版本">
                 </td>
             </tr>
-            <tr>
-                <td>分享链接:</td>
-                <td>
+            <tr hidden="hidden">
+                <td style="width:100px;text-align: left;padding-top: 13px;">分享链接:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_shareLinkUrl"></label>
                     <input type="text" name="save_shareLinkUrl" id="save_shareLinkUrl"
                            required="true" class="easyui-validatebox" validType="namerules"
@@ -120,18 +123,35 @@
                 </td>
             </tr>
             <tr>
-                <td>简写:</td>
-                <td>
+                <td style="width:100px;text-align: left;padding-top: 13px;">英文简称:</td>
+                <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_code"></label>
                     <input type="text" name="save_shareLinkUrl" id="save_code"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="jianxie ">
                 </td>
-            </tr>save_code
+            </tr>
+            </tbody>
         </table>
     </div>
 </div>
+<script type="text/css">
+    .table_report th, .table_report td {
+        border-top: 0;
+        padding: 8px;
+        line-height: 20px;
+        text-align: left;
+        vertical-align: top;
+    }
 
+    .table_top th, .table_top td {
+        border-top: 0;
+        padding: 8px;
+        line-height: 20px;
+        text-align: left;
+        vertical-align: top;
+    }
+</script>
 </body>
 
 </html>

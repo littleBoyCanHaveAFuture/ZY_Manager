@@ -3,6 +3,8 @@ package com.ssm.promotion.core.dao;
 import com.ssm.promotion.core.entity.ChannelConfig;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author Administrator
  */
@@ -15,4 +17,5 @@ public interface ChannelConfigDao {
 
     int deleteConfig(@Param("appId") Integer appId, @Param("channelId") Integer channelId);
 
+    List<Integer> selectGameConfig(@Param("appId") Integer appId);
 }

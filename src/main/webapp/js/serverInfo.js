@@ -95,11 +95,22 @@ function initSpGameServer(type) {
         "type": type
     };
 
+    let url = "";
+    if (type === 1) {
+        url = "/channel/getAllChannel";
+        url += "?gameId=" + gameId;
+    } else if (type === 2) {
+        //查询游戏
+        url = "/channel/getAllGame";
+    } else {
+        url = "/channel/getAllServerId";
+        url += "?gameId=" + gameId;
+        url += "&spId=" + spId;
+    }
     $.ajax({
         //获取下拉
-        url: "/server/getDistinctServerInfo",
-        type: "post",
-        data: data,
+        url: url,
+        type: "get",
         async: false,
         dataType: "json",
         success: function (result) {
@@ -127,8 +138,8 @@ function initSpGameServer(type) {
             select_gameId.find("option").remove();
             select_gameId.append("<option value=-1 selected=selected>请选择</option>");
             for (let res = 0; res < response.total; res++) {
-                let gameId = response.rows[res].id;
-                let name = response.rows[res].name + "\t" + gameId;
+                let gameId = response.rows[res].appId;
+                let name = response.rows[res].appName + "\t" + gameId;
                 select_gameId.append("<option  value='" + gameId + "'>" + name + "</option>");
             }
             break;

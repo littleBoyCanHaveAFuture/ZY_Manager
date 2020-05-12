@@ -1,34 +1,8 @@
 package com.ssm.promotion.core.controller;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.ssm.promotion.core.entity.*;
-import com.ssm.promotion.core.jedis.jedisRechargeCache;
-import com.ssm.promotion.core.sdk.AccountWorker;
-import com.ssm.promotion.core.sdk.GameRoleWorker;
-import com.ssm.promotion.core.sdk.LoginWorker;
-import com.ssm.promotion.core.sdk.UOrderManager;
-import com.ssm.promotion.core.service.*;
-import com.ssm.promotion.core.util.DateUtil;
-import com.ssm.promotion.core.util.ResponseUtil;
-import com.ssm.promotion.core.util.StringUtils;
-import com.ssm.promotion.core.util.UtilG;
-import com.ssm.promotion.core.util.enums.OrderState;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author song minghua
@@ -37,7 +11,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/webGame222222")
 public class SdkController {
-    private static final Logger log = Logger.getLogger(SdkController.class);
+    private static final Logger log = Logger.getLogger(SdkController.class);/*
     public static String[] keys = {"createRole", "levelUp", "enterGame", "exitGame"};
     public static String[] mustKeysValue = {
             "appId", "channelId", "channelUid",
@@ -63,7 +37,7 @@ public class SdkController {
     @Resource
     private AccountService accountService;
 
-    /**
+    *//**
      * 1.初始化游戏
      * 1.获取 需要的js文件
      * 2.获取 渠道秘钥
@@ -71,7 +45,7 @@ public class SdkController {
      * @param GameId    游戏id
      * @param GameKey   游戏秘钥
      * @param channelId 渠道id
-     */
+     *//*
     @RequestMapping(value = "/initApi", method = RequestMethod.GET)
     @ResponseBody
     public void initApi(Integer GameId,
@@ -133,7 +107,7 @@ public class SdkController {
         log.info("end: /webGame/initApi\t" + result.toString());
     }
 
-    /**
+    *//**
      * 注册账号
      * SDK 登录接口
      *
@@ -149,7 +123,7 @@ public class SdkController {
      *                 string      deviceCode    硬件设备号*<p>
      *                 string      imei          国际移动设备识别码<p>
      *                 string      addparm       额外参数(为空即可)<p>
-     */
+     *//*
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public void sdkRegister(@RequestBody String jsonData,
@@ -191,7 +165,7 @@ public class SdkController {
         log.info("end: /webGame/initApi\t" + rspJson.toString());
     }
 
-    /**
+    *//**
      * 2.指悦账号登录
      * 客户端先请求
      * SDK 登录接口
@@ -204,7 +178,7 @@ public class SdkController {
      * @param password   指悦账号密码，需要uri
      * @param timestamp  时间戳
      * @param sign       签名数据，使用loginkey
-     */
+     *//*
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ResponseBody
     public void sdkLogin(Boolean isAuto,
@@ -322,7 +296,7 @@ public class SdkController {
         log.info("end /webGame/login" + rspJson.toString());
     }
 
-    /**
+    *//**
      * 设置角色基本数据
      * 1.创角打点
      * 2.新手指引打点
@@ -346,7 +320,7 @@ public class SdkController {
      *                 partyName            当前角色所属帮派，不能为空，不能为null，若无，传入“无帮派”<p>
      *                 roleCTime            单位为毫秒，创建角色的时间<p>
      *                 roleLevelMTime       单位为毫秒，角色等级变化时间<p>
-     */
+     *//*
     @RequestMapping(value = "/setData", method = RequestMethod.POST)
     @ResponseBody
     public void sdkRoleData(@RequestBody String JsonData,
@@ -522,7 +496,7 @@ public class SdkController {
         log.info("/webGame/setData\t" + result.toString());
     }
 
-    /**
+    *//**
      * 上报充值数据
      *
      * @param jsonData json 字符串
@@ -547,7 +521,7 @@ public class SdkController {
      *                 notifyUrl           支付回调通知的游戏服地址
      *                 signType            签名算法,RSA|MD5,默认MD5
      *                 sign                签名
-     */
+     *//*
     @RequestMapping(value = "/payInfo", method = RequestMethod.POST)
     @ResponseBody
     public void sdkPayInfo(@RequestBody String jsonData,
@@ -688,12 +662,12 @@ public class SdkController {
                 orderManager.updateOrder(order);
             }
 
-            /*
-             * redis
-             * 一个订单-只插入一次-充值成功的时候
-             * 1.订单存在 更新: STATE_PAY_SUCCESS--->STATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
-             * 2.订单不存在 STATE_PAY_SUCCESS/TATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
-             */
+            *//*
+     * redis
+     * 一个订单-只插入一次-充值成功的时候
+     * 1.订单存在 更新: STATE_PAY_SUCCESS--->STATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
+     * 2.订单不存在 STATE_PAY_SUCCESS/TATE_PAY_FINISHED/STATE_PAY_SUPPLEMENT
+     *//*
             boolean updateRedis = false;
             if (isPaySuccess && (status == OrderState.STATE_PAY_FINISHED || status == OrderState.STATE_PAY_SUPPLEMENT)) {
                 updateRedis = true;
@@ -774,5 +748,5 @@ public class SdkController {
     @ResponseBody
     public void test(HttpServletResponse response) throws Exception {
         ResponseUtil.write(response, "success");
-    }
+    }*/
 }

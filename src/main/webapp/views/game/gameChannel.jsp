@@ -74,7 +74,7 @@
 
 <div id="dlg" style="padding: 10px 20px; position: relative; z-index:1000;" hidden="hidden">
     <div style="padding-top:20px;  float:left; width:95%; padding-left:30px;">
-        <table style="border:0px;margin-bottom: 0px;" id="table_top"
+        <table style="border:0;margin-bottom: 0;" id="table_top"
                class="table table-striped table-bordered table-hover">
             <tbody>
             <tr id="channel_callback_url">

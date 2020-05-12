@@ -120,6 +120,12 @@
         where app_id = #{gameId,jdbcType=INTEGER}
     </select>
 
+    <select id="selectGameIdList" parameterType="map" resultMap="GameResult">
+        select  app_id,app_name
+        from zy_gamen
+        limit 100
+    </select>
+
     <delete id="deleteGame" parameterType="int">
         delete
         from zy_gamen

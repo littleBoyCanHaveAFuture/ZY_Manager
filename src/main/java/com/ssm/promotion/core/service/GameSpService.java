@@ -14,8 +14,6 @@ public interface GameSpService {
 
     GameSp selectGameSp(Integer gameId, Integer channelId, Integer userId);
 
-    List<GameSp> selectAllGameSp(Integer userId);
-
     int deleteGameSp(Integer id, Integer userId);
 
     int updateGameSp(Map<String, Object> map, Integer userId);

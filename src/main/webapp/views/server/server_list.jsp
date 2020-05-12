@@ -16,7 +16,8 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server/server_list.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/views/server/server_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
@@ -34,19 +35,19 @@
     <div>
         <label for="spid"></label>
         <span style="color: blue;">渠道:</span>
-        <select title="选择渠道" id="spid" name="spId">
+        <select title="选择渠道" id="save_spId" name="save_spId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="gameid"></label>
+        <label for="save_gameId"></label>
         <span style="color: blue; margin-left:50px ">游戏:</span>
-        <select title="选择游戏" id="gameid" name="gameId">
+        <select title="选择游戏" id="save_gameId" name="save_gameId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <label for="serverid"></label>
+        <label for="save_serverId"></label>
         <span style="color: blue; margin-left:50px">区服:</span>
-        <select title="选择区服" id="serverid" name="serverId">
+        <select title="选择区服" id="save_serverId" name="save_serverId">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
@@ -77,7 +78,7 @@
                 <td>渠道id</td>
                 <td>
                     <label for="save_spid"></label>
-                    <input type="text" name="save_spid" id="save_spid"
+                    <input type="text" name="dlg_spid" id="dlg_spid"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="渠道id不能为空">
                 </td>
@@ -86,7 +87,7 @@
             <tr>
                 <td>游戏id</td>
                 <td>
-                    <select title="选择游戏" id="save_gameid" name="save_gameid">
+                    <select title="选择游戏" id="dlg_gameid" name="dlg_gameid">
                         <option value="-1" selected="selected">请选择</option>
                     </select>
                 </td>
@@ -95,8 +96,8 @@
             <tr>
                 <td>区服id</td>
                 <td>
-                    <label for="save_serverid"></label>
-                    <input type="text" name="save_serverid" id="save_serverid"
+                    <label for="dlg_serverid"></label>
+                    <input type="text" name="dlg_serverid" id="dlg_serverid"
                            required="true" class="easyui-validatebox" validType="namerules"
                            missingMessage="服务器id不能为空">
                 </td>
@@ -105,16 +106,16 @@
             <tr>
                 <td>登录地址</td>
                 <td>
-                    <label for="save_loginurl"></label>
-                    <input type="text" name="save_loginurl" id="save_loginurl"
+                    <label for="dlg_loginurl"></label>
+                    <input type="text" name="dlg_loginurl" id="dlg_loginurl"
                            required="false">
                 </td>
             </tr>
             <tr>
                 <td>开服时间</td>
                 <td>
-                    <label for="save_openday"></label>
-                    <input class="easyui-datetimebox" id="save_openday" name="save_openday"
+                    <label for="dlg_openday"></label>
+                    <input class="easyui-datetimebox" id="dlg_openday" name="dlg_openday"
                            data-options="required:true,showSeconds:false" style="width:150px">
                 </td>
             </tr>

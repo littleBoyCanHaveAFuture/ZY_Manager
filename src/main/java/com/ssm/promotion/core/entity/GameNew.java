@@ -114,7 +114,7 @@ public class GameNew {
     private String secertKey;
 
 
-    GameNew() {
+    public GameNew() {
 
     }
 

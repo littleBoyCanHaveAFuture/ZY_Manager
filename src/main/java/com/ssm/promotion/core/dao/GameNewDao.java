@@ -22,4 +22,7 @@ public interface GameNewDao {
     Integer getCountGame(Map<String, Object> map);
 
     Integer readMaxAppId();
+
+
+    List<GameNew> selectGameIdList();
 }

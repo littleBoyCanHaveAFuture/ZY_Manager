@@ -21,18 +21,6 @@ public class GameSpServiceImpl implements GameSpService {
     /**
      * zy_game_sp
      * <p>
-     * 查询所有
-     *
-     * @param userId 用户id
-     */
-    @Override
-    public List<GameSp> selectAllGameSp(Integer userId) {
-        return gameSpDao.selectAllGameSp();
-    }
-
-    /**
-     * zy_game_sp
-     * <p>
      * 条件查询
      *
      * @param map id        主键<p>

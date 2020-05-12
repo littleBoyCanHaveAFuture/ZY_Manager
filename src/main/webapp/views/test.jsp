@@ -21,7 +21,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202002262244"></script>
+            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202005121504"></script>
 </head>
 
 <%--<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">--%>
@@ -56,21 +56,22 @@
     <select title="选择游戏" id="save_gameId" name="gameId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
         <%--        <option value="9" selected="selected">三国游侠 9</option>--%>
-        <option value="10">刺沙 10</option>
+        <%--        <option value="10">刺沙 10</option>--%>
         <option value="11" selected="selected">刺沙-指悦 11</option>
+        <option value="14" selected="selected">巨龙战歌-指悦 14</option>
     </select>
 
     <label for="save_serverId"></label>
     <span style="color: blue; margin-left:50px">区服:</span>
     <select title="选择区服" id="save_serverId" name="serverId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
-        <option value="1">1 区</option>
+        <option value="1" selected="selected">1 区</option>
         <option value="2">2 区</option>
         <option value="3">3 区</option>
         <option value="4">4 区</option>
         <option value="5">5 区</option>
         <option value="6">6 区</option>
-        <option value="170" selected="selected">170 区</option>
+        <option value="170">170 区</option>
     </select>
 
     <div>
@@ -175,7 +176,7 @@
         <label>Step:10----->一键下单/label>
             <a href="javascript:auto()" class="easyui-linkbutton" iconCls="icon-add" plain="true">一键下单</a>
             <%--        <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>--%>
-            <a href="javascript:ttt()" class="easyui-linkbutton" iconCls="icon-add" plain="true">测试</a>
+<%--            <a href="javascript:ttt()" class="easyui-linkbutton" iconCls="icon-add" plain="true">测试</a>--%>
     </div>
     <div>
         <label>--------------------------------------</label>
@@ -259,7 +260,9 @@
         } else if (appId === "10") {
             GameKey = "f1kn2ta5i3qkg7vi015dkq5muy0ii786";
         } else if (appId === "11") {
-            GameKey = "l44i45326jixrlaio9c0025g974125y6"
+            GameKey = "l44i45326jixrlaio9c0025g974125y6";
+        } else if (appId === "14") {
+            GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
         } else {
             alert("无此游戏");
             return;
@@ -510,11 +513,11 @@
         // });
         test();
         return;
-        send("/h5/addExRecord","json",data);
+        send("/h5/addExRecord", "json", data);
 
     }
 
-    function send(url,type,data) {
+    function send(url, type, data) {
         let xhr = new XMLHttpRequest();
         xhr.open("post", url, true);
         if (type === "formdata") {
@@ -532,6 +535,7 @@
         }
         xhr.send(data);
     }
+
     function test() {
         var httpdata = {
             id: 1,
@@ -541,9 +545,9 @@
             status: 1,
             message: 2,
             finishedTime: 5,
-            address:"11",
-            phone:"22",
-            name:"33"
+            address: "11",
+            phone: "22",
+            name: "33"
         };
         var url = "http://111.231.244.198:8080/huoguo/h5/addExRecord";
         let xhr = new XMLHttpRequest();
