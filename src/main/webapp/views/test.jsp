@@ -20,8 +20,10 @@
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
+    <%--    <script type="text/javascript"--%>
+    <%--            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202005121504"></script>--%>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/libZySdk_v1.js?v=202005121504"></script>
+            src="${pageContext.request.contextPath}/js/libZySdk_v2.js?v=202005121504"></script>
 </head>
 
 <%--<body style="margin:1px;" id="ff" bgcolor="#7fffd4" onload="checkCookies()">--%>
@@ -35,9 +37,18 @@
     <!--        <a href="javascript:initSpGameServer(3)" class="easyui-linkbutton" style="margin-left:50px"-->
     <%--           iconCls=" icon-search" plain="true">查询区服</a>--%>
     <%--    </div>--%>
+    <label for="save_gameId"></label>
+    <span style="color: blue;">游戏:</span>
+    <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
+        <%--        <option value="-1" selected="selected">请选择</option>--%>
+        <%--        <option value="9" selected="selected">三国游侠 9</option>--%>
+        <%--        <option value="10">刺沙 10</option>--%>
+        <option value="11" selected="selected">刺沙-指悦 11</option>
+        <option value="14" selected="selected">巨龙战歌-指悦 14</option>
+    </select>
 
     <label for="save_spId"></label>
-    <span style="color: blue; ">渠道:</span>
+    <span style="color: blue; margin-left:50px  ">渠道:</span>
     <select title="选择渠道" id="save_spId" name="spId">
         <%--        <option value="-1" selected="selected">请选择</option>--%>
         <option value="0" selected="selected">官方渠道 0</option>
@@ -48,17 +59,6 @@
         <option value="5">爱点游</option>
         <option value="6">虫虫游戏</option>
         <option value="7">闲兔</option>
-    </select>
-
-
-    <label for="save_gameId"></label>
-    <span style="color: blue;margin-left:50px  ">游戏:</span>
-    <select title="选择游戏" id="save_gameId" name="gameId">
-        <%--        <option value="-1" selected="selected">请选择</option>--%>
-        <%--        <option value="9" selected="selected">三国游侠 9</option>--%>
-        <%--        <option value="10">刺沙 10</option>--%>
-        <option value="11" selected="selected">刺沙-指悦 11</option>
-        <option value="14" selected="selected">巨龙战歌-指悦 14</option>
     </select>
 
     <label for="save_serverId"></label>
@@ -176,7 +176,7 @@
         <label>Step:10----->一键下单/label>
             <a href="javascript:auto()" class="easyui-linkbutton" iconCls="icon-add" plain="true">一键下单</a>
             <%--        <a href="javascript:test_PayInfo()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">官方充值</a>--%>
-<%--            <a href="javascript:ttt()" class="easyui-linkbutton" iconCls="icon-add" plain="true">测试</a>--%>
+            <%--            <a href="javascript:ttt()" class="easyui-linkbutton" iconCls="icon-add" plain="true">测试</a>--%>
     </div>
     <div>
         <label>--------------------------------------</label>
@@ -226,16 +226,13 @@
 </body>
 <script type="text/javascript">
     $(function () {
-        // initSpGameServer(1);
-        // initSpGameServer(2);
-        // initSpGameServer(3);
+        initSpGameServer(2);
         let auto = $("#auto").val();
         let appId = $("#save_gameId").val();
         let channelId = $("#save_spId").val();
         let channelUid = $("#channelUid").val();
         let username = $("#username").val();
         let password = $("#password").val();
-
     });
 
     function auto() {
@@ -267,12 +264,24 @@
             alert("无此游戏");
             return;
         }
-        ZySDK.init(appId, GameKey, channelId, function (state) {
-            if (state === true) {
-                console.info("init ok");
-            } else {
-                console.error("init fail");
-            }
+
+        let newurl = updateQueryStringParameter(window.location.href, 'GameId', appId);
+        newurl = updateQueryStringParameter(newurl, 'GameKey', GameKey);
+        newurl = updateQueryStringParameter(newurl, 'channelId', channelId);
+        //向当前url添加参数，没有历史记录
+        window.history.replaceState({
+            path: newurl
+        }, '', newurl);
+
+        ZySDK.init(appId, GameKey, function (state) {
+            ZySDK.login(function (callbackData) {
+                if (callbackData.status) {
+                    console.log('GameDemo:zySDK登录成功: uid=>' + callbackData.data.uid);
+                } else {
+                    console.log('GameDemo:zySDK登录失败:' + callbackData.message);
+                }
+            });
+            console.log("zySDK init succ");
         });
     }
 

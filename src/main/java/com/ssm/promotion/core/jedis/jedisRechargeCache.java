@@ -75,9 +75,8 @@ public class jedisRechargeCache {
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
-            jds.select(0);
-            byte[] lkey = SerializeUtil.serialize(existskey);
-            return jds.exists(lkey);
+            jds.select(DB_INDEX);
+            return jds.exists(existskey);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -108,6 +107,38 @@ public class jedisRechargeCache {
         jedis.close();
     }
 
+    public String getString(String key) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            return jds.get(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    public void setString(String key, String value) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            jds.set(key, value);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
     /**
      * 简单的Get
      *
@@ -121,7 +152,7 @@ public class jedisRechargeCache {
         boolean isBroken = false;
         try {
             jds = this.jedisManager.getJedis();
-            jds.select(0);
+            jds.select(DB_INDEX);
             byte[] skey = SerializeUtil.serialize(key);
             return SerializeUtil.deserialize(jds.get(skey), requiredType);
         } catch (Exception e) {
@@ -132,6 +163,7 @@ public class jedisRechargeCache {
         }
         return null;
     }
+
 
     /**
      * 简单的set
@@ -144,7 +176,7 @@ public class jedisRechargeCache {
         boolean isBroken = false;
         try {
             jds = jedisManager.getJedis();
-            jds.select(0);
+            jds.select(DB_INDEX);
             byte[] skey = SerializeUtil.serialize(key);
             byte[] svalue = SerializeUtil.serialize(value);
             jds.set(skey, svalue);
@@ -472,26 +504,6 @@ public class jedisRechargeCache {
     }
 
     /**
-     * 设置游戏信息
-     */
-    public void setGAMEIDInfo(String appId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            String key = RedisKey_Gen.get_GameInfo();
-            jds.sadd(key, appId);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-    }
-
-    /**
      * 获取游戏信息
      */
     public Set<String> getGAMEIDInfo() {
@@ -510,6 +522,26 @@ public class jedisRechargeCache {
             returnResource(jds, isBroken);
         }
         return null;
+    }
+
+    /**
+     * 设置游戏信息
+     */
+    public void setGAMEIDInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_GameInfo();
+            jds.sadd(key, appId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
     }
 
     /**

@@ -1,7 +1,9 @@
 package com.ssm.promotion.core.sdk;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.service.ServerListService;
 import com.ssm.promotion.core.util.MD5Util;
+import com.ssm.promotion.core.util.RandomUtil;
 import com.ssm.promotion.core.util.enums.ServiceType;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,8 @@ public class LoginWorker {
     public static int whiteListState = 0;
     @Resource
     ServerListService service;
+    @Resource
+    ChannelLogin channelLogin;
 
     /**
      * 登陆校验
@@ -60,40 +64,17 @@ public class LoginWorker {
     }
 
     /**
-     * 获取登录地址
+     * 渠道游戏登录 设置参数
      */
-    public String getLoginParam(String accountId, String appId, String serverId) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("spId", "0");
-        map.put("gameId", appId);
-        map.put("serverId", serverId);
-
-        String loginUrl = service.selectLoginUrl(map, 0);
-
-        StringBuilder param = new StringBuilder();
-        param.append(loginUrl);
-        param.append("qid=").append(accountId);
-        switch (appId) {
-            case "2":
-                param.append("&server_id=").append(serverId);
-                break;
-            default:
-                break;
-        }
-        param.append("time=").append(System.currentTimeMillis());
-
-        String sign = MD5Util.md5(param.toString());
-        param.append("sign=").append(sign);
-
-        return param.toString();
-    }
-
     public String loadLoginUrl(String loginUrl, Integer accountId, Integer appId, Integer serverId) {
         StringBuilder param = new StringBuilder();
 
+        String key = String.valueOf(System.currentTimeMillis());
         switch (appId) {
-            case 11:
+            case AppId.cisha:
+            case AppId.julongzhange:
                 //指悦刺沙
+                //巨龙战歌
                 param.append("qid=").append(accountId);
                 param.append("&server_id=").append(serverId);
                 break;
@@ -102,11 +83,49 @@ public class LoginWorker {
             default:
                 break;
         }
-        param.append("&time=").append(System.currentTimeMillis());
+        param.append("&time=").append(key);
 
-        String sign = MD5Util.md5(param.toString());
+        String sign = "";
+        switch (appId) {
+            case AppId.cisha:
+                sign = MD5Util.md5(param.toString());
+                break;
+            case AppId.julongzhange:
+                //指悦
+                sign = MD5Util.md5(param.toString() + key);
+                break;
+            case 9999:
+                sign = MD5Util.md5(param.toString());
+            default:
+                break;
+        }
+
         param.append("&sign=").append(sign);
 
         return loginUrl + param.toString();
     }
+
+    public void getLoginParams(Map<String, String[]> map) {
+        //遍历
+        for (Map.Entry<String, String[]> stringEntry : map.entrySet()) {
+            //key值
+            Object strKey = stringEntry.getKey();
+            //value,数组形式
+            String[] value = stringEntry.getValue();
+
+            System.out.println(strKey.toString() + "=" + value[0]);
+        }
+    }
+
+    /**
+     * 向渠道校验 获取用户数据
+     */
+    public boolean checkLoginParams(Map<String, String[]> map, JSONObject userData) {
+        int appId = Integer.parseInt(map.get("GameId")[0]);
+        int channelId = Integer.parseInt(map.get("channelId")[0]);
+
+        return channelLogin.loadChannelLogin(channelId, map, userData);
+    }
+
+
 }

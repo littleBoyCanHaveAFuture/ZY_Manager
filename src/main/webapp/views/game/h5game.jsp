@@ -19,7 +19,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/game/game.js?202004281101"></script>
+            src="${pageContext.request.contextPath}/js/game.js?202004281101"></script>
 </head>
 
 <body style="margin:1px;height: 100%;" id="ff">

@@ -32,7 +32,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/jquery.tips.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/game/gameChannel.js?v2020052143"></script>
+            src="${pageContext.request.contextPath}/js/gameChannel.js?2020051414"></script>
 </head>
 <body>
 
@@ -80,7 +80,7 @@
             <tr id="channel_callback_url">
                 <td style="width:100px;text-align: left;padding-top: 13px;">渠道支付回调:</td>
                 <td style="padding-top: 13px;color:#000;font-weight: bold;">
-                    <input type="hidden" name="callback_url" id="callback_url" style="width: 94%">
+                    <input readonly="readonly" name="callback_url" id="callback_url" style="width: 94%">
                 </td>
             </tr>
             <tr>
@@ -91,8 +91,8 @@
                            id="url" maxlength="500" title="渠道入口地址">
                     <div id="soeasyurl" class="showNormal" style="color:red;">
                         注：提供给渠道的地址
-                        <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/
-                        <br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/
+<%--                        <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/--%>
+<%--                        <br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/3799/10654/--%>
                     </div>
                 </td>
             </tr>
@@ -101,17 +101,17 @@
         <table style="border:0px;" id="table_report" class="table table-striped table-bordered table-hover">
             <tbody>
             <tr id="gameTest" style="display: none;">
-                <td style="width:100px;text-align: left;padding-top: 13px;">游戏测试地址:</td>
-                <td>
-                    <input style="width: 94%;color:#000;font-weight: bold;" type="text" name="testUrl" id="testUrl"
-                           value="" maxlength="500" readonly="readonly">
-                    <div>
-                        <font id="testTip1" color="red" style="display: block;">注：保存即可激活测试游戏按钮</font>
-                        <font color="#aaa" style="display: block;">游戏中心接入操作指南
-                            <a target="_blank"
-                               onclick="javascript:window.open('http://www.soeasysdk.com/website_download.html')"><i>（查看）</i></a></font>
-                    </div>
-                </td>
+<%--                <td style="width:100px;text-align: left;padding-top: 13px;">游戏测试地址:</td>--%>
+<%--                <td>--%>
+<%--                    <input style="width: 94%;color:#000;font-weight: bold;" type="text" name="testUrl" id="testUrl"--%>
+<%--                           value="" maxlength="500" readonly="readonly">--%>
+<%--                    <div>--%>
+<%--                        <font id="testTip1" color="red" style="display: block;">注：保存即可激活测试游戏按钮</font>--%>
+<%--                        <font color="#aaa" style="display: block;">游戏中心接入操作指南--%>
+<%--                            <a target="_blank"--%>
+<%--                               onclick="window.open('http://www.soeasysdk.com/website_download.html')"><i>（查看）</i></a></font>--%>
+<%--                    </div>--%>
+<%--                </td>--%>
             </tr>
             </tbody>
         </table>
@@ -123,7 +123,7 @@
     <input id="dlg-channelid" hidden="hidden" value="">
     <a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="save();">保存</a>
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel"
-       onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+       onclick="$('#dlg').dialog('close')">关闭</a>
 </div>
 
 </body>

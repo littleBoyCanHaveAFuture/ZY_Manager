@@ -6,11 +6,10 @@ import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.Character.UnicodeBlock;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -413,6 +412,35 @@ public class StringUtil {
 
     public static boolean isInteger(String str) {
         return intPattern.matcher(str).matches();
+    }
+
+    public static List getCode(Map map) {
+        List list = new ArrayList();
+        Iterator iter = map.entrySet().iterator();  //获得map的Iterator
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            list.add(entry.getKey());
+        }
+        Collections.sort(list);
+        return list;
+    }
+
+    /**
+     * 字典升序排列
+     */
+    public static void sort(ArrayList arr) {
+
+        Collections.sort(arr, (Comparator<String>) (o1, o2) -> {
+            try {
+                String str1 = new String(o1.getBytes("GB2312"), StandardCharsets.ISO_8859_1);
+                String str2 = new String(o2.getBytes("GB2312"), StandardCharsets.ISO_8859_1);
+                return str1.compareTo(str2);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            return 0;
+        });
+
     }
 
     public String getValidNameThrowMsg(String name, int lenMin, int lenMax, Collection<String> badWordList) throws Exception {

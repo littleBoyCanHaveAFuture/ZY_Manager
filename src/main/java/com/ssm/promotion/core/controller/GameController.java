@@ -229,11 +229,11 @@ public class GameController {
             ResponseUtil.write(response, result);
             return;
         }
-        if (sp.getConfig() == null || sp.getConfig().isEmpty()) {
-            result.put("result", "fail");
-            ResponseUtil.write(response, result);
-            return;
-        }
+//        if (sp.getConfig() == null || sp.getConfig().isEmpty()) {
+//            result.put("result", "fail");
+//            ResponseUtil.write(response, result);
+//            return;
+//        }
 
         JSONArray ccArray = JSONArray.fromObject(sp.getConfig());
 
@@ -244,7 +244,7 @@ public class GameController {
             config.setChannelId(channelId);
 
             config.setChannelCallbackUrl("http://www.zyh5games.com/pay/payInfo/{channel_code}/{sdkindex}/{appid}");
-            config.setH5Url("http://www.zyh5games.com:8080/login/cs.jsp");
+            config.setH5Url("http://www.zyh5games.com:8080/login/{game}.jsp");
 
             config.setChannelSdkName(sp.getName());
             config.setChannelSdkCode(sp.getCode());

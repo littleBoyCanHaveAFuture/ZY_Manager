@@ -119,6 +119,7 @@
             select_dlg_discount.append("<option  value='" + value + "'>" + value + "%" + "</option>");
         }
         loadDiscountData();
+        initSpGameServer(2);
     });
 
     function initDatagrid(commonResult) {

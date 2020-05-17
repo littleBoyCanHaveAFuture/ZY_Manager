@@ -17,7 +17,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/views/channel/channel_list.js"></script>
+            src="${pageContext.request.contextPath}/js/channel_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">

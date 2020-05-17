@@ -36,6 +36,9 @@ public class AccountWorker {
      * 真实用户编号起始值
      */
     public static final int USERID_BEGIN = USERID_SP_INTERVAL;
+    /**
+     * log
+     */
     private static final Logger log = Logger.getLogger(AccountWorker.class);
     /**
      * 用户名和密码长度限制
@@ -66,13 +69,17 @@ public class AccountWorker {
     @Resource
     private GameNewService gameNewService;
 
+    public static Integer getNextId() {
+        int id = AccountWorker.lastUserId.get();
+        return id + 1;
+    }
+
     /**
      * 返回某运营商用户编号起始值
      */
     public static int getSpUserIdBegin(int spId) {
         return USERID_BEGIN + USERID_SP_INTERVAL * (spId - 1);
     }
-
 
     /**
      * 注册账号
@@ -226,6 +233,91 @@ public class AccountWorker {
         return 0;
     }
 
+
+    /**
+     * 渠道自动注册账号
+     */
+    public JSONObject channelRegister(JSONObject jsonObject) throws Exception {
+        JSONObject reply = new JSONObject();
+        do {
+            int appId = jsonObject.getInteger("appId");
+            int channelId = jsonObject.getInteger("channelId");
+            String channelUid = jsonObject.getString("channelUid");
+
+            String channelUname = jsonObject.containsKey("channelUname") ? jsonObject.getString("channelUname") : "";
+            String channelUnick = jsonObject.containsKey("channelUname") ? jsonObject.getString("channelUnick") : "";
+            String phone = jsonObject.containsKey("channelUname") ? jsonObject.getString("phone") : "";
+            String deviceCode = jsonObject.containsKey("channelUname") ? jsonObject.getString("deviceCode") : "";
+            String imei = jsonObject.containsKey("channelUname") ? jsonObject.getString("imei") : "";
+
+            String ip = jsonObject.getString("ip");
+
+
+            Map<String, Object> map = new HashMap<>(6);
+            //检查渠道id和渠道用户id是否存在
+            map.put("channelId", channelId);
+            map.put("channelUid", channelUid);
+
+            if (TemplateWorker.hasBanIp(ip)) {
+                log.error("玩家ip已被封禁  ip=" + ip);
+                //封禁ip
+                TemplateWorker.addBanIp(ip);
+                reply.put("state", false);
+                reply.put("message", "玩家ip已被封禁");
+                break;
+            }
+
+            if (accountService.exist(map) > 0) {
+                log.error("渠道账号已经存在 channelUid=" + channelUid + " channelId=" + channelId);
+                reply.put("state", false);
+                reply.put("message", "渠道账号已经存在");
+                break;
+            }
+
+            Account account = new Account();
+            account.setName(RandomUtil.rndStr(10, true));
+            account.setPwd(RandomUtil.rndStr(6, false));
+            account.setPhone(phone);
+            account.setCreateIp(ip);
+            account.setCreateTime(DateUtil.getCurrentDateStr());
+            account.setCreateDevice(deviceCode);
+            account.setDeviceCode(deviceCode);
+            account.setChannelId(String.valueOf(channelId));
+            account.setChannelUserId(channelUid);
+            account.setChannelUserName(channelUname);
+            account.setChannelUserNick(channelUnick);
+            account.setLastLoginTime(0L);
+            account.setToken("");
+            account.setAddParam("");
+
+            accountService.createAccount(account);
+            if (account.getId() < 0) {
+                if (account.getId() == -2) {
+                    log.error("账号名重复");
+                    reply.put("state", false);
+                    reply.put("message", "账号名重复");
+                    break;
+                } else {
+                    log.error("注册失败");
+                    reply.put("state", false);
+                    reply.put("message", "注册失败");
+                    break;
+                }
+            }
+            reply.put("state", true);
+            reply.put("accountId", account.getId());
+            reply.put("account", account.getName());
+            reply.put("password", account.getPwd());
+            reply.put("channelUid", account.getChannelUserId());
+            reply.put("message", "注册成功");
+            //注册成功 相关数据存入redis
+            cache.register(true, appId, account.getId(), channelId);
+        } while (false);
+
+        return reply;
+    }
+
+
     /**
      * 创建用户
      */
@@ -299,46 +391,6 @@ public class AccountWorker {
         return account;
     }
 
-    /**
-     * 注册账号
-     */
-    public Account autoRegister(JSONObject reply, String ip) throws Exception {
-        //创建账号
-        Account account = new Account();
-
-        account.setPhone("");
-        account.setCreateIp(ip);
-        account.setCreateTime(DateUtil.getCurrentDateStr());
-        account.setCreateDevice("");
-        account.setDeviceCode("");
-        account.setChannelId("0");
-        account.setChannelUserId("");
-        account.setChannelUserName("Official");
-        account.setChannelUserNick("Official");
-        account.setLastLoginTime(0L);
-        account.setToken("");
-        account.setAddParam("");
-
-        accountService.createAccount(account);
-        if (account.getId() == -1 || account.getId() == -2 || account.getId() == -3) {
-            return null;
-        }
-        //官方
-        account.setChannelUserId(account.getId().toString());
-        //更新uid
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", account.getId());
-        map.put("channelUid", account.getId());
-        accountService.updateAccountUid(map);
-
-        reply.put("message", "注册成功");
-        reply.put("accountId", account.getId());
-        reply.put("account", account.getName());
-        reply.put("pwd", account.getPwd());
-        reply.put("status", 1);
-
-        return account;
-    }
 
     private void AccountWorker() {
         try {

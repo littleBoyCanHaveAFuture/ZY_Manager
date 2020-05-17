@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,11 +9,11 @@
     <meta name="keywords" content="perfect-ssm">
     <meta name="description" content="perfect-ssm">
 
-    <link href="css/bootstrap.min14ed.css" rel="stylesheet">
-    <link href="css/font-awesome.min93e3.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}css/bootstrap.min14ed.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}css/font-awesome.min93e3.css" rel="stylesheet">
 
-    <link href="css/animate.min.css" rel="stylesheet">
-    <link href="css/style.min862f.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}css/animate.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}css/style.min862f.css" rel="stylesheet">
     <link rel="shortcut icon"
           href="${pageContext.request.contextPath}/images/favicon.ico" type="image/x-icon"/>
     <!--[if lt IE 9]>
@@ -25,7 +24,6 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-    <script src="${pageContext.request.contextPath}/js/login.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
 
 </head>
@@ -74,6 +72,41 @@
 
         }
     });
+
+    function login() {
+        var userName = $("#userName").val();
+        var password = $("#password").val();
+        var roleName = $("#roleName").val();
+        if (userName == null || userName === "") {
+            alert("用户名不能为空！");
+            return;
+        }
+        if (password == null || password === "") {
+            alert("密码不能为空！");
+            return;
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/users/cookie",
+            data: $('#adminlogin').serialize(),
+            success: function (result) {
+                console.log(result);
+                if (result.resultCode === 200) {
+                    setCookie("userName", result.data.currentUser.userName);
+                    setCookie("roleName", result.data.currentUser.roleName);
+                    setCookie("useless", "useless");
+                    window.location.href = "main.jsp";
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function () {
+                alert("登录异常！");
+            }
+        });
+
+    }
 </script>
 </body>
 

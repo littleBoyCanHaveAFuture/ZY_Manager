@@ -19,7 +19,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/views/server/game_index.css?1505">
+          href="${pageContext.request.contextPath}/css/game_index.css">
 </head>
 <body>
 

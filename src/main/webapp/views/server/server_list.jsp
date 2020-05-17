@@ -17,7 +17,7 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/serverInfo.js"></script>
-    <script type="text/javascript" src="${pageContext.request.contextPath}/views/server/server_list.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/server_list.js"></script>
 </head>
 
 <body style="margin:1px;" id="ff">

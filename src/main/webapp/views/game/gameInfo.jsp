@@ -18,7 +18,7 @@
             src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
     <link rel="stylesheet" type="text/css"
-          href="${pageContext.request.contextPath}/views/server/game_index.css?202005071137">
+          href="${pageContext.request.contextPath}/css/game_index.css?202005071137">
 </head>
 <body>
 

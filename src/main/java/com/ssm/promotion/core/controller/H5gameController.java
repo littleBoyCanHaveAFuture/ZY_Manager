@@ -4,6 +4,7 @@ import com.ssm.promotion.core.common.Constants;
 import com.ssm.promotion.core.entity.HuoguoExchange;
 import com.ssm.promotion.core.entity.HuoguoExchangeRecord;
 import com.ssm.promotion.core.entity.PageBean;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.HuoguoExchangeService;
 import com.ssm.promotion.core.util.DateUtil;
 import com.ssm.promotion.core.util.ResponseUtil;
@@ -29,11 +30,59 @@ import java.util.Map;
 @RequestMapping("/h5")
 public class H5gameController {
     private static final Logger log = Logger.getLogger(H5gameController.class);
-
+    @Autowired
+    jedisRechargeCache cache;
     @Autowired
     private HttpServletRequest request;
     @Resource
     private HuoguoExchangeService exchangeService;
+
+    /**
+     * 查询商品兑换列表
+     */
+    @RequestMapping(value = "/getExchangeStatus", method = RequestMethod.GET)
+    public void getExchangeStatus(HttpServletResponse response) throws Exception {
+        JSONObject result = new JSONObject();
+        String key = "huoguo#exchange";
+        boolean status = false;
+        boolean hasKey = cache.exists(key);
+        if (!hasKey) {
+            cache.setString(key, "false");
+            result.put("status", false);
+        } else {
+            String sstatus = cache.getString(key);
+            status = "true".equals(sstatus);
+            result.put("status", status);
+        }
+
+        ResponseUtil.write(response, result);
+    }
+
+    /**
+     * 查询商品兑换列表
+     */
+    @RequestMapping(value = "/setExchangeStatus", method = RequestMethod.GET)
+    public void setExchangeStatus(HttpServletResponse response) throws Exception {
+        JSONObject result = new JSONObject();
+        String key = "huoguo#exchange";
+        boolean status = false;
+        boolean hasKey = cache.exists(key);
+        if (!hasKey) {
+            cache.setString(key, "false");
+            result.put("status", false);
+        } else {
+            String sstatus = cache.getString(key);
+            status = "true".equals(sstatus);
+            if (status) {
+                cache.setString(key, "false");
+            } else {
+                cache.setString(key, "true");
+            }
+            result.put("status", !status);
+        }
+
+        ResponseUtil.write(response, result);
+    }
 
     /**
      * 查询商品兑换列表
@@ -172,6 +221,7 @@ public class H5gameController {
         ResponseUtil.write(response, result);
         log.info("request: h5/addExRecord , map: " + result.toString());
     }
+
 
 }
 

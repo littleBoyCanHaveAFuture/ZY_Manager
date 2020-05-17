@@ -33,7 +33,7 @@ public class ServerController {
     @Resource
     private ServerListService serverService;
     @Resource
-    private GameService gameService;
+    private GameNewService gameNewService;
     @Resource
     private GameSpService gameSpService;
     @Resource
@@ -44,8 +44,6 @@ public class ServerController {
     private GameDiscountService gameDiscountService;
     @Autowired
     private HttpServletRequest request;
-    @Resource
-    private ChannelConfigService channelConfigService;
 
     private Integer getUserId() {
         //可以设置缓存 redis 登录时设置过期时间 24小时 todo
@@ -367,15 +365,16 @@ public class ServerController {
                 }
             }
         }
-
-        Game game = gameService.selectGame(gameId, -1);
-        if (game == null) {
+        //检查游戏秘钥
+        GameNew gameNew = gameNewService.selectGame(gameId, -1);
+        if (gameNew == null) {
             log.error("游戏不存在 GameId=" + gameId);
             result.put("state", false);
             result.put("message", "游戏 非法");
             ResponseUtil.write(response, result);
             return;
         }
+
         GameSp gameSp = gameSpService.selectGameSp(gameId, channelId, userId);
         if (gameSp == null) {
             result.put("state", false);
@@ -414,7 +413,7 @@ public class ServerController {
                     return;
                 }
                 //操作权限判断
-                String name = game.getName();
+                String name = gameNew.getAppName();
                 gameDiscount = new GameDiscount();
                 gameDiscount.setGameId(gameId);
                 gameDiscount.setName(name);
@@ -543,15 +542,15 @@ public class ServerController {
         map.put("gameId", gameId);
         map.put("name", name);
 
-        List<Game> serverInfos = gameService.getGameList(map, userId);
+        List<GameNew> serverInfos = gameNewService.getGameList(map, userId);
 
         if (spId != null) {
-            List<Game> res = new ArrayList<>();
+            List<GameNew> res = new ArrayList<>();
 
             List<Integer> gameIdList = serverService.getDistinctServerInfo(map, 1, userId);
 
             if (gameIdList != null && gameIdList.size() > 0) {
-                for (Game game : serverInfos) {
+                for (GameNew game : serverInfos) {
                     if (gameIdList.contains(game.getId())) {
                         res.add(game);
                     }

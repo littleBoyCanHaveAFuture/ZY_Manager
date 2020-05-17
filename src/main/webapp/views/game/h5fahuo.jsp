@@ -51,6 +51,11 @@
 
         <a href="javascript:search($('#oid').val(),null,null)" class="easyui-linkbutton" style="margin-left:10px"
            iconCls=" icon-search" plain="true">查询</a>
+
+
+        <input type="text" id="ex_status" readonly="readonly" style="float: right;width: 50px"
+               onclick="changeStatus();"/>
+        <label for="ex_status" style="float: right">兑换功能：</label>
     </div>
 </div>
 
@@ -108,7 +113,52 @@
         });
 
         search("-1", pageNumber, pageSize);
+        loadStatus();
     });
+
+    function changeStatus() {
+        $.ajax({
+            url: "/h5/setExchangeStatus",
+            type: "get",
+            dataType: "json",//预期服务器返回的数据类型
+            async: false,
+            success: function (result) {
+                console.log("changeStatus:" + result.status);
+                let status;
+                if (result.status === true || result.status === "true") {
+                    status = "已开启";
+                } else {
+                    status = "已关闭";
+                }
+                $("#ex_status").val(status);
+            },
+            error: function () {
+                tip("ERROR！", "查询失败");
+            }
+        });
+    }
+
+    function loadStatus() {
+        $.ajax({
+            url: "/h5/getExchangeStatus",
+            type: "get",
+            dataType: "json",//预期服务器返回的数据类型
+            async: false,
+            success: function (result) {
+                console.log("loadStatus:" + result.status);
+                let status;
+                if (result.status === true || result.status === "true") {
+                    status = "已开启";
+                } else {
+                    status = "已关闭";
+                }
+                $("#ex_status").val(status);
+            },
+            error: function () {
+                tip("ERROR！", "查询失败");
+            }
+        });
+    }
 
     function config(val, row, index) {
         if (row.status === 0) {
@@ -142,7 +192,7 @@
             async: false,
             success: function (result) {
                 console.log("opt:" + result);
-                if(result.hasOwnProperty("resultCode") && result.resultCode===501){
+                if (result.hasOwnProperty("resultCode") && result.resultCode === 501) {
                     relogin();
                     return;
                 }
@@ -173,7 +223,7 @@
             async: false,
             success: function (result) {
                 console.info(result);
-                if(result.hasOwnProperty("resultCode") && result.resultCode===501){
+                if (result.hasOwnProperty("resultCode") && result.resultCode === 501) {
                     relogin();
                     return;
                 }

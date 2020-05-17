@@ -37,7 +37,7 @@ function checkCookies() {
 function clearCookie() {
     delCookie("userName");
     delCookie("roleName");
-    window.location.href = "login.jsp";
+    window.location.href = "../login.jsp";
 }
 
 function clearGameCookie() {
@@ -164,3 +164,4 @@ function GetArgsFromHref(sHref, sArgName) {
     }
     return retval;
 }
+

@@ -47,7 +47,7 @@ function initSelectList() {
                 select_gameId.find("option").remove();
                 select_gameId.append("<option value=-1 selected=selected>请选择</option>");
                 for (let res = 0; res < result.total; res++) {
-                    select_gameId.append("<option value='" + result.rows[res].id + "'>" + result.rows[res].name + "</option>");
+                    select_gameId.append("<option value='" + result.rows[res].appId + "'>" + result.rows[res].appName + "</option>");
                 }
             }
         },
@@ -316,7 +316,7 @@ function relogin() {
             if (r) {
                 delCookie("userName");
                 delCookie("roleName");
-                parent.location.href = "../../login.jsp";
+                parent.location.href = "../login.jsp";
             }
         });
 }

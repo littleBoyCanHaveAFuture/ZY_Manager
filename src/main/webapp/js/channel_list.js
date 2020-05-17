@@ -281,7 +281,7 @@ function relogin() {
             if (r) {
                 delCookie("userName");
                 delCookie("roleName");
-                parent.location.href = "../../login.jsp";
+                parent.location.href = "../login.jsp";
             }
         });
 }
