@@ -137,7 +137,15 @@ public class GameController {
                 break;
             }
             game.setOwnerId(userId);
-            game.setSecertKey(RandomUtil.rndSecertKey());
+            String secertKey = RandomUtil.rndSecertKey();
+            if (gameNewService.existKey(secertKey, userId) > 0) {
+                secertKey = RandomUtil.rndSecertKey();
+            }
+            if (gameNewService.existKey(secertKey, userId) > 0) {
+                result.put("reason", "添加失败 秘钥重复请重试");
+                break;
+            }
+            game.setSecertKey(secertKey);
             int res = gameNewService.addGame(game, userId);
 
             log.info("request: game/save , " + game.toString());

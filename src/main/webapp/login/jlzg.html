@@ -71,6 +71,10 @@
         <button class="btn btn-login " onClick="resetLogin()">
             重置登录数据
         </button>
+
+        <button class="btn btn-login " onClick="pay()">
+            zhifu
+        </button>
     </div>
     <span class="logintip3">客服QQ：602824414</span>
 </div>
@@ -131,6 +135,71 @@
     <label for="copy"></label>
     <input type="text" name="copy" id="copy" required="" hidden="hidden">
 </div>
+<script src="//dm.233h5.com/static/sdk/xianxia.sdk.js?version=1.0"></script>
+<script type="text/javascript">
+    var sdk = window.XIANXIA_GAME_SDK;
+    var params = {
+        gameId: "6",
+        debug: false,//设置为true,开启调试模式
+        share: {
+            success: function () {/*分享好友成功回调*/
+                //alert("game tell success");
+            }
+        },
+        pay: {
+            success: function () {// 支付成功回调方法（仅针对于 当前页面的支付方式有效）
+                console.info("pay success")
+            }
+        }
+    };
+    sdk.config(params);//初始化
+    function share() {
+        //可以自定义分享内容，也可以不传参数，不传采用平台默认
+        sdk.showShare('分享给好友的标题', '分享给好友的描述', '分享给好友时的图标');
+    };
+
+    function authentication() {  //唤起实名认证窗口
+        sdk.authentication({show: 'true'});
+    }
+
+    function pay() {
+        // Md5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1&role=1&server=1&time=1475049097&uid=6298253&key=testpaykey)
+        let pay = {
+            uid: "1",
+            gameId: "6",
+            time: "1",
+            server: "1",
+            role: "1",
+            goodsId: "1",
+            goodsName: "1",
+            money: "1",
+            cpOrderId: "32",
+            ext: "1",
+            sign: "1",//签名见后面加密实例
+            signType: "md5"
+        };
+        let strInfo = "cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1&role=1&server=1&time=1475049097&uid=6298253&key=";
+        strInfo += "82937ce89565d82c09422e54f1fc4e24";
+
+        let sign_uri = encodeURIComponent(strInfo);
+        let hex_sign_uri = hex_md5(sign_uri);
+        pay.sign = hex_sign_uri;
+        sdk.pay(pay);
+    };
+
+    //上传类型填数字
+    function role() {//角色升级的时候上报角色等级，用于统计用户的活跃度
+        sdk.role({
+            roleEvent: "", //上传类型，1.online 2 create 3.levelup 4.offline 5. pay 6.delete
+            roleId: "",
+            roleName: "",
+            serverId: "",
+            serverName: "",
+            roleLevel: ""
+        });
+    }
+
+</script>
 <script>
     let clipboard = new ClipboardJS('.copyBtn', {
         text: function () {
@@ -200,6 +269,8 @@
             ZySDK.login(function (callbackData) {
                 if (callbackData.status) {
                     console.log('GameDemo:zySDK登录成功: uid=>' + callbackData.data.uid);
+                    //模拟校验
+                    checkUserInfo(callbackData);
                 } else {
                     console.log('GameDemo:zySDK登录失败:' + callbackData.message);
                 }

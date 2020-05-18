@@ -91,4 +91,14 @@ public class GameNewServiceImpl implements GameNewService {
         return dao.readMaxAppId();
     }
 
+    @Override
+    public int existKey(String key, Integer userId) {
+        return dao.existKey(key);
+    }
+
+    @Override
+    public GameNew getGameByKey(String key, Integer userId) {
+        return dao.getGameByKey(key);
+    }
+
 }

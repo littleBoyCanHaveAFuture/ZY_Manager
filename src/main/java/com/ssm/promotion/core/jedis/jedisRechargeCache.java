@@ -107,6 +107,40 @@ public class jedisRechargeCache {
         jedis.close();
     }
 
+    public void setChannelLoginToken(String gameId, String channelId, String channelUid, String token) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            String key = RedisKey_Gen.get_ChannelLoginToken(gameId, channelId, channelUid);
+            jds.set(key, token);
+            jds.expire(key, 60 * 10);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    public String getChannelLoginToken(String gameId, String channelId, String channelUid) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            String key = RedisKey_Gen.get_ChannelLoginToken(gameId, channelId, channelUid);
+            return jds.get(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return "";
+    }
+
     public String getString(String key) {
         Jedis jds = null;
         boolean isBroken = false;

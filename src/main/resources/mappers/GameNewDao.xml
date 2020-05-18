@@ -121,7 +121,7 @@
     </select>
 
     <select id="selectGameIdList" parameterType="map" resultMap="GameResult">
-        select  app_id,app_name
+        select app_id, app_name
         from zy_gamen
         limit 100
     </select>
@@ -184,11 +184,11 @@
                              description,
                              secert_key)
         values (#{ownerId},
-                #{ appId},
-                #{ appName},
-                #{ type},
-                #{ genres},
-                #{ theme},
+                #{appId},
+                #{appName},
+                #{type},
+                #{genres},
+                #{theme},
                 #{keyConcept},
                 #{ipType},
                 #{loginUrl},
@@ -201,5 +201,15 @@
     <select id="readMaxAppId" parameterType="int" resultType="int">
         select max(app_id)
         from zy_gamen
+    </select>
+    <select id="existKey" parameterType="string" resultType="int">
+        select count(*)
+        from zy_gamen
+        where secert_key = #{key}
+    </select>
+
+    <select id="getGameByKey" parameterType="string" resultMap="GameResult">
+        <include refid="select_all"/>
+        where secert_key = #{key}
     </select>
 </mapper>

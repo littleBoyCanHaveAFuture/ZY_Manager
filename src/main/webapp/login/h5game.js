@@ -196,3 +196,21 @@ function updateQueryStringParameter(uri, key, value) {
         return uri + separator + key + "=" + value;
     }
 }
+
+function checkUserInfo(info) {
+    let param = "token=" + info.data.token +
+        "&gameKey=" + ZySDK.GameKey +
+        "&uid=" + info.data.uid +
+        "&channelId=" + info.data.channelId;
+    $.ajax({
+        url: "/webGame2/checkUserInfo?" + param,
+        type: "get",
+        async: false,
+        success: function (result) {
+            console.info("checkUserInfo=" + result);
+            //验证成功 进入游戏
+        }, error: function (result) {
+            console.log("checkUserInfo=" + result);
+        }
+    });
+}

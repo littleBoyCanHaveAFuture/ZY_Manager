@@ -25,4 +25,8 @@ public interface GameNewDao {
 
 
     List<GameNew> selectGameIdList();
+
+    Integer existKey(String key);
+
+    GameNew getGameByKey(String gameId);
 }

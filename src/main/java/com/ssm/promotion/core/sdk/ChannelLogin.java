@@ -2,6 +2,7 @@ package com.ssm.promotion.core.sdk;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ssm.promotion.core.entity.Account;
+import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.service.AccountService;
 import com.ssm.promotion.core.util.MD5Util;
 import com.ssm.promotion.core.util.RandomUtil;
@@ -28,8 +29,12 @@ public class ChannelLogin {
     private RestOperations restOperations;
     @Resource
     private AccountService accountService;
+    @Autowired
+    jedisRechargeCache cache;
+    @Resource
+    AccountWorker accountWorker;
 
-    public boolean loadChannelLogin(Integer channelId, Map<String, String[]> map, JSONObject userData) {
+    public boolean loadChannelLogin(Map<String, String[]> map, JSONObject userData) throws Exception {
         boolean isOk = false;
         // 渠道uid
         userData.put("uid", "");
@@ -44,7 +49,9 @@ public class ChannelLogin {
         // 渠道ID
         userData.put("channelId", "");
 
-        // 需要存入redis [appId-channelId-uid]-token
+        int appId = Integer.parseInt(map.get("GameId")[0]);
+        int channelId = Integer.parseInt(map.get("channelId")[0]);
+
         switch (channelId) {
             case 0:
                 //指悦官方
@@ -60,9 +67,67 @@ public class ChannelLogin {
             default:
                 break;
         }
+        if (isOk) {
+            //没有则注册指悦账号
+            //1.判断账号是否存在
+            String channelUid = userData.getString("uid");
+            String token = userData.getString("token");
+
+            Account account = channelReg(appId, channelId, channelUid);
+            if (account != null) {
+                setToken(String.valueOf(appId), String.valueOf(channelId), channelUid, token);
+            } else {
+                isOk = false;
+            }
+        }
         return isOk;
     }
 
+    /**
+     * 需要存入redis [appId-channelId-uid]-token
+     */
+    public void setToken(String gameId, String channelId, String channelUid, String token) {
+        cache.setChannelLoginToken(gameId, channelId, channelUid, token);
+    }
+
+    public Account channelReg(Integer appId, Integer channelId, String channelUid) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("isChannel", "true");
+        map.put("channelId", channelId);
+        map.put("channelUid", channelUid);
+
+        Account account = accountWorker.getAccount(map);
+        if (account != null) {
+            return account;
+        } else {
+            JSONObject jsonObject = new JSONObject();
+            JSONObject reply = new JSONObject();
+
+            jsonObject.put("appId", appId);
+            jsonObject.put("channelId", channelId);
+            jsonObject.put("channelUid", channelUid);
+
+            return accountWorker.commonReg(reply, jsonObject);
+        }
+    }
+
+    public void setUserData(JSONObject userData, String channelUid, String username, String channelId) {
+        String token = RandomUtil.rndSecertKey();
+        // 渠道uid
+        userData.replace("uid", channelUid);
+        // 	渠道username
+        userData.put("username", username);
+        // 是否游客,登录后此值为true
+        userData.put("isLogin", false);
+        // 当前时间戳 单位：秒
+        userData.put("time", System.currentTimeMillis() / 1000);
+        // 	token 游戏服务器需通过v2/checkUserInfo接口(参见服务器接口文档)验证token和UID的正确性
+        userData.put("token", token);
+        // 渠道ID
+        userData.put("channelId", channelId);
+    }
+
+    // 指悦官方登录
     public boolean zhiyueLogin(Map<String, String[]> map, JSONObject userData) {
         int appId = Integer.parseInt(map.get("GameId")[0]);
         int channelId = Integer.parseInt(map.get("channelId")[0]);
@@ -71,30 +136,34 @@ public class ChannelLogin {
             return false;
         }
         String channelUid = map.get("zy_channelUid")[0];
+
         Map<String, Object> objectMap = new HashMap<>(6);
         objectMap.put("channelId", channelId);
         objectMap.put("channelUid", channelUid);
+
         Account account = accountService.findUserBychannelUid(String.valueOf(channelId), channelUid);
         if (account != null) {
+            String token = RandomUtil.rndSecertKey();
             userData.replace("uid", channelUid);
             userData.replace("username", account.getChannelUserName());
             userData.replace("isLogin", true);
             // 当前时间戳 单位：秒
             userData.replace("time", System.currentTimeMillis() / 1000);
             // 	token 游戏服务器需通过v2/checkUserInfo接口(参见服务器接口文档)验证token和UID的正确性
-            userData.replace("token", RandomUtil.rndSecertKey());
+            userData.replace("token", token);
             // 渠道ID
-            userData.replace("channelId", channelUid);
+            userData.replace("channelId", channelId);
 
             return true;
         } else {
             return false;
         }
-
     }
 
-    public boolean ziwanLogin(Map<String, String[]> map, JSONObject userData) {
+
+    public boolean ziwanLogin(Map<String, String[]> map, JSONObject userData) throws Exception {
         int appId = Integer.parseInt(map.get("GameId")[0]);
+        int channelId = Integer.parseInt(map.get("channelId")[0]);
 
         if (!map.containsKey("channel_id") || !map.containsKey("userToken") || !map.containsKey("other")) {
             return false;
@@ -130,9 +199,23 @@ public class ChannelLogin {
         param.append("&sign=").append(serverSign);
 
         JSONObject jsonObject = httpGet(url + param.toString());
+        System.out.println("紫菀平台 登录校验 info:" + jsonObject.getString("info"));
+        System.out.println("紫菀平台 登录校验 userinfo:" + jsonObject.getString("userinfo"));
 
         if (jsonObject.containsKey("status") && jsonObject.getInteger("status") == 1001) {
             System.out.println("紫菀平台 登录校验成功");
+//            userinfo (获取到的用户信息，status为1001时有，包含wechaname，用户名称；portrait，用户头像；sex，性别；city，城市；province 省会;openid 用户标识，uid 用户ID)
+            JSONObject userinfo = jsonObject.getJSONObject("userinfo");
+
+            String wechaname = userinfo.getString("wechaname");
+            String portrait = userinfo.getString("portrait");
+            String sex = userinfo.getString("sex");
+            String city = userinfo.getString("city");
+            String province = userinfo.getString("province");
+            String openid = userinfo.getString("openid");
+            String uid = userinfo.getString("uid");
+
+            setUserData(userData, uid, portrait, String.valueOf(channelId));
             return true;
         } else {
             return false;
@@ -141,7 +224,7 @@ public class ChannelLogin {
 
     public boolean baijiaLogin(Map<String, String[]> map, JSONObject userData) {
         int appId = Integer.parseInt(map.get("GameId")[0]);
-
+        int channelId = Integer.parseInt(map.get("channelId")[0]);
         if (!map.containsKey("gameId") || !map.containsKey("uid") || !map.containsKey("userName") ||
                 !map.containsKey("birthday") || !map.containsKey("idCard") || !map.containsKey("sign")) {
             return false;
@@ -185,21 +268,22 @@ public class ChannelLogin {
 
 
         if (appId == AppId.julongzhange) {
+            String GameId = "6";
             loginKey = "e3101115202b291b1c942fbc417ba064";
             payKey = "82937ce89565d82c09422e54f1fc4e24";
         }
 
         param.append("gameId=").append(gameId);
-        param.append("uid=").append(gameId);
+        param.append("uid=").append(uid);
         param.append("userName=").append(userName);
         param.append("time=").append(time);
         param.append("key=").append(loginKey);
 
         serverSign = MD5Util.md5(param.toString());
-        if (!serverSign.equals(sign)) {
+        if (!sign.equals(serverSign)) {
             return false;
         } else {
-            //查找用户是否存在 不存在则创建 todo
+            setUserData(userData, uid, userName, String.valueOf(channelId));
             return true;
         }
     }

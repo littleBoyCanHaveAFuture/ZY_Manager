@@ -13,6 +13,16 @@ public class RedisKey_Gen {
 
     private static final boolean isLog = false;
 
+    public static String get_ChannelLoginToken(String gameId, String channelId, String channelUid) {
+        String key = "Login" +
+                ":" + SP_ID + ":" + channelId +
+                "#" + channelUid;
+        if (isLog) {
+            log.info("get_ChannelLoginToken:\t" + key);
+        }
+        return key;
+    }
+
     /**
      * 全服汇总 每日
      * <p>

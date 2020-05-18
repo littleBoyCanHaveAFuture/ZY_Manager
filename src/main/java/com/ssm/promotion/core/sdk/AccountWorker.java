@@ -239,6 +239,12 @@ public class AccountWorker {
      */
     public JSONObject channelRegister(JSONObject jsonObject) throws Exception {
         JSONObject reply = new JSONObject();
+        commonReg(reply, jsonObject);
+        return reply;
+    }
+
+    public Account commonReg(JSONObject reply, JSONObject jsonObject) throws Exception {
+        Account account = new Account();
         do {
             int appId = jsonObject.getInteger("appId");
             int channelId = jsonObject.getInteger("channelId");
@@ -274,7 +280,7 @@ public class AccountWorker {
                 break;
             }
 
-            Account account = new Account();
+
             account.setName(RandomUtil.rndStr(10, true));
             account.setPwd(RandomUtil.rndStr(6, false));
             account.setPhone(phone);
@@ -313,10 +319,9 @@ public class AccountWorker {
             //注册成功 相关数据存入redis
             cache.register(true, appId, account.getId(), channelId);
         } while (false);
+        return account;
 
-        return reply;
     }
-
 
     /**
      * 创建用户

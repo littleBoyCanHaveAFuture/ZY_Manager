@@ -67,9 +67,7 @@
 
     </bean>
 
-    <bean id="gameWorker" class="com.ssm.promotion.core.sdk.GameWorker" init-method="init">
 
-    </bean>
     <bean id="httpClientFactory" class="org.springframework.http.client.SimpleClientHttpRequestFactory">
         <property name="connectTimeout" value="1000"/>
         <property name="readTimeout" value="1000"/>

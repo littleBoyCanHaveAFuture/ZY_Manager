@@ -1,9 +1,8 @@
 package com.ssm.promotion.core.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ssm.promotion.core.entity.*;
 import com.ssm.promotion.core.entity.ChannelConfig;
-import com.ssm.promotion.core.entity.GameNew;
-import com.ssm.promotion.core.entity.Sp;
 import com.ssm.promotion.core.jedis.jedisRechargeCache;
 import com.ssm.promotion.core.sdk.*;
 import com.ssm.promotion.core.service.AccountService;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -134,7 +134,6 @@ public class NewZySdkController {
         }
 
         do {
-
             int appId = Integer.parseInt(parameterMap.get("GameId")[0]);
             String appKey = parameterMap.get("GameKey")[0];
             int channelId = Integer.parseInt(parameterMap.get("channelId")[0]);
@@ -264,16 +263,72 @@ public class NewZySdkController {
      *
      * @return 1为成功, 其他值为失败。
      */
-    @RequestMapping(value = "/checkUserInfo")
+    @RequestMapping(value = "/checkUserInfo", produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String checkUserInfo(HttpServletRequest request, HttpServletResponse response,
                                 String token,
-                                String product_code,
+                                String gameKey,
                                 String uid,
-                                String channel_code) throws Exception {
-        //从redis读取 [appId-channelId-uid]-token todo
-        return "1";
+                                String channelId) throws Exception {
+        boolean res = false;
+        do {
+            Map<String, Object> map = new HashMap<>();
+            map.put("isChannel", "true");
+            map.put("channelId", channelId);
+            map.put("channelUid", uid);
+
+            Account account = accountWorker.getAccount(map);
+            //从redis读取 [appId-channelId-uid]-token todo
+
+            GameNew gameNew = gameNewService.getGameByKey(gameKey, -1);
+            if (gameNew == null) {
+                break;
+            }
+            String channelToken = cache.getChannelLoginToken(String.valueOf(gameNew.getAppId()), channelId, uid);
+            if (!token.isEmpty() && token.equals(channelToken)) {
+                res = true;
+                break;
+            } else {
+                break;
+            }
+
+        } while (false);
+        return res ? "1" : "0";
     }
 
+    /**
+     * 获取支付信息
+     */
+    @RequestMapping(value = "/getPayInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public String getPayInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        boolean res = false;
+        do {
+        } while (false);
+        return res ? "1" : "0";
+    }
+    /**
+     * 检查支付信息->跳转地址网页支付
+     */
+    @RequestMapping(value = "/checkPayInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public String checkPayInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        boolean res = false;
+        do {
+        } while (false);
+        return res ? "1" : "0";
+    }
+
+    /**
+     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     */
+    @RequestMapping(value = "/callbackPayInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public String callbackPayInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        boolean res = false;
+        do {
+        } while (false);
+        return res ? "1" : "0";
+    }
 
 }
