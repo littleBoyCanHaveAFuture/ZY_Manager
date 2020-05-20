@@ -667,8 +667,4 @@ public class NewZySdkController {
         log.info("/webGame/setData\t" + result.toString());
     }
 
-    //渠道 md5加密 todo
-    public void sdkMd5() {
-
-    }
 }

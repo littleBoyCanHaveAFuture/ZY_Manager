@@ -78,21 +78,22 @@ public class ChannelPayCallback {
         }
         String channel_Id = "c53457d37e949c6133752a3bd41f44f1";
         String channelSecertKey = "PGM2FPCTO94DFLWJJE6KMJ6T2QA10V8P";
-
+        String orderId = parameterMap.get("orderid");
         // 单位是元是分？
         String price = parameterMap.get("price");
         //升序排列
         StringBuilder param = new StringBuilder();
         param.append("channel_id").append("=").append(channel_Id);
-        param.append("&").append("orderid").append("=");
-        param.append(channelSecertKey);
+        param.append("&").append("orderid").append("=").append(orderId);
 
         //参数赋值 并签名
-        String sign = MD5Util.md5(param.toString());
+        String sign = MD5Util.md5(param.toString() + channelSecertKey);
         param.append("&").append("sign").append("=").append(sign);
 
-        JSONObject rsp = httpGet(checkOrderUrl + param);
+        String url = checkOrderUrl + "&" + param;
+        System.out.println("ziwanPayCallback = " + url);
 
+        JSONObject rsp = httpGet(url);
         System.out.println("ziwanPayCallback 渠道回调 " + rsp);
 
         if (rsp.containsKey("status")) {
@@ -130,7 +131,7 @@ public class ChannelPayCallback {
         String rsp = restOperations.getForObject(notifyUrl, String.class);
         log.info("cp支付回调：" + rsp);
         JSONObject json = JSONObject.parseObject(rsp);
-        System.out.println(json);
+//        System.out.println(json);
         return json;
     }
 }

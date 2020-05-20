@@ -15,6 +15,7 @@
         <result property="direction" column="direction"/>
         <result property="description" column="description"/>
         <result property="secertKey" column="secert_key"/>
+        <result property="callbacKey" column="callback_key"/>
     </resultMap>
     <sql id="select_all">
         select id,
@@ -30,7 +31,8 @@
                payback_url,
                direction,
                description,
-               secert_key
+               secert_key,
+               callback_key
         from zy_gamen
     </sql>
 
@@ -69,6 +71,9 @@
             </if>
             <if test="secertKey != null and  secertKey!='' ">
                 and secert_key=#{secertKey}
+            </if>
+            <if test="callbacKey != null and  callbacKey!='' ">
+                and callback_key=#{callbacKey}
             </if>
         </where>
         <if test="start!=null and size!=null">
@@ -111,6 +116,9 @@
             </if>
             <if test="secertKey != null and  secertKey!='' ">
                 and secert_key=#{secertKey}
+            </if>
+            <if test="callbacKey != null and  callbacKey!='' ">
+                and callback_key=#{callbacKey}
             </if>
         </where>
     </select>
@@ -182,7 +190,8 @@
                              payback_url,
                              direction,
                              description,
-                             secert_key)
+                             secert_key,
+                             callback_key)
         values (#{ownerId},
                 #{appId},
                 #{appName},
@@ -195,7 +204,8 @@
                 #{paybackUrl},
                 #{direction},
                 #{description},
-                #{secertKey})
+                #{secertKey},
+                #{callbacKey})
     </insert>
 
     <select id="readMaxAppId" parameterType="int" resultType="int">
@@ -211,5 +221,10 @@
     <select id="getGameByKey" parameterType="string" resultMap="GameResult">
         <include refid="select_all"/>
         where secert_key = #{key}
+    </select>
+    <select id="getCallbackKey" resultType="java.lang.String">
+        select callback_key
+        from zy_gamen
+        where app_id = #{gameId}
     </select>
 </mapper>

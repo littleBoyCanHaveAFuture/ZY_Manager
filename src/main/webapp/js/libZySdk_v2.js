@@ -713,19 +713,19 @@ function testChannelPayCallback() {
         "/" + ZhiYueSDK.channelCode +
         "/" + ZhiYueSDK.channelId +
         "/" + ZhiYueSDK.GameId;
-    let url = ZhiYue_domain + "/callbackPayInfo" + param;
+    let url = "/sdkPay" + "/callbackPayInfo" + param;
     console.info("testChannelPayCallback = " + url);
 
-    if (ZhiYueSDK.channelCode === "h5_ziwan") {
-        $.post(url + "/x-www-form-urlencoded", {
-            "openid": "aaa",
-            "price": "bbb",
-            "other": "",
-            "item_id": "",
-            "orderid": "",
-            "sign": ""
-        })
-    }
+    // if (ZhiYueSDK.channelCode === "h5_ziwan") {
+    //     $.post(url + "/x-www-form-urlencoded", {
+    //         "openid": "aaa",
+    //         "price": "bbb",
+    //         "other": "",
+    //         "item_id": "",
+    //         "orderid": "",
+    //         "sign": ""
+    //     })
+    // }
 
     // $.ajax({
     //     url: url,

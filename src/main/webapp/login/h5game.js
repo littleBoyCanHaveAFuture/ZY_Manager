@@ -53,7 +53,7 @@ function sdkPay(roleId) {
     orderInfo.userServer = "测试1区";                //角色所在区服
     orderInfo.userLevel = "1";                      //角色等级
     orderInfo.cpOrderNo = cpOrderId;                //游戏内的订单,SDK服务器通知中会回传
-    orderInfo.amount = 0.01;                        //购买金额（元）
+    orderInfo.amount = 1;                            //购买金额（元）
     orderInfo.count = 1;                            //购买商品个数
     orderInfo.quantifier = "个";                    //购买商品单位，如，个
     orderInfo.subject = "测试道具1";                 //道具名称

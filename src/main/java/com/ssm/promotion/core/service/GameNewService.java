@@ -1,11 +1,9 @@
 package com.ssm.promotion.core.service;
 
 import com.ssm.promotion.core.entity.GameNew;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Administrator
@@ -75,4 +73,6 @@ public interface GameNewService {
     int existKey(String key, Integer userId);
 
     GameNew getGameByKey(String key, Integer userId);
+
+    String getCallbackKey(Integer gameId, Integer userId);
 }

@@ -145,6 +145,7 @@ public class GameController {
                 result.put("reason", "添加失败 秘钥重复请重试");
                 break;
             }
+            game.setCallbacKey(RandomUtil.rndSecertKey());
             game.setSecertKey(secertKey);
             int res = gameNewService.addGame(game, userId);
 

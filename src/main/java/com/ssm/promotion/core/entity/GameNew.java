@@ -112,7 +112,10 @@ public class GameNew {
      * 秘钥 32位小写字母和数字
      */
     private String secertKey;
-
+    /**
+     * 秘钥 32位小写字母和数字
+     */
+    private String callbacKey;
 
     public GameNew() {
 

@@ -221,7 +221,7 @@ public class UOrderManager {
         order.setRoleName(userRoleName);
         order.setServerID(serverId);
         order.setServerName(userServer);
-        order.setState(OrderState.STATE_OPEN_SELECT);
+        order.setState(OrderState.STATE_OPEN_PAY);
         order.setChannelOrderID("");
         order.setExtension(extrasParams);
         order.setCreatedTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));

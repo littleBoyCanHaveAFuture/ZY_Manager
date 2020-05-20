@@ -29,4 +29,6 @@ public interface GameNewDao {
     Integer existKey(String key);
 
     GameNew getGameByKey(String gameId);
+
+    String getCallbackKey(Integer gameId);
 }

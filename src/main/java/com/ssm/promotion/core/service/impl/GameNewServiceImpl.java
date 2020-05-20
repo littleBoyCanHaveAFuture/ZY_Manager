@@ -101,4 +101,10 @@ public class GameNewServiceImpl implements GameNewService {
         return dao.getGameByKey(key);
     }
 
+    @Override
+    public String getCallbackKey(Integer gameId, Integer userId) {
+        return dao.getCallbackKey(gameId);
+    }
+
+
 }
