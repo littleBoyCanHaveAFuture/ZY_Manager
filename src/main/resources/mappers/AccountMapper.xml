@@ -109,4 +109,12 @@
         </set>
         where id=#{id}
     </update>
+
+    <select id="findAccountByOpenId" parameterType="string" resultMap="AccountResult">
+        <include refid="select_account_column"/>
+        where
+        channelId = #{channelId}
+        and
+        token = #{openId}
+    </select>
 </mapper>

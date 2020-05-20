@@ -5,64 +5,50 @@
  * @date 2020/05/14
  * @version 0.2.7
  */
-const OrderStatus = [1, 2, 3, 4, 5];
-const OrderStatusDesc = [
-    "选择充值方式界面  未选择充值方式（取消支付）",
-    "支付宝微信界面   未支付（取消支付）",
-    "支付成功 未发货",
-    "支付成功 已发货(交易完成)",
-    "支付成功 补单(交易完成)"
-];
-
 //服务器地址
-const zy_domain = "http://localhost:8080/webGame2";
-// const zy_domain = "http://zyh5games.com:8080/webGame2";
+const ZhiYue_domain = "http://localhost:8080/webGame2";
+// const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
 
-let ZySDK = {
+
+let ZhiYueSDK = {
     GameId: null,//游戏id
     GameKey: null,//游戏秘钥
     channelId: -1,//渠道id
     channelUid: "",//渠道uid
-    channelUsername: "",//渠道用户名
-    LoginKey: null,//登录秘钥
-    PayKey: null,//支付秘钥
-    SendKey: null,//其他
+    channelCode: "",
     channelToken: "",
     debug: true,
     /**
      * 1.sdk初始化函数
-     * @param GameId       平台游戏id（后台自动分配 ）
-     * @param GameKey        平台游戏秘钥（后台自动分配 ）
+     * @param GameId            平台游戏id（后台自动分配 ）
+     * @param GameKey           平台游戏秘钥（后台自动分配 ）
+     * @param channelId         平台渠道id（后台自动分配 ）
      * @param callback          自定义回调函数
      * */
-    init: function (GameId, GameKey, callback) {
-        ZySDK.GameId = GameId;
-        ZySDK.GameKey = GameKey;
-
+    init: function (GameId, GameKey, channelId, callback) {
+        ZhiYueSDK.GameId = GameId;
+        ZhiYueSDK.GameKey = GameKey;
+        ZhiYueSDK.channelId = channelId;
         let params = {};
         params.debug = this.debug;
         params.GameId = this.GameId;
         params.GameKey = this.GameKey;
-        params.debug = this.debug;
+        params.channelId = this.channelId;
 
         doInit(params, function (status) {
             callback(status);
         });
-    }, login: function (callback) {
+    },
+    /**
+     * 2.渠道账号登录->会获取当前页面的参数进行处理
+     * @param callback          自定义回调函数
+     * */
+    login: function (callback) {
         loginCallbackFunction = callback;
         autoLogin();
     },
     /**
-     * 4.上传角色信息
-     * @param   {string}        key             上报类型
-     * @param   {Object}        roleInfo        角色信息
-     * @param   {function}      callback        回调函数
-     *  */
-    uploadGameRoleInfo: function (key, roleInfo, callback) {
-        sdk_ZyUploadGameRoleInfo(key, roleInfo, callback);
-    },
-    /**
-     * 5.支付上报
+     * 3.调起支付-callChannelPay 每个渠道需要重写，调起渠道支付页面
      * @param {Object}      orderInfo       订单信息
      * @param {function}    callback
      * */
@@ -70,9 +56,36 @@ let ZySDK = {
         sdk_zyUploadPayInfo(orderInfo, callback);
     },
     /**
-     * 6.指悦账号注册*/
-    zyRegister: function (regInfo, callback) {
-        sdk_ZyRegister(regInfo, callback);
+     * 4.上传角色信息
+     * @param   {objcet}      roleInfo
+     * @param   {function}      callback        回调函数
+     *  */
+    uploadGameRoleInfo: function (roleInfo, callback) {
+        let roleObject = {};
+        this.dataPut("H5角色更新", "");
+        //检查是否已初始化
+        if (!ZhiYueSDK.checkZySdkParam(false)) {
+            setLog('SDK未完成初始化', 1);
+            return;
+        }
+        let roleChecker = checkRoleObject(roleInfo);
+        if (!roleChecker.result) {
+            setLog(roleChecker.message, 1);
+            return;
+        }
+        callUploadRole(roleInfo);
+        ajaxUploadGameRole(roleInfo, function (resultObject) {
+            callback(resultObject);
+        });
+    },
+    /**
+     * 6.注销
+     * */
+    logout: function (callback) {
+        if (typeof callChannelLogout == 'function') {
+            let logout = callChannelLogout();
+            callback(logout);
+        }
     },
     /**
      * 检查sdk初始化的参数
@@ -84,13 +97,20 @@ let ZySDK = {
             return false;
         }
         if (type === true) {
-            if (this.channelUid == null || this.channelUsername == null) {
+            if (this.channelUid == null) {
                 return false;
             }
         }
         return true;
-    }
+    },
+    dataPut: function () {
+        //null
+    },
 };
+// 临时存放 某些渠道的 token
+let saveChannelParams = '';
+let loginCallbackFunction = null;
+let CallbackPayFun = null;
 
 /**
  * 获取平台的该游戏渠道参数
@@ -102,32 +122,32 @@ let ZySDK = {
  * */
 function doInit(params, callback) {
     let requestUri = getNowHost();
+    console.info("doInit requestUri=" + requestUri);
     requestUri = requestUri.replace(/\&amp;/g, '&');
     try {
         var params = requestUri.split('?')[1];
+        console.info("doInit params=" + params);
     } catch (e) {
         var params = '';
     }
 
     $.ajax({
         type: "GET",
-        url: zy_domain + "/initApi/?" + params,
+        url: ZhiYue_domain + "/initApi?" + params,
         dataType: "json",
         success: function (data) {
-            if (data.hasOwnProperty('status')) {
-                if (data.status === true) {
-                    //load channel lib
-                    loadSpLib(data, function () {
-                        ZySDK.LoginKey = data.channelParams.login_key;
-                        ZySDK.PayKey = data.channelParams.pay_key;
-                        ZySDK.SendKey = data.channelParams.send_key;
-                        callback(data.status);
-                        setLog(JSON.stringify(data), 0);
-                    });
-                } else {
-                    setLog(JSON.stringify(data), 1);
+            if (data.hasOwnProperty('status') && data.status === true) {
+                //load channel lib
+                loadSpLib(data, function () {
+                    callChannelInit(params + '&zhiyue_channel_token=' + data.channelToken);
                     callback(data.status);
-                }
+                    if (data.hasOwnProperty('channelToken')) {
+                        saveChannelParams = data.channelToken;
+                    }
+                    if (data.hasOwnProperty('channelCode')) {
+                        ZhiYueSDK.channelCode = data.channelCode;
+                    }
+                });
             } else {
                 setLog(JSON.stringify(data), 1);
                 data.status = false;
@@ -137,8 +157,9 @@ function doInit(params, callback) {
     })
 }
 
-var loginCallbackFunction = null;
-
+/**
+ * 渠道登录
+ * */
 function autoLogin() {
     let requestUri = getNowHost();
     requestUri = requestUri.replace(/\&amp;/g, '&');
@@ -149,7 +170,7 @@ function autoLogin() {
     }
     $.ajax({
         type: "GET",
-        url: zy_domain + "/loginApi?" + params,
+        url: ZhiYue_domain + "/loginApi?" + params,
         dataType: "json",
         success: function (data) {
             doLoginCallback(data);
@@ -159,6 +180,21 @@ function autoLogin() {
 
 let userData = {};
 
+/**
+ * @param {object}  data
+ * @param {object}  data.userData                   用户
+ * @param {string}  data.userData.uid                   渠道uid
+ * @param {string}  data.userData.username              渠道username
+ * @param {boolean} data.userData.isLogin               是否游客,登录后此值为true
+ * @param {string}  data.userData.time                  当前时间戳 单位：秒
+ * @param {string}  data.userData.token
+ * @param {string}  data.userData.channelId             渠道ID
+ * @param {object}  data.channelData                渠道
+ * @param {string}  data.channelData.channel_id
+ * @param {string}  data.channelData.channel_name
+ * @param {boolean} data.status                     登录结果
+ * @param {string}  data.message                    提示内容
+ * */
 function doLoginCallback(data) {
     let t_userData = data.userData;
     let channelData = data.channelData;
@@ -166,429 +202,105 @@ function doLoginCallback(data) {
     let channelId = channelData.channel_id;
     let channelName = channelData.channel_name;
 
-    ZySDK.channelId = userData.channelId;
-    ZySDK.userData = t_userData;
+    ZhiYueSDK.channelId = channelData.channel_id;
+    userData = t_userData;
 
     if (loginCallbackFunction != null) {
         let returnObject = {};
         returnObject.data = data.userData;
         returnObject.status = data.userData.uid !== '';
         returnObject.message = data.message;
+        if (returnObject.status)
+            ZhiYueSDK.channelUid = data.userData.uid;
         loginCallbackFunction(returnObject);
     }
 }
 
 /**
- * 注册-接口
- * @param   {object}        regInfo                  注册信息
- * @param   {boolean}       regInfo.auto             是否无需账号密码注册
- * @param   {number}        regInfo.appId            游戏id
- * @param   {number}        regInfo.channelId        渠道id
- * @param   {string}        regInfo.channelUid       渠道账号id
- * @param   {string}        regInfo.channelUname     渠道账号名称
- * @param   {string}        regInfo.channelUnick     渠道账号昵称
- * @param   {string}        regInfo.username         指悦账号
- * @param   {string}        regInfo.password         指悦账号密码
- * @param   {string}        regInfo.phone            手机号
- * @param   {string}        regInfo.deviceCode
- * @param   {string}        regInfo.imei
- * @param   {string}        regInfo.addparm          额外参数
- * @param   {function}      callback
-
- * */
-function sdk_ZyRegister(regInfo, callback) {
-    let rspObject = {};
-    if (!ZySDK.checkZySdkParam(false)) {
-        rspObject.state = false;
-        rspObject.message = "请先调用 ZySDK.init()";
-        callback(rspObject);
-        return;
-    }
-    regInfo.appId = Number(ZySDK.GameId);
-    regInfo.channelId = Number(ZySDK.channelId);
-    if (!regInfo.hasOwnProperty('auto')) {
-        rspObject.message = "auto 参数为空";
-        rspObject.state = false;
-        callback(rspObject);
-        return;
-    }
-    if (!regInfo.hasOwnProperty('appId')) {
-        rspObject.message = "appId 参数为空";
-        rspObject.state = false;
-        callback(rspObject);
-        return;
-    }
-    if (regInfo.auto === true) {
-        let mustKey = ['channelId', 'channelUid'];
-        if (regInfo.hasOwnProperty('channelId') && regInfo.channelId === 0) {
-
-        } else {
-            for (let keyIndex of mustKey) {
-                if (!regInfo.hasOwnProperty(keyIndex)) {
-                    rspObject.message = "渠道id 或 渠道uid 为空";
-                    rspObject.state = false;
-                    callback(rspObject);
-                    return;
-                }
-            }
-        }
-    } else {
-        let mustKey = ['channelId', 'username', 'password'];
-        for (let keyIndex of mustKey) {
-            if (!regInfo.hasOwnProperty(keyIndex)) {
-                rspObject.message = "用户名 或 密码 为空";
-                rspObject.state = false;
-                callback(rspObject);
-                return;
-            }
-        }
-    }
-
-    $.ajax({
-        url: zy_domain + "/webGame/register",
-        type: "post",
-        contentType: "text/plain; charset=utf-8",
-        data: JSON.stringify(regInfo),
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            console.info(result);
-            if (result.hasOwnProperty('state')) {
-                if (result.state === true) {
-                    rspObject.state = true;
-                    rspObject.message = result.message;
-
-                    rspObject.uid = result.accountId;
-                    rspObject.account = result.account;
-                    rspObject.password = result.password;
-                    rspObject.channelUid = result.channelUid;
-                } else {
-                    rspObject.state = false;
-                    rspObject.message = result.message;
-                }
-            } else {
-                rspObject.state = false;
-                rspObject.message = "通信失败";
-            }
-            callback(rspObject);
-        },
-        error: function () {
-            rspObject.message = "通信失败";
-            rspObject.state = false;
-            callback(rspObject);
-        }
-    });
-}
-
-/**
- * 请求登录-接口
- * @param   {Object}        loginInfo
- * @param   {boolean}       loginInfo.isAuto           是否渠道自动注册
- * @param   {number}        loginInfo.GameId           游戏id
- * @param   {number}        loginInfo.channelId        渠道id
- * @param   {string}        loginInfo.channelUid       渠道账号id
- * @param   {string}        loginInfo.username         指悦账号
- * @param   {string}        loginInfo.password         指悦账号密码
- * @param   {number}        loginInfo.timestamp        时间戳
- * @param   {string}        loginInfo.sign             签名
- * @param   {function}      callback                   回调函数
- * */
-function sdk_ZyLogin(loginInfo, callback) {
-    let rspObject = {};
-    if (!ZySDK.checkZySdkParam(true)) {
-        rspObject.state = false;
-        rspObject.message = "请先调用 ZySDK.init() 和 ZySDK.initUser()";
-        callback(rspObject);
-        return;
-    }
-    loginInfo.GameId = ZySDK.GameId;
-    loginInfo.channelId = ZySDK.channelId;
-    loginInfo.channelUid = ZySDK.channelUid;
-    loginInfo.timestamp = new Date().valueOf();
-
-
-    let mustKey = ['isAuto', 'GameId', 'channelId'];
-    for (let keyIndex of mustKey) {
-        if (!loginInfo.hasOwnProperty(keyIndex)) {
-            rspObject.state = false;
-            rspObject.message = "参数为空：isAuto GameId channelId";
-            callback(rspObject);
-            return;
-        }
-    }
-    if (loginInfo.isAuto === true) {
-        if (checkParam(loginInfo.channelId) || checkParam(loginInfo.channelUid)) {
-            rspObject.state = false;
-            rspObject.message = "参数为空：channelId  channelUid";
-            callback(rspObject);
-            return;
-        }
-    } else if (loginInfo.isAuto === false) {
-        if (checkParam(loginInfo.username) || checkParam(loginInfo.password)) {
-            rspObject.state = false;
-            rspObject.message = "参数为空：username  password";
-            callback(rspObject);
-            return;
-        }
-    } else {
-        rspObject.state = false;
-        rspObject.message = "参数错误：isAuto";
-        callback(rspObject);
-        return;
-    }
-    let param = "isAuto" + "=" + loginInfo.isAuto + "&" +
-        "GameId" + "=" + loginInfo.GameId + "&" +
-        "channelId" + "=" + loginInfo.channelId + "&" +
-        "channelUid" + "=" + loginInfo.channelUid + "&" +
-        "username" + "=" + loginInfo.username + "&" +
-        "password" + "=" + loginInfo.password + "&" +
-        "timestamp" + "=" + loginInfo.timestamp;
-
-    //md5 加密
-    loginInfo.sign = md5(param, ZySDK.GameKey);
-
-    let params = param + "&sign=" + loginInfo.sign;
-
-    console.info(params);
-
-    $.ajax({
-        url: zy_domain + "/webGame/login?" + params,
-        type: "get",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            if (result.state === true) {
-                rspObject.message = result.message;
-                rspObject.state = result.state;
-
-                rspObject.GameId = result.GameId;
-                rspObject.channelId = result.channelId;
-                rspObject.channelUid = result.channelUid;
-                rspObject.channelToken = result.channelToken;
-                rspObject.zyUid = result.zyUid;
-                rspObject.username = result.username;
-                rspObject.password = result.password;
-                rspObject.loginUrl = result.loginUrl;
-                rspObject.paybackUrl = result.paybackUrl;
-
-                ZySDK.channelToken = result.channelToken;
-
-                callback(rspObject);
-            } else {
-                rspObject.message = result.message;
-                rspObject.state = result.state;
-                callback(rspObject);
-            }
-        },
-        error: function () {
-            rspObject.message = "通信失败";
-            rspObject.state = false;
-            callback(rspObject);
-        }
-    });
-}
-
-/**
- * 角色-上报数据接口
- * @param   {string}        key
- * @param   {string}        key.createRole              创建新角色时调用
- * @param   {string}        key.enterGame               选择游戏内进入时调用
- * @param   {string}        key.levelUp                 玩家升级角色时调用
- * @param   {string}        key.exitGame                玩家退出游戏时调用
- * @param   {Object}        roleInfo                    角色信息
- * @param   {number}        roleInfo.appId              游戏id
- * @param   {number}        roleInfo.channelId          玩家渠道id
- * @param   {number}        roleInfo.channelUid         玩家渠道账号id
- * @param   {number}        roleInfo.roleId             当前登录的玩家角色ID，必须为数字
- * @param   {string}        roleInfo.roleName           当前登录的玩家角色名，不能为空，不能为null
- * @param   {number}        roleInfo.roleLevel          当前登录的玩家角色等级，必须为数字，且不能为0，若无，传入1
- * @param   {number}        roleInfo.zoneId             当前登录的游戏区服ID，必须为数字，且不能为0，若无，传入1
- * @param   {string}        roleInfo.zoneName           当前登录的游戏区服名称，不能为空，不能为null
- * @param   {number}        roleInfo.balance            用户游戏币余额，必须为数字，若无，传入0
- * @param   {number}        roleInfo.vip                当前用户VIP等级，必须为数字，若无，传入1
- * @param   {string}        roleInfo.partyName          当前角色所属帮派，不能为空，不能为null，若无，传入“无帮派”
- * @param   {number}        roleInfo.roleCTime          单位为毫秒，创建角色的时间
- * @param   {number}        roleInfo.roleLevelMTime     单位为毫秒，角色等级变化时间
- * @param   {function}      callback                    回调函数
- * */
-function sdk_ZyUploadGameRoleInfo(key, roleInfo, callback) {
-    let rspObject = {};
-    if (!ZySDK.checkZySdkParam(true)) {
-        rspObject.state = false;
-        rspObject.message = "请先调用 ZySDK.init() 和 ZySDK.initUser()";
-        callback(rspObject);
-        return;
-    }
-
-    roleInfo.appId = ZySDK.GameId;
-    roleInfo.channelId = ZySDK.channelId;
-    roleInfo.channelUid = ZySDK.channelUid;
-
-    let mustKeys = ['createRole', 'levelUp', 'enterGame', 'exitGame'];
-
-    let hasKey = false;
-    for (let keyIndex of mustKeys) {
-        if (key === keyIndex) {
-            hasKey = true;
-            break;
-        }
-    }
-    if (!hasKey) {
-        rspObject.state = false;
-        rspObject.message = "上传角色信息 key值错误 createRole levelUp enterServer enterGame";
-        callback(rspObject);
-        return;
-    }
-    let mustKeysValue = [
-        'appId', 'channelId', 'channelUid',
-        'roleId', 'roleName', 'roleLevel',
-        'zoneId', 'zoneName', 'balance', 'vip',
-        'partyName'];
-
-    for (let keyIndex of mustKeysValue) {
-        if (!roleInfo.hasOwnProperty(keyIndex)) {
-            rspObject.state = false;
-            rspObject.message = "上传角色信息 参数缺失 " + keyIndex;
-            callback(rspObject);
-            return;
-        }
-    }
-    //参数值正确校验
-    if (checkParam(roleInfo.appId) || checkParam(roleInfo.channelId) || checkParam(roleInfo.channelUid)) {
-        rspObject.state = false;
-        rspObject.message = "上传角色信息 参数为空 ：appId channelId channelUid";
-        callback(rspObject);
-        return;
-    }
-    if (checkParam(roleInfo.roleId) || checkParam(roleInfo.roleName) || checkParam(roleInfo.roleLevel)) {
-        rspObject.state = false;
-        rspObject.message = "上传角色信息 参数为空 ：roleId roleName roleLevel";
-        callback(rspObject);
-        return;
-    }
-    if (checkParam(roleInfo.zoneId) || checkParam(roleInfo.zoneName) || checkParam(roleInfo.balance)) {
-        rspObject.state = false;
-        rspObject.message = "上传角色信息 参数为空 ：zoneId zoneName balance";
-        callback(rspObject);
-        return;
-    }
-    if (checkParam(roleInfo.vip) || checkParam(roleInfo.partyName)) {
-        rspObject.state = false;
-        rspObject.message = "上传角色信息 参数为空 ：zoneId zoneName balance";
-        callback(rspObject);
-        return;
-    }
-    if (key === 'createRole' && !roleInfo.hasOwnProperty('roleCTime')) {
-        rspObject.state = false;
-        rspObject.message = "创建角色 参数缺失 " + 'roleCTime';
-        callback(rspObject);
-        return;
-    }
-    if (key === 'levelUp' && !roleInfo.hasOwnProperty('roleLevelMTime')) {
-        rspObject.state = false;
-        rspObject.message = "角色升级 参数缺失 " + 'roleLevelMTime';
-        callback(rspObject);
-        return;
-    }
-
-    let value = JSON.stringify(roleInfo);
-    let data = {
-        "key": key,
-        "value": roleInfo
-    };
-    $.ajax({
-        url: zy_domain + "/webGame/setData",
-        type: "post",
-        contentType: "text/plain; charset=utf-8",
-        data: JSON.stringify(data),
-        dataType: "json",
-        success: function (result) {
-            if (result.state === true) {
-                rspObject.state = true;
-                rspObject.message = result.message;
-
-                rspObject.GameId = result.GameId;
-                rspObject.channelId = result.channelId;
-                rspObject.zoneId = result.zoneId;
-                rspObject.roleId = result.roleId;
-                rspObject.balance = result.balance;
-            } else {
-                rspObject.state = false;
-                rspObject.message = result.message;
-            }
-            callback(rspObject);
-        },
-        error: function () {
-            rspObject.state = false;
-            rspObject.message = "通信失败";
-
-            callback(rspObject);
-        }
-    });
-}
-
-/**
  * 充值-上报数据接口
- * @param   {Object}      orderInfo           充值信息
- * @param   {number}      orderInfo.accountID           指悦账号id
- * @param   {number}      orderInfo.channelId           渠道id
- * @param   {number}      orderInfo.channelUid          渠道账号id
- * @param   {number}      orderInfo.appId               游戏id
- * @param   {string}      orderInfo.channelOrderID      渠道订单号
- * @param   {string}      orderInfo.productID           当前商品ID
- * @param   {string}      orderInfo.productName         商品名称
- * @param   {string}      orderInfo.productDesc         商品描述
- * @param   {number}      orderInfo.money               商品价格,单位:分
- * @param   {number}      orderInfo.roleID              玩家在游戏服中的角色ID
- * @param   {string}      orderInfo.roleName            玩家在游戏服中的角色名称
- * @param   {number}      orderInfo.roleLevel           玩家等级
- * @param   {number}      orderInfo.serverID            玩家所在的服务器ID
- * @param   {string}      orderInfo.serverName          玩家所在的服务器名称
- * @param   {number}      orderInfo.realMoney           订单完成,实际支付金额,单位:分,未完成:-1
- * @param   {number}      orderInfo.completeTime        订单完成时间戳(毫秒，13位),未完成为:-1
- * @param   {number}      orderInfo.sdkOrderTime        订单创建时间戳(毫秒，13位)
- * @param   {number}      orderInfo.status              订单状态 请看OrderStatus、OrderStatusDesc
- * @param   {string}      orderInfo.notifyUrl           支付回调通知的游戏服地址
- * @param   {string}      orderInfo.signType            签名算法,RSA|MD5,默认MD5
- * @param   {string}      orderInfo.sign                签名
- * @param   {function}    callback                      回调函数
+ * @param   {Object}      orderInfo                     充值信息
+ * @param   {string}      orderInfo.gameKey             QuickSDK后台自动分配的游戏参数
+ * @param   {number}      orderInfo.channelId           QuickSDK后台自动分配的渠道参数
+ * @param   {string}      orderInfo.channelUid          渠道UID
+ * @param   {string}      orderInfo.username            渠道username
+ * @param   {string}      orderInfo.userRoleId          游戏内角色ID
+ * @param   {string}      orderInfo.userRoleName        游戏角色
+ * @param   {string}      orderInfo.serverId            角色所在区服ID
+ * @param   {string}      orderInfo.userServer          角色所在区服
+ * @param   {number}      orderInfo.userLevel           角色等级
+ * @param   {number}      orderInfo.cpOrderNo           游戏内的订单,SDK服务器通知中会回传
+ * @param   {string}      orderInfo.amount              购买金额（元）
+ * @param   {number}      orderInfo.count               购买商品个数
+ * @param   {number}      orderInfo.quantifier          购买商品单位，如，个
+ * @param   {string}      orderInfo.subject             道具名称
+ * @param   {number}      orderInfo.desc                道具描述
+ * @param   {number}      orderInfo.callbackUrl         Cp服务器通知地址
+ * @param   {number}      orderInfo.extrasParams        透传参数,服务器通知中原样回传
+ * @param   {number}      orderInfo.goodsId             商品ID
  * */
 function sdk_zyUploadPayInfo(orderInfo, callback) {
-    let rspObject = checkOrderObject(orderInfo);
-    if (rspObject.state === false) {
-        callback(rspObject);
-        return;
+    let rspObject = {};
+    let orderChecker = checkOrderObject(orderInfo);
+    if (orderChecker.state === false) {
+        setLog(orderChecker.message, 1);
+        return
     }
 
-    orderInfo.sign = orderSign(orderInfo);
-
-    $.ajax({
-        url: zy_domain + "/webGame/payInfo",
-        type: "post",
-        contentType: "text/plain; charset=utf-8",
-        data: JSON.stringify(orderInfo),
-        dataType: "json",
-        success: function (result) {
-            console.info(result);
-            if (result.state === true) {
-                rspObject.state = true;
-                rspObject.message = result.message;
-                rspObject.orderId = result.orderId;
-            } else {
-                rspObject.state = false;
-                rspObject.message = result.message;
-            }
-            callback(rspObject);
-        },
-        error: function () {
-            rspObject.state = false;
-            rspObject.message = "通信失败";
-            callback(rspObject);
+    //向 ZhiYueSDK 下单获取 ZhiYueSDK 订单
+    let channelToken = getParamsExtQuick('channelToken');
+    //从渠道驱动js里获取channelToken
+    if (!channelToken || channelToken === '') {
+        if (typeof getChannelToken == 'function') {
+            channelToken = getChannelToken();
         }
-    })
+    }
+    if (channelToken === '') {
+        channelToken = saveChannelParams;
+    }
+    orderInfo.channelToken = channelToken;
+    getQuickSDKOrderData(orderInfo, function (getOrderData) {
+        if (getOrderData.status === false || !getOrderData.hasOwnProperty('orderNo')) {
+
+            //0支付成功 1支付失败 2取消支付 3下单失败
+            let orderType = {};
+            orderType.payStatus = 3;
+
+            rspObject.status = false;
+            rspObject.data = orderType;
+            rspObject.message = '下单失败:' + getOrderData.message;
+
+            setLog(rspObject.message, 1);
+
+            ZhiYueSDK.dataPut("H5下单失败", "");
+            if (callback != null) {
+                callback(rspObject);
+            }
+        }
+
+        orderInfo.orderNo = getOrderData.orderNo;
+        orderInfo.zhiyueOrder = getOrderData;
+        callChannelPay(orderInfo);
+    });
 }
 
-//下面 工具函数 放在服务器
+/*
+ * 日志
+ * @param {string} str 消息内容
+ * @param {number} level 等级
+ * */
+function setLog(str, level) {
+    if (ZhiYueSDK.debug === true) {
+        if (level === 1) {
+            console.log('%cZhiYueSDK致命错误:' + str, 'color:red');
+        } else if (level === 2) {
+            console.log('%cZhiYueSDK警告错误:' + str, 'color:gray');
+        } else if (level === 0) {
+            console.log('%cZhiYueSDK运行日志:' + str, 'color:gray');
+        } else {
+            console.log('%cZhiYueSDK运行日志:' + str, 'color:gray');
+        }
+    }
+}
 
 /**
  * 加载需要的js文件
@@ -632,20 +344,6 @@ function loadAsyncScript(src, callback) {
     }
 }
 
-function setLog(str, level) {
-    if (ZySDK.debug === true) {
-        if (level === 1) {
-            console.log('%cZYSDK致命错误:' + str, 'color:red');
-        } else if (level === 2) {
-            console.log('%cZYSDK警告错误:' + str, 'color:gray');
-        } else if (level === 0) {
-            console.log('%cZYSDK运行日志:' + str, 'color:gray');
-        } else {
-            console.log('%cZYSDK运行日志:' + str, 'color:gray');
-        }
-    }
-}
-
 /**
  * md5加密
  * @param {string} info 加密内容
@@ -664,7 +362,7 @@ function md5(info, secretKey) {
     let sign_uri = encodeURIComponent(strInfo);
     let hex_sign_uri = hex_md5(sign_uri);
 
-    if (ZySDK.debug) {
+    if (ZhiYueSDK.debug) {
         console.info(strInfo);
         console.info(hex_sign_uri);
     }
@@ -679,115 +377,55 @@ function md5(info, secretKey) {
 function checkOrderObject(orderInfo) {
     let rspObject = {};
 
-    if (!ZySDK.checkZySdkParam(true)) {
+    if (!ZhiYueSDK.checkZySdkParam(true)) {
         rspObject.state = false;
-        rspObject.message = "请先调用 ZySDK.init() 和 ZySDK.initUser()";
+        rspObject.message = "请先调用 ZhiYueSDK.init() 和 ZhiYueSDK.login()";
         return rspObject;
     }
-    let isStatus = false;
-    if (orderInfo.status > 5 || orderInfo.status < 1) {
-        rspObject.state = false;
-        rspObject.message = "订单状态错误:" + orderInfo.status;
-        return rspObject;
-    }
-    orderInfo.appId = ZySDK.GameId;
-    orderInfo.channelId = ZySDK.channelId;
-    orderInfo.channelUid = ZySDK.channelUid;
 
-    let mustKeys = [
-        'accountID', 'channelId', 'channelUid', 'appId', 'channelOrderID',
-        'productID', 'productName', 'productDesc', 'money', 'roleID', 'roleName',
-        'roleLevel', 'serverID', 'serverName', 'sdkOrderTime', 'status', 'signType'];
-    for (let keyIndex of mustKeys) {
-        if (!orderInfo.hasOwnProperty(keyIndex)) {
+    let mustKey = ["gameKey", "uid", "username", "userRoleId", "userRoleName",
+        "serverId", "userServer", "userLevel", "cpOrderNo", "amount",
+        "count", "quantifier", "subject", "desc", "callbackUrl",
+        "goodsId"];
+
+    for (let keyIndex in mustKey) {
+        let keyName = mustKey[keyIndex];
+        if (!orderInfo.hasOwnProperty(keyName)) {
             rspObject.state = false;
-            rspObject.message = "参数为空：" + keyIndex;
+            rspObject.message = '调用ZhiYueSDK pay()缺少必须参数:' + keyName;
             return rspObject;
         }
     }
-    if (checkParam(orderInfo.accountID) || checkParam(orderInfo.channelId) || checkParam(orderInfo.channelUid) || checkParam(orderInfo.appId)) {
+    //检查参数是否合法 gameKey是否一致
+    if (orderInfo.gameKey !== ZhiYueSDK.GameKey) {
+        setLog('调用ZhiYueSDK 下单的产品与初始化的产品不一致', 2);
+    }
+
+    //uid userRoleId userRoleName userServer userLevel是否为空
+    if (orderInfo.uid.length <= 0 || orderInfo.userRoleId.length <= 0 ||
+        orderInfo.userRoleName.length <= 0 || orderInfo.userServer.length <= 0 ||
+        orderInfo.userLevel.length <= 0) {
         rspObject.state = false;
-        rspObject.message = "参数为空：accountID channelId channelUid appId";
+        rspObject.message = '调用ZhiYueSDK pay()时如下参数:uid userRoleId userRoleName userServer userLevel 不能为空';
         return rspObject;
     }
-    if (checkParam(orderInfo.productID) || checkParam(orderInfo.productName) || checkParam(orderInfo.productDesc)) {
+
+    //amount金额需为整数或浮点数
+    if (parseFloat(orderInfo.amount) !== orderInfo.amount && parseInt(orderInfo.amount) !== orderInfo.amount) {
         rspObject.state = false;
-        rspObject.message = "参数为空：productID productName productDesc ";
+        rspObject.message = '调用ZhiYueSDK pay()时下单金额需为整数或浮点数';
         return rspObject;
     }
-    if (checkParam(orderInfo.roleID) || checkParam(orderInfo.roleName) || checkParam(orderInfo.roleLevel)) {
+    //subject为必传
+    if (orderInfo.subject.length <= 0) {
         rspObject.state = false;
-        rspObject.message = "参数为空：roleID roleName roleLevel ";
-        return rspObject;
-    }
-    if (checkParam(orderInfo.serverID) || checkParam(orderInfo.serverName)) {
-        rspObject.state = false;
-        rspObject.message = "参数为空：serverID serverName ";
-        return rspObject;
-    }
-    if (checkParam(orderInfo.channelOrderID || checkParam(orderInfo.money))) {
-        rspObject.state = false;
-        rspObject.message = "参数为空：channelOrderID money ";
-        return rspObject;
-    }
-    if (orderInfo.status === 1 && checkParam(orderInfo.sdkOrderTime)) {
-        rspObject.state = false;
-        rspObject.message = "参数为空：sdkOrderTime ";
-        return rspObject;
-    }
-    if (checkParam(orderInfo.signType)) {
-        rspObject.state = false;
-        rspObject.message = "参数为空：signType ";
-        return rspObject;
-    }
-    if (orderInfo.signType !== "MD5" && orderInfo.signType !== "RSA") {
-        rspObject.state = false;
-        rspObject.message = "签名类型错误：signType " + orderInfo.signType;
+        rspObject.message = '调用ZhiYueSDK pay()时下单如下参数:subject 不能为空';
         return rspObject;
     }
     rspObject.state = true;
     return rspObject;
 }
 
-/**
- * 订单签名
- * @param       {Object}        orderInfo           充值信息
- * @return      {string}        sign                签名数据
- * */
-function orderSign(orderInfo) {
-    let signString =
-        "accountID=" + orderInfo.accountID + "&" +
-        "channelID=" + orderInfo.channelId + "&" +
-        "channelUid=" + orderInfo.channelUid + "&" +
-        "appID=" + orderInfo.appId + "&" +
-        "channelOrderID=" + orderInfo.channelOrderID + "&" +
-
-        "productID=" + orderInfo.productID + "&" +
-        "productName=" + orderInfo.productName + "&" +
-        "productDesc=" + orderInfo.productDesc + "&" +
-        "money=" + orderInfo.money + "&" +
-
-        "roleID=" + orderInfo.roleID + "&" +
-        "roleName=" + orderInfo.roleName + "&" +
-        "roleLevel=" + orderInfo.roleLevel + "&" +
-
-        "serverID=" + orderInfo.serverID + "&" +
-        "serverName=" + orderInfo.serverName + "&" +
-
-        "realMoney=" + orderInfo.realMoney + "&" +
-        "completeTime=" + orderInfo.completeTime + "&" +
-        "sdkOrderTime=" + orderInfo.sdkOrderTime + "&" +
-
-        "status=" + orderInfo.status + "&" +
-        "notifyUrl=" + orderInfo.notifyUrl + "&" +
-        ZySDK.GameKey;
-    // console.info(signString);
-    let urlSign = encodeURIComponent(signString);
-    // console.info(urlSign);
-    let hex_sign_uri = hex_md5(urlSign);
-    // console.info(hex_sign_uri);
-    return hex_sign_uri;
-}
 
 /**
  * 从服务器获取js路径
@@ -796,8 +434,7 @@ function orderSign(orderInfo) {
  * */
 function loadSpLib(data, callback) {
     let libUrl = data.channelPlatform.libUrl;
-    // let spLib = "http://111.231.244.198:8080/lib/Channels/Drivers/" + data.channelData.name + ".js"
-    let spLib = null;
+    let spLib = "https://zyh5games.com/sdk/channel/" + data.channelData.name + ".js";
     loadAsyncScript(spLib, function () {
         let channelLib = libUrl;
         if (channelLib == null) {
@@ -839,78 +476,269 @@ function getNowHost() {
 }
 
 /**
- * @param orderId 订单id
- * @param body 商品详细描述
- * @param subject 商品名称
- * @param totalAmount 商品金额：分
- * @param productId 商品id
- * @param passBackParams 透传参数*/
-function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackParams) {
-    console.info("to orderId" + orderId);
-    console.info("to money" + totalAmount);
-    let money = changeMoneyToYuan(totalAmount);
-    console.info("real money" + money);
-    let param = "?orderId=" + orderId
-        + "&body=" + body
-        + "&subject=" + subject
-        + "&totalAmount=" + money
-        + "&productId=" + productId
-        + "&passBackParams=" + passBackParams
-        + "&appId=" + ZySDK.GameId + "&spId=" + ZySDK.channelId;
-    console.info(ZySDK.channelId);
-
-    let payUrl = "http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param);
-    // let payUrl = "http://localhost:8080/mall/pay.html" + encodeURI(param);
-    // let payUrl = "http://zy.hysdgame.cn:8080/mall/pay.html" + encodeURI(param);
-    //苹果浏览器
-    let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
-        navigator.userAgent &&
-        navigator.userAgent.indexOf('CriOS') === -1 &&
-        navigator.userAgent.indexOf('FxiOS') === -1;
-    if (isSafari) {
-        // alert("苹果");
-        openWin(payUrl);
-    } else {
-        // alert("其他");
-        window.open(payUrl);
-    }
-}
-
-let openWin = function (payUrl) {
-    //打开一个新窗口
-    let winRef = window.open('', "_blank");
-    //假装获取请求支付参数
-    $.ajax({
-        type: 'get',
-        url: zy_domain + '/webGame/test',
-        success: function () {
-            //设置新窗口的跳转地址
-            // winRef.location.href = "www.baidu.com";
-            winRef.location.href = payUrl;
-        }
-    })
-};
-
-//money 为分;10/100/1000/1000/100011
-function changeMoneyToYuan(tmoney) {
-    let money = tmoney.toString();
-    let realmonet_yuan = 0;
-    if (money.length > 2) {
-        let fen1 = money.substr(0, money.length - 2);
-        let fen2 = money.substr(money.length - 2, 2);
-        realmonet_yuan = fen1 + "." + fen2;
-    } else if (money.length === 2) {
-        realmonet_yuan = "0." + money;
-    } else if (money.length === 1) {
-        realmonet_yuan = "0.0" + money;
-    }
-    return realmonet_yuan;
-}
-
-/**
  * @param param 判断的参数
  * @return {boolean}
  * */
 function checkParam(param) {
     return (param == null || param === "" || param === "undefined");
+}
+
+let getParamsArr = null;
+
+function getParamsExtQuick(key) {
+
+    if (getParamsArr == null) {
+        var domain = window.location.href;
+        domain = domain.replace('??', "?");
+        var urlParams = domain.split("?");
+        var channelToken = '';
+        var getParamsData = new Object();
+        if (urlParams.length >= 2) {
+            urlParamsArr = urlParams[1];
+            var keyVal = urlParamsArr.split("&");
+            for (var ki in keyVal) {
+                var thisKeyVal = keyVal[ki].split("=");
+                if (thisKeyVal.length >= 2) {
+                    var paramsKey = thisKeyVal[0];
+                    var paramsVal = thisKeyVal[1];
+                    getParamsData[paramsKey] = paramsVal;
+                }
+            }
+        }
+        getParamsArr = getParamsData;
+    }
+
+    return getParamsArr.hasOwnProperty(key) ? getParamsArr[key] : '';
+
+}
+
+function getQuickSDKOrderData(orderData, callback) {
+
+    orderData.gameKey = ZhiYueSDK.GameKey;
+    orderData.channelId = ZhiYueSDK.channelId;
+
+    if (orderData.channelId === -1) {
+        return setLog('必须登录后方可调用支付', 1);
+    }
+
+    if (!orderData.hasOwnProperty('username') || orderData.username.length <= 0) {
+        orderData.username = orderData.uid;
+    }
+
+    let rebackObj = {};
+    rebackObj.status = false;
+    rebackObj.orderNo = '';
+
+    $.ajax({
+        url: ZhiYue_domain + "/ajaxGetOrderNo",
+        type: "post",
+        contentType: "text/plain; charset=utf-8",
+        data: JSON.stringify(orderData),
+        dataType: "json",
+        // /**
+        //  * @param {object} rspData
+        //  * @param {string} rspData.message
+        //  * @param {boolean} rspData.status
+        //  * @param {string} rspData.orderNo
+        //  * @param {object} rspData.data
+        //  * @param {object} rspData.data.amount
+        //  * @param {object} rspData.data.orderNo
+        //  * @param {object} rspData.data.channelOrderNo
+        //  * */
+        success: function (rspData) {
+            if (rspData == null || typeof (rspData) !== 'object') {
+                rebackObj.message = '请求接口失败无法获取响应';
+                return callback(rebackObj);
+            }
+            if (!rspData.hasOwnProperty('status') || rspData.status === false) {
+                if (rebackObj.message !== undefined || rebackObj.message === '' || !rspData.hasOwnProperty('message')) {
+                    rebackObj.message = '请求接口失败';
+                } else {
+                    rebackObj.message = rspData.message;
+                }
+                return callback(rebackObj);
+            }
+            rebackObj.orderNo = rspData.data.orderNo;
+            rebackObj.status = true;
+            rebackObj.channelOrder = rspData.data.channelOrderNo;
+            return callback(rebackObj);
+        },
+        error: function () {
+            rebackObj.status = false;
+            rebackObj.message = "接口请求失败";
+            return callback(rebackObj);
+        }
+    });
+}
+
+/**测试代码-模拟cp服务器请求登录验证*/
+function checkUserInfo(info) {
+    let param = "token=" + info.data.token + "&gameKey=" + ZhiYueSDK.GameKey + "&uid=" + info.data.uid + "&channelId=" + info.data.channelId;
+    $.ajax({
+        url: ZhiYue_domain + "/checkUserInfo?" + param,
+        type: "get",
+        async: false,
+        success: function (result) {
+            console.info("checkUserInfo=" + result);
+            //验证成功 进入游戏
+        }, error: function (result) {
+            console.log("checkUserInfo=" + result);
+        }
+    });
+}
+
+function checkRoleObject(roleInfo) {
+    let roleJson = roleInfo;
+    let result = {};
+    result.result = true;
+
+    //检查必须参数
+    let mustKey = ['serverId', 'serverName', 'userRoleId', 'userRoleName', 'userRoleBalance', 'vipLevel', 'userRoleLevel', 'partyName'];
+    for (let keyIndex in mustKey) {
+        let keyName = mustKey[keyIndex];
+        if (!roleJson.hasOwnProperty(keyName)) {
+            result.result = false;
+            result.message = '调用updateGameRoleInfo()缺少必须参数:' + keyName;
+            return result;
+        }
+    }
+
+    //判断类型 vipLevel userRoleBalance userRoleLevel需为int
+    if (parseInt(roleJson.vipLevel) !== roleJson.vipLevel) {
+        result.result = false;
+        result.message = '调用updateGameRoleInfo()时传递vipLevel类型需为int';
+        return result;
+    }
+
+    if (parseInt(roleJson.userRoleBalance) !== roleJson.userRoleBalance) {
+        result.result = false;
+        result.message = '调用updateGameRoleInfo()时传递userRoleBalance类型需为int';
+        return result;
+    }
+
+    if (parseInt(roleJson.userRoleLevel) !== roleJson.userRoleLevel) {
+        result.result = false;
+        result.message = '调用updateGameRoleInfo()时传递userRoleLevel类型需为int';
+        return result;
+    }
+
+    return result;
+}
+
+/**
+ * 角色-上报数据接口
+ *  @param  {object}             roleInfo
+ *  @param  {boolean}            roleInfo.datatype
+ *  @param  {string}             roleInfo.roleCreateTime
+ *  @param  {}                   roleInfo.uid
+ *  @param  {}                   roleInfo.username
+ *  @param  {}                   roleInfo.serverId
+ *  @param  {}                   roleInfo.serverName
+ *  @param  {}                   roleInfo.userRoleName
+ *  @param  {}                   roleInfo.userRoleId
+ *  @param  {}                   roleInfo.userRoleBalance
+ *  @param  {}                   roleInfo.vipLevel
+ *  @param  {}                   roleInfo.userRoleLevel
+ *  @param  {}                   roleInfo.partyId
+ *  @param  {}                   roleInfo.partyName
+ *  @param  {}                   roleInfo.gameRoleGender
+ *  @param  {}                   roleInfo.gameRolePower
+ *  @param  {}                   roleInfo.partyRoleId
+ *  @param  {}                   roleInfo.partyRoleName
+ *  @param  {}                   roleInfo.professionId
+ *  @param  {}                   roleInfo.profession
+ *  @param  {}                   roleInfo.friendlist
+ * @param   {function}           callback                    回调函数
+ * */
+function ajaxUploadGameRole(roleInfo, callback) {
+    let rspObject = {};
+    rspObject.status = false;
+    rspObject.data = '';
+    rspObject.message = "";
+
+    let roleObject = roleInfo;
+
+    roleObject.GameId = ZhiYueSDK.GameId;
+    roleObject.GameKey = ZhiYueSDK.GameKey;
+    roleObject.channelCode = ZhiYueSDK.channelId;
+
+    if (!roleObject.hasOwnProperty('uid') || roleObject.uid.length <= 0) {
+        rspObject.message = "调用失败:缺少uid";
+        return callback(rspObject);
+    }
+
+    if (!roleObject.hasOwnProperty('username') || roleObject.username.length <= 0) {
+        roleObject.username = roleObject.uid;
+    }
+    ZhiYueSDK.dataPut("H5角色Vip" + roleObject.vipLevel, "");
+    let data = JSON.stringify(roleObject);
+    $.ajax({
+        url: ZhiYue_domain + "/ajaxUploadGameRoleInfo",
+        type: "post",
+        contentType: "text/plain; charset=utf-8",
+        data: data,
+        dataType: "json",
+        async: false,
+        success: function (respData) {
+            if (respData == null || typeof (respData) != 'object') {
+                rspObject.message = '请求接口失败无法获取响应';
+                return callback(rspObject);
+            }
+            if (!respData.hasOwnProperty('status') || respData.status === false) {
+                if (rspObject.message !== undefined || rspObject.message === '' || !respData.hasOwnProperty('message')) {
+                    rspObject.message = '请求接口失败';
+                } else {
+                    rspObject.message = respData.message;
+                }
+                return callback(rspObject);
+            }
+            rspObject.data = respData;
+            rspObject.status = true;
+            return callback(rspObject);
+        },
+        error: function () {
+            rspObject.status = false;
+            rspObject.message = "接口请求失败";
+            return callback(rspObject);
+        }
+    });
+}
+
+/**测试 渠道支付回调*/
+function testChannelPayCallback() {
+    let data = {};
+    data.channelCode = ZhiYueSDK.channelCode;
+
+    let param =
+        "/" + ZhiYueSDK.channelCode +
+        "/" + ZhiYueSDK.channelId +
+        "/" + ZhiYueSDK.GameId;
+    let url = ZhiYue_domain + "/callbackPayInfo" + param;
+    console.info("testChannelPayCallback = " + url);
+
+    if (ZhiYueSDK.channelCode === "h5_ziwan") {
+        $.post(url + "/x-www-form-urlencoded", {
+            "openid": "aaa",
+            "price": "bbb",
+            "other": "",
+            "item_id": "",
+            "orderid": "",
+            "sign": ""
+        })
+    }
+
+    // $.ajax({
+    //     url: url,
+    //     type: "post",
+    //     data: JSON.stringify(data),
+    //     dataType: "json",
+    //     async: false,
+    //     success: function (result) {
+    //         console.info(result);
+    //
+    //     },
+    //     error: function () {
+    //
+    //     }
+    // });
 }

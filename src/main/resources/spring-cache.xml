@@ -81,7 +81,20 @@
     <bean id="channelLogin" class="com.ssm.promotion.core.sdk.ChannelLogin">
 
     </bean>
-    <bean id="ChannelLib" class="com.ssm.promotion.core.sdk.ChannelLib">
+
+    <bean id="channelLib" class="com.ssm.promotion.core.sdk.ChannelLib">
+
+    </bean>
+
+    <bean id="channelToken" class="com.ssm.promotion.core.sdk.ChannelToken">
+
+    </bean>
+
+    <bean id="channelPayInfo" class="com.ssm.promotion.core.sdk.ChannelPayInfo">
+
+    </bean>
+
+    <bean id="channelPayCallback" class="com.ssm.promotion.core.sdk.ChannelPayCallback">
 
     </bean>
 </beans>

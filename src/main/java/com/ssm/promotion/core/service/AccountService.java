@@ -47,6 +47,13 @@ public interface AccountService {
 
     /**
      * 查找账号
+     * <p>
+     * Account
+     */
+    Account findUser(String channelId, String openId);
+
+    /**
+     * 查找账号
      *
      * @return List<Account>
      */

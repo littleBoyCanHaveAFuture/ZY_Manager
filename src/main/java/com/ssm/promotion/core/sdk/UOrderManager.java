@@ -74,6 +74,14 @@ public class UOrderManager {
         return newSign.equals(sign);
     }
 
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String p = "accountID=1000064&channelID=0&channelUid=1000064&appID=11&channelOrderID=6e90bb15-3dbb-4a7a-87de-97f48713b5fe&productID=59&productName=10元档首充前置&productDesc=10元档首充前置&money=0.01&roleID=5987857551844908&roleName=捂裆派掌门5987857551844908&roleLevel=1&serverID=170&serverName=170服务器170&realMoney=0.01&completeTime=1582600283766&sdkOrderTime=1582600283766&status=1&notifyUrl=47.101.44.31&l44i45326jixrlaio9c0025g974125y6";
+        String encoded = URLEncoder.encode(p, "UTF-8");
+        String newSign = EncryptUtils.md5(encoded).toLowerCase();
+
+        log.info("Md5 sign server\n:" + newSign);
+    }
+
     /**
      * @param appId          游戏id
      * @param channelID      渠道id
@@ -81,6 +89,19 @@ public class UOrderManager {
      */
     public UOrder getOrder(String appId, String channelID, String channelOrderID) {
         List<UOrder> orderList = orderDao.get(appId, channelID, channelOrderID);
+        if (orderList.size() >= 1) {
+            return orderList.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * @param appId          游戏id
+     * @param channelID      渠道id
+     * @param cpOrderID 渠道订单id
+     */
+    public UOrder getCpOrder(String appId, String channelID, String cpOrderID) {
+        List<UOrder> orderList = orderDao.getCpOrder(appId, channelID, cpOrderID);
         if (orderList.size() >= 1) {
             return orderList.get(0);
         }
@@ -152,10 +173,11 @@ public class UOrderManager {
         order.setProductDesc(productDesc);
         order.setProductID(productID);
         order.setProductName(productName);
-        if (status <= OrderState.STATE_OPEN_PAY)
+        if (status <= OrderState.STATE_OPEN_PAY) {
             order.setRealMoney(0);
-        else
+        } else {
             order.setRealMoney(realMoney);
+        }
         order.setSdkOrderTime(DateUtil.formatDate(Long.parseLong(sdkOrderTime), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
 
         order.setServerID(String.valueOf(serverID));
@@ -174,11 +196,46 @@ public class UOrderManager {
         return order;
     }
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        String p = "accountID=1000064&channelID=0&channelUid=1000064&appID=11&channelOrderID=6e90bb15-3dbb-4a7a-87de-97f48713b5fe&productID=59&productName=10元档首充前置&productDesc=10元档首充前置&money=0.01&roleID=5987857551844908&roleName=捂裆派掌门5987857551844908&roleLevel=1&serverID=170&serverName=170服务器170&realMoney=0.01&completeTime=1582600283766&sdkOrderTime=1582600283766&status=1&notifyUrl=47.101.44.31&l44i45326jixrlaio9c0025g974125y6";
-        String encoded = URLEncoder.encode(p, "UTF-8");
-        String newSign = EncryptUtils.md5(encoded).toLowerCase();
+    /**
+     * 生成订单
+     */
+    public UOrder genOrder(Integer zyUid, Integer appId, String channelId, String cpOrderNo,
+                           String userRoleId, String userRoleName, String serverId, String userServer, String userLevel,
+                           String goodsId, String subject, String desc, String money, String count, String quantifier,
+                           String extrasParams, String callbackUrl) throws Exception {
+        UOrder order = new UOrder();
 
-        log.info("Md5 sign server\n:" + newSign);
+        order.setOrderID(loginIdGenerator.getRandomId());
+        order.setAppID(appId);
+        order.setChannelID(Integer.parseInt(channelId));
+        order.setChannelOrderID("");
+        order.setUserID(zyUid);
+        order.setUsername("");
+        order.setProductID(goodsId);
+        order.setProductName(subject);
+        order.setProductDesc(desc);
+        order.setMoney(Integer.parseInt(money));
+        order.setMoney(0);
+        order.setCurrency("RMB");
+        order.setRoleID(userRoleId);
+        order.setRoleName(userRoleName);
+        order.setServerID(serverId);
+        order.setServerName(userServer);
+        order.setState(OrderState.STATE_OPEN_SELECT);
+        order.setChannelOrderID("");
+        order.setExtension(extrasParams);
+        order.setCreatedTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+//        order.setSdkOrderTime("");
+//        order.setCompleteTime("");
+        order.setNotifyUrl(callbackUrl);
+        order.setCpOrderId(cpOrderNo);
+
+        log.info("generateOrder: Order:\n" + order.toJSON());
+
+        int res = orderDao.save(order);
+        log.info("generateOrder: saveOrder:" + res);
+        return order;
     }
+
+
 }

@@ -100,6 +100,8 @@ public class UOrder {
     private String notifyUrl;
     //给js显示
     private String JsOrderId;
+    //cp订
+    private String cpOrderId;
 
     public void setJsOrder() {
         JsOrderId = String.valueOf(orderID);

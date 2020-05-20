@@ -118,6 +118,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Account findUser(String channelId, String openId) {
+        return accountDao.findAccountByOpenId(channelId, openId);
+    }
+
+    @Override
     public Account findAccountByname(String username) {
         return accountDao.findAccountByname(username);
     }

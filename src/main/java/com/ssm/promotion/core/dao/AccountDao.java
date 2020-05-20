@@ -57,4 +57,6 @@ public interface AccountDao {
     int updateAccountUid(Map<String, Object> map);
 
     Account findAccountById(@Param("id") int id);
+
+    Account findAccountByOpenId(@Param("channelId") String channelId, @Param("openId") String openId);
 }

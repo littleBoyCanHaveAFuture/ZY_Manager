@@ -258,6 +258,7 @@ public class AccountWorker {
 
             String ip = jsonObject.getString("ip");
 
+            String openId = jsonObject.containsKey("openId") ? jsonObject.getString("openId") : "";
 
             Map<String, Object> map = new HashMap<>(6);
             //检查渠道id和渠道用户id是否存在
@@ -293,7 +294,7 @@ public class AccountWorker {
             account.setChannelUserName(channelUname);
             account.setChannelUserNick(channelUnick);
             account.setLastLoginTime(0L);
-            account.setToken("");
+            account.setToken(openId);
             account.setAddParam("");
 
             accountService.createAccount(account);

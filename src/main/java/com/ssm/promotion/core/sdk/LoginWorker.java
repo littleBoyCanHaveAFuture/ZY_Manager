@@ -117,12 +117,5 @@ public class LoginWorker {
         }
     }
 
-    /**
-     * 向渠道校验 获取用户数据
-     */
-    public boolean checkLoginParams(Map<String, String[]> map, JSONObject userData) throws Exception {
-        return channelLogin.loadChannelLogin(map, userData);
-    }
-
 
 }

@@ -25,6 +25,7 @@
         <result property="sdkOrderTime" column="sdkOrderTime"/>
         <result property="completeTime" column="completeTime"/>
         <result property="notifyUrl" column="notifyUrl"/>
+        <result property="cpOrderId" column="cpOrderID"/>
     </resultMap>
 
     <sql id="select_payRecord_column">
@@ -49,7 +50,8 @@
                serverName,
                state,
                userID,
-               username
+               username,
+               cpOrderID
         FROM zy_order
     </sql>
 
@@ -128,14 +130,14 @@
         insert into zy_order(orderID, appID, channelID, channelOrderID, completeTime, createdTime, currency, extension,
                              money, notifyUrl, productDesc, productID, productName, realMoney, roleID, roleName,
                              sdkOrderTime, serverID,
-                             serverName, state, userID, username)
+                             serverName, state, userID, username, cpOrderID)
         VALUES (#{orderID}, #{appID}, #{channelID}, #{channelOrderID}, #{completeTime,jdbcType=TIMESTAMP},
                 #{createdTime,jdbcType=TIMESTAMP}, #{currency},
                 #{extension},
                 #{money}, #{notifyUrl}, #{productDesc}, #{productID}, #{productName}, #{realMoney}, #{roleID},
                 #{roleName},
                 #{sdkOrderTime,jdbcType=TIMESTAMP}, #{serverID},
-                #{serverName}, #{state}, #{userID}, #{username})
+                #{serverName}, #{state}, #{userID}, #{username}, #{cpOrderId})
     </insert>
 
     <select id="get" parameterType="map" resultMap="orderRecordResult">
@@ -182,4 +184,20 @@
         where orderID=#{orderID}
     </select>
 
+    <select id="getCpOrder" parameterType="map" resultMap="orderRecordResult">
+        <include refid="select_payRecord_column"/>
+        <where>
+            <if test="appId!=null and appId!='' ">
+                AND appID = #{appId}
+            </if>
+            <if test="channelID!=null and channelID!='' ">
+                AND channelID = #{channelID}
+            </if>
+            <if test="cpOrderID!=null and cpOrderID!='' ">
+                AND cpOrderID = #{cpOrderID}
+            </if>
+
+        </where>
+
+    </select>
 </mapper>

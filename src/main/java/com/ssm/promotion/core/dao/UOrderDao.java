@@ -17,9 +17,13 @@ public interface UOrderDao {
 
     Long getTotalUorders(Map<String, Object> map);
 
-    public List<UOrder> get(@Param("appId") String appId,
+    List<UOrder> get(@Param("appId") String appId,
+                     @Param("channelID") String channelID,
+                     @Param("channelOrderID") String channelOrderID);
+
+    List<UOrder> getCpOrder(@Param("appId") String appId,
                             @Param("channelID") String channelID,
-                            @Param("channelOrderID") String channelOrderID);
+                            @Param("cpOrderID") String cpOrderID);
 
     int save(UOrder order);
 

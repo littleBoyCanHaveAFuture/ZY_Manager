@@ -7,25 +7,22 @@
     <meta name="keywords" content="perfect-ssm">
     <meta name="description" content="perfect-ssm">
 
-    <!--    <link href="/css/bootstrap.min14ed.css" rel="stylesheet">-->
-    <!--    <link href="/css/font-awesome.min93e3.css" rel="stylesheet">-->
-    <!--    <link href="/css/animate.min.css" rel="stylesheet">-->
-    <!--    <link href="/css/style.min862f.css" rel="stylesheet">-->
-    <link href="/login/image/style.css?04231428" rel='stylesheet' type='text/css'/>
-    <link href="/images/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <!--    <link href="https://zyh5games.com/zysdk/login/image/style.css?04231428" rel='stylesheet' type='text/css'/>-->
+    <link href="https://zyh5games.com/zysdk/images/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
     <!--[if lt IE 9]>
     <meta http-equiv="refresh" content="0;ie.html"/>
     <![endif]-->
-    <script src="/js/vconsole.min.js"></script>
+    <script src="https://zyh5games.com/zysdk/js/vconsole.min.js"></script>
     <script type="text/javascript"
-            src="/jquery-easyui-1.7.0/jquery.min.js"></script>
+            src="https://zyh5games.com/zysdk/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script type="text/javascript"
-            src="/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
-    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+            src="https://zyh5games.com/zysdk/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+    <script src="https://zyh5games.com/zysdk/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
-    <script src="/js/common.js"></script>
-    <script src="/js/libZySdk_v2.js?1533"></script>
-    <script src="./h5game.js?1611"></script>
+    <script src="https://zyh5games.com/zysdk/js/common.js"></script>
+<!--        <script src="https://zyh5games.com/zysdk/js/libZySdk_v2.js?1925"></script>-->
+    <script src="https://zyh5games.com/sdk/libZySdk_v2.js?1553"></script>
+    <script src="https://zyh5games.com/zysdk/login/h5game.js?1611"></script>
 
 </head>
 
@@ -52,7 +49,7 @@
     $(function () {
         let appId = 14;
         let GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
-        let channelId = 8;
+        let channelId = 0;
 
         let newURl = updateQueryStringParameter(window.location.href, 'GameId', appId);
         newURl = updateQueryStringParameter(newURl, 'GameKey', GameKey);
@@ -173,10 +170,6 @@
         return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function callChannelInit() {
-
-    }
-
     // 自动注册账号
     function autoReg(regInfo) {
         sdk_AutoReg(regInfo, function (callbackData) {
@@ -236,7 +229,7 @@
         }
 
         $.ajax({
-            url: ZhiYue_domain + "/autoReg",
+            url: "/zysdk" + "/webGame2/autoReg",
             type: "post",
             contentType: "text/plain; charset=utf-8",
             data: JSON.stringify(regInfo),

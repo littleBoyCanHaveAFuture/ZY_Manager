@@ -1,176 +1,86 @@
 $(function () {
     let appId = 14;
     let GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
-    let channelId = 0;
-
-    let newURl = updateQueryStringParameter(window.location.href, 'GameId', appId);
-    newURl = updateQueryStringParameter(newURl, 'GameKey', GameKey);
-    newURl = updateQueryStringParameter(newURl, 'channelId', channelId);
-    //向当前url添加参数，没有历史记录
-    window.history.replaceState({
-        path: newURl
-    }, '', newURl);
-
-    let zy_account = getCookies("zy_account");
-    let zy_password = getCookies("zy_password");
-    let zy_channelUid = getCookies("zy_channelUid");
-
-    console.info("zy_account=" + zy_account);
-    console.info("zy_password=" + zy_password);
-    console.info("zy_channelUid=" + zy_channelUid);
-
-    if (channelId === 0) {
-        // 指悦官方渠道-无账号自动注册
-        if (zy_account === "" || zy_password === "" || zy_channelUid === "") {
-            let channelUid = getZyNextUid();
-            let regInfo = {};
-            regInfo.appId = appId;
-            regInfo.channelId = channelId;
-            regInfo.channelUid = channelUid;
-            regInfo.channelUname = "";
-            regInfo.channelUnick = "";
-            regInfo.phone = "";
-            regInfo.deviceCode = "PC";
-            autoReg(regInfo);
-        } else {
-            newURl = updateQueryStringParameter(newURl, 'zy_channelUid', zy_channelUid);
-            newURl = updateQueryStringParameter(newURl, 'zy_account', zy_account);
-            newURl = updateQueryStringParameter(newURl, 'zy_password', zy_password);
-            //向当前url添加参数，没有历史记录
-            window.history.replaceState({
-                path: newURl
-            }, '', newURl);
-
-        }
-    } else {
-        let regInfo = {};
-        regInfo.appId = appId;
-        regInfo.channelId = channelId;
-        regInfo.channelUid = getRndInteger(8, 10);
-        regInfo.channelUname = "";
-        regInfo.channelUnick = "";
-        regInfo.phone = "";
-        regInfo.deviceCode = "PC";
-        autoReg(regInfo);
-    }
-
-
-    let res = "账号: " + zy_account + " 密码: " + zy_password;
-    $('#copy').val(res);
+    let channelId = 8;
 
     sdkInit(appId, GameKey, channelId);
 });
+let channelUid = 0;
+let roleID = 0;
 
-
-// 自动注册账号
-function autoReg(regInfo) {
-    sdk_AutoReg(regInfo, function (callbackData) {
-        if (callbackData.state === false) {
-            console.log(callbackData.message);
-            alert(callbackData.message);
-        } else {
-            console.info(callbackData.message);
-            console.info(JSON.stringify(callbackData));
-
-            let ZyUid = callbackData.uid;
-            let username = callbackData.account;
-            let password = callbackData.password;
-            let channelUid = callbackData.channelUid;
-
-            // $("#uid").val(ZyUid);
-            // $("#username").val(username);
-            // $("#password").val(password);
-            // $("#channelUid").val(channelUid);
-            //
-            // $("#reg_username").val("");
-            // $("#reg_password").val("");
-            //
-            let res = "账号: " + username + " 密码: " + password + " Uid: " + channelUid;
-            $('#copy').val(res);
-            setCookie("zy_account", username);
-            setCookie("zy_password", password);
-            setCookie("zy_channelUid", channelUid);
-            // showLoginPage();
-        }
-    })
-}
-
-/**
- * 渠道账号自动注册指悦账号
- * @param regInfo
- * @param regInfo.appId
- * @param regInfo.channelId
- * @param regInfo.channelUid
- * @param regInfo.channelUname
- * @param regInfo.channelUnick
- * @param regInfo.phone
- * @param regInfo.deviceCode
- * @param callback
- * */
-function sdk_AutoReg(regInfo, callback) {
-    console.log(regInfo);
-    let rspObject = {};
-    let mustKey = ['appId', 'channelId', 'channelUid'];
-    for (let keyIndex of mustKey) {
-        if (!regInfo.hasOwnProperty(keyIndex)) {
-            rspObject.message = "参数:" + mustKey[keyIndex] + " 为空";
-            rspObject.state = false;
-            callback(rspObject);
+function sdkInit(GameId, GameKey, ChannelCode) {
+    ZhiYueSDK.init(GameId, GameKey, ChannelCode, function (status) {
+        if (!status) {
+            console.error("ZhiYueSDK init fail");
             return;
         }
-    }
-
-    $.ajax({
-        url: "/webGame2/autoReg",
-        type: "post",
-        contentType: "text/plain; charset=utf-8",
-        data: JSON.stringify(regInfo),
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            console.info(result);
-            if (result.hasOwnProperty('state')) {
-                if (result.state === true) {
-                    rspObject.state = true;
-                    rspObject.message = result.message;
-
-                    rspObject.uid = result.accountId;
-                    rspObject.account = result.account;
-                    rspObject.password = result.password;
-                    rspObject.channelUid = result.channelUid;
-                } else {
-                    rspObject.state = false;
-                    rspObject.message = result.message;
-                }
+        console.log("ZhiYueSDK init success");
+        ZhiYueSDK.login(function (callbackData) {
+            console.log("login " + JSON.stringify(callbackData));
+            if (callbackData.status) {
+                console.log('GameDemo:ZhiYueSDK登录成功: uid=>' + callbackData.data.uid);
+                //模拟cp服务器进行登录校验
+                checkUserInfo(callbackData);
+                channelUid = callbackData.data.uid;
+                roleID = getRndInteger(1000000, 9999999);
+                console.log("roleID=" + roleID);
+                uploadRoleInfo(2, channelUid, roleID);
+                // uploadRoleInfo(3, channelUid, roleID);
+                sdkPay(roleID);
+                testChannelPayCallback();
+                // uploadRoleInfo(4, channelUid, roleID);
+                // uploadRoleInfo(5, channelUid, roleID);
             } else {
-                rspObject.state = false;
-                rspObject.message = "通信失败";
+                console.log('GameDemo:ZhiYueSDK登录失败:' + callbackData.message);
             }
-            callback(rspObject);
-        },
-        error: function () {
-            rspObject.message = "通信失败";
-            rspObject.state = false;
-            callback(rspObject);
-        }
+        });
     });
 }
 
-function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+// 模拟支付
+function sdkPay(roleId) {
+    console.log("sdkPay");
+    //1.生成指悦订单
+    let cpOrderId = getCpOrderId();
+    //2.调用渠道支付接口
+    let orderInfo = {};
+    orderInfo.gameKey = ZhiYueSDK.GameKey;          //
+    orderInfo.uid = channelUid;                     //渠道UID
+    orderInfo.username = channelUid;                //渠道username
+    orderInfo.userRoleId = roleId;                  //游戏内角色ID
+    orderInfo.userRoleName = "名_" + channelUid;    //游戏角色
+    orderInfo.serverId = "1";                       //角色所在区服ID
+    orderInfo.userServer = "测试1区";                //角色所在区服
+    orderInfo.userLevel = "1";                      //角色等级
+    orderInfo.cpOrderNo = cpOrderId;                //游戏内的订单,SDK服务器通知中会回传
+    orderInfo.amount = 0.01;                        //购买金额（元）
+    orderInfo.count = 1;                            //购买商品个数
+    orderInfo.quantifier = "个";                    //购买商品单位，如，个
+    orderInfo.subject = "测试道具1";                 //道具名称
+    orderInfo.desc = "测试道具1";                    //道具描述
+    orderInfo.callbackUrl = "";                     //Cp服务器通知地址
+    orderInfo.extrasParams = "";                    //透传参数,服务器通知中原样回传
+    orderInfo.goodsId = "1";                        //商品ID
+    ZhiYueSDK.pay(orderInfo, function (payStatusObject) {
+        console.log(payStatusObject);
+        let status = payStatusObject.hasOwnProperty("status") ? payStatusObject.orderNo : false;
+        let orderNo = payStatusObject.hasOwnProperty("orderNo") ? payStatusObject.orderNo : "";
+        let channelOrder = payStatusObject.hasOwnProperty("channelOrder") ? payStatusObject.channelOrder : "";
+        console.log("status=" + status);
+        console.log("orderNo" + orderNo);
+        console.log("channelOrder=" + channelOrder);
+    });
 
-function resetLogin() {
-    delCookie("zy_account");
-    delCookie("zy_password");
-    delCookie("zy_channelUid");
+    //3.SDK服务器收到渠道支付回调 处理订单
 }
 
 /**指悦账号注册 获取下一位uid*/
 function getZyNextUid() {
     let id = "0";
+    let url = ZhiYue_domain.replace("webGame2", "");
+
     $.ajax({
-        url: "/webGame2/getId",
+        url: url + "/test/getId",
         type: "get",
         async: false,
         success: function (result) {
@@ -183,34 +93,51 @@ function getZyNextUid() {
     return id;
 }
 
-
-function updateQueryStringParameter(uri, key, value) {
-    if (value === "" || value === undefined) {
-        return uri;
-    }
-    let re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-    let separator = uri.indexOf('?') !== -1 ? "&" : "?";
-    if (uri.match(re)) {
-        return uri.replace(re, '$1' + key + "=" + value + '$2');
-    } else {
-        return uri + separator + key + "=" + value;
-    }
-}
-
-function checkUserInfo(info) {
-    let param = "token=" + info.data.token +
-        "&gameKey=" + ZySDK.GameKey +
-        "&uid=" + info.data.uid +
-        "&channelId=" + info.data.channelId;
+function getCpOrderId() {
+    let url = ZhiYue_domain.replace("webGame2", "");
+    let id = "0";
     $.ajax({
-        url: "/webGame2/checkUserInfo?" + param,
+        url: url + "/test/genOrder",
         type: "get",
         async: false,
         success: function (result) {
-            console.info("checkUserInfo=" + result);
-            //验证成功 进入游戏
-        }, error: function (result) {
-            console.log("checkUserInfo=" + result);
+            console.info("cpOrderId=" + result);
+            id = result;
+        }, error: function () {
+
+        }
+    });
+    return id;
+}
+
+function uploadRoleInfo(type, uid, roleId) {
+    let roleInfo = {};
+    roleInfo.datatype = type;
+    roleInfo.roleCreateTime = Date.parse(new Date()) / 1000;
+    roleInfo.uid = uid;
+    roleInfo.username = 'username_' + uid;
+    roleInfo.serverId = 1;
+    roleInfo.serverName = '内测1区';
+    roleInfo.userRoleName = 'username_' + uid;
+    roleInfo.userRoleId = roleId;
+    roleInfo.userRoleBalance = 1000;
+    roleInfo.vipLevel = 1;
+    roleInfo.userRoleLevel = 1;
+    roleInfo.partyId = 1;
+    roleInfo.partyName = '行会名称';
+    roleInfo.gameRoleGender = '男';
+    roleInfo.gameRolePower = 100;
+    roleInfo.partyRoleId = 1;
+    roleInfo.partyRoleName = '会长';
+    roleInfo.professionId = '1';
+    roleInfo.profession = '武士';
+    roleInfo.friendlist = '';
+    ZhiYueSDK.uploadGameRoleInfo(roleInfo, function (response) {
+        if (response.status) {
+            console.log('提交信息成功');
+        } else {
+            console.log(response.message);
         }
     });
 }
+

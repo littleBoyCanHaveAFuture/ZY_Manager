@@ -1,10 +1,17 @@
 package com.ssm.promotion.core.controller;
 
+import com.ssm.promotion.core.sdk.AccountWorker;
+import com.ssm.promotion.core.sdk.LoginIdGenerator;
+import com.ssm.promotion.core.sdk.UOrderManager;
 import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 
 /**
  * @author song minghua
@@ -14,6 +21,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/test")
 public class testController {
+    private static final Logger log = Logger.getLogger(testController.class);
+    @Resource
+    AccountWorker accountWorker;
+    @Resource
+    LoginIdGenerator loginIdGenerator;
+    @Resource
+    private UOrderManager orderManager;
+
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
     @ResponseBody
     public JSONObject getGameInfo() {
@@ -21,4 +36,23 @@ public class testController {
         jsonObject.put("message", "test");
         return jsonObject;
     }
+
+    @RequestMapping(value = "/getId", method = RequestMethod.GET)
+    @ResponseBody
+    public Integer getNextId() throws Exception {
+        return AccountWorker.getNextId();
+    }
+
+    @RequestMapping(value = "/genOrder", method = RequestMethod.GET)
+    @ResponseBody
+    public String getCpOrderId() throws Exception {
+        return String.valueOf(loginIdGenerator.getRandomId());
+    }
+
+    @RequestMapping("/{id}")
+    public String testPathVariable(@PathVariable("id") Integer id) {
+        System.out.println("testPathVariable:" + id);
+        return "SUCCESS";
+    }
+
 }
