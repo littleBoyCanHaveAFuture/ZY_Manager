@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
-<mapper namespace="com.ssm.promotion.core.dao.UOrderDao">
+<mapper namespace="com.zyh5games.dao.UOrderDao">
     <resultMap type="UOrder" id="orderRecordResult">
         <result property="orderID" column="orderID"/>
         <result property="appID" column="appID"/>

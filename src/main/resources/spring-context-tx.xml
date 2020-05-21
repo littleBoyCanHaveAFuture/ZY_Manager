@@ -41,15 +41,15 @@
         </tx:attributes>
     </tx:advice>
 
-    <bean id="securityHandler" class="com.ssm.promotion.core.handler.AopSurvey"/>
+    <bean id="securityHandler" class="com.zyh5games.handler.AopSurvey"/>
 
     <!-- 配置事务切面 -->
     <aop:config>
         <!--        <aop:pointcut id="serviceOperation"-->
-        <!--                      expression="(execution(* com.ssm.promotion.core.service.*.*(..)))"/>-->
+        <!--                      expression="(execution(* com.zyh5games.service.*.*(..)))"/>-->
         <!--        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceOperation"/>-->
         <aop:aspect id="securityAspect" ref="securityHandler">
-            <aop:pointcut id="addAddMethod" expression="(execution(* com.ssm.promotion.core.service.impl.*.*(..)))"/>
+            <aop:pointcut id="addAddMethod" expression="(execution(* com.zyh5games.service.impl.*.*(..)))"/>
             <aop:before method="verifyMethod" pointcut-ref="addAddMethod"/>
         </aop:aspect>
     </aop:config>

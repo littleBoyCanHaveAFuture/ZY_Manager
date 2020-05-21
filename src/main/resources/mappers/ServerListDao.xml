@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssm.promotion.core.dao.ServerListDao">
+<mapper namespace="com.zyh5games.dao.ServerListDao">
     <resultMap id="Server" type="ServerInfo">
         <result property="id" column="id"/>
         <result property="gameId" column="gameId"/>
@@ -16,17 +16,17 @@
     </resultMap>
 
     <sql id="select_user_column">
-		SELECT id,
-			gameId,
-			serverId,
-			spId,
-			regState,
-			loginState,
-			loginUrl,
-			gamename,
-			openday
-		FROM zy_serverlist
-	</sql>
+        SELECT id,
+               gameId,
+               serverId,
+               spId,
+               regState,
+               loginState,
+               loginUrl,
+               gamename,
+               openday
+        FROM zy_serverlist
+    </sql>
     <!--   与 selectServers where 条件一致-->
     <select id="getTotalServers" parameterType="map" resultType="Long">
         select count(*) from zy_serverlist
@@ -62,42 +62,37 @@
     </select>
 
     <insert id="insertServer" useGeneratedKeys="true" keyProperty="id" parameterType="ServerInfo">
-        insert into
-        zy_serverlist(
-        gameId,
-        serverId,
-        spId,
-        loginUrl,
-        gamename,
-        openday)
-        values(#{gameId},#{serverId},#{spId},#{loginUrl},#{gamename},#{openday})
+        insert into zy_serverlist(gameId,
+                                  serverId,
+                                  spId,
+                                  loginUrl,
+                                  gamename,
+                                  openday)
+        values (#{gameId}, #{serverId}, #{spId}, #{loginUrl}, #{gamename}, #{openday})
     </insert>
 
     <select id="exist" parameterType="map" resultType="int">
-        select count(*) from zy_serverlist
-        where
-        gameId = #{gameId}
-        and
-        serverId = #{serverId}
-        and
-        spId = #{spId}
+        select count(*)
+        from zy_serverlist
+        where gameId = #{gameId}
+          and serverId = #{serverId}
+          and spId = #{spId}
     </select>
 
     <update id="updateServer" parameterType="ServerInfo">
         update zy_serverlist
-        set
-        gameId=#{gameId},
-        serverId=#{serverId},
-        spId=#{spId},
-        loginUrl=#{loginUrl},
-        openday=#{openday}
-        where id=#{id}
+        set gameId=#{gameId},
+            serverId=#{serverId},
+            spId=#{spId},
+            loginUrl=#{loginUrl},
+            openday=#{openday}
+        where id = #{id}
     </update>
 
     <delete id="delServer" parameterType="integer">
-        delete from
-        zy_serverlist
-        where id=#{id}
+        delete
+        from zy_serverlist
+        where id = #{id}
     </delete>
 
     <select id="selectDistinctSpId" parameterType="map" resultType="int">
@@ -171,48 +166,18 @@
     </select>
 
     <select id="selectOpenday" parameterType="map" resultType="string">
-        select openday from zy_serverlist
-        where
-        spId =#{spId}
-        and
-        gameId = #{gameId}
-        and
-        serverId = #{serverId}
+        select openday
+        from zy_serverlist
+        where spId = #{spId}
+          and gameId = #{gameId}
+          and serverId = #{serverId}
     </select>
-    <select id="selectPrivateKey" parameterType="map" resultType="string">
-        select priKey from zy_serverlist
-        where
-        spId =#{spId}
-        and
-        gameId = #{gameId}
-        and
-        serverId = #{serverId}
-    </select>
-    <select id="selectPublicKey" parameterType="map" resultType="string">
-        select pubKey from zy_serverlist
-        where
-        spId =#{spId}
-        and
-        gameId = #{gameId}
-        and
-        serverId = #{serverId}
-    </select>
-    <select id="selectSecertKey" parameterType="map" resultType="string">
-    select secertKey from zy_serverlist
-    where
-    spId =#{spId}
-    and
-    gameId = #{gameId}
-    and
-    serverId = #{serverId}
-</select>
+
     <select id="selectLoginUrl" parameterType="map" resultType="string">
-        select loginUrl from zy_serverlist
-        where
-        spId =#{spId}
-        and
-        gameId = #{gameId}
-        and
-        serverId = #{serverId}
+        select loginUrl
+        from zy_serverlist
+        where spId = #{spId}
+          and gameId = #{gameId}
+          and serverId = #{serverId}
     </select>
 </mapper>

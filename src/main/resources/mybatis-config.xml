@@ -8,6 +8,6 @@
         <setting name="logImpl" value="LOG4J"/>
     </settings>
     <typeAliases>
-        <package name="com.ssm.promotion.core.entity"/>
+        <package name="com.zyh5games.entity"/>
     </typeAliases>
 </configuration>

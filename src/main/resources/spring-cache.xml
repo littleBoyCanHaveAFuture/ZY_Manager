@@ -39,31 +39,28 @@
     </bean>
 
     <!-- redis 的缓存 -->
-    <bean id="jedisManager" class="com.ssm.promotion.core.jedis.jedisManager">
-<!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
-                        <property name="jedisPool" ref="jedisPool_Tencent"/>
+    <bean id="jedisManager" class="com.zyh5games.jedis.jedisManager">
+        <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
+        <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
-    <!-- 全服概况 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
-    <bean id="jedisRechargeCache" class="com.ssm.promotion.core.jedis.jedisRechargeCache">
-        <property name="jedisManager" ref="jedisManager"/>
-    </bean>
-    <!-- sdk 缓存 -->
-    <bean id="jedisSDKCache" class="com.ssm.promotion.core.jedis.jedisSDKCache">
+    <!-- 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
+    <bean id="jedisRechargeCache" class="com.zyh5games.jedis.jedisRechargeCache">
         <property name="jedisManager" ref="jedisManager"/>
     </bean>
 
     <!--  数据库模板表读取 启动时初始化-->
-    <bean id="templateWorker" class="com.ssm.promotion.core.sdk.TemplateWorker" init-method="init">
+    <bean id="templateWorker" class="com.zyh5games.sdk.TemplateWorker" init-method="init">
 
     </bean>
+
     <!--  随机id生成器-->
-    <bean id="loginIdGenerator" class="com.ssm.promotion.core.sdk.LoginIdGenerator" init-method="init">
+    <bean id="loginIdGenerator" class="com.zyh5games.sdk.LoginIdGenerator" init-method="init">
         <property name="datacenterId" value="1"/><!-- 渠道id -->
         <property name="workerId" value="1"/><!-- 区服 -->
     </bean>
 
-    <bean id="accountWorker" class="com.ssm.promotion.core.sdk.AccountWorker" init-method="AccountWorker">
+    <bean id="accountWorker" class="com.zyh5games.sdk.AccountWorker" init-method="AccountWorker">
 
     </bean>
 
@@ -78,23 +75,24 @@
         <constructor-arg ref="httpClientFactory"/>
     </bean>
 
-    <bean id="channelLogin" class="com.ssm.promotion.core.sdk.ChannelLogin">
+    <bean id="channelLogin" class="com.zyh5games.sdk.ChannelLogin">
 
     </bean>
 
-    <bean id="channelLib" class="com.ssm.promotion.core.sdk.ChannelLib">
+    <bean id="channelLib" class="com.zyh5games.sdk.ChannelLib">
 
     </bean>
 
-    <bean id="channelToken" class="com.ssm.promotion.core.sdk.ChannelToken">
+    <bean id="channelToken" class="com.zyh5games.sdk.ChannelToken">
 
     </bean>
 
-    <bean id="channelPayInfo" class="com.ssm.promotion.core.sdk.ChannelPayInfo">
+    <bean id="channelPayInfo" class="com.zyh5games.sdk.ChannelPayInfo">
 
     </bean>
 
-    <bean id="channelPayCallback" class="com.ssm.promotion.core.sdk.ChannelPayCallback">
+    <bean id="channelPayCallback" class="com.zyh5games.sdk.ChannelPayCallback">
 
     </bean>
+
 </beans>

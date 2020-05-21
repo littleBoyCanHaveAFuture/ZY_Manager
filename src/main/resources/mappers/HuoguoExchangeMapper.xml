@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssm.promotion.core.dao.Huoguo_ExchangeDao">
+<mapper namespace="com.zyh5games.dao.Huoguo_ExchangeDao">
     <resultMap type="HuoguoExchange" id="ExchangeResult">
         <result property="id" column="id"/>
         <result property="name" column="name"/>
@@ -21,4 +21,4 @@
         from huoguo_exchange
         where id = #{id}
     </select>
-</mapper> 
+</mapper>
