@@ -42,7 +42,7 @@ function initSelectList() {
         success: function (result) {
             if (result.resultCode === 501) {
                 relogin();
-            } else if (result.resultCode === 200) {
+            } else if (result.resultCode === 200) {1``
                 let select_gameId = $("#dlg_gameid");
                 select_gameId.find("option").remove();
                 select_gameId.append("<option value=-1 selected=selected>请选择</option>");

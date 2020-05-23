@@ -24,8 +24,6 @@ public class LoginWorker {
     public static int whiteListState = 0;
     @Resource
     ServerListService service;
-    @Resource
-    ChannelLogin channelLogin;
 
     /**
      * 登陆校验
@@ -54,11 +52,6 @@ public class LoginWorker {
         }
         Map<String, Object> map = new HashMap<>();
         return service.isSpCanLogin(map, null);
-    }
-
-    public String getGameInfo(int accountId, int appId) {
-        //生成token
-        return LoginToken.getToken(accountId, appId, ServiceType.LOGIN);
     }
 
     /**

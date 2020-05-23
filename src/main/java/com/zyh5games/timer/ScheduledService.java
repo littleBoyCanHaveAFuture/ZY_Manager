@@ -1,7 +1,6 @@
 package com.zyh5games.timer;
 
 import com.zyh5games.jedis.jedisRechargeCache;
-import com.zyh5games.sdk.LoginToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -56,7 +55,7 @@ public class ScheduledService {
     public void scheduled() {
         log.info("scheduled 60s 过去了");
         log.info(System.getProperty("file.encoding"));
-        LoginToken.cleanInvalid(System.currentTimeMillis());
+//        LoginToken.cleanInvalid(System.currentTimeMillis());
     }
 //服务器启动时 可以检查一遍
 

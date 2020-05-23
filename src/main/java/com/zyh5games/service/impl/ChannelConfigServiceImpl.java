@@ -35,8 +35,18 @@ public class ChannelConfigServiceImpl implements ChannelConfigService {
     }
 
     @Override
-    public List<Integer> selectGameConfig(Integer appId,Integer userId) {
+    public List<Integer> selectGameConfig(Integer appId, Integer userId) {
         return dao.selectGameConfig(appId);
+    }
+
+    @Override
+    public List<ChannelConfig> selectAll(Integer userId) {
+        return dao.selectAll();
+    }
+
+    @Override
+    public List<ChannelConfig> selectChannelConfig(Integer channelId, Integer userId) {
+        return dao.selectChannelConfig(channelId);
     }
 }
 

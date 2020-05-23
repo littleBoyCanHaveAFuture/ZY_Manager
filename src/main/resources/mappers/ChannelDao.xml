@@ -52,7 +52,8 @@
     </select>
 
     <select id="selectGameConfig" parameterType="int" resultType="int">
-        select distinct channel_id from zy_channel
+        select distinct channel_id
+        from zy_channel
         where app_id = #{appId}
     </select>
 
@@ -63,5 +64,11 @@
           and channel_id = #{channelId}
     </delete>
 
-
+    <select id="selectAll" resultMap="ConfigResult">
+        <include refid="Base_Column_List"/>
+    </select>
+    <select id="selectChannelConfig" resultMap="ConfigResult">
+        <include refid="Base_Column_List"/>
+        where channel_id=#{channelId}
+    </select>
 </mapper>

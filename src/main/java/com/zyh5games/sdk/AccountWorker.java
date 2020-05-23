@@ -490,4 +490,25 @@ public class AccountWorker {
 
         return sign.equals(newSign);
     }
+
+    public Account channelReg(Integer appId, Integer channelId, String channelUid, String openId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("isChannel", "true");
+        map.put("channelId", channelId);
+        map.put("channelUid", channelUid);
+
+        Account account = this.getAccount(map);
+        if (account != null) {
+            return account;
+        } else {
+            JSONObject jsonObject = new JSONObject();
+            JSONObject reply = new JSONObject();
+
+            jsonObject.put("appId", appId);
+            jsonObject.put("channelId", channelId);
+            jsonObject.put("channelUid", channelUid);
+            jsonObject.put("openId", openId);
+            return this.commonReg(reply, jsonObject);
+        }
+    }
 }

@@ -1,33 +1,41 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.ChannelWorker;
+import com.zyh5games.sdk.BaseChannel;
+import com.zyh5games.sdk.ChannelId;
+import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
  * @author song minghua
  * @date 2020/5/21
  */
-public class BaiJiaChannel implements ChannelWorker {
-    private static final Logger log = Logger.getLogger(BaiJiaChannel.class);
+@Component("0")
+public class ZhiYueBaseChannel extends BaseChannel {
+    private static final Logger log = Logger.getLogger(ZhiYueBaseChannel.class);
+
+    ZhiYueBaseChannel() {
+        channelId = ChannelId.H5_ZHIYUE;
+    }
 
     /**
      * 1.渠道初始化 加载渠道js文件
      *
-     * @param channelData 渠道数据
      * @return boolean
      */
     @Override
-    public JSONArray channelLib(JSONObject channelData) {
-        JSONArray libUrl = new JSONArray();
-        libUrl.add("https://zyh5games.com/sdk/common/md5.js");
-        libUrl.add("https://zyh5games.com/sdk/common/jquery-3.4.1.min.js");
-
-        channelData.put("name", "xianxia.sdk");
-        return libUrl;
+    public JSONObject channelLib() {
+        JSONObject channelData = new JSONObject();
+        channelData.put("name", "");
+        return channelData;
     }
 
     /**
@@ -52,7 +60,10 @@ public class BaiJiaChannel implements ChannelWorker {
      */
     @Override
     public boolean channelLogin(Map<String, String[]> map, JSONObject userData) {
-        return false;
+        int appId = Integer.parseInt(map.get("GameId")[0]);
+        int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
+
+        return true;
     }
 
     /**
@@ -64,7 +75,9 @@ public class BaiJiaChannel implements ChannelWorker {
      */
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
-        return false;
+        Integer appId = orderData.getInteger("appId");
+
+        return true;
     }
 
     /**
@@ -72,10 +85,13 @@ public class BaiJiaChannel implements ChannelWorker {
      *
      * @param appId        指悦游戏id
      * @param parameterMap 渠道回调参数
-     * @param channelOrder 渠道回调校验成功后，设置向cp请求发货的数据格式
+     * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
      */
     @Override
-    public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrder) {
-        return false;
+    public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
+        String channelGameId = configMap.get(appId).getString(BaiJiaConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(BaiJiaConfig.PAY_KEY);
+
+        return true;
     }
 }

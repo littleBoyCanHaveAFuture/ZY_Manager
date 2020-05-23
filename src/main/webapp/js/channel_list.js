@@ -21,8 +21,24 @@ function initTableColumns() {
             {field: 'config', title: 'json配置', align: 'center', hidden: true},
         ]],
         pagination: true,
-        pageSize: 10,
-        pageList: [10, 20],
+        // pageSize: 10,
+        // pageList: [10, 20],
+        // onSelectPage: function (pageNum, pageSize) {
+        //     opts.pageNumber = pageNum;
+        //     opts.pageSize = pageSize;
+        //     loadSpListTab();
+        // }
+    });
+    let opts = getDatagridOptions(dg);
+    let pager = dg.datagrid('getPager');
+    pager.pagination({
+        pageSize: 20,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
+        pageList: [15, 20, 50, 100],//可以设置每页记录条数的列表 　　　　　　　　　　　　
+        beforePageText: '第',//页数文本框前显示的汉字
+        afterPageText: '页    共 {pages} 页',
+        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+        onChangePageSize: function () {
+        },
         onSelectPage: function (pageNum, pageSize) {
             opts.pageNumber = pageNum;
             opts.pageSize = pageSize;
@@ -187,8 +203,7 @@ function deleteSp() {
         "&state=" + state +
         "&shareLinkUrl=" + shareLinkUrl +
         "&iconUrl=" + iconUrl +
-        "&version=" + version
-    ;
+        "&version=" + version;
 
     $.messager.confirm("系统提示", "您确认要删除这" + "<font color=red>" + length + "</font>" + "条数据吗？",
         function (r) {

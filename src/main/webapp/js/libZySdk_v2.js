@@ -22,7 +22,7 @@ let ZhiYueSDK = {
      * 1.sdk初始化函数
      * @param GameId            平台游戏id（后台自动分配 ）
      * @param GameKey           平台游戏秘钥（后台自动分配 ）
-     * @param channelId         平台渠道id（后台自动分配 ）
+     * @param channelId         平台渠道id（后台自动分配 ）其实不用这个参数 使用的是url的参数
      * @param callback          自定义回调函数
      * */
     init: function (GameId, GameKey, channelId, callback) {
@@ -318,7 +318,6 @@ function loadAsyncScript(src, callback) {
             console.info("jQuery is not imported");
         } else {
             console.info("jQuery is imported");
-            callback();
             return;
         }
     }
@@ -716,29 +715,19 @@ function testChannelPayCallback() {
     let url = "/sdkPay" + "/callbackPayInfo" + param;
     console.info("testChannelPayCallback = " + url);
 
-    // if (ZhiYueSDK.channelCode === "h5_ziwan") {
-    //     $.post(url + "/x-www-form-urlencoded", {
-    //         "openid": "aaa",
-    //         "price": "bbb",
-    //         "other": "",
-    //         "item_id": "",
-    //         "orderid": "",
-    //         "sign": ""
-    //     })
-    // }
 
-    // $.ajax({
-    //     url: url,
-    //     type: "post",
-    //     data: JSON.stringify(data),
-    //     dataType: "json",
-    //     async: false,
-    //     success: function (result) {
-    //         console.info(result);
-    //
-    //     },
-    //     error: function () {
-    //
-    //     }
-    // });
+    $.ajax({
+        url: url,
+        type: "post",
+        data: JSON.stringify(data),
+        dataType: "json",
+        async: false,
+        success: function (result) {
+            console.info(result);
+
+        },
+        error: function () {
+
+        }
+    });
 }

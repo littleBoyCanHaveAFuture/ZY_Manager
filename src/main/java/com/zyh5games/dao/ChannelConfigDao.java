@@ -18,4 +18,8 @@ public interface ChannelConfigDao {
     int deleteConfig(@Param("appId") Integer appId, @Param("channelId") Integer channelId);
 
     List<Integer> selectGameConfig(@Param("appId") Integer appId);
+
+    List<ChannelConfig> selectAll();
+
+    List<ChannelConfig> selectChannelConfig(Integer channelId);
 }

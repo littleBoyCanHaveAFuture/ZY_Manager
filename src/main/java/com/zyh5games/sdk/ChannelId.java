@@ -8,4 +8,5 @@ public class ChannelId {
     public static final int H5_ZHIYUE = 0;
     public static final int H5_ZIWAN = 8;
     public static final int H5_BAIJIA = 9;
+    public static final int H5_5144WAN = 10;
 }

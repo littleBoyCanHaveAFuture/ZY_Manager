@@ -4,8 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.*;
 import com.zyh5games.jedis.jedisRechargeCache;
 import com.zyh5games.sdk.*;
-import com.zyh5games.sdk.channel.BaiJiaChannel;
-import com.zyh5games.sdk.channel.ZiWanChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
@@ -43,15 +41,6 @@ public class NewZySdkController {
     AccountWorker accountWorker;
     @Resource
     GameRoleWorker gameRoleWorker;
-    @Resource
-    ChannelLib channelLib;
-    @Resource
-    ChannelLogin channelLogin;
-    @Resource
-    ChannelToken channelToken;
-    @Resource
-    ChannelPayInfo channelPayInfo;
-
     @Autowired
     private HttpServletRequest request;
     @Resource
@@ -64,6 +53,8 @@ public class NewZySdkController {
     private SpService spService;
     @Resource
     private ChannelConfigService configService;
+    @Resource
+    private ChannelHandler channelHandler;
 
     /**
      * 渠道自动注册
@@ -164,15 +155,18 @@ public class NewZySdkController {
                 String channelCode = sp.getCode();
                 result.put("channelCode", channelCode);
             }
-            JSONObject channelData = new JSONObject();
 
-            JSONArray libUrl = channelLib.loadChannelLib(channelId, channelData);
+            BaseChannel channelService = channelHandler.getChannel(channelId);
+            JSONObject channelData = channelService.channelLib();
+            JSONArray libUrl = channelService.commonLib();
+            String channelToken = channelService.channelToken(parameterMap);
+
 
             JSONObject channelPlatform = new JSONObject();
             channelPlatform.put("libUrl", libUrl);
             channelPlatform.put("playUrl", "");
 
-            result.put("channelToken", channelToken.loadChannelToken(parameterMap));
+            result.put("channelToken", channelToken);
             result.put("channelPlatform", channelPlatform);
             result.put("channelData", channelData);
 
@@ -252,12 +246,29 @@ public class NewZySdkController {
                 break;
             }
 
+            BaseChannel channelService = channelHandler.getChannel(channelId);
+
             // 4.不同渠道 账号校验
-            if (!channelLogin.loadChannelLogin(parameterMap, userData)) {
+            if (!channelService.channelLogin(parameterMap, userData)) {
                 log.error("渠道登录 参数校验失败 appId=" + appId + " channelId=" + channelId);
                 result.put("status", false);
                 result.put("message", "游戏渠道 参数校验失败！");
                 break;
+            } else {
+                //没有则注册指悦账号
+                //1.判断账号是否存在
+                String channelUid = userData.getString("uid");
+                String token = userData.getString("token");
+                String openid = userData.getString("openid");
+
+                Account account = accountWorker.channelReg(appId, channelId, channelUid, openid);
+                if (account != null) {
+                    cache.setChannelLoginToken(String.valueOf(appId), String.valueOf(channelId), channelUid, token);
+                } else {
+                    result.put("status", false);
+                    result.put("message", "游戏渠道 登录失败！");
+                    break;
+                }
             }
 
             channelData.put("channel_id", channelId);
@@ -305,7 +316,7 @@ public class NewZySdkController {
     }
 
     /**
-     * 获取支付信息->跳转地址网页支付
+     * 3.获取支付信息->跳转地址网页支付
      * 1.生成订单
      * 2.跳转到渠道支付页面
      *
@@ -431,7 +442,6 @@ public class NewZySdkController {
             }
 
             //3.订单是否已经存在
-            boolean isPaySuccess = false;
             UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), cpOrderNo);
             if (order != null) {
                 result.put("message", "订单已存在");
@@ -444,13 +454,16 @@ public class NewZySdkController {
                     goodsId, subject, desc, moneyFen, count, quantifier,
                     extrasParams, callbackUrl);
 
+            BaseChannel channelService = channelHandler.getChannel(Integer.parseInt(channelId));
             //4.调起渠道支付接口 生成订单
+            orderData.put("appId", appId);
             JSONObject channelOrderNo = new JSONObject();
-            if (!channelPayInfo.loadPayInfo(orderData, channelOrderNo)) {
+            if (!channelService.channelPayInfo(orderData, channelOrderNo)) {
                 result.put("message", "调起渠道支付接口 失败");
                 result.put("status", false);
                 break;
             }
+            orderData.remove("appId");
             JSONObject rspData = new JSONObject();
             rspData.put("orderNo", String.valueOf(order.getOrderID()));
             rspData.put("channelOrderNo", channelOrderNo.toJSONString());

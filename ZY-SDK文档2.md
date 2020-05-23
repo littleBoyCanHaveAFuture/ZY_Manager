@@ -2,9 +2,9 @@
 ###游戏参数
    
     游戏：巨龙战歌
-    GameId = 8
+    GameId = 14
     GameKey = u6d3047qbltix34a9l0g2bvs5e8q82ol
-    channelId = 14
+    channelId = 8
     callbackKey = oI4FzZkBVsd18ptwdwZ8cPT23n3yN99D
     
 ###流程描述:
@@ -18,7 +18,7 @@
 
 #####1. 引用JS类库.
 ````
-  js文件地址：https://zy.hysdgame.cn/sdk/common/libZySdk_v2.js  
+  js文件地址：https://zyh5games.com/sdk/libZySdk_v2.js 
 ````  
 注意: 游戏应原样引入此JS,不能随意变更协议为https或在后面附加时间戳。    
 

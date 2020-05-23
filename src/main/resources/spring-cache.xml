@@ -40,8 +40,8 @@
 
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.zyh5games.jedis.jedisManager">
-        <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
-        <property name="jedisPool" ref="jedisPool_Tencent"/>
+<!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
+                <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
     <!-- 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
@@ -75,23 +75,7 @@
         <constructor-arg ref="httpClientFactory"/>
     </bean>
 
-    <bean id="channelLogin" class="com.zyh5games.sdk.ChannelLogin">
-
-    </bean>
-
-    <bean id="channelLib" class="com.zyh5games.sdk.ChannelLib">
-
-    </bean>
-
-    <bean id="channelToken" class="com.zyh5games.sdk.ChannelToken">
-
-    </bean>
-
-    <bean id="channelPayInfo" class="com.zyh5games.sdk.ChannelPayInfo">
-
-    </bean>
-
-    <bean id="channelPayCallback" class="com.zyh5games.sdk.ChannelPayCallback">
+    <bean id="channelHandler" class="com.zyh5games.sdk.ChannelHandler" init-method="init">
 
     </bean>
 

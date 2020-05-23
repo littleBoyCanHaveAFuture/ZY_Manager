@@ -17,7 +17,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/channel_list.js"></script>
+            src="${pageContext.request.contextPath}/js/channel_list.js?1747"></script>
 </head>
 
 <body style="margin:1px;" id="ff">
@@ -122,7 +122,7 @@
                            missingMessage="分享链接">
                 </td>
             </tr>
-            <tr>
+            <tr hidden="hidden">
                 <td style="width:100px;text-align: left;padding-top: 13px;">英文简称:</td>
                 <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_code"></label>

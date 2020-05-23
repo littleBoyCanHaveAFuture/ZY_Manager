@@ -2,6 +2,10 @@ $(function () {
     let appId = 14;
     let GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
     let channelId = 8;
+    let requestUri = getNowHost();
+    requestUri = requestUri.replace(/\&amp;/g, '&');
+
+    let params = requestUri.split('?')[1];
 
     sdkInit(appId, GameKey, channelId);
 });
@@ -27,7 +31,7 @@ function sdkInit(GameId, GameKey, ChannelCode) {
                 uploadRoleInfo(2, channelUid, roleID);
                 // uploadRoleInfo(3, channelUid, roleID);
                 sdkPay(roleID);
-                testChannelPayCallback();
+                // testChannelPayCallback();
                 // uploadRoleInfo(4, channelUid, roleID);
                 // uploadRoleInfo(5, channelUid, roleID);
             } else {
@@ -61,6 +65,9 @@ function sdkPay(roleId) {
     orderInfo.callbackUrl = "";                     //Cp服务器通知地址
     orderInfo.extrasParams = "";                    //透传参数,服务器通知中原样回传
     orderInfo.goodsId = "1";                        //商品ID
+    if (ZhiYueSDK.channelId === 9) {
+        orderInfo.amount = 0.01;
+    }
     ZhiYueSDK.pay(orderInfo, function (payStatusObject) {
         console.log(payStatusObject);
         let status = payStatusObject.hasOwnProperty("status") ? payStatusObject.orderNo : false;
