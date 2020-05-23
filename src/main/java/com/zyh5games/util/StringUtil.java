@@ -329,7 +329,24 @@ public class StringUtil {
 
         return sb.toString();
     }
+    public static <K, V extends Comparable<V>> LinkedHashMap<K, V> sortMapValue(Map<K, V> oldMap) throws Exception {
+        List<Map.Entry<K, V>> entryList = new ArrayList(oldMap.entrySet());
+        Collections.sort(entryList, new Comparator<Map.Entry<K, V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return -((Comparable) o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+        LinkedHashMap<K, V> newMap = new LinkedHashMap();
+        Iterator var3 = entryList.iterator();
 
+        while (var3.hasNext()) {
+            Map.Entry<K, V> entry = (Map.Entry) var3.next();
+            newMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return newMap;
+    }
     public static Map<Character, Integer> getCharNumMap(String str) throws Exception {
         Map<Character, Integer> charMap = new HashMap();
         char[] var2 = str.toCharArray();
@@ -346,7 +363,7 @@ public class StringUtil {
             charMap.put(c, num);
         }
 
-        Map<Character, Integer> numMap = CommonUtil.sortMapValue(charMap);
+        Map<Character, Integer> numMap = sortMapValue(charMap);
         return numMap;
     }
 

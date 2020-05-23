@@ -20,7 +20,7 @@ import java.util.*;
 public class RechargeSummaryImpl implements RechargeSummaryService {
     private static final Logger log = Logger.getLogger(RechargeSummaryImpl.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
 
     @Override
     public Map<String, GameInfo> getGameInfo(Integer gameId, Integer channelId, Integer serverId) {

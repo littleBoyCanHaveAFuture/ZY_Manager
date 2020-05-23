@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
 import com.zyh5games.entity.GameNew;
 import com.zyh5games.entity.UOrder;
-import com.zyh5games.jedis.jedisRechargeCache;
-import com.zyh5games.sdk.BaseChannel;
+import com.zyh5games.jedis.JedisRechargeCache;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.ChannelHandler;
 import com.zyh5games.sdk.HttpService;
 import com.zyh5games.sdk.UOrderManager;
@@ -37,7 +37,7 @@ public class PayCallbackController {
     private static final Logger log = Logger.getLogger(PayCallbackController.class);
     public static String[] keys = {"createRole", "levelUp", "enterGame", "exitGame"};
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     ChannelHandler channelHandler;
     @Resource
@@ -51,6 +51,7 @@ public class PayCallbackController {
 
     public boolean notifyToCp(boolean first, GameNew gameNew, UOrder order,
                               String price, String cpOrderId, Integer channelId) throws Exception {
+        log.info("notifyToCp");
         boolean res = true;
         do {
             // cp验证订单并发货
@@ -118,6 +119,7 @@ public class PayCallbackController {
                          @RequestParam("orderid") String orderid,
                          @RequestParam("sign") String sign,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("h5_ziwan start " + "channelId=" + channelId + " appId=" + appId);
         System.out.println("callbackPayInfo:" + channelId);
         System.out.println("callbackPayInfo:" + appId);
 
@@ -135,7 +137,7 @@ public class PayCallbackController {
         do {
             BaseChannel channelSerivce = channelHandler.getChannel(channelId);
 
-            boolean checkOrder = channelSerivce.channelPayCallback(channelId, parameterMap, channelOrder);
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
             if (!checkOrder) {
                 result = false;
                 break;
@@ -169,7 +171,7 @@ public class PayCallbackController {
 
             // cp请求发货
 
-            GameNew gameNew = gameNewService.selectGame(appId, channelId);
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
             if (gameNew == null) {
                 result = false;
                 break;
@@ -179,6 +181,7 @@ public class PayCallbackController {
 
         } while (false);
         ResponseUtil.write(response, result ? "success" : "fail");
+        log.info("h5_ziwan end " + result);
     }
 
     /**
@@ -242,15 +245,16 @@ public class PayCallbackController {
 
         parameterMap.put("sign", sign);
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        System.out.println("h5_baijia parameterMap =" + parameterMap.toString());
 
         JSONObject channelOrder = new JSONObject();
         boolean result = true;
         do {
             BaseChannel channelSerivce = channelHandler.getChannel(channelId);
 
-            boolean checkOrder = channelSerivce.channelPayCallback(channelId, parameterMap, channelOrder);
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
             if (!checkOrder) {
+                log.info("h5_baijia checkOrder false");
                 result = false;
                 break;
             }
@@ -281,8 +285,7 @@ public class PayCallbackController {
             }
 
             // cp请求发货
-
-            GameNew gameNew = gameNewService.selectGame(appId, channelId);
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
             if (gameNew == null) {
                 result = false;
                 break;
@@ -362,7 +365,7 @@ public class PayCallbackController {
         do {
             BaseChannel channelSerivce = channelHandler.getChannel(channelId);
 
-            boolean checkOrder = channelSerivce.channelPayCallback(channelId, parameterMap, channelOrder);
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
             if (!checkOrder) {
                 result = false;
                 break;
@@ -395,7 +398,7 @@ public class PayCallbackController {
 
             // cp请求发货
 
-            GameNew gameNew = gameNewService.selectGame(appId, channelId);
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
             if (gameNew == null) {
                 result = false;
                 break;

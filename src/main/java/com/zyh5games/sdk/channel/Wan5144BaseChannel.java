@@ -1,7 +1,6 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.BaseChannel;
 import com.zyh5games.sdk.ChannelId;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
@@ -236,7 +235,7 @@ public class Wan5144BaseChannel extends BaseChannel {
         //MD5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1.00&orderId=201801241127404978&role=1&server=1&status=success&time=1475049097&uid=6298253&userName=dreamfly_1981&key=testpaykey)
         StringBuilder param = new StringBuilder();
         param.append("cpOrderId").append("=").append(parameterMap.get("cpOrderId"));
-        param.append("&").append("gameId").append("=").append(parameterMap.get(channelGameId));
+        param.append("&").append("gameId").append("=").append(channelGameId);
         param.append("&").append("goodsId").append("=").append(parameterMap.get("goodsId"));
         param.append("&").append("goodsName").append("=").append(parameterMap.get("goodsName"));
         param.append("&").append("money").append("=").append(parameterMap.get("money"));

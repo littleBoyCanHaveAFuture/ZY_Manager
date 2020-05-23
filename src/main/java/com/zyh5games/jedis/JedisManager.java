@@ -23,8 +23,8 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
  * @version 1.0, 2016年6月2日 <br/>
  * @email so@sojson.com
  */
-public class jedisManager {
-    private static final Logger log = Logger.getLogger(jedisManager.class);
+public class JedisManager {
+    private static final Logger log = Logger.getLogger(JedisManager.class);
     private JedisPool jedisPool;
 
     public Jedis getJedis() {

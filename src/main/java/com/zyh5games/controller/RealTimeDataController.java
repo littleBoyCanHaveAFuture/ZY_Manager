@@ -4,7 +4,7 @@ import com.zyh5games.common.Constants;
 import com.zyh5games.entity.PageBean;
 import com.zyh5games.entity.UOrder;
 import com.zyh5games.entity.User;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.sdk.UOrderManager;
 import com.zyh5games.service.impl.UserServiceImpl;
 import com.zyh5games.util.DateUtil;
@@ -35,7 +35,7 @@ import java.util.*;
 public class RealTimeDataController {
     private static final Logger log = Logger.getLogger(RealTimeDataController.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     private UOrderManager orderManager;
     @Autowired

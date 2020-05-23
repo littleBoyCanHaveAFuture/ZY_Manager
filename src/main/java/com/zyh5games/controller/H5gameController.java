@@ -4,7 +4,7 @@ import com.zyh5games.common.Constants;
 import com.zyh5games.entity.HuoguoExchange;
 import com.zyh5games.entity.HuoguoExchangeRecord;
 import com.zyh5games.entity.PageBean;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.HuoguoExchangeService;
 import com.zyh5games.util.DateUtil;
 import com.zyh5games.util.ResponseUtil;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class H5gameController {
     private static final Logger log = Logger.getLogger(H5gameController.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Autowired
     private HttpServletRequest request;
     @Resource

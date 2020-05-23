@@ -5,6 +5,7 @@ import com.zyh5games.service.GameRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,20 @@ public class GameRoleWorker {
         gameRoleService.updateGameRole(map);
     }
 
+    public void updateGameRole(String gameId, String channelId, String serverId, String lastLoginTime,
+                               String roleId, String balance, String userRoleName, String param) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("roleId", roleId);
+        map.put("channelId", channelId);
+        map.put("gameId", gameId);
+        map.put("serverId", serverId);
+        map.put("lastLoginTime", lastLoginTime);
+        map.put("balance", balance);
+        map.put("name", userRoleName);
+        map.put("param", param);
+        gameRoleService.updateGameRole(map);
+    }
+
     public String getLastLoginTime(Map<String, Object> map) {
         return gameRoleService.getLastLoginTime(map);
     }
@@ -34,6 +49,16 @@ public class GameRoleWorker {
     }
 
     public GameRole findGameRole(Map<String, Object> map) {
+        return gameRoleService.findGameRole(map);
+    }
+
+    public GameRole findGameRole(String gameId, String channelId, String serverId, String channelUid, String roleId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("gameId", gameId);
+        map.put("channelId", channelId);
+        map.put("serverId", serverId);
+        map.put("channelUid", channelUid);
+        map.put("roleId", roleId);
         return gameRoleService.findGameRole(map);
     }
 

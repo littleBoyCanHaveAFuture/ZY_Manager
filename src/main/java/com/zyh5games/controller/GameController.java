@@ -5,7 +5,7 @@ import com.zyh5games.entity.ChannelConfig;
 import com.zyh5games.entity.GameNew;
 import com.zyh5games.entity.PageBean;
 import com.zyh5games.entity.Sp;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
 import com.zyh5games.service.SpService;
@@ -34,7 +34,7 @@ import java.util.Map;
 public class GameController {
     private static final Logger log = Logger.getLogger(GameController.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     private GameNewService gameNewService;
     @Resource

@@ -2,7 +2,7 @@ package com.zyh5games.sdk;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.service.GameNewService;
 import com.zyh5games.service.ServerListService;
@@ -61,7 +61,7 @@ public class AccountWorker {
      */
     public static AtomicInteger lastAppId;
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     private AccountService accountService;
     @Resource

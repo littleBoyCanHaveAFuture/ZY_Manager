@@ -4,7 +4,7 @@ import com.zyh5games.common.Constants;
 import com.zyh5games.common.Result;
 import com.zyh5games.common.ResultGenerator;
 import com.zyh5games.entity.*;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.*;
 import com.zyh5games.util.ResponseUtil;
 import com.zyh5games.util.enums.ManagerType;
@@ -29,7 +29,7 @@ import java.util.*;
 public class ServerController {
     private static final Logger log = Logger.getLogger(ServerController.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     private ServerListService serverService;
     @Resource

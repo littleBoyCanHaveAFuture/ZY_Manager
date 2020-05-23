@@ -3,7 +3,7 @@ package com.zyh5games.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.*;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.sdk.AccountWorker;
 import com.zyh5games.sdk.GameRoleWorker;
 import com.zyh5games.sdk.LoginWorker;
@@ -47,7 +47,7 @@ public class ZySdkController {
             "zoneId", "zoneName", "balance", "vip",
             "partyName"};
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     LoginWorker loginWorker;
     @Resource
@@ -496,8 +496,7 @@ public class ZySdkController {
                         result.put("state", true);
 
                         //设置活跃玩家、在线玩家
-
-                        cache.enterGame(gameId, String.valueOf(zoneId), channelId, gameRole.getId());
+                        cache.enterGame(gameId, String.valueOf(zoneId), channelId, gameRole.getRoleId());
                         //设置区服信息
                         cache.setServerInfo(gameId, channelId, String.valueOf(zoneId));
                     } else {

@@ -65,7 +65,7 @@ function sdkPay(roleId) {
     orderInfo.callbackUrl = "";                     //Cp服务器通知地址
     orderInfo.extrasParams = "";                    //透传参数,服务器通知中原样回传
     orderInfo.goodsId = "1";                        //商品ID
-    if (ZhiYueSDK.channelId === 9) {
+    if (ZhiYueSDK.channelId === 9 || ZhiYueSDK.channelId === 10) {
         orderInfo.amount = 0.01;
     }
     ZhiYueSDK.pay(orderInfo, function (payStatusObject) {

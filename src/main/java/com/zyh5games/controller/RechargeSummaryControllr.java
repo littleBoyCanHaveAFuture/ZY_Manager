@@ -4,7 +4,7 @@ import com.zyh5games.common.Constants;
 import com.zyh5games.entity.GameInfo;
 import com.zyh5games.entity.PageBean;
 import com.zyh5games.entity.RechargeSummary;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.RechargeSummaryService;
 import com.zyh5games.util.DateUtil;
 import com.zyh5games.util.ResponseUtil;
@@ -33,7 +33,7 @@ import java.util.*;
 public class RechargeSummaryControllr {
     private static final Logger log = Logger.getLogger(RechargeSummaryControllr.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     private RechargeSummaryService rsService;
     @Autowired

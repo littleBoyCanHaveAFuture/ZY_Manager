@@ -1,6 +1,6 @@
 package test;
 
-import com.zyh5games.sdk.BaseChannel;
+import com.zyh5games.sdk.channel.BaseChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

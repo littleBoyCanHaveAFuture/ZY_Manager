@@ -659,7 +659,7 @@ function ajaxUploadGameRole(roleInfo, callback) {
 
     roleObject.GameId = ZhiYueSDK.GameId;
     roleObject.GameKey = ZhiYueSDK.GameKey;
-    roleObject.channelCode = ZhiYueSDK.channelId;
+    roleObject.channelId = ZhiYueSDK.channelId;
 
     if (!roleObject.hasOwnProperty('uid') || roleObject.uid.length <= 0) {
         rspObject.message = "调用失败:缺少uid";

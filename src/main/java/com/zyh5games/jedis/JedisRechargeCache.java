@@ -12,8 +12,8 @@ import redis.clients.jedis.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class jedisRechargeCache {
-    private static final Logger log = Logger.getLogger(jedisRechargeCache.class);
+public class JedisRechargeCache {
+    private static final Logger log = Logger.getLogger(JedisRechargeCache.class);
     /**
      * 为了不和其他的缓存混淆，采用追加前缀方式以作区分
      */
@@ -22,7 +22,7 @@ public class jedisRechargeCache {
      * Redis 分片(分区)，也可以在配置文件中配置
      */
     private static final int DB_INDEX = 5;
-    private jedisManager jedisManager;
+    private JedisManager jedisManager;
 
     private boolean isLog = false;
 
@@ -52,14 +52,14 @@ public class jedisRechargeCache {
         list.forEach(System.out::println);
     }
 
-    public jedisManager getJedisManager() {
+    public JedisManager getJedisManager() {
         return jedisManager;
     }
 
     /**
      * bean
      */
-    public void setJedisManager(jedisManager jedismanager) {
+    public void setJedisManager(JedisManager jedismanager) {
         this.jedisManager = jedismanager;
     }
 
@@ -731,7 +731,7 @@ public class jedisRechargeCache {
     public void enterGame(String appId,
                           String serverId,
                           String channelId,
-                          long roleId) {
+                          String roleId) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -744,11 +744,11 @@ public class jedisRechargeCache {
             Pipeline pipeline = jds.pipelined();
 
             //活跃玩家-精确到游戏
-            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Game(appId, currDay), String.valueOf(roleId));
+            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Game(appId, currDay), roleId);
             //活跃玩家-精确到游戏渠道
-            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Channel(appId, channelId, currDay), String.valueOf(roleId));
+            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Channel(appId, channelId, currDay), roleId);
             //活跃玩家-精确到游戏区服
-            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Server(appId, serverId, currDay), String.valueOf(roleId));
+            pipeline.sadd(RedisKey_Gen.get_RolesActive_Day_Server(appId, serverId, currDay), roleId);
 
             //在线玩家
             pipeline.zincrby(RedisKey_Gen.get_RolesOnline_Day(channelId, appId, serverId), 1, currDay);

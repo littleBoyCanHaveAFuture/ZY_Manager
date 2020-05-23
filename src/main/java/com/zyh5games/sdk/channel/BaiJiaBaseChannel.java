@@ -1,7 +1,6 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.BaseChannel;
 import com.zyh5games.sdk.ChannelId;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
@@ -77,8 +76,6 @@ public class BaiJiaBaseChannel extends BaseChannel {
         }
 
         String loginKey = configMap.get(appId).getString(BaiJiaConfig.LOGIN_KEY);
-        String payKey = configMap.get(appId).getString(BaiJiaConfig.PAY_KEY);
-
 
         //百家-http://www.test.com/index.php?ac=game&id=1&avatar=http%3A%2F%2Fh5.6816.com%2Fstatic%2Fattachment%2Fuser%2F20160816%2F1471334322441376.png&gameId=113&signType=md5&time=1475042060&uid=29923&userName=dreamfly_1981&userSex=male&sign=6a3f16124a0c641082c17a438d1323a8
         //解释|必选-参与加密
@@ -232,11 +229,11 @@ public class BaiJiaBaseChannel extends BaseChannel {
         String payKey = configMap.get(appId).getString(BaiJiaConfig.PAY_KEY);
 
         String sign = parameterMap.get("sign");
-
-//MD5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1.00&orderId=201801241127404978&role=1&server=1&status=success&time=1475049097&uid=6298253&userName=dreamfly_1981&key=testpaykey)
-        StringBuilder param = new StringBuilder();
+        //   MD5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1.00&orderId=201801241127404978&role=1&server=1&status=success&time=1475049097&uid=6298253&userName=dreamfly_1981&key=testpaykey)
+        //       cpOrderId=e16b7fc8-d43b-4ca7-938b-b190834c1366&gameId=null&goodsId=1&goodsName=1000元宝&money=0.10&orderId=202005231535551325&role=42860509&server=65501&status=success&time=1590219619&uid=10000210268567&userName=高山仰止&key=82937ce89565d82c09422e54f1fc4e24
+      StringBuilder param = new StringBuilder();
         param.append("cpOrderId").append("=").append(parameterMap.get("cpOrderId"));
-        param.append("&").append("gameId").append("=").append(parameterMap.get(channelGameId));
+        param.append("&").append("gameId").append("=").append(channelGameId);
         param.append("&").append("goodsId").append("=").append(parameterMap.get("goodsId"));
         param.append("&").append("goodsName").append("=").append(parameterMap.get("goodsName"));
         param.append("&").append("money").append("=").append(parameterMap.get("money"));
@@ -253,7 +250,7 @@ public class BaiJiaBaseChannel extends BaseChannel {
 
         String serverSign = MD5Util.md5(param.toString());
         System.out.println("channelPayInfo sign: " + serverSign);
-
+        System.out.println("channelPayInfo sign: " + sign);
         if (sign.equals(serverSign)){
             setChannelOrder(channelOrderNo, "", parameterMap.get("orderId"), "", parameterMap.get("money"));
             return true;

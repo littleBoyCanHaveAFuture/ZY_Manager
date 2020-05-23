@@ -22,7 +22,6 @@ import java.io.*;
  * @version 1.0, 2016年6月2日 <br/>
  * @email so@sojson.com
  */
-@SuppressWarnings("unchecked")
 public class SerializeUtil {
     private static final Logger log = Logger.getLogger(SerializeUtil.class);
 

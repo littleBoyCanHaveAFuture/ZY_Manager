@@ -2,7 +2,7 @@ package com.zyh5games.controller;
 
 import com.zyh5games.common.Constants;
 import com.zyh5games.entity.GameNew;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
 import com.zyh5games.util.ResponseUtil;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class ChannelController {
     private static final Logger log = Logger.getLogger(ChannelController.class);
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Autowired
     private HttpServletRequest request;
     @Resource

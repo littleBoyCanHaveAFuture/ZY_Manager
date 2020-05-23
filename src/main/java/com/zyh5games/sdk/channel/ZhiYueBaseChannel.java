@@ -1,17 +1,10 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.BaseChannel;
 import com.zyh5games.sdk.ChannelId;
-import com.zyh5games.util.MD5Util;
-import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**

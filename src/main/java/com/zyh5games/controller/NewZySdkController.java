@@ -2,8 +2,9 @@ package com.zyh5games.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.*;
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.sdk.*;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
@@ -34,7 +35,7 @@ public class NewZySdkController {
     private static final Logger log = Logger.getLogger(NewZySdkController.class);
     public static String[] keys = {"createRole", "levelUp", "enterGame", "exitGame"};
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
     @Resource
     LoginWorker loginWorker;
     @Resource
@@ -56,6 +57,113 @@ public class NewZySdkController {
     @Resource
     private ChannelHandler channelHandler;
 
+    public boolean checkSdk(Integer type, Integer appId, Integer channelId, String appKey, JSONObject result) {
+        // 1.检查游戏秘钥
+        GameNew gameNew = gameNewService.selectGame(appId, -1);
+        if (gameNew == null) {
+            log.error("游戏不存在 appId=" + appId);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏不存在！");
+            return false;
+        }
+        if (!gameNew.getSecertKey().equals(appKey)) {
+            log.error("游戏秘钥错误 appId=" + appId);
+            log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
+            log.error("游戏秘钥错误 收到  key=" + appKey);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏秘钥错误！");
+            return false;
+        }
+
+        // 2.渠道基本配置 和游戏无关
+        Sp sp = spService.getSp(channelId, -1);
+        if (sp == null) {
+            result.put("status", false);
+            result.put("message", "游戏渠道不存在！");
+            return false;
+        }
+        if (type == 1) {
+            String channelCode = sp.getCode();
+            result.put("channelCode", channelCode);
+        } else if (type == 2) {
+            result.put("channel_name", sp.getCode());
+        }
+
+        // 3.检查游戏渠道
+        ChannelConfig config = configService.selectConfig(appId, channelId, -1);
+        if (config == null) {
+            log.error("游戏渠道不存在 appId=" + appId + " channelId=" + channelId);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏渠道不存在！");
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean checkSdkRole(Integer type, String channelId, String appKey, String channelUid,
+                                String serverId, String roleId, JSONObject result) {
+        // 1.检查游戏秘钥
+        GameNew gameNew = gameNewService.getGameByKey(appKey, -1);
+        if (gameNew == null) {
+            result.put("message", "游戏不存在");
+            result.put("status", false);
+            return false;
+        }
+        if (type == 3) {
+            result.put("appId", gameNew.getAppId());
+        }
+
+        //2.判断账号是否存在
+        Map<String, Object> map = new HashMap<>();
+        map.put("isChannel", "true");
+        map.put("channelId", channelId);
+        map.put("channelUid", channelUid);
+
+        Account account = accountWorker.getAccount(map);
+        if (account == null) {
+            result.put("message", "账号不存在");
+            result.put("state", false);
+            return false;
+        }
+        if (type == 3) {
+            result.put("zhiyueUid", account.getId());
+        }
+        //3.判断角色存不存在-角色信息 可以获取 游戏id、渠道id
+        GameRole gameRole = gameRoleWorker.findGameRole(String.valueOf(gameNew.getAppId()),
+                channelId, serverId, channelUid, roleId);
+        if (gameRole == null) {
+            result.put("message", "角色不存在");
+            result.put("status", false);
+            return false;
+        }
+        return true;
+
+    }
+
+    public GameRole createRole(Integer zhiyueUid, String roleId, String channelId, String channelUid,
+                               String appId, String serverId, long roleCreateTime, String userRoleName) throws Exception {
+        //role 同渠道游戏区服不能重复-创建角色
+        GameRole gameRole = new GameRole();
+        gameRole.setAccountId(zhiyueUid);
+        gameRole.setRoleId(roleId);
+        gameRole.setChannelId(channelId);
+        gameRole.setChannelUid(channelUid);
+        gameRole.setGameId(appId);
+        gameRole.setServerId(Integer.parseInt(serverId));
+        gameRole.setCreateTime(DateUtil.formatDate(roleCreateTime * 1000, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+        gameRole.setLastLoginTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+        gameRole.setName(userRoleName);
+        boolean res = gameRoleWorker.existRole(String.valueOf(zhiyueUid));
+        //插入mysql
+        gameRoleWorker.createGameRole(gameRole);
+        //redis
+
+        cache.createRole(appId, serverId, channelId, zhiyueUid, roleId, res);
+        log.info("createRole " + gameRole.toString());
+        return gameRole;
+    }
+
     /**
      * 渠道自动注册
      * SDK 登录接口
@@ -71,8 +179,7 @@ public class NewZySdkController {
      */
     @RequestMapping(value = "/autoReg", method = RequestMethod.POST)
     @ResponseBody
-    public void sdkRegister(@RequestBody String jsonData,
-                            HttpServletResponse response) throws Exception {
+    public void sdkRegister(@RequestBody String jsonData, HttpServletResponse response) throws Exception {
         log.info("start: /webGame2/register\t" + jsonData);
 
         JSONObject reqJson = JSONObject.parseObject(jsonData);
@@ -101,8 +208,7 @@ public class NewZySdkController {
      */
     @RequestMapping(value = "/initApi", method = RequestMethod.GET)
     @ResponseBody
-    public void initApi(HttpServletRequest request,
-                        HttpServletResponse response) throws Exception {
+    public void initApi(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("start: /webGame2/initApi\tstart");
 
         Map<String, String[]> parameterMap = request.getParameterMap();
@@ -124,36 +230,8 @@ public class NewZySdkController {
             String appKey = parameterMap.get("GameKey")[0];
             int channelId = Integer.parseInt(parameterMap.get("ChannelCode")[0]);
 
-            // 1.检查游戏秘钥
-            GameNew gameNew = gameNewService.selectGame(appId, -1);
-            if (gameNew == null) {
-                log.error("游戏不存在 appId=" + appId);
-                result.put("status", false);
-                result.put("message", "SDK init:游戏不存在！");
+            if (!this.checkSdk(1, appId, channelId, appKey, result)) {
                 break;
-            }
-            if (!gameNew.getSecertKey().equals(appKey)) {
-                log.error("游戏秘钥错误 appId=" + appId);
-                log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
-                log.error("游戏秘钥错误 收到  key=" + appKey);
-                result.put("status", false);
-                result.put("message", "SDK init:游戏秘钥错误！");
-                break;
-            }
-
-            // 2.检查游戏渠道
-            ChannelConfig config = configService.selectConfig(appId, channelId, -1);
-            if (config == null) {
-                log.error("游戏渠道不存在 appId=" + appId + " channelId=" + channelId);
-                result.put("status", false);
-                result.put("message", "SDK init:游戏渠道不存在！");
-                break;
-            }
-            //
-            Sp sp = spService.getSp(channelId, -1);
-            if (sp != null) {
-                String channelCode = sp.getCode();
-                result.put("channelCode", channelCode);
             }
 
             BaseChannel channelService = channelHandler.getChannel(channelId);
@@ -175,7 +253,7 @@ public class NewZySdkController {
         } while (false);
 
         ResponseUtil.write(response, result);
-        log.info("end: /webGame/initApi\tend\t" + result.toString());
+        log.info("end: /webGame2/initApi\tend\t" + result.toString());
     }
 
     /**
@@ -183,8 +261,7 @@ public class NewZySdkController {
      */
     @RequestMapping(value = "/loginApi", method = RequestMethod.GET)
     @ResponseBody
-    public void loginApi(HttpServletRequest request,
-                         HttpServletResponse response) throws Exception {
+    public void loginApi(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("start: /webGame2/loginApi\tstart");
 
         Map<String, String[]> parameterMap = request.getParameterMap();
@@ -211,38 +288,7 @@ public class NewZySdkController {
         JSONObject channelData = new JSONObject();
 
         do {
-            // 1.检查游戏秘钥
-            GameNew gameNew = gameNewService.selectGame(appId, -1);
-            if (gameNew == null) {
-                log.error("游戏不存在 appId=" + appId);
-                result.put("status", false);
-                result.put("message", "游戏不存在！");
-                break;
-            }
-
-            if (!gameNew.getSecertKey().equals(appKey)) {
-                log.error("游戏秘钥错误 appId=" + appId);
-                log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
-                log.error("游戏秘钥错误 收到  key=" + appKey);
-                result.put("status", false);
-                result.put("message", "游戏秘钥错误！");
-                break;
-            }
-
-            // 2.检查渠道
-            Sp sp = spService.getSp(channelId, -1);
-            if (sp == null) {
-                result.put("status", false);
-                result.put("message", "游戏渠道不存在！");
-                break;
-            }
-
-            // 3.检查游戏渠道配置
-            ChannelConfig config = configService.selectConfig(appId, channelId, -1);
-            if (config == null) {
-                log.error("渠道配置不存在 appId=" + appId + " channelId=" + channelId);
-                result.put("status", false);
-                result.put("message", "游戏渠道不存在！");
+            if (!this.checkSdk(2, appId, channelId, appKey, result)) {
                 break;
             }
 
@@ -271,8 +317,11 @@ public class NewZySdkController {
                 }
             }
 
+
             channelData.put("channel_id", channelId);
-            channelData.put("channel_name", sp.getCode());
+            channelData.put("channel_name", result.getString("channel_name"));
+
+            result.remove("channel_name");
 
             result.replace("status", true);
             result.put("message", "登陆成功");
@@ -293,10 +342,7 @@ public class NewZySdkController {
      */
     @RequestMapping(value = "/checkUserInfo", produces = "text/html;charset=UTF-8")
     @ResponseBody
-    public String checkUserInfo(String token,
-                                String gameKey,
-                                String uid,
-                                String channelId) {
+    public String checkUserInfo(String token, String gameKey, String uid, String channelId) {
         boolean res = false;
         do {
             GameNew gameNew = gameNewService.getGameByKey(gameKey, -1);
@@ -395,42 +441,13 @@ public class NewZySdkController {
         String channelToken = orderData.getString("channelToken");
 
         do {
-            //1.判断游戏是否存在
-            GameNew gameNew = gameNewService.getGameByKey(gameKey, -1);
-            if (gameNew == null) {
-                result.put("message", "游戏不存在");
-                result.put("status", false);
+            if (!this.checkSdkRole(3, channelId, gameKey, channelUid, serverId, userRoleId, result)) {
                 break;
             }
-            Integer appId = gameNew.getAppId();
-            //2.判断账号是否存在
-            Map<String, Object> map = new HashMap<>();
-            map.put("isChannel", "true");
-            map.put("channelId", channelId);
-            map.put("channelUid", channelUid);
-
-            Account account = accountWorker.getAccount(map);
-            if (account == null) {
-                result.put("message", "账号不存在");
-                result.put("state", false);
-                break;
-            }
-
-            //3.判断角色存不存在
-            map.clear();
-            map.put("gameId", gameNew.getAppId());
-            map.put("channelId", channelId);
-            map.put("serverId", serverId);
-            map.put("roleId", userRoleId);
-            map.put("channelUid", channelUid);
-
-            //角色信息 可以获取 游戏id、渠道id
-            GameRole role = gameRoleWorker.findGameRole(map);
-            if (role == null) {
-                result.put("message", "角色不存在");
-                result.put("status", false);
-                break;
-            }
+            Integer appId = result.getInteger("appId");
+            Integer zhiyueUid = result.getInteger("zhiyueUid");
+            result.remove("appId");
+            result.remove("zhiyueUid");
 
             //2.金额合法性
             String moneyFen = FeeUtils.yuanToFen(amount);
@@ -449,13 +466,12 @@ public class NewZySdkController {
                 break;
             }
             log.info("order is not exist. generateOrder");
-            order = orderManager.genOrder(account.getId(), appId, channelId, cpOrderNo,
-                    userRoleId, userRoleName, serverId, userServer, userLevel,
-                    goodsId, subject, desc, moneyFen, count, quantifier,
-                    extrasParams, callbackUrl);
+            order = orderManager.genOrder(zhiyueUid, appId, channelId, cpOrderNo, userRoleId, userRoleName, serverId, userServer, userLevel,
+                    goodsId, subject, desc, moneyFen, count, quantifier, extrasParams, callbackUrl);
 
-            BaseChannel channelService = channelHandler.getChannel(Integer.parseInt(channelId));
             //4.调起渠道支付接口 生成订单
+            BaseChannel channelService = channelHandler.getChannel(Integer.parseInt(channelId));
+
             orderData.put("appId", appId);
             JSONObject channelOrderNo = new JSONObject();
             if (!channelService.channelPayInfo(orderData, channelOrderNo)) {
@@ -464,6 +480,7 @@ public class NewZySdkController {
                 break;
             }
             orderData.remove("appId");
+
             JSONObject rspData = new JSONObject();
             rspData.put("orderNo", String.valueOf(order.getOrderID()));
             rspData.put("channelOrderNo", channelOrderNo.toJSONString());
@@ -477,11 +494,11 @@ public class NewZySdkController {
 
         ResponseUtil.write(response, result);
 
-        log.info("end   /webGame/payInfo \t" + result.toString());
+        log.info("end   /webGame2/payInfo \t" + result.toString());
     }
 
     /**
-     * 设置角色基本数据
+     * 4.设置角色基本数据
      * 1.创角打点
      * 2.新手指引打点
      *
@@ -509,16 +526,15 @@ public class NewZySdkController {
      */
     @RequestMapping(value = "/ajaxUploadGameRoleInfo", method = RequestMethod.POST)
     @ResponseBody
-    public void ajaxUploadGameRoleInfo(@RequestBody String jsonRoleInfo,
-                                       HttpServletResponse response) throws Exception {
-        log.info("start /webGame/ajaxUploadGameRoleInfo" + "\t" + jsonRoleInfo);
+    public void ajaxUploadGameRoleInfo(@RequestBody String jsonRoleInfo, HttpServletResponse response) throws Exception {
+        log.info("start /webGame2/ajaxUploadGameRoleInfo" + "\t" + jsonRoleInfo);
 
         JSONObject roleInfo = JSONObject.parseObject(jsonRoleInfo);
         JSONObject result = new JSONObject();
 
         do {
             String[] mustKeysValue = {
-                    "GameId", "GameKey", "channelCode",
+                    "GameId", "GameKey", "channelId",
                     "datatype", "roleCreateTime", "uid", "username",
                     "serverId", "serverName", "userRoleName", "userRoleId", "userRoleBalance",
                     "vipLevel", "userRoleLevel", "partyId", "partyName",
@@ -526,11 +542,12 @@ public class NewZySdkController {
                     "friendlist"
             };
             String[] notNullKeysValue = {
-                    "GameId", "GameKey", "channelCode",
+                    "GameId", "GameKey", "channelId",
                     "datatype", "roleCreateTime", "uid", "username",
                     "serverId", "serverName", "userRoleName", "userRoleId", "userRoleBalance",
                     "vipLevel", "userRoleLevel", "partyId", "partyName"
             };
+
             for (String index : mustKeysValue) {
                 if (!roleInfo.containsKey(index)) {
                     result.put("message", "缺失参数：" + index);
@@ -545,33 +562,28 @@ public class NewZySdkController {
                     break;
                 }
             }
+
             String gameId = roleInfo.getString("GameId");
-            String channelId = roleInfo.getString("channelCode");
+            String channelId = roleInfo.getString("channelId");
             String channelUid = roleInfo.getString("uid");
             String roleId = roleInfo.getString("userRoleId");
             String userRoleName = roleInfo.getString("userRoleName");
-            Integer serverId = roleInfo.getInteger("serverId");
+            String serverId = roleInfo.getString("serverId");
             long roleCreateTime = roleInfo.getLongValue("roleCreateTime");
             String userRoleBalance = roleInfo.getString("userRoleBalance");
 
             Account account = accountService.findUserBychannelUid(channelId, channelUid);
-
             if (account == null) {
                 result.put("message", "账号不存在");
                 result.put("state", false);
                 break;
             }
-            Map<String, Object> map = new HashMap<>();
-            map.put("gameId", gameId);
-            map.put("channelId", channelId);
-            map.put("serverId", serverId);
-            map.put("channelUid", channelUid);
-            map.put("roleId", roleId);
 
-            GameRole gameRole = gameRoleWorker.findGameRole(map);
+            GameRole gameRole = gameRoleWorker.findGameRole(gameId, channelId, serverId, channelUid, roleId);
 
             Integer datatype = roleInfo.getInteger("datatype");
             switch (datatype) {
+                //创建角色
                 case 2: {
                     if (gameRole != null) {
                         result.put("message", "角色已存在");
@@ -579,76 +591,42 @@ public class NewZySdkController {
                         ResponseUtil.write(response, result);
                         return;
                     }
-                    boolean hasRole = gameRoleWorker.existRole(String.valueOf(account.getId()));
-                    //role 同渠道游戏区服不能重复-创建角色
-                    gameRole = new GameRole();
-                    gameRole.setAccountId(account.getId());
-                    gameRole.setRoleId(roleId);
-                    gameRole.setChannelId(channelId);
-                    gameRole.setChannelUid(channelUid);
-                    gameRole.setGameId(gameId);
-                    gameRole.setServerId(serverId);
-                    gameRole.setCreateTime(DateUtil.formatDate(roleCreateTime, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
-                    gameRole.setLastLoginTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
-                    gameRole.setName(userRoleName);
-                    //插入mysql
-                    gameRoleWorker.createGameRole(gameRole);
-                    //redis
-
-                    cache.createRole(gameId, String.valueOf(serverId), channelId, account.getId(), roleId, hasRole);
-
+                    gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
                 }
                 break;
-                case 3: {//进入游戏
-                    //查询mysql-设置角色登录时间
-                    map.clear();
-                    map.put("roleId", roleId);
-                    map.put("channelId", channelId);
-                    map.put("gameId", gameId);
-                    map.put("serverId", serverId);
-                    map.put("lastLoginTime", DateUtil.getCurrentDateStr());
-                    gameRoleWorker.updateGameRole(map);
+                // 进入游戏
+                case 3: {
+                    if (gameRole == null) {
+                        gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
+                    } else {
+                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, DateUtil.getCurrentDateStr(), roleId, userRoleBalance, userRoleName, "");
+                    }
                     result.put("message", "进入游戏 上报成功");
                     result.put("state", true);
-
                     //设置活跃玩家、在线玩家
-                    cache.enterGame(gameId, String.valueOf(serverId), channelId, gameRole.getId());
+                    cache.enterGame(gameId, String.valueOf(serverId), channelId, gameRole.getRoleId());
                     //设置区服信息
                     cache.setServerInfo(gameId, channelId, String.valueOf(serverId));
                 }
                 break;
+                // 角色升级
                 case 4: {
-                    //升级
-                    map.clear();
-                    map.put("gameId", gameId);
-                    map.put("channelId", channelId);
-                    map.put("serverId", serverId);
-                    map.put("roleId", roleId);
-                    map.put("name", userRoleName);
-                    map.put("balance", userRoleBalance);
-                    //更新mysql
-                    gameRoleWorker.updateGameRole(map);
+                    if (gameRole == null) {
+                        gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
+                    } else {
+                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, "", roleId, userRoleBalance, userRoleName, "");
+                    }
                     result.put("message", "角色升级 上报成功");
                     result.put("state", true);
                 }
                 break;
-                case 5: {//退出游戏
+                // 退出游戏
+                case 5: {
                     if (gameRole == null) {
-                        result.put("message", "角色不存在");
-                        result.put("state", false);
-                        break;
+                        gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
+                    } else {
+                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, "", roleId, userRoleBalance, userRoleName, "");
                     }
-                    map.clear();
-                    map.put("gameId", gameId);
-                    map.put("channelId", channelId);
-                    map.put("serverId", serverId);
-                    map.put("roleId", roleId);
-                    map.put("name", userRoleName);
-                    map.put("balance", userRoleBalance);
-                    //更新mysql
-                    gameRoleWorker.updateGameRole(map);
-                    result.put("message", "角色升级 上报成功");
-                    result.put("state", true);
                     //查询redis-移除在线玩家
                     cache.exitGame(gameId, channelId, String.valueOf(serverId), account.getId());
                     result.put("message", "退出游戏 上报成功");
@@ -667,7 +645,7 @@ public class NewZySdkController {
 
         ResponseUtil.write(response, result);
 
-        log.info("/webGame/setData\t" + result.toString());
+        log.info("/webGame2/ajaxUploadGameRoleInfo\t" + result.toString());
     }
 
 }

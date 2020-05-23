@@ -1,6 +1,6 @@
 package com.zyh5games.timer;
 
-import com.zyh5games.jedis.jedisRechargeCache;
+import com.zyh5games.jedis.JedisRechargeCache;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +28,7 @@ public class ScheduledService {
     private static Map<String, Object> map = new HashMap<>();
 
     @Autowired
-    jedisRechargeCache cache;
+    JedisRechargeCache cache;
 
     public static Date stampForDate(long timestamp) {
         return new Date(timestamp);

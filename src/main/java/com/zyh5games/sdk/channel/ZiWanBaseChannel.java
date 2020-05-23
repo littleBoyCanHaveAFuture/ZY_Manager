@@ -2,7 +2,6 @@ package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
-import com.zyh5games.sdk.BaseChannel;
 import com.zyh5games.sdk.ChannelId;
 import com.zyh5games.sdk.HttpService;
 import com.zyh5games.service.AccountService;

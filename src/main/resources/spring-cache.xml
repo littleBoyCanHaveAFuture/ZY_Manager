@@ -6,31 +6,41 @@
        default-lazy-init="false">
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-        <property name="maxTotal" value="200"/>    <!--  资源池中最大连接数      -->
-        <property name="maxIdle" value="200"/><!-- 最大闲置 -->
-        <property name="minIdle" value="10"/><!-- 最小闲置 -->
-        <property name="maxWaitMillis" value="2000"/><!-- 当资源池连接用尽后，调用者的最大等待时间(单位为毫秒)-->
-        <property name="testOnBorrow" value="true"/><!-- 向资源池借用连接时是否做连接有效性检测(ping)，无效连接会被移除-->
-        <property name="testOnReturn" value="false"/><!--向资源池归还连接时是否做连接有效性检测(ping)，无效连接会被移除-->
-        <property name="jmxEnabled" value="true"/><!-- 是否开启jmx监控，可用于监控-->
-        <property name="testWhileIdle" value="true"/><!-- 是否开启jmx监控，可用于监控-->
-        <property name="timeBetweenEvictionRunsMillis" value="30000"/><!--   空闲资源的检测周期(单位为毫秒)     -->
-        <property name="minEvictableIdleTimeMillis" value="60000"/><!--  资源池中资源最小空闲时间(单位为毫秒)，达到此值后空闲资源将被移除      -->
+        <!--  资源池中最大连接数      -->
+        <property name="maxTotal" value="200"/>
+        <!-- 最大闲置 -->
+        <property name="maxIdle" value="200"/>
+        <!-- 最小闲置 -->
+        <property name="minIdle" value="10"/>
+        <!-- 当资源池连接用尽后，调用者的最大等待时间(单位为毫秒)-->
+        <property name="maxWaitMillis" value="2000"/>
+        <!-- 向资源池借用连接时是否做连接有效性检测(ping)，无效连接会被移除-->
+        <property name="testOnBorrow" value="true"/>
+        <!--向资源池归还连接时是否做连接有效性检测(ping)，无效连接会被移除-->
+        <property name="testOnReturn" value="false"/>
+        <!-- 是否开启jmx监控，可用于监控-->
+        <property name="jmxEnabled" value="true"/>
+        <!-- 是否开启jmx监控，可用于监控-->
+        <property name="testWhileIdle" value="true"/>
+        <!--   空闲资源的检测周期(单位为毫秒)     -->
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/>
+        <!--  资源池中资源最小空闲时间(单位为毫秒)，达到此值后空闲资源将被移除      -->
+        <property name="minEvictableIdleTimeMillis" value="60000"/>
     </bean>
 
     <!-- redis 配置,也可以把配置挪到properties配置文件中,再读取 -->
-    <!--    自用 阿里云 外网连接-->
     <bean id="jedisPool_Ali" class="redis.clients.jedis.JedisPool">
+        <!--    自用 阿里云 外网连接-->
         <constructor-arg index="0" ref="jedisPoolConfig"/>
-        <constructor-arg index="1" name="host" type="java.lang.String"
+        <constructor-arg index="1" type="java.lang.String" name="host"
                          value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>
-        <constructor-arg index="2" name="port" type="int" value="6379"/>
-        <constructor-arg index="3" name="timeout" type="int" value="5000"/>
-        <constructor-arg index="4" name="password" type="java.lang.String" value="ppB7xnDF6pQdZRZp"/>
+        <constructor-arg index="2" type="int" name="port" value="6379"/>
+        <constructor-arg index="3" type="int" name="timeout" value="5000"/>
+        <constructor-arg index="4" type="java.lang.String" name="password" value="ppB7xnDF6pQdZRZp"/>
     </bean>
 
-    <!--    正式服 腾讯云 只能内网连接-->
     <bean id="jedisPool_Tencent" class="redis.clients.jedis.JedisPool">
+        <!--    正式服 腾讯云 只能内网连接-->
         <constructor-arg index="0" ref="jedisPoolConfig"/>
         <constructor-arg index="1" name="host" type="java.lang.String" value="172.16.0.11"/>
         <constructor-arg index="2" name="port" type="int" value="6379"/>
@@ -39,13 +49,13 @@
     </bean>
 
     <!-- redis 的缓存 -->
-    <bean id="jedisManager" class="com.zyh5games.jedis.jedisManager">
+    <bean id="jedisManager" class="com.zyh5games.jedis.JedisManager">
 <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
-                <property name="jedisPool" ref="jedisPool_Tencent"/>
+                        <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
     <!-- 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
-    <bean id="jedisRechargeCache" class="com.zyh5games.jedis.jedisRechargeCache">
+    <bean id="jedisRechargeCache" class="com.zyh5games.jedis.JedisRechargeCache">
         <property name="jedisManager" ref="jedisManager"/>
     </bean>
 
@@ -63,7 +73,6 @@
     <bean id="accountWorker" class="com.zyh5games.sdk.AccountWorker" init-method="AccountWorker">
 
     </bean>
-
 
     <bean id="httpClientFactory" class="org.springframework.http.client.SimpleClientHttpRequestFactory">
         <property name="connectTimeout" value="1000"/>

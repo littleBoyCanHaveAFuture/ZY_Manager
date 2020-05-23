@@ -1,4 +1,4 @@
-package com.zyh5games.sdk;
+package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.util.RandomUtil;
