@@ -300,13 +300,13 @@ public class ZySdkController {
             }
 
             //生成登录token-无用
-            String tokenParam = cache.getToken(String.valueOf(GameId), iChannelId, String.valueOf(channelUid));
-            if (tokenParam == null || tokenParam.isEmpty()) {
-                tokenParam = cache.saveToken(String.valueOf(GameId), Integer.parseInt(channelId), String.valueOf(channelUid));
-            }
+//            String tokenParam = cache.getToken(String.valueOf(GameId), iChannelId, String.valueOf(channelUid));
+//            if (tokenParam == null || tokenParam.isEmpty()) {
+//                tokenParam = cache.saveToken(String.valueOf(GameId), Integer.parseInt(channelId), String.valueOf(channelUid));
+//            }
 
-            String[] tokens = tokenParam.split("#");
-            String token = tokens[0];
+//            String[] tokens = tokenParam.split("#");
+//            String token = tokens[0];
 
             rspJson.put("message", "登陆成功");
             rspJson.put("state", true);
@@ -314,7 +314,7 @@ public class ZySdkController {
             rspJson.put("channelId", account.getChannelId());
             rspJson.put("channelUid", account.getChannelUserId());
             rspJson.put("zyUid", account.getId());
-            rspJson.put("channelToken", token);
+            rspJson.put("channelToken", "");
             rspJson.put("username", account.getName());
             rspJson.put("password", account.getPwd());
             rspJson.put("loginUrl", loginWorker.loadLoginUrl(gameNew.getLoginUrl(), accountId, GameId, 1));

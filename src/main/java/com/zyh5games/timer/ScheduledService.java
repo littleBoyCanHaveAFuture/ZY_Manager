@@ -41,9 +41,8 @@ public class ScheduledService {
     }
 
     public static String getTime() {
-        Long time = System.currentTimeMillis();
-        String times = dateForString(stampForDate(time));
-        return times;
+        long time = System.currentTimeMillis();
+        return dateForString(stampForDate(time));
     }
 
     /**
@@ -53,8 +52,7 @@ public class ScheduledService {
      */
     @Scheduled(fixedRate = rate * 1000)
     public void scheduled() {
-        log.info("scheduled 60s 过去了");
-        log.info(System.getProperty("file.encoding"));
+        log.info("scheduled 60s 过去了--" + System.getProperty("file.encoding"));
 //        LoginToken.cleanInvalid(System.currentTimeMillis());
     }
 //服务器启动时 可以检查一遍

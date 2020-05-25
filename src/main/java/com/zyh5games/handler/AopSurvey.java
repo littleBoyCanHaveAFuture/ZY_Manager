@@ -66,7 +66,7 @@ public class AopSurvey {
         String signature = pjp.getSignature().getName();
 
         StringBuilder message = new StringBuilder();
-        message.append("--------- AopSurvey verifyMethod()------------");
+        message.append("---- AopSurvey verifyMethod() ----");
         message.append("function:").append(signature).append("\t");
 
         int i = 0;

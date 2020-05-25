@@ -28,9 +28,10 @@ function sdkInit(GameId, GameKey, ChannelCode) {
                 channelUid = callbackData.data.uid;
                 roleID = getRndInteger(1000000, 9999999);
                 console.log("roleID=" + roleID);
-                uploadRoleInfo(2, channelUid, roleID);
+                test()
+                // uploadRoleInfo(2, channelUid, roleID);
                 // uploadRoleInfo(3, channelUid, roleID);
-                sdkPay(roleID);
+                // sdkPay(roleID);
                 // testChannelPayCallback();
                 // uploadRoleInfo(4, channelUid, roleID);
                 // uploadRoleInfo(5, channelUid, roleID);
@@ -139,11 +140,84 @@ function uploadRoleInfo(type, uid, roleId) {
     roleInfo.professionId = '1';
     roleInfo.profession = '武士';
     roleInfo.friendlist = '';
+    if (type !== 2) {
+         roleInfo = {
+            "datatype": 3,
+            "roleCreateTime": 1590376401,
+            "uid": "10000210268567",
+            "username": "username_高山仰止",
+            "serverId": 65501,
+            "serverName": "测试65501区",
+            "userRoleName": "username_无情地域",
+            "userRoleId": 42860509,
+            "userRoleBalance": 0,
+            "vipLevel": 1,
+            "userRoleLevel": 59,
+            "partyId": "",
+            "partyName": "",
+            "gameRoleGender": "无",
+            "gameRolePower": 5854,
+            "partyRoleId": "",
+            "partyRoleName": "",
+            "professionId": "0",
+            "profession": "无",
+            "friendlist": "",
+            "GameId": "14",
+            "GameKey": "u6d3047qbltix34a9l0g2bvs5e8q82ol",
+            "channelId": 9
+        };
+    }
     ZhiYueSDK.uploadGameRoleInfo(roleInfo, function (response) {
         if (response.status) {
             console.log('提交信息成功');
         } else {
             console.log(response.message);
+        }
+    });
+}
+
+function test() {
+    let roleInfo = {
+        "datatype": 3,
+        "roleCreateTime": 1590376401,
+        "uid": "10000210268567",
+        "username": "username_高山仰止",
+        "serverId": 65501,
+        "serverName": "测试65501区",
+        "userRoleName": "username_无情地域",
+        "userRoleId": 42860509,
+        "userRoleBalance": 0,
+        "vipLevel": 1,
+        "userRoleLevel": 59,
+        "partyId": "",
+        "partyName": "",
+        "gameRoleGender": "无",
+        "gameRolePower": 5854,
+        "partyRoleId": "",
+        "partyRoleName": "",
+        "professionId": "0",
+        "profession": "无",
+        "friendlist": "",
+        "GameId": "14",
+        "GameKey": "u6d3047qbltix34a9l0g2bvs5e8q82ol",
+        "channelId": 9
+    };
+    let rspObject = {};
+    let data = JSON.stringify(roleInfo);
+    $.ajax({
+        url: ZhiYue_domain + "/ajaxUploadGameRoleInfo",
+        type: "post",
+        contentType: "text/plain; charset=utf-8",
+        data: data,
+        dataType: "json",
+        async: false,
+        success: function (respData) {
+            console.info(respData);
+        },
+        error: function () {
+            rspObject.status = false;
+            rspObject.message = "接口请求失败";
+            console.info(rspObject);
         }
     });
 }

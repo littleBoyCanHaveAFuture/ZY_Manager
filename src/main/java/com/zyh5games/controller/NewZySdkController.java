@@ -165,7 +165,7 @@ public class NewZySdkController {
     }
 
     /**
-     * 渠道自动注册
+     * 0.渠道自动注册
      * SDK 登录接口
      *
      * @param jsonData int         appId         游戏id*<p>
@@ -599,7 +599,7 @@ public class NewZySdkController {
                     if (gameRole == null) {
                         gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
                     } else {
-                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, DateUtil.getCurrentDateStr(), roleId, userRoleBalance, userRoleName, "");
+                        gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, DateUtil.getCurrentDateStr(), roleId, userRoleBalance, userRoleName, "");
                     }
                     result.put("message", "进入游戏 上报成功");
                     result.put("state", true);
@@ -614,7 +614,7 @@ public class NewZySdkController {
                     if (gameRole == null) {
                         gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
                     } else {
-                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, "", roleId, userRoleBalance, userRoleName, "");
+                        gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, "", roleId, userRoleBalance, userRoleName, "");
                     }
                     result.put("message", "角色升级 上报成功");
                     result.put("state", true);
@@ -625,7 +625,7 @@ public class NewZySdkController {
                     if (gameRole == null) {
                         gameRole = this.createRole(account.getId(), roleId, channelId, channelUid, gameId, serverId, roleCreateTime, userRoleName);
                     } else {
-                        gameRoleWorker.updateGameRole(gameId, channelId, serverId, "", roleId, userRoleBalance, userRoleName, "");
+                        gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, "", roleId, userRoleBalance, userRoleName, "");
                     }
                     //查询redis-移除在线玩家
                     cache.exitGame(gameId, channelId, String.valueOf(serverId), account.getId());

@@ -215,7 +215,6 @@ public class UOrderManager {
         order.setProductName(subject);
         order.setProductDesc(desc);
         order.setMoney(Integer.parseInt(money));
-        order.setMoney(0);
         order.setCurrency("RMB");
         order.setRoleID(userRoleId);
         order.setRoleName(userRoleName);

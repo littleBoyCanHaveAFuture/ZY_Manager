@@ -122,11 +122,11 @@ let CallbackPayFun = null;
  * */
 function doInit(params, callback) {
     let requestUri = getNowHost();
-    console.info("doInit requestUri=" + requestUri);
+    // console.info("doInit requestUri=" + requestUri);
     requestUri = requestUri.replace(/\&amp;/g, '&');
     try {
         var params = requestUri.split('?')[1];
-        console.info("doInit params=" + params);
+        // console.info("doInit params=" + params);
     } catch (e) {
         var params = '';
     }
@@ -312,7 +312,7 @@ function loadAsyncScript(src, callback) {
         callback();
         return;
     }
-    console.info(src);
+    // console.info(src);
     if (src.search("jquery") !== -1) {
         if (typeof (jQuery) == "undefined") {
             console.info("jQuery is not imported");

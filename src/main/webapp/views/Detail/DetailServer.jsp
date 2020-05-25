@@ -94,7 +94,7 @@
             "活跃玩家": "activePlayer",
             "充值次数": "rechargeTimes",
             "充值人数": "rechargeNumber",
-            "充值金额(分)": "rechargePayment",
+            "充值金额": "rechargePayment",
             "活跃付费率": "activePayRate",
             "付费ARPU": "paidARPU",
             "活跃ARPU": "activeARPU",

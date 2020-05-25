@@ -49,6 +49,7 @@ public class PayCallbackController {
     @Resource
     private HttpService httpService;
 
+
     public boolean notifyToCp(boolean first, GameNew gameNew, UOrder order,
                               String price, String cpOrderId, Integer channelId) throws Exception {
         log.info("notifyToCp");
@@ -109,7 +110,7 @@ public class PayCallbackController {
      * @param orderid 订单id
      * @param sign    签名
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_ziwan/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_ziwan/{channelId}/{appId}")
     @ResponseBody
     public void h5_ziwan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                          @RequestParam("openid") String openid,
@@ -203,7 +204,7 @@ public class PayCallbackController {
      * signType	    string	是	否	固定值 md5
      * sign	        string	是	否	加密串
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_baijia/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_baijia/{channelId}/{appId}")
     @ResponseBody
     public void h5_baijia(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                           @RequestParam("status") String status,
@@ -316,7 +317,7 @@ public class PayCallbackController {
      * signType	    string	是	否	固定值 md5
      * sign	        string	是	否	加密串
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_5144wan/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_5144wan/{channelId}/{appId}")
     @ResponseBody
     public void h5_5144wan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                            @RequestParam("status") String status,

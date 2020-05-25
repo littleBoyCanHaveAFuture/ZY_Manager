@@ -57,14 +57,14 @@
         where gameId=#{gameId}
         and channelId=#{channelId}
         and serverId=#{serverId}
-        and channelId=#{roleId}
+        and channelUid=#{channelUid}
     </update>
 
     <select id="getLastLoginTime" parameterType="Map" resultType="string">
         select lastLoginTime
         from zy_role
         where channelId = #{roleId}
-          and channelId = #{channelId}
+          and channelUid = #{channelUid}
           and gameId = #{gameId}
           and serverId = #{serverId}
     </select>

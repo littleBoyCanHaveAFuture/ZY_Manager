@@ -26,11 +26,12 @@ public class GameRoleWorker {
         gameRoleService.updateGameRole(map);
     }
 
-    public void updateGameRole(String gameId, String channelId, String serverId, String lastLoginTime,
+    public void updateGameRole(String gameId, String channelId, String channelUid, String serverId, String lastLoginTime,
                                String roleId, String balance, String userRoleName, String param) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("roleId", roleId);
         map.put("channelId", channelId);
+        map.put("channelUid", channelUid);
         map.put("gameId", gameId);
         map.put("serverId", serverId);
         map.put("lastLoginTime", lastLoginTime);

@@ -138,7 +138,7 @@ public class H5gameController {
 
         ResponseUtil.write(response, result);
 
-        log.info("request: h5/getExRecordList , map: " + result.toString());
+        log.info("request: h5/getExRecordList end");
     }
 
     /**

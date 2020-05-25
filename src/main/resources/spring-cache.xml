@@ -50,8 +50,8 @@
 
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.zyh5games.jedis.JedisManager">
-<!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
-                        <property name="jedisPool" ref="jedisPool_Tencent"/>
+        <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
+        <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
     <!-- 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
