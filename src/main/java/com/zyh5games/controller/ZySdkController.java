@@ -299,14 +299,14 @@ public class ZySdkController {
 
             }
 
-            //生成登录token-无用
-//            String tokenParam = cache.getToken(String.valueOf(GameId), iChannelId, String.valueOf(channelUid));
-//            if (tokenParam == null || tokenParam.isEmpty()) {
-//                tokenParam = cache.saveToken(String.valueOf(GameId), Integer.parseInt(channelId), String.valueOf(channelUid));
-//            }
-
-//            String[] tokens = tokenParam.split("#");
-//            String token = tokens[0];
+//            生成登录token-无用
+            String tokenParam = cache.getToken(String.valueOf(GameId), iChannelId, String.valueOf(channelUid));
+            if (tokenParam == null || tokenParam.isEmpty()) {
+                tokenParam = cache.saveToken(String.valueOf(GameId), Integer.parseInt(channelId), String.valueOf(channelUid));
+            }
+//
+            String[] tokens = tokenParam.split("#");
+            String token = tokens[0];
 
             rspJson.put("message", "登陆成功");
             rspJson.put("state", true);
@@ -314,7 +314,7 @@ public class ZySdkController {
             rspJson.put("channelId", account.getChannelId());
             rspJson.put("channelUid", account.getChannelUserId());
             rspJson.put("zyUid", account.getId());
-            rspJson.put("channelToken", "");
+            rspJson.put("channelToken", token);
             rspJson.put("username", account.getName());
             rspJson.put("password", account.getPwd());
             rspJson.put("loginUrl", loginWorker.loadLoginUrl(gameNew.getLoginUrl(), accountId, GameId, 1));
@@ -324,7 +324,7 @@ public class ZySdkController {
             Map<String, Object> map = new HashMap<>(2);
             map.put("id", accountId);
             map.put("lastLoginTime", DateUtil.getCurrentDateStr());
-            accountWorker.updateLoginTime(map);
+            accountService.updateAccount(map);
         } while (false);
 
         ResponseUtil.write(response, rspJson);
@@ -738,7 +738,7 @@ public class ZySdkController {
         JSONObject result = new JSONObject();
 
         //1.判断账号是否存在
-        Account account = accountWorker.getAccountById(accountId);
+        Account account = accountService.findAccountById(accountId);
         if (account == null) {
             result.put("message", "账号不存在");
             result.put("state", false);

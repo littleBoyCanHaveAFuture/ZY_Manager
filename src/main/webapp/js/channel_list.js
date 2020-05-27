@@ -21,7 +21,7 @@ function initTableColumns() {
             {field: 'config', title: 'json配置', align: 'center', hidden: true},
         ]],
         pagination: true,
-        // pageSize: 10,
+        pageSize: 20,
         // pageList: [10, 20],
         // onSelectPage: function (pageNum, pageSize) {
         //     opts.pageNumber = pageNum;

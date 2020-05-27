@@ -102,7 +102,7 @@ public class H5gameController {
 
         ResponseUtil.write(response, result);
 
-        log.info("request: h5/getExchangeList , map: " + result.toString());
+        log.info("request: h5/getExchangeList , map:");
     }
 
     /**

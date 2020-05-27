@@ -28,10 +28,9 @@ function sdkInit(GameId, GameKey, ChannelCode) {
                 channelUid = callbackData.data.uid;
                 roleID = getRndInteger(1000000, 9999999);
                 console.log("roleID=" + roleID);
-                test()
-                // uploadRoleInfo(2, channelUid, roleID);
-                // uploadRoleInfo(3, channelUid, roleID);
-                // sdkPay(roleID);
+                uploadRoleInfo(2, channelUid, roleID);
+                uploadRoleInfo(3, channelUid, roleID);
+                sdkPay(roleID);
                 // testChannelPayCallback();
                 // uploadRoleInfo(4, channelUid, roleID);
                 // uploadRoleInfo(5, channelUid, roleID);

@@ -1,19 +1,26 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
+import com.zyh5games.entity.Account;
 import com.zyh5games.sdk.ChannelId;
+import com.zyh5games.service.AccountService;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
+ * 指悦
+ *
  * @author song minghua
  * @date 2020/5/21
  */
 @Component("0")
 public class ZhiYueBaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(ZhiYueBaseChannel.class);
+    @Resource
+    private AccountService accountService;
 
     ZhiYueBaseChannel() {
         channelId = ChannelId.H5_ZHIYUE;
@@ -27,7 +34,7 @@ public class ZhiYueBaseChannel extends BaseChannel {
     @Override
     public JSONObject channelLib() {
         JSONObject channelData = new JSONObject();
-        channelData.put("name", "");
+        channelData.put("name", "ZhiYueH5");
         return channelData;
     }
 
@@ -54,15 +61,41 @@ public class ZhiYueBaseChannel extends BaseChannel {
     @Override
     public boolean channelLogin(Map<String, String[]> map, JSONObject userData) {
         int appId = Integer.parseInt(map.get("GameId")[0]);
-        int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
+        String channelId = String.valueOf(map.get("ChannelCode")[0]);
+        String channelUid = String.valueOf(map.get("ChannelUid")[0]);
 
-        return true;
+        Account account = accountService.findUserBychannelUid(channelId, channelUid);
+        if (account != null) {
+            setUserData(userData, channelUid, "", channelId, "");
+            return true;
+        } else {
+            setUserData(userData, "", "", channelId, "");
+            return false;
+        }
     }
 
     /**
      * 4. 渠道调起支付 订单信息
      *
      * @param orderData      渠道订单请求参数
+     *                       channelId          必传     QuickSDK后台自动分配的渠道参数
+     *                       gameKey	        必传	    QuickSDK后台自动分配的游戏参数
+     *                       uid	            必传	    渠道UID
+     *                       username	        必传	    渠道username
+     *                       userRoleId	        必传	    游戏内角色ID
+     *                       userRoleName	    必传	    游戏角色
+     *                       serverId	        必传	    角色所在区服ID
+     *                       userServer	        必传	    角色所在区服
+     *                       userLevel	        必传	    角色等级
+     *                       cpOrderNo	        必传	    游戏内的订单,服务器通知中会回传
+     *                       amount	            必传	    购买金额（元）
+     *                       count	            必传	    购买商品个数
+     *                       quantifier	        必传	    购买商品单位，如，个
+     *                       subject	        必传	    道具名称
+     *                       desc	            必传	    道具描述
+     *                       callbackUrl	    选传	    服务器通知地址
+     *                       extrasParams	    选传	    透传参数,服务器通知中原样回传
+     *                       goodsId	        必传	    商品IDF
      * @param channelOrderNo 渠道订单返回参数
      * @return boolean
      */
@@ -70,14 +103,23 @@ public class ZhiYueBaseChannel extends BaseChannel {
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
 
+        JSONObject data = new JSONObject();
+        data.put("orderId", orderData.getString("zhiyueOrderId"));
+        data.put("body", orderData.getString("desc"));
+        data.put("subject", orderData.getString("subject"));
+        data.put("totalAmount", orderData.getString("amount"));
+        data.put("productId", orderData.getString("goodsId"));
+        data.put("passBackParams", orderData.getString("extrasParams"));
+        channelOrderNo.put("data", data);
+        channelOrderNo.put("spId", orderData.getString("channelId"));
         return true;
     }
 
     /**
      * 5.渠道支付订单校验
      *
-     * @param appId        指悦游戏id
-     * @param parameterMap 渠道回调参数
+     * @param appId          指悦游戏id
+     * @param parameterMap   渠道回调参数
      * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
      */
     @Override

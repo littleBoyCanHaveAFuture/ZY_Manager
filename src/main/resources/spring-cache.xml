@@ -50,7 +50,7 @@
 
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.zyh5games.jedis.JedisManager">
-        <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
+<!--                <property name="jedisPool" ref="jedisPool_Ali"/>-->
         <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
@@ -70,7 +70,7 @@
         <property name="workerId" value="1"/><!-- 区服 -->
     </bean>
 
-    <bean id="accountWorker" class="com.zyh5games.sdk.AccountWorker" init-method="AccountWorker">
+    <bean id="accountWorker" class="com.zyh5games.sdk.AccountWorker" init-method="init">
 
     </bean>
 

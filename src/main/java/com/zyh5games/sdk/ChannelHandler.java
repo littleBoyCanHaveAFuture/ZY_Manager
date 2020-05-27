@@ -49,6 +49,9 @@ public class ChannelHandler {
             Integer appId = channelConfig.getAppId();
             Integer channelId = channelConfig.getChannelId();
             String config = channelConfig.getConfigKey();
+            if (config == null || config.isEmpty()) {
+                continue;
+            }
             JSONObject jsonObject = JSONObject.parseObject(config);
 
             if (!appConfigMap.containsKey(channelId)) {
@@ -61,6 +64,8 @@ public class ChannelHandler {
                     configMap.put(appId, jsonObject);
                 }
             }
+
+
         }
         System.out.println(configService.toString());
     }
@@ -81,7 +86,7 @@ public class ChannelHandler {
             for (ChannelConfig config : channelConfigList) {
                 Integer appId = config.getAppId();
                 String configKey = config.getConfigKey();
-                if (!configKey.isEmpty()) {
+                if (configKey != null && !configKey.isEmpty()) {
                     JSONObject jsonObject = JSONObject.parseObject(configKey);
                     if (channel.getConfigMap().containsKey(appId)) {
                         channel.getConfigMap().replace(appId, jsonObject);

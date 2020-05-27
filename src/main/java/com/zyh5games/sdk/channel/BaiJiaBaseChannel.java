@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
+ * 百家
+ *
  * @author song minghua
  * @date 2020/5/21
  */
@@ -219,8 +221,8 @@ public class BaiJiaBaseChannel extends BaseChannel {
     /**
      * 5.渠道支付订单校验
      *
-     * @param appId        指悦游戏id
-     * @param parameterMap 渠道回调参数
+     * @param appId          指悦游戏id
+     * @param parameterMap   渠道回调参数
      * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
      */
     @Override
@@ -231,7 +233,7 @@ public class BaiJiaBaseChannel extends BaseChannel {
         String sign = parameterMap.get("sign");
         //   MD5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1.00&orderId=201801241127404978&role=1&server=1&status=success&time=1475049097&uid=6298253&userName=dreamfly_1981&key=testpaykey)
         //       cpOrderId=e16b7fc8-d43b-4ca7-938b-b190834c1366&gameId=null&goodsId=1&goodsName=1000元宝&money=0.10&orderId=202005231535551325&role=42860509&server=65501&status=success&time=1590219619&uid=10000210268567&userName=高山仰止&key=82937ce89565d82c09422e54f1fc4e24
-      StringBuilder param = new StringBuilder();
+        StringBuilder param = new StringBuilder();
         param.append("cpOrderId").append("=").append(parameterMap.get("cpOrderId"));
         param.append("&").append("gameId").append("=").append(channelGameId);
         param.append("&").append("goodsId").append("=").append(parameterMap.get("goodsId"));
@@ -251,7 +253,7 @@ public class BaiJiaBaseChannel extends BaseChannel {
         String serverSign = MD5Util.md5(param.toString());
         System.out.println("channelPayInfo sign: " + serverSign);
         System.out.println("channelPayInfo sign: " + sign);
-        if (sign.equals(serverSign)){
+        if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "", parameterMap.get("orderId"), "", parameterMap.get("money"));
             return true;
         }

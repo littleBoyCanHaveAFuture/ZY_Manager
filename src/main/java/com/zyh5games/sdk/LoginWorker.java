@@ -2,7 +2,6 @@ package com.zyh5games.sdk;
 
 import com.zyh5games.service.ServerListService;
 import com.zyh5games.util.MD5Util;
-import com.zyh5games.util.enums.ServiceType;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -56,40 +55,39 @@ public class LoginWorker {
 
     /**
      * 渠道游戏登录 设置参数
+     * 旧版
      */
     public String loadLoginUrl(String loginUrl, Integer accountId, Integer appId, Integer serverId) {
         StringBuilder param = new StringBuilder();
 
+        //加密字符串
         String key = String.valueOf(System.currentTimeMillis());
         switch (appId) {
+            //指悦刺沙
             case AppId.H5_CISHA:
-            case AppId.H5_JULONGZHANGE:
-                //指悦刺沙
-                //巨龙战歌
                 param.append("qid=").append(accountId);
                 param.append("&server_id=").append(serverId);
                 break;
+            //巨龙战歌
+            case AppId.H5_JULONGZHANGE:
+                break;
             case 9999:
                 param.append("qid=").append(accountId);
+                break;
             default:
                 break;
         }
         param.append("&time=").append(key);
 
-        String sign = "";
-        switch (appId) {
-            case AppId.H5_CISHA:
-                sign = MD5Util.md5(param.toString());
-                break;
-            case AppId.H5_JULONGZHANGE:
-                //指悦
-                sign = MD5Util.md5(param.toString() + key);
-                break;
-            case 9999:
-                sign = MD5Util.md5(param.toString());
-            default:
-                break;
+        // 字符串md5 加密
+        String data = param.toString();
+
+        //指悦
+        if (appId == AppId.H5_JULONGZHANGE) {
+            data += key;
         }
+
+        String sign = MD5Util.md5(data);
 
         param.append("&sign=").append(sign);
 

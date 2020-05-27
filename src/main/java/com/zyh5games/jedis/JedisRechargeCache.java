@@ -573,27 +573,6 @@ public class JedisRechargeCache {
     }
 
     /**
-     * 设置游戏渠道信息
-     */
-    public void setSPIDInfo(String appId,
-                            String channelId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            String key = RedisKey_Gen.get_ChannelInfo(appId);
-            jds.sadd(key, channelId);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-    }
-
-    /**
      * 获取游戏的渠道id
      */
     public Set<String> getSPIDInfo(String appId) {
@@ -612,6 +591,27 @@ public class JedisRechargeCache {
             returnResource(jds, isBroken);
         }
         return null;
+    }
+
+    /**
+     * 设置游戏渠道信息
+     */
+    public void setSPIDInfo(String appId,
+                            String channelId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_ChannelInfo(appId);
+            jds.sadd(key, channelId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
     }
 
     /**

@@ -26,9 +26,10 @@ function initTableColumns() {
 
         "订单状态": "state",
         "渠道订单号": "channelOrderID",
+        "cp订单号": "cpOrderId",
         // "扩展数据": "extension",
         "订单创建时间": "createdTime",
-        "渠道SDK订单交易时间": "sdkOrderTime",
+        // "渠道SDK订单交易时间": "sdkOrderTime",
 
         "订单完成时间": "completeTime",
         // "渠道回调游戏url": "notifyUrl"
@@ -49,8 +50,9 @@ function initTableColumns() {
         columns: [
             activeColumns
         ],
-        striped: true
+        striped: true,
         // nowrap: true,
+        pageSize: 20,
     });
     //.datagrid('loadData', ttt.bodys);
     //初始化内容 下一页按钮
@@ -58,8 +60,8 @@ function initTableColumns() {
     let opts = getDatagridOptions(dg);
     let pager = dg.datagrid('getPager');
     pager.pagination({
-        pageSize: 10,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
-        pageList: [5, 10, 15, 20],//可以设置每页记录条数的列表 　　　　　　　　　　　　
+        pageSize: 20,//每页显示的记录条数，默认为10        　　　　　　　　　　//这里不设置的画分页页数选择函数会正确调用，否则每次点击下一页pageSize都会变回设置的值
+        pageList: [10, 15, 20, 50],//可以设置每页记录条数的列表 　　　　　　　　　　　　
         beforePageText: '第',//页数文本框前显示的汉字
         afterPageText: '页    共 {pages} 页',
         displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
@@ -135,6 +137,8 @@ function selectPayRecord() {
                     if (row.notifyUrl === "null") {
                         row.notifyUrl = "";
                     }
+                    row.money = changeMoneyToYuan(row.money);
+                    row.realMoney = changeMoneyToYuan(row.realMoney);
 
                     return row;
                 });

@@ -81,6 +81,19 @@ public class AccountWorker {
         return USERID_BEGIN + USERID_SP_INTERVAL * (spId - 1);
     }
 
+    private void init() {
+        try {
+            AccountWorker.lastUserId = this.getLastUserId();
+            log.info("init lastUserId:" + AccountWorker.lastUserId);
+
+            AccountWorker.lastAppId = this.lastAppId();
+            log.info("init lastUserId:" + AccountWorker.lastAppId);
+            System.out.println("init lastUserId:" + AccountWorker.lastAppId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 注册账号
      */
@@ -215,24 +228,6 @@ public class AccountWorker {
         return reply;
     }
 
-    /**
-     * 此设备号的用户 是否可以创建账号
-     *
-     * @return int:0,可以创建|>0,不能
-     */
-    public int getDeviceCreateAccount(String deviceCode, Integer spId) {
-        if (!StringUtil.isValid(deviceCode)) {
-            return 10;
-        }
-        //根据渠道和设备码获取账户列表
-
-        int size = accountService.getTotalSameDeviceCode(deviceCode, spId);
-        if (size >= AccountWorker.DeviceAccountMax) {
-            return 20;
-        }
-        return 0;
-    }
-
 
     /**
      * 渠道自动注册账号
@@ -321,7 +316,6 @@ public class AccountWorker {
             cache.register(true, appId, account.getId(), channelId);
         } while (false);
         return account;
-
     }
 
     /**
@@ -398,24 +392,11 @@ public class AccountWorker {
     }
 
 
-    private void AccountWorker() {
-        try {
-            AccountWorker.lastUserId = this.getLastUserId();
-            log.info("init lastUserId:" + AccountWorker.lastUserId);
-
-            AccountWorker.lastAppId = this.lastAppId();
-            log.info("init lastUserId:" + AccountWorker.lastAppId);
-            System.out.println("init lastUserId:" + AccountWorker.lastAppId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private AtomicInteger lastAppId() {
         int lastUserId = 0;
-        Integer maxAppid = gameNewService.getMaxAppid();
-        if (maxAppid != null) {
-            lastUserId = maxAppid;
+        Integer maxAppId = gameNewService.getMaxAppid();
+        if (maxAppId != null) {
+            lastUserId = maxAppId;
         }
 
         return new AtomicInteger(lastUserId);
@@ -445,19 +426,6 @@ public class AccountWorker {
             return null;
         }
         return list.get(NumberUtil.ZERO);
-    }
-
-    public Account getAccountById(int id) {
-        Account account = accountService.findAccountById(id);
-
-        return account;
-    }
-
-    /**
-     * 账号登录时间
-     */
-    public void updateLoginTime(Map<String, Object> map) {
-        accountService.updateAccount(map);
     }
 
     /**
@@ -510,5 +478,65 @@ public class AccountWorker {
             jsonObject.put("openId", openId);
             return this.commonReg(reply, jsonObject);
         }
+    }
+
+    /**
+     * @param rsqData int         appId         游戏id<p>
+     *                int         channelId     渠道id<p>
+     *                string      appKey        游戏秘钥<p>
+     *                string      addParam      注释*<p>
+     *                string      ip            ip地址
+     */
+    public Account zhiyueRegister(JSONObject rsqData) throws Exception {
+        JSONObject reply = new JSONObject();
+        Account account = new Account();
+        do {
+            int appId = rsqData.getInteger("appId");
+            int channelId = rsqData.getInteger("channelId");
+            String appKey = rsqData.getString("appKey");
+            String addParam = rsqData.getString("addParam");
+            String ip = rsqData.getString("ip");
+
+            account.setName(RandomUtil.rndStr(10, true));
+            account.setPwd(RandomUtil.rndStr(6, false));
+            account.setPhone("");
+            account.setCreateIp(ip);
+            account.setCreateTime(DateUtil.getCurrentDateStr());
+            account.setCreateDevice("");
+            account.setDeviceCode("");
+            account.setChannelId("0");
+            account.setChannelUserName("");
+            account.setChannelUserNick("");
+            account.setLastLoginTime(0L);
+            account.setToken("");
+            account.setAddParam(addParam);
+
+            accountService.createAccount(account);
+            if (account.getId() < 0) {
+                if (account.getId() == -2) {
+                    log.error("账号名重复");
+                    reply.put("state", false);
+                    reply.put("message", "账号名重复");
+                    break;
+                } else {
+                    log.error("注册失败");
+                    reply.put("state", false);
+                    reply.put("message", "注册失败");
+                    break;
+                }
+            }
+            //官方
+            account.setChannelUserId(account.getId().toString());
+
+            //更新uid
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", account.getId());
+            map.put("channelUid", account.getId());
+            accountService.updateAccountUid(map);
+
+            //注册成功 相关数据存入redis
+            cache.register(true, appId, account.getId(), channelId);
+        } while (false);
+        return account;
     }
 }

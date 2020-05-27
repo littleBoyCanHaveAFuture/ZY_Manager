@@ -374,6 +374,7 @@ function setValue(res) {
     let gotourl = "";
     if (res.h5_url) {
         gotourl = res.h5_url;
+        gotourl = gotourl.replace("{game}", res.channel_sdk_code);
         let fileName = hex_md5(encodeURIComponent(res.app_id + "" + res.channel_id));
         if (gotourl.indexOf("zycon") < 0) {
             if (gotourl.indexOf("?") > 0) {

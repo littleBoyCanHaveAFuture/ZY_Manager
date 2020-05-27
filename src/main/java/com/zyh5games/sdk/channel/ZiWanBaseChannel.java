@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 紫菀/骆驼
+ *
  * @author song minghua
  * @date 2020/5/21
  */
@@ -28,15 +30,6 @@ public class ZiWanBaseChannel extends BaseChannel {
     ZiWanBaseChannel() {
         configMap = new HashMap<>();
         channelId = ChannelId.H5_ZIWAN;
-    }
-
-    /**
-     * 0.从数据库加载配置
-     */
-    @Override
-    public void loadChannelConfig() {
-        super.setChannelId(ChannelId.H5_ZIWAN);
-        System.out.println("loadChannelConfig");
     }
 
     /**
@@ -228,5 +221,25 @@ public class ZiWanBaseChannel extends BaseChannel {
         return false;
     }
 
+    @Override
+    public JSONObject ajaxGetSignature(Integer appId,JSONObject requestInfo) {
+        String secretKey = configMap.get(appId).getString(ZiWanConfig.KEY);
 
+        StringBuilder param = new StringBuilder();
+        //升序排列-参数赋值 并签名
+        param.append("area").append("=").append(requestInfo.getString("area"));
+        param.append("&").append("channel_id").append("=").append(requestInfo.get("channel_id"));
+        param.append("&").append("money").append("=").append(requestInfo.get("money"));
+        param.append("&").append("new_role").append("=").append(requestInfo.getString("new_role"));
+        param.append("&").append("rank").append("=").append(requestInfo.get("rank"));
+        param.append("&").append("role_name").append("=").append(requestInfo.get("role_name"));
+        param.append("&").append("userToken").append("=").append(requestInfo.get("userToken"));
+
+        String sign = MD5Util.md5(param.toString() + secretKey);
+        param.append("&").append("sign").append("=").append(sign);
+        JSONObject rsp = new JSONObject();
+        rsp.put("content", requestInfo);
+        rsp.put("sign", sign);
+        return rsp;
+    }
 }

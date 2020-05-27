@@ -16,40 +16,48 @@
     <!--[if lt IE 9]>
     <meta http-equiv="refresh" content="0;ie.html"/>
     <![endif]-->
-    <script src="/js/vconsole.min.js"></script>
-    <script type="text/javascript"
-            src="/jquery-easyui-1.7.0/jquery.min.js"></script>
-    <script type="text/javascript"
-            src="/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+<!--    <script src="/js/vconsole.min.js"></script>-->
+    <script src="/jquery-easyui-1.7.0/jquery.min.js"></script>
+    <script src="/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<!--    <script src="/js/jquery.qrcode.min.js"></script>-->
     <script src="/js/common.js"></script>
     <script src="/js/libZySdk_v2.js?1359"></script>
-    <script src="./h5game.js?1148"></script>
+    <script src="h5game.js?1417"></script>
 
 </head>
 
 <body class="gray-bg">
 
-<div hidden="hidden">
-    <label for="appId"></label>
-    <input type="text" name="appId" id="appId" required="" hidden="hidden">
-
-    <label for="channelId"></label>
-    <input type="text" name="channelId" id="channelId" required="" hidden="hidden">
-
-    <label for="uid"></label>
-    <input type="text" name="uid" id="uid" required="" hidden="hidden">
-
-    <label for="channelUid"></label>
-    <input type="text" name="channelUid" id="channelUid" required="" hidden="hidden">
-
-    <label for="copy"></label>
-    <input type="text" name="copy" id="copy" required="" hidden="hidden">
+<div id="shunwang_qrcode">
+    <span>二维码在此--></span>
+    <img id="shunwang_qr_img" src="" alt=""/>
 </div>
 
+<div>
+    <div hidden="hidden">
+        <label for="appId"></label>
+        <input type="text" name="appId" id="appId" required="" hidden="hidden">
+
+        <label for="channelId"></label>
+        <input type="text" name="channelId" id="channelId" required="" hidden="hidden">
+
+        <label for="uid"></label>
+        <input type="text" name="uid" id="uid" required="" hidden="hidden">
+
+        <label for="channelUid"></label>
+        <input type="text" name="channelUid" id="channelUid" required="" hidden="hidden">
+
+        <label for="copy"></label>
+        <input type="text" name="copy" id="copy" required="" hidden="hidden">
+    </div>
+
+</div>
 <script>
     $(function () {
+        // let qrdata = "";
+        // $("#shunwang_qr_img").attr("src", "data:image/jpeg;base64," + qrdata);
         let appId = 14;
         let GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
         let channelId = 8;
@@ -75,20 +83,20 @@
         regInfo.phone = "";
         regInfo.deviceCode = "PC";
 
-        if (channelId === 0) {
-            // 指悦官方渠道-无账号自动注册
-            if (zy_account === "" || zy_password === "" || zy_channelUid === "") {
-                regInfo.channelUid = getZyNextUid();
-                autoReg(regInfo);
-            } else {
-                newURl = updateQueryStringParameter(newURl, 'zy_channelUid', zy_channelUid);
-                newURl = updateQueryStringParameter(newURl, 'zy_account', zy_account);
-                newURl = updateQueryStringParameter(newURl, 'zy_password', zy_password);
-            }
-        } else {
-            // regInfo.channelUid = getRndInteger(8, 10);
-            // autoReg(regInfo);
-        }
+        // if (channelId === 0) {
+        //     // 指悦官方渠道-无账号自动注册
+        //     if (zy_account === "" || zy_password === "" || zy_channelUid === "") {
+        //         regInfo.channelUid = getZyNextUid();
+        //         autoReg(regInfo);
+        //     } else {
+        //         newURl = updateQueryStringParameter(newURl, 'zy_channelUid', zy_channelUid);
+        //         newURl = updateQueryStringParameter(newURl, 'zy_account', zy_account);
+        //         newURl = updateQueryStringParameter(newURl, 'zy_password', zy_password);
+        //     }
+        // } else {
+        //     // regInfo.channelUid = getRndInteger(8, 10);
+        //     // autoReg(regInfo);
+        // }
 
         //向当前url添加参数，没有历史记录
         // window.history.replaceState({
@@ -99,9 +107,9 @@
         $('#copy').val(res);
 
         // 初始化
-        window.vConsole = new window.VConsole();
-        console.log('Hello world');
-        console.log(window.location.href);
+        // window.vConsole = new window.VConsole();
+        // console.log('Hello world');
+        // console.log(window.location.href);
 
     });
     let clipboard = new ClipboardJS('.copyBtn', {
@@ -284,7 +292,5 @@
         }
     }
 </script>
-
 </body>
-
 </html>

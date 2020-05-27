@@ -165,3 +165,59 @@ function GetArgsFromHref(sHref, sArgName) {
     return retval;
 }
 
+//money 为元;20.01|20|20.1|20.10
+function changeMoneyToFen(money) {
+    let realmoney_fen = 0;
+    let part_yuan = 0;
+    let part_fen = 0;
+    console.info(money);
+    console.info("." + money.indexOf("."));
+    if (money.indexOf(".") === -1) {
+        //不存在小数点，分
+        part_yuan = parseInt(money);
+        part_fen = 0;
+        realmoney_fen = part_yuan * 100;
+    } else {
+        let moneyArray = new Array();
+        moneyArray = money.split(".");
+        console.info("moneyArray=" + moneyArray);
+        console.info("moneyArray s=" + moneyArray.length);
+        if (moneyArray.length !== 2) {
+            return null;
+        } else {
+            part_yuan = moneyArray[0];
+            part_fen = moneyArray[1];
+            console.info("part_yuan=" + part_yuan);
+            console.info("part_fen=" + part_fen);
+            let fen = 0;
+            if (part_fen.length === 2) {
+                let fen1 = parseInt(part_fen[0]);
+                let fen2 = parseInt(part_fen[1]);
+                if (fen1 !== 0)
+                    fen += fen1 * 10;
+                fen += fen2;
+            } else {
+                fen += part_fen * 10;
+            }
+            realmoney_fen = parseInt(part_yuan) * 100 + fen;
+        }
+    }
+    return realmoney_fen;
+}
+
+//money 为分;10/100/1000/1000/100011
+function changeMoneyToYuan(money) {
+    let realmonet_yuan = 0;
+    if (money.length > 2) {
+        let fen1 = money.substr(0, money.length - 2);
+        let fen2 = money.substr(money.length - 2, 2);
+        console.info(fen1);
+        console.info(fen2);
+        realmonet_yuan = fen1 + "." + fen2;
+    } else if (money.length === 2) {
+        realmonet_yuan = "0." + money;
+    } else if (money.length === 1) {
+        realmonet_yuan = "0.0" + money;
+    }
+    return realmonet_yuan;
+}

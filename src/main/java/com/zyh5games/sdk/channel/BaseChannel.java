@@ -135,5 +135,9 @@ public abstract class BaseChannel {
         channelOrderNo.put("cpOrderId", cpOrderId);
     }
 
+    public JSONObject ajaxGetSignature(Integer appId,JSONObject requestInfo) {
+        return null;
+    }
+
 
 }

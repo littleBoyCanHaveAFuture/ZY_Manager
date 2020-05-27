@@ -252,7 +252,7 @@ public class GameController {
             config.setAppId(appId);
             config.setChannelId(channelId);
 
-            config.setChannelCallbackUrl("http://www.zyh5games.com/pay/payInfo/{channel_code}/{sdkindex}/{appid}");
+            config.setChannelCallbackUrl("https://zyh5games.com/zysdk/weGame2/callbackPayInfo/{channel_code}/{sdkindex}/{appid}");
             config.setH5Url("http://www.zyh5games.com:8080/login/{game}.jsp");
 
             config.setChannelSdkName(sp.getName());
@@ -280,7 +280,7 @@ public class GameController {
         config.setChannelSdkCode(sp.getCode());
         config.setChannelConfigKey(sp.getConfig());
 
-        result.put("sdkindex", config.getId());
+        result.put("sdkindex", config.getChannelId());
         result.put("app_id", config.getAppId());
         result.put("channel_id", config.getChannelId());
         result.put("config_key", config.getConfigKey());

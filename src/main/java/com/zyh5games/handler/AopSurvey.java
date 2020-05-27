@@ -38,6 +38,9 @@ public class AopSurvey {
         allJumpFuncMethodList.add("getChannelResult");
         allJumpFuncMethodList.add("getCountGame");
         allJumpFuncMethodList.add("getMaxAppid");
+
+        allJumpFuncMethodList.add("existKey");
+
     }
 
     /**

@@ -344,31 +344,6 @@ function loadAsyncScript(src, callback) {
 }
 
 /**
- * md5加密
- * @param {string} info 加密内容
- * @param secretKey md5秘钥
- * */
-function md5(info, secretKey) {
-    let strInfo = info;
-    // for (let key in info) {
-    //     strInfo += key;
-    //     strInfo += "=";
-    //     strInfo += info[key];
-    //     strInfo += "&";
-    // }
-    strInfo += "&" + secretKey;
-
-    let sign_uri = encodeURIComponent(strInfo);
-    let hex_sign_uri = hex_md5(sign_uri);
-
-    if (ZhiYueSDK.debug) {
-        console.info(strInfo);
-        console.info(hex_sign_uri);
-    }
-    return hex_sign_uri;
-}
-
-/**
  * 检查订单参数
  * @param       {Object}        orderInfo           充值信息
  * @return      {Object}        rspObject
@@ -424,7 +399,6 @@ function checkOrderObject(orderInfo) {
     rspObject.state = true;
     return rspObject;
 }
-
 
 /**
  * 从服务器获取js路径

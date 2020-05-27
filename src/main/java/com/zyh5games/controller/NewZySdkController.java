@@ -473,12 +473,14 @@ public class NewZySdkController {
             BaseChannel channelService = channelHandler.getChannel(Integer.parseInt(channelId));
 
             orderData.put("appId", appId);
+            orderData.put("zhiyueOrderId", order.getOrderID());
             JSONObject channelOrderNo = new JSONObject();
             if (!channelService.channelPayInfo(orderData, channelOrderNo)) {
                 result.put("message", "调起渠道支付接口 失败");
                 result.put("status", false);
                 break;
             }
+            orderData.remove("zhiyueOrderId");
             orderData.remove("appId");
 
             JSONObject rspData = new JSONObject();
@@ -627,7 +629,7 @@ public class NewZySdkController {
                     } else {
                         gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, "", roleId, userRoleBalance, userRoleName, "");
                     }
-                    //查询redis-移除在线玩家
+                    //查询redis-移除在线玩家 todo h5没法监控 数据不可靠
                     cache.exitGame(gameId, channelId, String.valueOf(serverId), account.getId());
                     result.put("message", "退出游戏 上报成功");
                     result.put("state", true);
@@ -648,4 +650,48 @@ public class NewZySdkController {
         log.info("/webGame2/ajaxUploadGameRoleInfo\t" + result.toString());
     }
 
+    /**
+     * 5.某些渠道 上报角色数据 签名
+     * todo
+     *
+     * @param jsonRoleInfo json         字符串
+     *                     userToken    必填，接口1 回调获取到的userToken
+     *                     channel_id   必填，渠道id
+     *                     area         必填，区服名
+     *                     role_name    必填，角色名
+     *                     new_role     必填，创建新角色：0为角色升级，1为创建新角
+     *                     rank         必填，等级
+     *                     money        必填，元宝数
+     *                     sign         必填，见附录
+     */
+    @RequestMapping(value = "/ajaxGetSignature", method = RequestMethod.POST)
+    @ResponseBody
+    public void ajaxGetSignature(@RequestBody String jsonRoleInfo, HttpServletResponse response) throws Exception {
+        log.info("start /webGame2/ajaxGetSignature" + "\t" + jsonRoleInfo);
+        JSONObject result = new JSONObject();
+        JSONObject requestInfo = JSONObject.parseObject(jsonRoleInfo);
+        do {
+            String[] mustKeysValue = {"userToken", "area", "role_name", "new_role", "rank", "money", "appId", "channelId"};
+            for (String index : mustKeysValue) {
+                if (!requestInfo.containsKey(index)) {
+                    result.put("message", "缺失参数：" + index);
+                    result.put("status", false);
+                    break;
+                }
+            }
+            Integer appId = requestInfo.getInteger("appId");
+            Integer channelId = requestInfo.getInteger("channelId");
+            BaseChannel channelService = channelHandler.getChannel(channelId);
+            JSONObject rsp = channelService.ajaxGetSignature(appId, requestInfo);
+
+            result.put("data", rsp);
+            result.put("message", "签名成功");
+            result.put("status", true);
+        }
+        while (false);
+
+        ResponseUtil.write(response, result);
+
+        log.info("/webGame2/ajaxGetSignature\t" + result.toString());
+    }
 }
