@@ -1,22 +1,10 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.wan5144;
 
 /**
  * @author song minghua
  * @date 2020/5/21
  */
-public class BaiJiaConfig {
-    /**
-     * 登陆校验地址
-     */
-    public static final String LOGIN_URL = "";
-    /**
-     * 渠道支付校验地址
-     */
-    public static final String PAY_URL = "";
-    /**
-     * 渠道订单校验地址
-     */
-    public static final String CHECK_ORDER_URL = "";
+public class Wan5144Config {
     /**
      * 渠道 渠道游戏id
      */

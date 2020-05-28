@@ -57,8 +57,12 @@ public abstract class BaseChannel {
      * 1.渠道初始化 加载渠道js文件
      *
      * @return channelData 渠道数据
+     * <p>
+     * channelData.name 指悦对应渠道js文件
+     * <p>
+     * channelData.xxx 其他参数自定义
      */
-    public JSONObject channelLib() {
+    public JSONObject channelLib(Integer appId) {
         return null;
     }
 
@@ -135,9 +139,38 @@ public abstract class BaseChannel {
         channelOrderNo.put("cpOrderId", cpOrderId);
     }
 
-    public JSONObject ajaxGetSignature(Integer appId,JSONObject requestInfo) {
+    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo) {
         return null;
     }
 
 
+    public boolean channelLoginCheck(JSONObject data, String clientToken, String serverToken) {
+        boolean res = false;
+        if (!clientToken.isEmpty() && clientToken.equals(serverToken)) {
+            res = true;
+        } else {
+        }
+        return res;
+    }
+
+    /**
+     * 检查 key 是否存在
+     */
+    public boolean channelMustParam(String[] mustKey, Map<String, String[]> map) {
+        for (String key : mustKey) {
+            if (!map.containsKey(key)) {
+                System.out.println("channelPayCallback 缺少key：" + key);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void addParam(StringBuilder param, String key, String value) {
+        param.append(key).append("=").append(value);
+    }
+
+    public void addParamAnd(StringBuilder param, String key, String value) {
+        param.append("&").append(key).append("=").append(value);
+    }
 }

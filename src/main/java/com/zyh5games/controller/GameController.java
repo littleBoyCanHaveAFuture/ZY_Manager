@@ -243,20 +243,28 @@ public class GameController {
 //            ResponseUtil.write(response, result);
 //            return;
 //        }
-
+        GameNew gameNew = gameNewService.selectGame(appId, -1);
+        if (gameNew == null) {
+            result.put("result", "fail");
+            ResponseUtil.write(response, result);
+            return;
+        }
         JSONArray ccArray = JSONArray.fromObject(sp.getConfig());
 
         if (config == null) {
             config = new ChannelConfig();
+            String loginUrl = "http://www.zyh5games.com:8080/login/prod/{game}.jsp?GameId={GameId}&GameKey={GameKey}&ChannelCode={ChannelCode}";
+            String callBackUrl = "https://zyh5games.com/zysdk/weGame2/callbackPayInfo/{channel_code}/{sdkindex}/{appid}";
 
+            String loginUrlReal = "http://www.zyh5games.com:8080/login/prod/{game}.jsp?" + "GameId=" + appId + "&GameKey=" + gameNew.getSecertKey() + "&ChannelCode=" + channelId;
             config.setAppId(appId);
             config.setChannelId(channelId);
 
-            config.setChannelCallbackUrl("https://zyh5games.com/zysdk/weGame2/callbackPayInfo/{channel_code}/{sdkindex}/{appid}");
-            config.setH5Url("http://www.zyh5games.com:8080/login/{game}.jsp");
+            config.setChannelCallbackUrl(callBackUrl);
+            config.setH5Url(loginUrlReal);
 
             config.setChannelSdkName(sp.getName());
-            config.setChannelSdkCode(sp.getCode());
+            config.setChannelSdkCode(String.valueOf(sp.getSpId()));
             config.setChannelConfigKey(sp.getConfig());
 
             JSONObject jsonObject = new JSONObject();
@@ -272,7 +280,8 @@ public class GameController {
 
             int index = channelConfigService.insertConfig(config, -1);
 
-            String url = "http://www.zyh5games.com/pay/payInfo/" + sp.getCode() + "/" + index + "/" + appId;
+            String url = "https://zyh5games.com/zysdk/weGame2/callbackPayInfo/" + sp.getCode() + "/" + sp.getSpId() + "/" + appId;
+
             config.setChannelCallbackUrl(url);
             channelConfigService.updateConfig(config, -1);
         }
@@ -289,7 +298,7 @@ public class GameController {
         result.put("channel_config_key", config.getChannelConfigKey());
         result.put("channel_callback_url", config.getChannelCallbackUrl());
         result.put("h5_url", config.getH5Url());
-
+        result.put("game_key", gameNew.getSecertKey());
         ResponseUtil.write(response, result);
     }
 

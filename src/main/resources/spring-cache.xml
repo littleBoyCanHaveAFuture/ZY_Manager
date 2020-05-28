@@ -50,7 +50,7 @@
 
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.zyh5games.jedis.JedisManager">
-<!--                <property name="jedisPool" ref="jedisPool_Ali"/>-->
+        <!--                        <property name="jedisPool" ref="jedisPool_Ali"/>-->
         <property name="jedisPool" ref="jedisPool_Tencent"/>
     </bean>
 
@@ -84,7 +84,7 @@
         <constructor-arg ref="httpClientFactory"/>
     </bean>
 
-    <bean id="channelHandler" class="com.zyh5games.sdk.ChannelHandler" init-method="init">
+    <bean id="channelHandler" class="com.zyh5games.sdk.channel.ChannelHandler" init-method="init">
 
     </bean>
 

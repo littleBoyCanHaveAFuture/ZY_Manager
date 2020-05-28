@@ -8,7 +8,7 @@ function getQueryString(url, key) {
     }
 }
 
-function callChannelInit(params) {
+function zyCallChannelInit(params) {
     if (typeof (params) == 'object') {
         window.PRODUCT_CODE = params.GameId;
     } else {
@@ -17,8 +17,8 @@ function callChannelInit(params) {
     }
 }
 
-function callChannelPay(order) {
-    console.log("callChannelPay=" + JSON.stringify(order));
+function zyCallChannelPay(order) {
+    console.log("zyCallChannelPay = " + JSON.stringify(order));
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
     let payData = trade.data;
@@ -30,10 +30,10 @@ function callChannelPay(order) {
 }
 
 
-function callUploadRole(roleInfo) {
+function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     let data = {};
-    data.userToken = saveChannelParams;
+    data.userToken = zySaveChannelParams;
     data.area = roleInfo.serverId;
     data.role_name = roleInfo.userRoleName;
     data.new_role = roleInfo.datatype === 2 ? 1 : 0;

@@ -1,5 +1,6 @@
 package com.zyh5games.sdk;
 
+import com.zyh5games.sdk.channel.AppId;
 import com.zyh5games.service.ServerListService;
 import com.zyh5games.util.MD5Util;
 import org.apache.log4j.Logger;

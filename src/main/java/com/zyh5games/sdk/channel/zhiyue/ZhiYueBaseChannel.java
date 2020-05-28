@@ -1,8 +1,10 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.zhiyue;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
-import com.zyh5games.sdk.ChannelId;
+import com.zyh5games.sdk.channel.ChannelId;
+import com.zyh5games.sdk.channel.BaseChannel;
+import com.zyh5games.sdk.channel.baijia.BaiJiaConfig;
 import com.zyh5games.service.AccountService;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,7 @@ public class ZhiYueBaseChannel extends BaseChannel {
      * @return boolean
      */
     @Override
-    public JSONObject channelLib() {
+    public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
         channelData.put("name", "ZhiYueH5");
         return channelData;

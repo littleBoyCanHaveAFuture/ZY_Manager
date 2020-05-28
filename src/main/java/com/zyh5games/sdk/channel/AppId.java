@@ -1,4 +1,4 @@
-package com.zyh5games.sdk;
+package com.zyh5games.sdk.channel;
 
 /**
  * @author song minghua

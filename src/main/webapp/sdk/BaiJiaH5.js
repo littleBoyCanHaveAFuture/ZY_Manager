@@ -24,7 +24,7 @@ function getQueryString(url, key) {
     }
 }
 
-function callChannelInit(params) {
+function zyCallChannelInit(params) {
     let gameId = 0;
     if (typeof (params) == 'object') {
         window.PRODUCT_CODE = params.productCode;
@@ -37,16 +37,16 @@ function callChannelInit(params) {
 
 }
 
-function callChannelPay(order) {
+function zyCallChannelPay(order) {
     if (!hasInit) {
         sdk.config(initParams);//初始化
         hasInit = true;
     }
 
-    console.log("callChannelPay=" + JSON.stringify(order));
+    console.log("zyCallChannelPay=" + JSON.stringify(order));
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
     let payData = JSON.parse(trade.data)
-    console.log("callChannelPay payData= " + trade.data);
+    console.log("zyCallChannelPay payData= " + trade.data);
 
     sdk.pay({
         uid: payData.uid,
@@ -65,7 +65,7 @@ function callChannelPay(order) {
 }
 
 
-function callUploadRole(roleInfo) {
+function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     if (!hasInit) {
         sdk.config(initParams);//初始化

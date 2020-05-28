@@ -5,6 +5,7 @@ import com.zyh5games.entity.*;
 import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.sdk.*;
 import com.zyh5games.sdk.channel.BaseChannel;
+import com.zyh5games.sdk.channel.ChannelHandler;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
@@ -235,7 +236,7 @@ public class NewZySdkController {
             }
 
             BaseChannel channelService = channelHandler.getChannel(channelId);
-            JSONObject channelData = channelService.channelLib();
+            JSONObject channelData = channelService.channelLib(appId);
             JSONArray libUrl = channelService.commonLib();
             String channelToken = channelService.channelToken(parameterMap);
 
@@ -349,14 +350,16 @@ public class NewZySdkController {
             if (gameNew == null) {
                 break;
             }
-            String channelToken = cache.getChannelLoginToken(String.valueOf(gameNew.getAppId()), channelId, uid);
-            if (!token.isEmpty() && token.equals(channelToken)) {
-                res = true;
-                break;
-            } else {
-                break;
-            }
+            JSONObject data = new JSONObject();
+            data.put("appId", gameNew.getAppId());
+            data.put("channelUid", uid);
+            data.put("channelId", channelId);
 
+            String channelToken = cache.getChannelLoginToken(String.valueOf(gameNew.getAppId()), channelId, uid);
+            BaseChannel channelService = channelHandler.getChannel(Integer.parseInt(channelId));
+            if (channelService != null) {
+                res = channelService.channelLoginCheck(data, token, channelToken);
+            }
         } while (false);
         return res ? "1" : "0";
     }
@@ -511,8 +514,8 @@ public class NewZySdkController {
      *                     username             渠道账号昵称
      *                     serverId             区服ID
      *                     serverName           区服名称
-     *                     userRoleName         游戏内角色ID
-     *                     userRoleId           游戏角色
+     *                     userRoleName         游戏内角色名
+     *                     userRoleId           游戏内角色ID
      *                     userRoleBalance      角色游戏内货币余额
      *                     vipLevel             角色VIP等级
      *                     userRoleLevel        角色等级

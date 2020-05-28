@@ -1,8 +1,9 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.shunwang;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.ChannelId;
-import com.zyh5games.sdk.HttpService;
+import com.zyh5games.sdk.channel.ChannelId;
+import com.zyh5games.sdk.channel.HttpService;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.util.Base64;
 import com.zyh5games.util.MD5Util;
@@ -50,7 +51,7 @@ public class ShunWangBaseChannel extends BaseChannel {
      * 1.渠道初始化 加载渠道js文件
      */
     @Override
-    public JSONObject channelLib() {
+    public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
         channelData.put("name", "ShunWangH5");
         return channelData;
@@ -225,16 +226,18 @@ public class ShunWangBaseChannel extends BaseChannel {
         }
 
         String[] signKey = {"order_no", "guid", "server_code", "money", "coin",
-                "role_id", "out_order_no", "other_data", "platform", "time", "sign"};
+                "role_id", "out_order_no", "other_data", "platform", "time"};
         Arrays.sort(signKey);
 
         // 1|6450_1590389480629_59367345|1|Test_LSJ_6450_20200525194126_709204|211|2121|swjoy|1|1|1590407707|1FudvEHJrAKQ8MFiPMWLIE3OvxjzfrHl
         //  sign=fdb912fb0af6c488be7f9ef05e1504d5,
         //升序排列
+        StringBuilder pp = new StringBuilder();
         StringBuilder param = new StringBuilder();
         try {
             for (String s : signKey) {
-                if (!parameterMap.containsKey(s)) {
+                pp.append("&").append(s).append("=").append(parameterMap.get(s));
+                if (!parameterMap.containsKey(s) || parameterMap.get(s).isEmpty()) {
                     continue;
                 }
                 String value = parameterMap.get(s);
@@ -246,7 +249,7 @@ public class ShunWangBaseChannel extends BaseChannel {
             e.printStackTrace();
         }
         param.append(payKey);
-
+        log.info("channelPayCallback " + pp);
         log.info("channelPayCallback " + param);
 
         String sign = parameterMap.get("sign");
@@ -254,15 +257,12 @@ public class ShunWangBaseChannel extends BaseChannel {
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
 
-        JSONObject rsp = httpService.httpGet("");
-        //        {"code": 1,"msg": "ok"}	json	其中 code 为 int 类型，msg 为 code 的说明类型,两个属性值都不 能少
-        //code=1		订单充值成功
-        //code=2		订单号重复,顺网当成充值成功来处理
-        //code=3		充值异常,顺网会重复发起请求
-        //code=4		明确充值失败,顺网发起退款流
-        //还没返回或其它值		顺网会重复发起请求
+        if (sign.equals(serverSign)) {
+            return true;
+        } else {
+            return false;
+        }
 
-        return false;
     }
 
 

@@ -45,4 +45,5 @@ public class ChannelConfig {
      * 渠道json参数
      */
     private String channelConfigKey;
+
 }

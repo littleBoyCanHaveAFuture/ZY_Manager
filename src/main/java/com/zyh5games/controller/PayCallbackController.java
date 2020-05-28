@@ -5,10 +5,10 @@ import com.zyh5games.entity.Account;
 import com.zyh5games.entity.GameNew;
 import com.zyh5games.entity.UOrder;
 import com.zyh5games.jedis.JedisRechargeCache;
-import com.zyh5games.sdk.ChannelHandler;
-import com.zyh5games.sdk.HttpService;
 import com.zyh5games.sdk.UOrderManager;
 import com.zyh5games.sdk.channel.BaseChannel;
+import com.zyh5games.sdk.channel.ChannelHandler;
+import com.zyh5games.sdk.channel.HttpService;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.service.GameNewService;
 import com.zyh5games.util.DateUtil;
@@ -19,10 +19,7 @@ import com.zyh5games.util.enums.OrderState;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -83,7 +80,7 @@ public class PayCallbackController {
 
             String url = notifyUrl + param.toString();
 
-            JSONObject cpData = httpService.httpGet(url);
+            JSONObject cpData = httpService.httpGetJson(url);
             log.info("cp支付回调：" + cpData);
             if (cpData.containsKey("code") && cpData.getInteger("code") == 1) {
                 order.setState(OrderState.STATE_PAY_FINISHED);
@@ -159,14 +156,14 @@ public class PayCallbackController {
                 result = false;
                 break;
             }
-            long orderId = order.getOrderID();
+
             Integer zhiyueUid = order.getUserID();
 
             boolean first = false;
             if (order.getState() == OrderState.STATE_OPEN_PAY) {
                 // 首次回调 已完成支付 但未发货
                 order.setState(OrderState.STATE_PAY_SUCCESS);
-                order.setChannelOrderID("");
+                order.setChannelOrderID(channelOrderId);
                 order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(price)));
                 order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
                 orderManager.updateOrder(order);
@@ -274,14 +271,13 @@ public class PayCallbackController {
                 break;
             }
 
-            long zhiyueOrderId = order.getOrderID();
             Integer zhiyueUid = order.getUserID();
             channelOrder.replace("zy_uid", zhiyueUid);
             boolean first = false;
             if (order.getState() == OrderState.STATE_OPEN_PAY) {
                 // 首次回调 已完成支付 但未发货
                 order.setState(OrderState.STATE_PAY_SUCCESS);
-                order.setChannelOrderID("");
+                order.setChannelOrderID(orderId);
                 order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
                 order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
                 orderManager.updateOrder(order);
@@ -319,7 +315,7 @@ public class PayCallbackController {
      * goodsName	string	是	是	商品名,如：游戏币
      * server	    string	是	是	支付时的游戏服
      * role	        string	是	是	支付时角色信息,支付完后回传
-     * time	        int	是	是	当前时间unix时间戳
+     * time	        int	是	是	    当前时间unix时间戳
      * ext	        string	否	否	额外透传参数(原样返回)
      * signType	    string	是	否	固定值 md5
      * sign	        string	是	否	加密串
@@ -386,14 +382,13 @@ public class PayCallbackController {
                 break;
             }
 
-            long zhiyueOrderId = order.getOrderID();
             Integer zhiyueUid = order.getUserID();
             channelOrder.replace("zy_uid", zhiyueUid);
             boolean first = false;
             if (order.getState() == OrderState.STATE_OPEN_PAY) {
                 // 首次回调 已完成支付 但未发货
                 order.setState(OrderState.STATE_PAY_SUCCESS);
-                order.setChannelOrderID("");
+                order.setChannelOrderID(orderId);
                 order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
                 order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
                 orderManager.updateOrder(order);
@@ -433,17 +428,17 @@ public class PayCallbackController {
      * time	            int	    是	     unix时间戳
      * sign	            string	是	     签名规则
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_shunwang/{channelId}/{appId}")
+    @RequestMapping(value = "/callbackPayInfo/h5_shunwang/{channelId}/{appId}", method = RequestMethod.GET)
     @ResponseBody
     public void h5_shunwang(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                             @RequestParam("order_no") String order_no,
                             @RequestParam("guid") String guid,
-                            @RequestParam("server_code") String server_code,//字符串
+                            @RequestParam(value = "server_code", required = false) String server_code,//字符串
                             @RequestParam("money") String money,
-                            @RequestParam("coin") String coin,
-                            @RequestParam("role_id") String role_id,
-                            @RequestParam("out_order_no") String out_order_no,
-                            @RequestParam("other_data") String other_data,
+                            @RequestParam(value = "coin", required = false) String coin,
+                            @RequestParam(value = "role_id", required = false) String role_id,
+                            @RequestParam(value = "out_order_no", required = false) String out_order_no,
+                            @RequestParam(value = "other_data", required = false) String other_data,
                             @RequestParam("platform") String platform,
                             @RequestParam("time") String time,
                             @RequestParam("sign") String sign,
@@ -476,25 +471,22 @@ public class PayCallbackController {
 
             boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
             if (!checkOrder) {
-                result = false;
                 break;
             }
 
             UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), out_order_no);
             if (order == null) {
                 log.info("订单为空");
-                result = false;
                 break;
             }
 
-            long zhiyueOrderId = order.getOrderID();
             Integer zhiyueUid = order.getUserID();
             channelOrder.replace("zy_uid", zhiyueUid);
             boolean first = false;
             if (order.getState() == OrderState.STATE_OPEN_PAY) {
                 // 首次回调 已完成支付 但未发货
                 order.setState(OrderState.STATE_PAY_SUCCESS);
-                order.setChannelOrderID("");
+                order.setChannelOrderID(order_no);
                 order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
                 order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
                 orderManager.updateOrder(order);
@@ -510,7 +502,6 @@ public class PayCallbackController {
             // cp请求发货
             GameNew gameNew = gameNewService.selectGame(appId, -1);
             if (gameNew == null) {
-                result = false;
                 break;
             }
 
@@ -524,16 +515,232 @@ public class PayCallbackController {
             }
 
         } while (false);
-        //        {"code": 1,"msg": "ok"}	json	其中 code 为 int 类型，msg 为 code 的说明类型,两个属性值都不 能少
-        //code=1		订单充值成功
-        //code=2		订单号重复,顺网当成充值成功来处理
-        //code=3		充值异常,顺网会重复发起请求
-        //code=4		明确充值失败,顺网发起退款流
-        //还没返回或其它值		顺网会重复发起请求
+
+        /*
+            {"code": 1,"msg": "ok"}	json	其中 code 为 int 类型，msg 为 code 的说明类型,两个属性值都不 能少
+            code=1		订单充值成功
+            code=2		订单号重复,顺网当成充值成功来处理
+            code=3		充值异常,顺网会重复发起请求
+            code=4		明确充值失败,顺网发起退款流
+            还没返回或其它值		顺网会重复发起请求
+        */
         if (!rsp.containsKey("code")) {
             rsp.put("code", 4);
             rsp.put("msg", "订单充值失败");
         }
         ResponseUtil.write(response, rsp);
     }
+
+
+    /**
+     * 渠道订单回调地址
+     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 参数名            类型    是否必传    说明
+     * nt_data	        string	是       通知数据解码后为xml格式 ,具体见2.1.1
+     * sign	            string	是       签名串,具体见第三章
+     * md5Sign	        string	否       分区服的游戏必传,游戏方的区服编号,如s1,s2
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_yuma/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_yuma(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                        @RequestParam("nt_data") String nt_data,
+                        @RequestParam("sign") String sign,
+                        @RequestParam("md5Sign") String md5Sign,
+                        HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println("callbackPayInfo:" + channelId);
+        System.out.println("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("nt_data", nt_data);
+        parameterMap.put("sign", sign);
+        parameterMap.put("md5Sign", md5Sign);
+
+
+        System.out.println("parameterMap =" + parameterMap.toString());
+
+        JSONObject rsp = new JSONObject();
+        JSONObject channelOrder = new JSONObject();
+        boolean result = false;
+        do {
+            BaseChannel channelSerivce = channelHandler.getChannel(channelId);
+            // quick 解密 将参数放到 parameterMap 里
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
+            if (!checkOrder) {
+                break;
+            }
+            /*
+             *  is_test	        string	必有	    是否为测试订单 1为测试 0为线上正式订单，游戏应根据情况确定上线后是否向测试订单发放道具。
+             *  channel	        string	必有	    渠道标示ID 注意:游戏可根据实情,确定发放道具时是否校验充值来源渠道是否与该角色注册渠道相符
+             *  channel_uid	    string	必有	    渠道用户唯一标示,该值从客户端GetUserId()中可获取
+             *  game_order	    string	必有	    游戏在调用QuickSDK发起支付时传递的游戏方订单,这里会原样传回
+             *  order_no	    string	必有	    QuickSDK唯一订单号
+             *  pay_time	    string	必有	    支付时间 2015-01-01 23:00:00
+             *  amount	        string	必有	    成交金额，单位元，游戏最终发放道具金额应以此为准
+             *  status	        string	必有	    充值状态:0成功, 1失败(为1时 应返回FAILED失败)
+             *  extras_params	string	必有	    可为空,充值状态游戏客户端调用SDK发起支付时填写的透传参数.没有则为空
+             * */
+            JSONObject quickOrder = JSONObject.parseObject(parameterMap.get("quickOrder"));
+
+            String out_order_no = quickOrder.getString("game_order");
+            String money = quickOrder.getString("amount");
+            String order_no = quickOrder.getString("order_no");
+
+            UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), out_order_no);
+            if (order == null) {
+                log.info("订单为空");
+                break;
+            }
+
+            Integer zhiyueUid = order.getUserID();
+            channelOrder.replace("zy_uid", zhiyueUid);
+            boolean first = false;
+            if (order.getState() == OrderState.STATE_OPEN_PAY) {
+                // 首次回调 已完成支付 但未发货
+                order.setState(OrderState.STATE_PAY_SUCCESS);
+                order.setChannelOrderID(order_no);
+                order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
+                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                orderManager.updateOrder(order);
+                first = true;
+            } else if (order.getState() == OrderState.STATE_PAY_SUCCESS) {
+                // 多次回调 已完成支付 申请发货未发货
+                rsp.put("code", 2);
+                rsp.put("msg", "订单已支付成功");
+            } else {
+                break;
+            }
+
+            // cp请求发货
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
+            if (gameNew == null) {
+                break;
+            }
+
+            result = notifyToCp(first, gameNew, order, money, out_order_no, channelId);
+            if (!result) {
+                rsp.put("code", 3);
+                rsp.put("msg", "发货失败");
+            } else {
+                rsp.put("code", 1);
+                rsp.put("msg", "订单充值成功");
+            }
+
+        } while (false);
+
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 渠道订单回调地址
+     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * <p>
+     * 接收参数(CGI)	类型	        必选	参于加密	说明
+     * status		    String	    是	是	    订单状态。“success”为支付成功
+     * cpOrderId		String	    是	是	    cp游戏订单号。
+     * orderId		    String	    是	是	    欢聚游微游戏订单号
+     * uid		        string	    是	是	    欢聚游微游戏用户的uid
+     * userName		    string	    是	是	    欢聚游微游戏的用户名
+     * money		    decimal	    是	是	    支付钱数(元),保留2位小数
+     * gameId		    String	    是	是	    游戏的id
+     * goodsId		    String	    是	是	    商品ID
+     * goodsName		String	    是	是	    商品名
+     * server		    String	    是	是	    支付的游戏服
+     * role		        String	    是	是	    支付时角色信息,
+     * time		        int	        是  是	    当前时间unix时间戳
+     * ext		        String(200)	否	否	    额外透传参数(原样返回)
+     * sign		        string	    是	否	    加密串
+     * signType		    string	    是	否	    固定md5
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_huanju/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_huanju(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                          @RequestParam("status") String status,
+                          @RequestParam("cpOrderId") String cpOrderId,
+                          @RequestParam("orderId") String orderId,
+                          @RequestParam("uid") String uid,
+                          @RequestParam("userName") String userName,
+                          @RequestParam("money") String money,
+                          @RequestParam("gameId") String gameId,
+                          @RequestParam("goodsId") String goodsId,
+                          @RequestParam("goodsName") String goodsName,
+                          @RequestParam("server") String server,
+                          @RequestParam("role") String role,
+                          @RequestParam("time") String time,
+                          @RequestParam(value = "ext", required = false) String ext,
+                          @RequestParam("signType") String signType,
+                          @RequestParam("sign") String sign,
+
+                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println("callbackPayInfo:" + channelId);
+        System.out.println("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("status", status);
+        parameterMap.put("cpOrderId", cpOrderId);
+        parameterMap.put("orderId", orderId);
+        parameterMap.put("uid", uid);
+        parameterMap.put("userName", userName);
+        parameterMap.put("money", money);
+
+        parameterMap.put("gameId", gameId);
+        parameterMap.put("goodsId", goodsId);
+        parameterMap.put("goodsName", goodsName);
+        parameterMap.put("server", server);
+        parameterMap.put("role", role);
+        parameterMap.put("time", time);
+        parameterMap.put("ext", ext);
+        parameterMap.put("signType", signType);
+
+        parameterMap.put("sign", sign);
+
+        System.out.println("parameterMap =" + parameterMap.toString());
+
+        JSONObject channelOrder = new JSONObject();
+        boolean result = true;
+        do {
+            BaseChannel channelSerivce = channelHandler.getChannel(channelId);
+
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
+            if (!checkOrder) {
+                result = false;
+                break;
+            }
+
+            UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), cpOrderId);
+            if (order == null) {
+                log.info("订单为空");
+                result = false;
+                break;
+            }
+
+            Integer zhiyueUid = order.getUserID();
+            channelOrder.replace("zy_uid", zhiyueUid);
+            boolean first = false;
+            if (order.getState() == OrderState.STATE_OPEN_PAY) {
+                // 首次回调 已完成支付 但未发货
+                order.setState(OrderState.STATE_PAY_SUCCESS);
+                order.setChannelOrderID(orderId);
+                order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
+                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                orderManager.updateOrder(order);
+                first = true;
+            } else if (order.getState() == OrderState.STATE_PAY_SUCCESS) {
+                // 多次回调 已完成支付 申请发货未发货
+            } else {
+                break;
+            }
+
+            // cp请求发货
+
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
+            if (gameNew == null) {
+                result = false;
+                break;
+            }
+
+            result = notifyToCp(first, gameNew, order, money, cpOrderId, channelId);
+        } while (false);
+        ResponseUtil.write(response, result ? "success" : "fail");
+    }
+
 }

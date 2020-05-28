@@ -1,9 +1,10 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.ziwan;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
-import com.zyh5games.sdk.ChannelId;
-import com.zyh5games.sdk.HttpService;
+import com.zyh5games.sdk.channel.ChannelId;
+import com.zyh5games.sdk.channel.HttpService;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.util.MD5Util;
 import org.apache.log4j.Logger;
@@ -36,7 +37,7 @@ public class ZiWanBaseChannel extends BaseChannel {
      * 1.渠道初始化 加载渠道js文件
      */
     @Override
-    public JSONObject channelLib() {
+    public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
         channelData.put("name", "LuoTuoH5");
         return channelData;
@@ -87,7 +88,7 @@ public class ZiWanBaseChannel extends BaseChannel {
         String url = ZiWanConfig.LOGIN_URL + "&" + param.toString();
         log.info("channelLogin = " + url);
 
-        JSONObject jsonObject = httpService.httpGet(url);
+        JSONObject jsonObject = httpService.httpGetJson(url);
         // userinfo (获取到的用户信息，status为1001时有，包含wechaname，用户名称；portrait，用户头像；sex，性别；city，城市；province 省会;openid 用户标识，uid 用户ID)
         if (jsonObject.containsKey("status") && jsonObject.getInteger("status") == 1001) {
             log.info("紫菀平台 登录校验成功");
@@ -140,7 +141,7 @@ public class ZiWanBaseChannel extends BaseChannel {
         String url = ZiWanConfig.PAY_URL + "&" + param;
         log.info("channelPayInfo = " + url);
 
-        JSONObject rsp = httpService.httpGet(url);
+        JSONObject rsp = httpService.httpGetJson(url);
         if (rsp.containsKey("status") && rsp.getInteger("status") == 1001) {
             String info = rsp.getString("info");
             String domain = rsp.getString("domain");
@@ -191,7 +192,7 @@ public class ZiWanBaseChannel extends BaseChannel {
         String url = ZiWanConfig.CHECK_ORDER_URL + "&" + param;
         log.info("channelPayCallback = " + url);
 
-        JSONObject rsp = httpService.httpGet(url);
+        JSONObject rsp = httpService.httpGetJson(url);
 
         if (rsp.containsKey("status")) {
             if (rsp.getInteger("status") == 1001) {

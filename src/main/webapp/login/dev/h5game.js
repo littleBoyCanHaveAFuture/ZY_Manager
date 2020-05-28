@@ -2,7 +2,7 @@ $(function () {
     let appId = 14;
     let GameKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
     let channelId = 8;
-    let requestUri = getNowHost();
+    let requestUri = zyGetNowHost();
     requestUri = requestUri.replace(/\&amp;/g, '&');
 
     let params = requestUri.split('?')[1];
@@ -24,7 +24,7 @@ function sdkInit(GameId, GameKey, ChannelCode) {
             if (callbackData.status) {
                 console.log('GameDemo:ZhiYueSDK登录成功: uid=>' + callbackData.data.uid);
                 //模拟cp服务器进行登录校验
-                checkUserInfo(callbackData);
+                zyCheckUserInfo(callbackData);
                 channelUid = callbackData.data.uid;
                 roleID = getRndInteger(1000000, 9999999);
                 console.log("roleID=" + roleID);

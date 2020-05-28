@@ -6,9 +6,8 @@
  * @version 0.2.7
  */
 //服务器地址
-const ZhiYue_domain = "http://localhost:8080/webGame2";
-// const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
-
+// const ZhiYue_domain = "http://localhost:8080/webGame2";
+const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
 
 let ZhiYueSDK = {
     GameId: null,//游戏id
@@ -35,7 +34,7 @@ let ZhiYueSDK = {
         params.GameKey = this.GameKey;
         params.channelId = this.channelId;
 
-        doInit(params, function (status) {
+        zyDoInit(params, function (status) {
             callback(status);
         });
     },
@@ -44,16 +43,16 @@ let ZhiYueSDK = {
      * @param callback          自定义回调函数
      * */
     login: function (callback) {
-        loginCallbackFunction = callback;
-        autoLogin();
+        zyLoginCallbackFunction = callback;
+        zyAutoLogin();
     },
     /**
-     * 3.调起支付-callChannelPay 每个渠道需要重写，调起渠道支付页面
+     * 3.调起支付-zyCallChannelPay 每个渠道需要重写，调起渠道支付页面
      * @param {Object}      orderInfo       订单信息
      * @param {function}    callback
      * */
     pay: function (orderInfo, callback) {
-        sdk_zyUploadPayInfo(orderInfo, callback);
+        zyUploadPayInfo(orderInfo, callback);
     },
     /**
      * 4.上传角色信息
@@ -68,13 +67,13 @@ let ZhiYueSDK = {
             setLog('SDK未完成初始化', 1);
             return;
         }
-        let roleChecker = checkRoleObject(roleInfo);
+        let roleChecker = zyCheckRoleObject(roleInfo);
         if (!roleChecker.result) {
             setLog(roleChecker.message, 1);
             return;
         }
-        callUploadRole(roleInfo);
-        ajaxUploadGameRole(roleInfo, function (resultObject) {
+        zyCallUploadRole(roleInfo);
+        zyAjaxUploadGameRole(roleInfo, function (resultObject) {
             callback(resultObject);
         });
     },
@@ -82,8 +81,8 @@ let ZhiYueSDK = {
      * 6.注销
      * */
     logout: function (callback) {
-        if (typeof callChannelLogout == 'function') {
-            let logout = callChannelLogout();
+        if (typeof zyCallChannelLogout == 'function') {
+            let logout = zyCallChannelLogout();
             callback(logout);
         }
     },
@@ -108,9 +107,9 @@ let ZhiYueSDK = {
     },
 };
 // 临时存放 某些渠道的 token
-let saveChannelParams = '';
-let loginCallbackFunction = null;
-let CallbackPayFun = null;
+let zySaveChannelParams = '';
+let zyLoginCallbackFunction = null;
+let zyCallbackPayFun = null;
 
 /**
  * 获取平台的该游戏渠道参数
@@ -120,8 +119,8 @@ let CallbackPayFun = null;
  * @param {boolean}     params.debug    是否·debug模式
  * @param {function}    callback        回调函数
  * */
-function doInit(params, callback) {
-    let requestUri = getNowHost();
+function zyDoInit(params, callback) {
+    let requestUri = zyGetNowHost();
     // console.info("doInit requestUri=" + requestUri);
     requestUri = requestUri.replace(/\&amp;/g, '&');
     try {
@@ -138,11 +137,15 @@ function doInit(params, callback) {
         success: function (data) {
             if (data.hasOwnProperty('status') && data.status === true) {
                 //load channel lib
-                loadSpLib(data, function () {
-                    callChannelInit(params + '&zhiyue_channel_token=' + data.channelToken);
+                zyLoadSpLib(data, function () {
+                    let initParam = params + '&zhiyue_channel_token=' + data.channelToken;
+                    if (data.channelData.hasOwnProperty("config")) {
+                        initParam += "&zhiyue_channel_config=" + data.channelData.config;
+                    }
+                    zyCallChannelInit(initParam);
                     callback(data.status);
                     if (data.hasOwnProperty('channelToken')) {
-                        saveChannelParams = data.channelToken;
+                        zySaveChannelParams = data.channelToken;
                     }
                     if (data.hasOwnProperty('channelCode')) {
                         ZhiYueSDK.channelCode = data.channelCode;
@@ -160,8 +163,8 @@ function doInit(params, callback) {
 /**
  * 渠道登录
  * */
-function autoLogin() {
-    let requestUri = getNowHost();
+function zyAutoLogin() {
+    let requestUri = zyGetNowHost();
     requestUri = requestUri.replace(/\&amp;/g, '&');
     try {
         var params = requestUri.split('?')[1];
@@ -173,12 +176,12 @@ function autoLogin() {
         url: ZhiYue_domain + "/loginApi?" + params,
         dataType: "json",
         success: function (data) {
-            doLoginCallback(data);
+            zyDoLoginCallback(data);
         }
     })
 }
 
-let userData = {};
+let zyUserData = {};
 
 /**
  * @param {object}  data
@@ -195,7 +198,7 @@ let userData = {};
  * @param {boolean} data.status                     登录结果
  * @param {string}  data.message                    提示内容
  * */
-function doLoginCallback(data) {
+function zyDoLoginCallback(data) {
     let t_userData = data.userData;
     let channelData = data.channelData;
 
@@ -203,16 +206,20 @@ function doLoginCallback(data) {
     let channelName = channelData.channel_name;
 
     ZhiYueSDK.channelId = channelData.channel_id;
-    userData = t_userData;
+    zyUserData = t_userData;
 
-    if (loginCallbackFunction != null) {
+    if (typeof zyCallChannelLogin == 'function') {
+        zyCallChannelLogin(data.userData);
+    }
+
+    if (zyLoginCallbackFunction != null) {
         let returnObject = {};
         returnObject.data = data.userData;
         returnObject.status = data.userData.uid !== '';
         returnObject.message = data.message;
         if (returnObject.status)
             ZhiYueSDK.channelUid = data.userData.uid;
-        loginCallbackFunction(returnObject);
+        zyLoginCallbackFunction(returnObject);
     }
 }
 
@@ -238,16 +245,16 @@ function doLoginCallback(data) {
  * @param   {number}      orderInfo.extrasParams        透传参数,服务器通知中原样回传
  * @param   {number}      orderInfo.goodsId             商品ID
  * */
-function sdk_zyUploadPayInfo(orderInfo, callback) {
+function zyUploadPayInfo(orderInfo, callback) {
     let rspObject = {};
-    let orderChecker = checkOrderObject(orderInfo);
+    let orderChecker = zyCheckOrderObject(orderInfo);
     if (orderChecker.state === false) {
         setLog(orderChecker.message, 1);
         return
     }
 
     //向 ZhiYueSDK 下单获取 ZhiYueSDK 订单
-    let channelToken = getParamsExtQuick('channelToken');
+    let channelToken = zyGetParamsExtQuick('channelToken');
     //从渠道驱动js里获取channelToken
     if (!channelToken || channelToken === '') {
         if (typeof getChannelToken == 'function') {
@@ -255,10 +262,10 @@ function sdk_zyUploadPayInfo(orderInfo, callback) {
         }
     }
     if (channelToken === '') {
-        channelToken = saveChannelParams;
+        channelToken = zySaveChannelParams;
     }
     orderInfo.channelToken = channelToken;
-    getQuickSDKOrderData(orderInfo, function (getOrderData) {
+    getZhiYueSDKOrderData(orderInfo, function (getOrderData) {
         if (getOrderData.status === false || !getOrderData.hasOwnProperty('orderNo')) {
 
             //0支付成功 1支付失败 2取消支付 3下单失败
@@ -279,7 +286,7 @@ function sdk_zyUploadPayInfo(orderInfo, callback) {
 
         orderInfo.orderNo = getOrderData.orderNo;
         orderInfo.zhiyueOrder = getOrderData;
-        callChannelPay(orderInfo);
+        zyCallChannelPay(orderInfo);
     });
 }
 
@@ -307,12 +314,12 @@ function setLog(str, level) {
  * @param {string}      src         js文件路径+文件名称
  * @param {function}    callback
  * */
-function loadAsyncScript(src, callback) {
-    if (checkParam(src)) {
+function zyLoadAsyncScript(src, callback) {
+    if (zyCheckParam(src)) {
         callback();
         return;
     }
-    // console.info(src);
+    console.info(src);
     if (src.search("jquery") !== -1) {
         if (typeof (jQuery) == "undefined") {
             console.info("jQuery is not imported");
@@ -348,7 +355,7 @@ function loadAsyncScript(src, callback) {
  * @param       {Object}        orderInfo           充值信息
  * @return      {Object}        rspObject
  * */
-function checkOrderObject(orderInfo) {
+function zyCheckOrderObject(orderInfo) {
     let rspObject = {};
 
     if (!ZhiYueSDK.checkZySdkParam(true)) {
@@ -403,12 +410,22 @@ function checkOrderObject(orderInfo) {
 /**
  * 从服务器获取js路径
  * @param {object}  data
+ * @param {object}  data.channelPlatform
+ * @param {string}  data.channelPlatform.libUrl
+ * @param {string}  data.channelPlatform.playUrl
+ * @param {string}  data.channelData.name
+ * @param {string}  data.channelData.config
  * @param {function}  callback
  * */
-function loadSpLib(data, callback) {
+function zyLoadSpLib(data, callback) {
     let libUrl = data.channelPlatform.libUrl;
     let spLib = "https://zyh5games.com/sdk/channel/" + data.channelData.name + ".js";
-    loadAsyncScript(spLib, function () {
+    let name = "";
+    if (!data.channelData.hasOwnProperty("name")) {
+        spLib = null;
+    }
+
+    zyLoadAsyncScript(spLib, function () {
         let channelLib = libUrl;
         if (channelLib == null) {
             callback();
@@ -418,7 +435,7 @@ function loadSpLib(data, callback) {
             let hasSend = false;
             for (let i in channelLib) {
                 let thisLib = channelLib[i];
-                loadAsyncScript(thisLib, function () {
+                zyLoadAsyncScript(thisLib, function () {
                     setLog('load channel lib success');
                     if (!hasSend) {
                         callback();
@@ -427,7 +444,7 @@ function loadSpLib(data, callback) {
                 });
             }
         } else {
-            loadAsyncScript(channelLib, function () {
+            zyLoadAsyncScript(channelLib, function () {
                 setLog('load channel lib success');
                 callback();
             });
@@ -435,7 +452,7 @@ function loadSpLib(data, callback) {
     });
 }
 
-function getNowHost() {
+function zyGetNowHost() {
     let requestUri = window.location.href;
     //?次数
     var temp = requestUri.split("?");
@@ -452,15 +469,14 @@ function getNowHost() {
  * @param param 判断的参数
  * @return {boolean}
  * */
-function checkParam(param) {
+function zyCheckParam(param) {
     return (param == null || param === "" || param === "undefined");
 }
 
-let getParamsArr = null;
+let zyGetParamsArr = null;
 
-function getParamsExtQuick(key) {
-
-    if (getParamsArr == null) {
+function zyGetParamsExtQuick(key) {
+    if (zyGetParamsArr == null) {
         var domain = window.location.href;
         domain = domain.replace('??', "?");
         var urlParams = domain.split("?");
@@ -478,14 +494,12 @@ function getParamsExtQuick(key) {
                 }
             }
         }
-        getParamsArr = getParamsData;
+        zyGetParamsArr = getParamsData;
     }
-
-    return getParamsArr.hasOwnProperty(key) ? getParamsArr[key] : '';
-
+    return zyGetParamsArr.hasOwnProperty(key) ? zyGetParamsArr[key] : '';
 }
 
-function getQuickSDKOrderData(orderData, callback) {
+function getZhiYueSDKOrderData(orderData, callback) {
 
     orderData.gameKey = ZhiYueSDK.GameKey;
     orderData.channelId = ZhiYueSDK.channelId;
@@ -498,9 +512,9 @@ function getQuickSDKOrderData(orderData, callback) {
         orderData.username = orderData.uid;
     }
 
-    let rebackObj = {};
-    rebackObj.status = false;
-    rebackObj.orderNo = '';
+    let rspObj = {};
+    rspObj.status = false;
+    rspObj.orderNo = '';
 
     $.ajax({
         url: ZhiYue_domain + "/ajaxGetOrderNo",
@@ -508,44 +522,44 @@ function getQuickSDKOrderData(orderData, callback) {
         contentType: "text/plain; charset=utf-8",
         data: JSON.stringify(orderData),
         dataType: "json",
-        // /**
-        //  * @param {object} rspData
-        //  * @param {string} rspData.message
-        //  * @param {boolean} rspData.status
-        //  * @param {string} rspData.orderNo
-        //  * @param {object} rspData.data
-        //  * @param {object} rspData.data.amount
-        //  * @param {object} rspData.data.orderNo
-        //  * @param {object} rspData.data.channelOrderNo
-        //  * */
+        // @param {object} rspData
+        // @param {string} rspData.message
+        // @param {boolean} rspData.status
+        // @param {string} rspData.orderNo
+        // @param {object} rspData.data
+        // @param {object} rspData.data.amount
+        // @param {object} rspData.data.orderNo
+        // @param {object} rspData.data.channelOrderNo
         success: function (rspData) {
             if (rspData == null || typeof (rspData) !== 'object') {
-                rebackObj.message = '请求接口失败无法获取响应';
-                return callback(rebackObj);
+                rspObj.message = '请求接口失败无法获取响应';
+                return callback(rspObj);
             }
             if (!rspData.hasOwnProperty('status') || rspData.status === false) {
-                if (rebackObj.message !== undefined || rebackObj.message === '' || !rspData.hasOwnProperty('message')) {
-                    rebackObj.message = '请求接口失败';
+                if (rspObj.message !== undefined || rspObj.message === '' || !rspData.hasOwnProperty('message')) {
+                    rspObj.message = '请求接口失败';
                 } else {
-                    rebackObj.message = rspData.message;
+                    rspObj.message = rspData.message;
                 }
-                return callback(rebackObj);
+                return callback(rspObj);
             }
-            rebackObj.orderNo = rspData.data.orderNo;
-            rebackObj.status = true;
-            rebackObj.channelOrder = rspData.data.channelOrderNo;
-            return callback(rebackObj);
+            //指悦订单id
+            rspObj.orderNo = rspData.data.orderNo;
+            rspObj.status = true;
+            // 渠道订单信息
+            rspObj.channelOrder = rspData.data.channelOrderNo;
+            return callback(rspObj);
         },
         error: function () {
-            rebackObj.status = false;
-            rebackObj.message = "接口请求失败";
-            return callback(rebackObj);
+            rspObj.status = false;
+            rspObj.message = "接口请求失败";
+            return callback(rspObj);
         }
     });
 }
 
-/**测试代码-模拟cp服务器请求登录验证*/
-function checkUserInfo(info) {
+/** 测试代码-模拟cp服务器请求登录验证*/
+function zyCheckUserInfo(info) {
     let param = "token=" + info.data.token + "&gameKey=" + ZhiYueSDK.GameKey + "&uid=" + info.data.uid + "&channelId=" + info.data.channelId;
     $.ajax({
         url: ZhiYue_domain + "/checkUserInfo?" + param,
@@ -560,7 +574,7 @@ function checkUserInfo(info) {
     });
 }
 
-function checkRoleObject(roleInfo) {
+function zyCheckRoleObject(roleInfo) {
     let roleJson = roleInfo;
     let result = {};
     result.result = true;
@@ -601,29 +615,29 @@ function checkRoleObject(roleInfo) {
 /**
  * 角色-上报数据接口
  *  @param  {object}             roleInfo
- *  @param  {boolean}            roleInfo.datatype
- *  @param  {string}             roleInfo.roleCreateTime
- *  @param  {}                   roleInfo.uid
- *  @param  {}                   roleInfo.username
- *  @param  {}                   roleInfo.serverId
- *  @param  {}                   roleInfo.serverName
- *  @param  {}                   roleInfo.userRoleName
- *  @param  {}                   roleInfo.userRoleId
- *  @param  {}                   roleInfo.userRoleBalance
- *  @param  {}                   roleInfo.vipLevel
- *  @param  {}                   roleInfo.userRoleLevel
- *  @param  {}                   roleInfo.partyId
- *  @param  {}                   roleInfo.partyName
- *  @param  {}                   roleInfo.gameRoleGender
- *  @param  {}                   roleInfo.gameRolePower
- *  @param  {}                   roleInfo.partyRoleId
- *  @param  {}                   roleInfo.partyRoleName
- *  @param  {}                   roleInfo.professionId
- *  @param  {}                   roleInfo.profession
- *  @param  {}                   roleInfo.friendlist
+ *  @param  {boolean}            roleInfo.datatype          1.选择服务器 2.创建角色 3.进入游戏 4.等级提升 5.退出游戏"
+ *  @param  {string}             roleInfo.roleCreateTime    角色创建时间 时间戳 单位 秒
+ *  @param  {string}             roleInfo.uid               渠道UID
+ *  @param  {string}             roleInfo.username          渠道账号昵称
+ *  @param  {string}             roleInfo.serverId          区服ID
+ *  @param  {string}             roleInfo.serverName        区服名称
+ *  @param  {string}             roleInfo.userRoleName      游戏内角色名
+ *  @param  {string}             roleInfo.userRoleId        游戏角色ID
+ *  @param  {string}             roleInfo.userRoleBalance   角色游戏内货币余额
+ *  @param  {string}             roleInfo.vipLevel          角色VIP等级
+ *  @param  {string}             roleInfo.userRoleLevel     角色等级
+ *  @param  {string}             roleInfo.partyId           公会/社团ID
+ *  @param  {string}             roleInfo.partyName         公会/社团名称
+ *  @param  {string}             roleInfo.gameRoleGender    角色性别
+ *  @param  {string}             roleInfo.gameRolePower     角色战力
+ *  @param  {string}             roleInfo.partyRoleId       角色在帮派中的ID
+ *  @param  {string}             roleInfo.partyRoleName     角色在帮派中的名称
+ *  @param  {string}             roleInfo.professionId      角色职业ID
+ *  @param  {string}             roleInfo.profession        角色职业名称
+ *  @param  {string}             roleInfo.friendlist        角色好友列表
  * @param   {function}           callback                    回调函数
  * */
-function ajaxUploadGameRole(roleInfo, callback) {
+function zyAjaxUploadGameRole(roleInfo, callback) {
     let rspObject = {};
     rspObject.status = false;
     rspObject.data = '';
@@ -673,35 +687,6 @@ function ajaxUploadGameRole(roleInfo, callback) {
             rspObject.status = false;
             rspObject.message = "接口请求失败";
             return callback(rspObject);
-        }
-    });
-}
-
-/**测试 渠道支付回调*/
-function testChannelPayCallback() {
-    let data = {};
-    data.channelCode = ZhiYueSDK.channelCode;
-
-    let param =
-        "/" + ZhiYueSDK.channelCode +
-        "/" + ZhiYueSDK.channelId +
-        "/" + ZhiYueSDK.GameId;
-    let url = "/sdkPay" + "/callbackPayInfo" + param;
-    console.info("testChannelPayCallback = " + url);
-
-
-    $.ajax({
-        url: url,
-        type: "post",
-        data: JSON.stringify(data),
-        dataType: "json",
-        async: false,
-        success: function (result) {
-            console.info(result);
-
-        },
-        error: function () {
-
         }
     });
 }

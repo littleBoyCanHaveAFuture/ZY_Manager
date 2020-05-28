@@ -8,7 +8,7 @@ function getQueryString(url, key) {
     }
 }
 
-function callChannelInit(params) {
+function zyCallChannelInit(params) {
     let gameId = 0;
     if (typeof (params) == 'object') {
         window.PRODUCT_CODE = params.productCode;
@@ -18,8 +18,8 @@ function callChannelInit(params) {
 
 }
 
-function callChannelPay(order) {
-    console.log("callChannelPay=" + JSON.stringify(order));
+function zyCallChannelPay(order) {
+    console.log("zyCallChannelPay = " + JSON.stringify(order));
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
     let data = trade.data;
@@ -77,7 +77,7 @@ let openWin = function (payUrl) {
     })
 };
 
-function callUploadRole(roleInfo) {
+function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
 
 }

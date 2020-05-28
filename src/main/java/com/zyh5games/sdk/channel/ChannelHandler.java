@@ -1,8 +1,7 @@
-package com.zyh5games.sdk;
+package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.ChannelConfig;
-import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.ChannelConfigService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class ChannelHandler {
     public void print() {
         System.out.println("===== BaseChannel extends Map =====");
         channelMap.forEach((name, impl) -> {
-            System.out.println(name + "->channelData" + ":" + impl.channelLib());
+            System.out.println(name + "->channelData" + ":" + impl.channelLib(-1));
         });
     }
 

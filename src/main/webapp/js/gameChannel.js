@@ -375,13 +375,17 @@ function setValue(res) {
     if (res.h5_url) {
         gotourl = res.h5_url;
         gotourl = gotourl.replace("{game}", res.channel_sdk_code);
-        let fileName = hex_md5(encodeURIComponent(res.app_id + "" + res.channel_id));
-        if (gotourl.indexOf("zycon") < 0) {
-            if (gotourl.indexOf("?") > 0) {
-                gotourl += "&zycon=" + fileName;
-            } else {
-                gotourl += "?zycon=" + fileName;
-            }
+        if (gotourl.indexOf("?") < 0) {
+            gotourl += "?";
+        }
+        if (gotourl.indexOf("GameId") < 0) {
+            gotourl += "&GameId=" + res.app_id;
+        }
+        if (gotourl.indexOf("GameKey") < 0) {
+            gotourl += "&GameKey=" + res.game_key;
+        }
+        if (gotourl.indexOf("ChannelCode") < 0) {
+            gotourl += "&ChannelCode=" + res.sdkindex;
         }
 
         document.getElementById("url").value = gotourl;
@@ -406,11 +410,11 @@ function setValue(res) {
             }
         }
         if (showTip === "1") {
-            $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
+            // $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
         }
     } else {
         if (showTip === "1") {
-            $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
+            // $("#soeasyurl").html("注：提供给渠道的地址 <br>https://cn.soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/" + "<br>http://soeasysdk.com/soeasysr/gameini/apps_conf_html/" + res.app_id + "/" + res.sdkindex + "/");
         }
     }
     save_Config = res.c
@@ -471,16 +475,35 @@ function save() {
         });
         $("#url").focus();
         return false;
-    } else if ($("#url").val().indexOf("zycon") < 0) {
+    } else if ($("#url").val().indexOf("GameId") < 0) {
         $("#url").tips({
             side: 3,
-            msg: '请带上zycon参数',
+            msg: '请带上GameId参数',
+            bg: '#AE81FF',
+            time: 2
+        });
+        $("#url").focus();
+        return false;
+    } else if ($("#url").val().indexOf("GameKey") < 0) {
+        $("#url").tips({
+            side: 3,
+            msg: '请带上GameKey参数',
+            bg: '#AE81FF',
+            time: 2
+        });
+        $("#url").focus();
+        return false;
+    } else if ($("#url").val().indexOf("ChannelCode") < 0) {
+        $("#url").tips({
+            side: 3,
+            msg: '请带上ChannelCode参数',
             bg: '#AE81FF',
             time: 2
         });
         $("#url").focus();
         return false;
     }
+
     if (feeConfig === "1") {
         if (feeArr.length < 1) {
             if ($('#feelist').children().length === 0) {

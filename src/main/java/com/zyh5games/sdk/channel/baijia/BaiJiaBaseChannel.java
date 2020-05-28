@@ -1,7 +1,8 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.baijia;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.ChannelId;
+import com.zyh5games.sdk.channel.ChannelId;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
@@ -40,7 +41,7 @@ public class BaiJiaBaseChannel extends BaseChannel {
      * @return boolean
      */
     @Override
-    public JSONObject channelLib() {
+    public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
         channelData.put("name", "BaiJiaH5");
         return channelData;
@@ -251,8 +252,8 @@ public class BaiJiaBaseChannel extends BaseChannel {
         System.out.println("channelPayCallback : " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
-        System.out.println("channelPayInfo sign: " + serverSign);
-        System.out.println("channelPayInfo sign: " + sign);
+        System.out.println("channelPayCallback sign: " + serverSign);
+        System.out.println("channelPayCallback sign: " + sign);
         if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "", parameterMap.get("orderId"), "", parameterMap.get("money"));
             return true;

@@ -1,4 +1,4 @@
-package com.zyh5games.sdk.channel;
+package com.zyh5games.sdk.channel.ziwan;
 
 /**
  * @author song minghua
@@ -14,11 +14,15 @@ public class ZiWanConfig {
      */
     public static final String PAY_URL = "https://gameluotuo.com/index.php?g=Home&m=GameOauth&a=pay_info";
     /**
-     *渠道订单校验地址
+     * 渠道订单校验地址
      */
     public static final String CHECK_ORDER_URL = "https://gameluotuo.com/index.php?g=Home&m=GameOauth&a=check_order";
-    //渠道秘钥键值
+    /**
+     * 渠道秘钥键值
+     */
     public static final String KEY = "appsecret";
-    //渠道的渠道id键值
+    /**
+     * 渠道的渠道id键值
+     */
     public static final String CHANNEL_ID = "channel_id";
 }
