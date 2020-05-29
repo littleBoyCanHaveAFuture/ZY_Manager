@@ -11,6 +11,10 @@ public class ChannelId {
     /**
      * 指悦sdk
      */
+    public static final int H5_EXAMPLE = -1;
+    /**
+     * 指悦sdk
+     */
     public static final int H5_ZHIYUE = 0;
     /**
      * 紫菀/骆驼
@@ -40,4 +44,8 @@ public class ChannelId {
      * 欢聚
      */
     public static final int H5_HUANJU = 14;
+    /**
+     * 悦游
+     */
+    public static final int H5_YUEYOU = 15;
 }

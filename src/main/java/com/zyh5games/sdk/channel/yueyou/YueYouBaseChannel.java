@@ -3,16 +3,15 @@ package com.zyh5games.sdk.channel.yueyou;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
-import com.zyh5games.sdk.channel.baijia.BaiJiaConfig;
+import com.zyh5games.sdk.channel.example.ExampleConfig;
+import com.zyh5games.util.FeeUtils;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,12 +20,17 @@ import java.util.Map;
  * @author song minghua
  * @date 2020/5/21
  */
-@Component("9")
+@Component("15")
 public class YueYouBaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(YueYouBaseChannel.class);
 
+    Map<String, String> loginExtMap;
+    Map<String, String> loginModelMap;
+
     YueYouBaseChannel() {
-        channelId = ChannelId.H5_BAIJIA;
+        channelId = ChannelId.H5_YUEYOU;
+        loginExtMap = new HashMap<>();
+        loginModelMap = new HashMap<>();
     }
 
     @Override
@@ -65,78 +69,69 @@ public class YueYouBaseChannel extends BaseChannel {
      * 3.2 设置token<p>
      *
      * @param map      渠道传入参数
+     *                 channelExt               透传信息，在支付跳转时原样返回
+     *                 email                    CP 方分配给运营方的账号（没有则游戏 ID）
+     *                 game_appid               游戏编号----运营方为游戏分配的唯一编号
+     *                 new_time                 当前时间戳
+     *                 loginplatform2cp         用于 CP 要求平台特别传输其他参数，默认是访问 ip
+     *                 user_id                  用户唯一 ID
+     *                 sdklogindomain           调起登录和支付 sdk 的域名
+     *                 sdkloginmodel            调起登录和支付 sdk 的模块,，不是固定值,拉起登录和支付时需原样返回（运营方特殊要求）
+     *                 sign                     按照上方签名机制进行签名
+     *                 icon                     用户头像，不参与加密
+     *                 nickname                 用户昵称，不参与加密
      * @param userData 渠道用户数据
      * @return boolean
      */
     @Override
     public boolean channelLogin(Map<String, String[]> map, JSONObject userData) {
+        String[] mustKey = {"channelExt", "email", "game_appid", "new_time", "loginplatform2cp", "user_id",
+                "sdklogindomain", "sdkloginmodel", "icon", "nickname"};
+        if (!super.channelMustParam(mustKey, map)) {
+            return false;
+        }
         int appId = Integer.parseInt(map.get("GameId")[0]);
         int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
 
-        if (!map.containsKey("gameId") || !map.containsKey("uid") || !map.containsKey("userName") ||
-//                !map.containsKey("birthday") || !map.containsKey("idCard") ||
-                !map.containsKey("sign")) {
-            return false;
-        }
-
-        String loginKey = configMap.get(appId).getString(BaiJiaConfig.LOGIN_KEY);
-
-        //百家-http://www.test.com/index.php?ac=game&id=1&avatar=http%3A%2F%2Fh5.6816.com%2Fstatic%2Fattachment%2Fuser%2F20160816%2F1471334322441376.png&gameId=113&signType=md5&time=1475042060&uid=29923&userName=dreamfly_1981&userSex=male&sign=6a3f16124a0c641082c17a438d1323a8
-        //解释|必选-参与加密
-        // 游戏ID,通过商务获得
-        String gameId = map.get("gameId")[0];
-        // 用户UID (唯一) 我方用户的UID
-        String uid = map.get("uid")[0];
-        // 用户名（urlencode）
-        String userName = map.get("userName")[0];
-        // 当前时间unix时间戳
-        String time = map.get("time")[0];
-        // 用户头像|否-否
-        String avatar = map.containsKey("avatar") ? map.get("avatar")[0] : "none";
-        // 玩家性别[no 末设置 male 男 famale 女]|否-否
-        String userSex = map.containsKey("avatar") ? map.get("userSex")[0] : "none";
-        // 邀请进入游戏的用户 ID|否-否
-        String fuid = map.containsKey("avatar") ? map.get("fuid")[0] : "none";
-        // 是否身份证实名，注:yes有身份证 no 无身份证|否-否
-        String authentication = map.containsKey("avatar") ? map.get("authentication")[0] : "none";
-        // 用户的年龄 游戏商请自行判断是否开启防沉迷，返回0或空为用户末实名|否-否
-        String age = map.containsKey("avatar") ? map.get("age")[0] : "none";
-        // 生日|是-否
-        String birthday = map.containsKey("birthday") ? map.get("birthday")[0] : "none";
-        // MD5的身份证号|是-否
-        String idCard = map.containsKey("idCard") ? map.get("idCard")[0] : "none";
-        // 加密串|是-否
-        String sign = map.get("sign")[0];
-        String deCodeUserName = "";
-        try {
-            deCodeUserName = URLDecoder.decode(userName, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        //Md5(gameId=113&time=1475042196&uid=29923&userName=dreamfly_1981&key=testappykey)
+        String loginKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
+        Arrays.sort(mustKey);
+        // 加密串
         StringBuilder param = new StringBuilder();
-        param.append("gameId").append("=").append(gameId);
-        param.append("&").append("time").append("=").append(time);
-        param.append("&").append("uid").append("=").append(uid);
-        param.append("&").append("userName").append("=").append(deCodeUserName);
-        param.append("&").append("key").append("=").append(loginKey);
+
+        boolean first = false;
+        for (String key : mustKey) {
+            String value = map.get(key).length > 0 ? map.get(key)[0] : "";
+            if (!first) {
+                super.addParam(param, key, value);
+                first = true;
+            } else {
+                super.addParamAnd(param, key, value);
+            }
+        }
 
         System.out.println("param = " + param.toString());
 
-        String serverSign = MD5Util.md5(param.toString());
-        log.info("channelLogin = " + serverSign);
-        log.info("sign = " + sign);
+        // 签名验证
+        String sign = map.get("sign")[0];
+        String serverSign = MD5Util.md5(param.toString() + loginKey);
 
-        System.out.println("channelLogin = " + serverSign);
-        System.out.println("sign = " + sign);
+        log.info("channelLogin serverSign = " + serverSign);
+        log.info("channelLogin sign       = " + sign);
+
+        System.out.println("channelLogin serverSign = " + serverSign);
+        System.out.println("channelLogin sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
-            setUserData(userData, "", userName, String.valueOf(channelId), "");
+            setUserData(userData, "", "", String.valueOf(channelId), "");
             return false;
-        } else {
-            setUserData(userData, uid, userName, String.valueOf(channelId), "");
-            return true;
         }
+        String channelExt = map.get("channelExt")[0];
+        String sdkloginmodel = map.get("sdkloginmodel")[0];
+        String channelUid = map.get("user_id")[0];
+        loginExtMap.put(channelUid, channelExt);
+        loginModelMap.put(channelUid, sdkloginmodel);
+        setUserData(userData, "channelUid", "userName", String.valueOf(channelId), "openid");
+        return true;
     }
 
     /**
@@ -144,75 +139,71 @@ public class YueYouBaseChannel extends BaseChannel {
      *
      * @param orderData      渠道订单请求参数
      * @param channelOrderNo 渠道订单返回参数
+     *                       amount                 金额，单位为分
+     *                       channelExt             原样返回登陆时透传的信息
+     *                       game_appid             游戏编号----运营方为游戏分配的唯一编号
+     *                       props_name             道具名称
+     *                       trade_no               游戏透传参数（默认为游戏订单号，回调时候原样返回）
+     *                       user_id                运营方用户 ID
+     *                       sdkloginmodel          登录时的传递的参数
+     *                       sign                   按照上方签名机制进行签名
+     *                       server_id              区服 id（不参与加密）
+     *                       server_name            区服名称（不参与加密）
+     *                       role_id                角色 id（不参与加密）
+     *                       role_name              角色名（不参与加密）
      * @return boolean
      */
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String channelGameId = configMap.get(appId).getString(BaiJiaConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(BaiJiaConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
 
         long time = System.currentTimeMillis() / 1000;
 
-        //Md5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1&role=1&server=1&time=1475049097&uid=6298253&key=testpaykey)
+        // 加密串
         StringBuilder param = new StringBuilder();
-        param.append("cpOrderId").append("=").append(orderData.getString("cpOrderNo"));
-        param.append("&").append("gameId").append("=").append(channelGameId);
-        param.append("&").append("goodsId").append("=").append(orderData.getString("goodsId"));
-        param.append("&").append("goodsName").append("=").append(orderData.getString("subject"));
-        param.append("&").append("money").append("=").append(orderData.getString("amount"));
-        param.append("&").append("role").append("=").append(orderData.getString("userRoleId"));
-        param.append("&").append("server").append("=").append(orderData.getString("serverId"));
-        param.append("&").append("time").append("=").append(time);
-        param.append("&").append("uid").append("=").append(orderData.getString("uid"));
-        param.append("&").append("key").append("=").append(payKey);
+        String[] signKey = {"amount", "channelExt", "game_appid", "props_name", "trade_no", "sdkloginmodel"};
+        Arrays.sort(signKey);
 
-        System.out.println("channelPayInfo : " + param.toString());
-
-        String sign = MD5Util.md5(param.toString());
-        System.out.println("channelPayInfo sign: " + sign);
-
-        String urlUid = "";
-        String urlChannelGameId = "";
-        String urlTime = "";
-        String urlServer = "";
-        String urlUserRoleId = "";
-        String urlGoodsId = "";
-        String urlGoodsName = "";
-        String urlMoney = "";
-        String urlCpOrderId = "";
-        String urlExtrasParams = "";
-
-        try {
-            urlUid = URLEncoder.encode(orderData.getString("uid"), String.valueOf(StandardCharsets.UTF_8));
-            urlChannelGameId = URLEncoder.encode(channelGameId, String.valueOf(StandardCharsets.UTF_8));
-            urlTime = URLEncoder.encode(String.valueOf(time), String.valueOf(StandardCharsets.UTF_8));
-            urlServer = URLEncoder.encode(orderData.getString("serverId"), String.valueOf(StandardCharsets.UTF_8));
-            urlUserRoleId = URLEncoder.encode(orderData.getString("userRoleId"), String.valueOf(StandardCharsets.UTF_8));
-
-            urlGoodsId = URLEncoder.encode(orderData.getString("goodsId"), String.valueOf(StandardCharsets.UTF_8));
-            urlGoodsName = URLEncoder.encode(orderData.getString("subject"), String.valueOf(StandardCharsets.UTF_8));
-            urlMoney = URLEncoder.encode(orderData.getString("amount"), String.valueOf(StandardCharsets.UTF_8));
-            urlCpOrderId = URLEncoder.encode(orderData.getString("cpOrderNo"), String.valueOf(StandardCharsets.UTF_8));
-            urlExtrasParams = URLEncoder.encode(orderData.getString("extrasParams"), String.valueOf(StandardCharsets.UTF_8));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return false;
+        boolean first = false;
+        for (String key : signKey) {
+            String value = orderData.getString(key);
+            if (!first) {
+                super.addParam(param, key, value);
+                first = true;
+            } else {
+                super.addParamAnd(param, key, value);
+            }
         }
 
+        System.out.println("param = " + param.toString());
+
+
+        // 签名验证
+        String serverSign = MD5Util.md5(param.toString());
+
+        log.info("channelPayInfo serverSign = " + serverSign);
+
+        System.out.println("channelPayInfo serverSign = " + serverSign);
+
+
+        String channelUid = orderData.getString("uid");
+        String money = FeeUtils.yuanToFen(orderData.getString("amount"));
+        // 渠道订单数据
         JSONObject data = new JSONObject();
-        data.put("uid", urlUid);
-        data.put("gameId", urlChannelGameId);
-        data.put("time", urlTime);
-        data.put("server", urlServer);
-        data.put("role", urlUserRoleId);
-        data.put("goodsId", urlGoodsId);
-        data.put("goodsName", urlGoodsName);
-        data.put("money", urlMoney);
-        data.put("cpOrderId", urlCpOrderId);
-        data.put("ext", urlExtrasParams);
-        data.put("signType", "md5");
-        data.put("sign", sign);
+        data.put("amount", money);
+        data.put("channelExt", loginExtMap.get(channelUid));
+        data.put("game_appid", channelGameId);
+        data.put("props_name", orderData.getString("subject"));
+        data.put("trade_no", orderData.getString("extrasParams"));
+        data.put("user_id", channelUid);
+        data.put("sdkloginmodel", loginModelMap.get(channelUid));
+        data.put("sign", serverSign);
+        data.put("server_id", orderData.getString("serverId"));
+        data.put("server_name", orderData.getString("userServer"));
+        data.put("role_id", orderData.getString("userRoleId"));
+        data.put("role_name", orderData.getString("userRoleName"));
 
         System.out.println("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
@@ -229,37 +220,31 @@ public class YueYouBaseChannel extends BaseChannel {
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
-        String channelGameId = configMap.get(appId).getString(BaiJiaConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(BaiJiaConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
 
-        String sign = parameterMap.get("sign");
-        //   MD5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1.00&orderId=201801241127404978&role=1&server=1&status=success&time=1475049097&uid=6298253&userName=dreamfly_1981&key=testpaykey)
-        //       cpOrderId=e16b7fc8-d43b-4ca7-938b-b190834c1366&gameId=null&goodsId=1&goodsName=1000元宝&money=0.10&orderId=202005231535551325&role=42860509&server=65501&status=success&time=1590219619&uid=10000210268567&userName=高山仰止&key=82937ce89565d82c09422e54f1fc4e24
+        // 加密串
         StringBuilder param = new StringBuilder();
-        param.append("cpOrderId").append("=").append(parameterMap.get("cpOrderId"));
-        param.append("&").append("gameId").append("=").append(channelGameId);
-        param.append("&").append("goodsId").append("=").append(parameterMap.get("goodsId"));
-        param.append("&").append("goodsName").append("=").append(parameterMap.get("goodsName"));
-        param.append("&").append("money").append("=").append(parameterMap.get("money"));
-        param.append("&").append("orderId").append("=").append(parameterMap.get("orderId"));
-        param.append("&").append("role").append("=").append(parameterMap.get("role"));
-        param.append("&").append("server").append("=").append(parameterMap.get("server"));
-        param.append("&").append("status").append("=").append(parameterMap.get("status"));
-        param.append("&").append("time").append("=").append(parameterMap.get("time"));
-        param.append("&").append("uid").append("=").append(parameterMap.get("uid"));
-        param.append("&").append("userName").append("=").append(parameterMap.get("userName"));
-        param.append("&").append("key").append("=").append(payKey);
+        super.addParam(param, "", "");
+        super.addParamAnd(param, "", "");
 
-        System.out.println("channelPayCallback : " + param.toString());
+        System.out.println("param = " + param.toString());
 
+        // 签名验证
+        String sign = parameterMap.get("sign");
         String serverSign = MD5Util.md5(param.toString());
-        System.out.println("channelPayCallback sign: " + serverSign);
-        System.out.println("channelPayCallback sign: " + sign);
-        if (sign.equals(serverSign)) {
-            setChannelOrder(channelOrderNo, "", parameterMap.get("orderId"), "", parameterMap.get("money"));
-            return true;
-        }
 
-        return false;
+        log.info("channelPayCallback serverSign = " + serverSign);
+        log.info("channelPayCallback sign       = " + sign);
+
+        System.out.println("channelPayCallback serverSign = " + serverSign);
+        System.out.println("channelPayCallback sign       = " + sign);
+
+        if (!sign.equals(serverSign)) {
+            return false;
+        }
+        // 渠道订单赋值
+        setChannelOrder(channelOrderNo, "", "cpOrderId", "channelOrderId", "money");
+        return true;
     }
 }

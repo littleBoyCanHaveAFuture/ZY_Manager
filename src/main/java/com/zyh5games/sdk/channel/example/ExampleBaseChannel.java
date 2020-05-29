@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * 百家
+ * 模板
  *
  * @author song minghua
  * @date 2020/5/21
  */
-@Component("9")
+@Component("-1")
 public class ExampleBaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(ExampleBaseChannel.class);
 
     ExampleBaseChannel() {
-        channelId = ChannelId.H5_BAIJIA;
+        channelId = ChannelId.H5_EXAMPLE;
     }
 
     @Override
