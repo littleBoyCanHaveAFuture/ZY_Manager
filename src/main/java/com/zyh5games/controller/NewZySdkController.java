@@ -686,7 +686,7 @@ public class NewZySdkController {
             Integer channelId = requestInfo.getInteger("channelId");
             BaseChannel channelService = channelHandler.getChannel(channelId);
             JSONObject rsp = channelService.ajaxGetSignature(appId, requestInfo);
-
+// TODO: 2020/5/29
             result.put("data", rsp);
             result.put("message", "签名成功");
             result.put("status", true);

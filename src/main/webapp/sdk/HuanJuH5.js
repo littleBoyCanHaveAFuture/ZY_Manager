@@ -1,4 +1,4 @@
-let sdk = window.CY_GAME_SDK;
+let cySdk = window.CY_GAME_SDK;
 let hasInit = false;
 let initParams = {
     gameId: "游戏的ID ", //游戏的ID
@@ -29,13 +29,13 @@ let initParams = {
 
 //用户点击分享
 function share() {
-    sdk.showShare();
+    cySdk.showShare();
 }
 
 
 //登录被顶
 function repeatLogin() {
-    sdk.repeatLogin();
+    cySdk.repeatLogin();
 }
 
 function getQueryString(url, key) {
@@ -64,7 +64,7 @@ function zyCallChannelInit(params) {
 //用户点击商品下单
 function zyCallChannelPay(order) {
     if (!hasInit) {
-        sdk.config(initParams);//初始化
+        cySdk.config(initParams);//初始化
         hasInit = true;
     }
     console.log("zyCallChannelPay = " + JSON.stringify(order));
@@ -74,14 +74,14 @@ function zyCallChannelPay(order) {
 
     console.log("zyCallChannelPay payData= " + trade.data);
 
-    sdk.pay(payData);
+    cySdk.pay(payData);
 }
 
 //角色-上报数据
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     if (!hasInit) {
-        sdk.config(initParams);//初始化
+        cySdk.config(initParams);//初始化
         hasInit = true;
     }
     if (roleInfo.datatype === 5) {
@@ -131,6 +131,6 @@ function zyCallUploadRole(roleInfo) {
         // "gameRoleMoney": 10.00,
         // "gameRoleOnline": 10,
     };
-    sdk.uploadGameRole(roleParam);
+    cySdk.uploadGameRole(roleParam);
 }
 

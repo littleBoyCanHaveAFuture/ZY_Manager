@@ -50,6 +50,8 @@ public class PayCallbackController {
     private HttpService httpService;
 
     /**
+     * 渠道订单回调地址
+     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
      * 通知cp发货
      * 1.指悦支付 在 ijpay--master里面发货 这里不处理
      * 2.渠道在这里处理
@@ -104,8 +106,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 紫菀
      *
      * @param openid  渠道玩家唯一标示
      * @param price   商品金额
@@ -190,8 +191,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 百家
      * status	    String	是	是	订单状态。“success”为支付成功
      * cpOrderId	String	是	是	游戏方（cp）游戏订单号
      * orderId	    String	是	是	我方订单ID
@@ -302,8 +302,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 5144玩
      * status	    String	是	是	订单状态。“success”为支付成功
      * cpOrderId	String	是	是	游戏方（cp）游戏订单号
      * orderId	    String	是	是	我方订单ID
@@ -413,8 +412,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 顺网
      * 参数名            类型    是否必传    说明
      * order_no	        string	是       顺网平台订单号
      * guid	            string	是       顺网平台游戏帐号
@@ -533,8 +531,7 @@ public class PayCallbackController {
 
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 鱼马
      * 参数名            类型    是否必传    说明
      * nt_data	        string	是       通知数据解码后为xml格式 ,具体见2.1.1
      * sign	            string	是       签名串,具体见第三章
@@ -631,8 +628,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 渠道订单回调地址
-     * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * 欢聚
      * <p>
      * 接收参数(CGI)	类型	        必选	参于加密	说明
      * status		    String	    是	是	    订单状态。“success”为支付成功
@@ -743,4 +739,107 @@ public class PayCallbackController {
         ResponseUtil.write(response, result ? "success" : "fail");
     }
 
+    /**
+     * 引力
+     * 回调body已经过url encode，使用时要使用url decode进行解密等到json
+     *
+     * @param param uid                  KUKU平台用户ID
+     *              orderNo              KUKU平台订单唯一编号
+     *              productId            游戏方支付时传入的商品ID
+     *              gameOrderNo          游戏方支付时传入的游戏方订单编号
+     *              gameKey              KUKU平台分配给游戏方的游戏标识
+     *              payCost              用户真实支付的金额，单位分
+     *              ext1                 游戏方支付时传入的扩展参数2，原样返回
+     *              ext2                 游戏方支付时传入的扩展参数1，原样返回
+     *              sign                 签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_yinli/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_yinli(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                         @RequestBody Map<String, Object> param,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println("callbackPayInfo:" + channelId);
+        System.out.println("callbackPayInfo:" + appId);
+
+        System.out.println("callbackPayInfo:" + param.toString());
+//        String jsonData = URLDecoder.decode(urlJsonData, String.valueOf(StandardCharsets.UTF_8));
+//        System.out.println("h5_yinli JsonData = " + jsonData);
+//
+//        JSONObject data = JSONObject.parseObject(jsonData);
+//
+//        Map<String, String> parameterMap = new HashMap<>();
+//        parameterMap.put("uid", data.getString("uid"));
+//        parameterMap.put("orderNo", data.getString("orderNo"));
+//        parameterMap.put("productId", data.getString("productId"));
+//        parameterMap.put("gameOrderNo", data.getString("gameOrderNo"));
+//        parameterMap.put("gameKey", data.getString("gameKey"));
+//        parameterMap.put("payCost", data.getString("payCost"));
+//        parameterMap.put("ext1", data.getString("ext1"));
+//        parameterMap.put("ext2", data.getString("ext2"));
+//        parameterMap.put("sign", data.getString("sign"));
+//
+//        System.out.println("parameterMap =" + parameterMap.toString());
+//
+//        String money = FeeUtils.fenToYuan(data.getString("payCost"));
+//        boolean result = checkOrder(appId, channelId, parameterMap, data, data.getString("gameOrderNo"), data.getString("orderNo"), money);
+
+//        ResponseUtil.write(response, result ? "ok" : "fail");
+    }
+
+    /**
+     * 通用方法 检查订单并发货
+     *
+     * @param channelOrder
+     * @param money        金额 元
+     */
+    public boolean checkOrder(Integer appId, Integer channelId,
+                              Map<String, String> parameterMap, JSONObject channelOrder,
+                              String cpOrderId, String channelOrderId, String money) throws Exception {
+        boolean result = true;
+        do {
+            BaseChannel channelSerivce = channelHandler.getChannel(channelId);
+
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
+            if (!checkOrder) {
+                result = false;
+                break;
+            }
+
+            UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), cpOrderId);
+            if (order == null) {
+                log.info("订单为空");
+                result = false;
+                break;
+            }
+
+            Integer zhiyueUid = order.getUserID();
+            channelOrder.replace("zy_uid", zhiyueUid);
+            boolean first = false;
+            if (order.getState() == OrderState.STATE_OPEN_PAY) {
+                // 首次回调 已完成支付 但未发货
+                order.setState(OrderState.STATE_PAY_SUCCESS);
+                order.setChannelOrderID(channelOrderId);
+                order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
+                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                orderManager.updateOrder(order);
+                first = true;
+            } else if (order.getState() == OrderState.STATE_PAY_SUCCESS) {
+                // 多次回调 已完成支付 申请发货未发货
+                log.info("checkOrder 支付成功待发货 order = " + order.getOrderID());
+            } else {
+                break;
+            }
+
+            // cp请求发货
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
+            if (gameNew == null) {
+                result = false;
+                break;
+            }
+
+            result = notifyToCp(first, gameNew, order, money, cpOrderId, channelId);
+        } while (false);
+
+        return result;
+    }
 }

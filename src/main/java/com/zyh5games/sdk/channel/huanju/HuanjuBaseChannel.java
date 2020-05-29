@@ -12,7 +12,10 @@ import java.util.Map;
 
 /**
  * 欢聚
- *
+ * 未接的 todo
+ * 1.游戏礼包领取接口
+ * 2.游戏登录被顶
+ * 3.游戏服务器列表查询
  * @author song minghua
  * @date 2020/5/21
  */
@@ -80,7 +83,7 @@ public class HuanjuBaseChannel extends BaseChannel {
         int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
 
         String[] mustKey = {"gameId", "uid", "userName", "time", "isAdult", "sign", "signType"};
-        if (super.channelMustParam(mustKey, map)) {
+        if (!super.channelMustParam(mustKey, map)) {
             return false;
         }
         //  id=1&avatar=http%3A%2F%2Fh5.6816.com%2Fstatic%2Fattachment%2Fuser%2F20160816%2F1471334322441376.png&gameId=113&signType=md5&time=1475042060&uid=29923&userName=dreamfly_1981&userSex=male&sign=6a3f16124a0c641082c17a438d1323a8
@@ -109,12 +112,12 @@ public class HuanjuBaseChannel extends BaseChannel {
         System.out.println("param = " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
-        log.info("channelLogin = " + serverSign);
-        log.info("sign = " + sign);
+        log.info("channelLogin serverSign = " + serverSign);
+        log.info("channelLogin sign = " + sign);
 
-        System.out.println("channelLogin = " + serverSign);
-        System.out.println("sign = " + sign);
-
+        // todo 参数校验有问题 周一重发参数
+        System.out.println("channelLogin serverSign = " + serverSign);
+        System.out.println("channelLogin sign = " + sign);
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", "", String.valueOf(channelId), "");
             return false;

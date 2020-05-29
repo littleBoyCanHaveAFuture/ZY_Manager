@@ -303,7 +303,7 @@ public class GameController {
     }
 
     /**
-     * 获取 游戏渠道配置
+     * 修改 游戏渠道配置
      */
     @RequestMapping(value = "/updateChannelConfig", method = RequestMethod.POST)
     @ResponseBody

@@ -63,8 +63,6 @@ public class ChannelHandler {
                     configMap.put(appId, jsonObject);
                 }
             }
-
-
         }
         System.out.println(configService.toString());
     }

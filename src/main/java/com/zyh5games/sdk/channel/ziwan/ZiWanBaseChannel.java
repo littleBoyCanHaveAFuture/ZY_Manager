@@ -1,10 +1,9 @@
 package com.zyh5games.sdk.channel.ziwan;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.entity.Account;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.HttpService;
-import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.util.MD5Util;
 import org.apache.log4j.Logger;
@@ -203,14 +202,7 @@ public class ZiWanBaseChannel extends BaseChannel {
 
                 log.info("channelPayCallback 支付成功");
 
-                // openid 可能重复 需要处理 todo
-                Account account = accountService.findUser(String.valueOf(ChannelId.H5_ZIWAN), openid);
-                int zyUid = account == null ? 0 : account.getId();
-                if (zyUid == 0) {
-                    return false;
-                }
-
-                setChannelOrder(channelOrderNo, String.valueOf(zyUid), orderid, "", price);
+                setChannelOrder(channelOrderNo, "", orderid, "", price);
 
                 return true;
             } else if (rsp.getInteger("status") == 4001 || rsp.getInteger("status") == 4002) {
@@ -223,7 +215,7 @@ public class ZiWanBaseChannel extends BaseChannel {
     }
 
     @Override
-    public JSONObject ajaxGetSignature(Integer appId,JSONObject requestInfo) {
+    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo) {
         String secretKey = configMap.get(appId).getString(ZiWanConfig.KEY);
 
         StringBuilder param = new StringBuilder();

@@ -122,13 +122,13 @@
                            missingMessage="分享链接">
                 </td>
             </tr>
-            <tr hidden="hidden">
-                <td style="width:100px;text-align: left;padding-top: 13px;">英文简称:</td>
+            <tr >
+                <td style="width:200px;text-align: left;padding-top: 13px;">英文简称:</td>
                 <td style="padding-top: 13px;color:#000;font-weight: bold;">
                     <label for="save_code"></label>
                     <input type="text" name="save_shareLinkUrl" id="save_code"
                            required="true" class="easyui-validatebox" validType="namerules"
-                           missingMessage="jianxie ">
+                           missingMessage="h5_{渠道全拼} ">
                 </td>
             </tr>
             </tbody>

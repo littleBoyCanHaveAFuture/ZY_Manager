@@ -25,6 +25,7 @@ function zyCallChannelPay(order) {
     let domain = trade.domain;
     console.log("trade[" + typeof trade + "]=" + trade);
     console.log("payData[" + typeof payData + "]=" + payData);
+    payData = JSON.parse(payData);
     // parent.postMessage(trade.data, 'https://' + trade.domain);
     parent.postMessage(payData, '*');
 }
@@ -62,7 +63,10 @@ function getChannelSignature(Request, Callback) {
         data: JSON.stringify(Request),
         dataType: "json",
         success: function (result) {
+            console.log("getChannelSignature success" + result);
             Callback(result.data);
+        }, error: function (result) {
+            console.log("getChannelSignature error" + result);
         }
     });
 }

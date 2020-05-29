@@ -543,8 +543,8 @@ function IsURL(urlString) {
 
 function checkParamS() {
     for (var o in arr) {
-        val = document.getElementById(arr[o].name).value;
-        var check = document.getElementById(arr[o].name).getAttribute("check");
+        let val = document.getElementById(arr[o].name).value;
+        let check = document.getElementById(arr[o].name).getAttribute("check");
         val = val.trim();
         if (val === "" && check === "1") {
             $("#" + arr[o].name).tips({

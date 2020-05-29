@@ -6,8 +6,8 @@
  * @version 0.2.7
  */
 //服务器地址
-// const ZhiYue_domain = "http://localhost:8080/webGame2";
-const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
+const ZhiYue_domain = "http://localhost:8080/webGame2";
+// const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
 
 let ZhiYueSDK = {
     GameId: null,//游戏id

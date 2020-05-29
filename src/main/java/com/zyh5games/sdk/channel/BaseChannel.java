@@ -165,7 +165,18 @@ public abstract class BaseChannel {
         }
         return true;
     }
-
+    /**
+     * 检查 key 是否存在
+     */
+    public boolean channelMustParamS(String[] mustKey, Map<String, String> map) {
+        for (String key : mustKey) {
+            if (!map.containsKey(key)) {
+                System.out.println("channelPayCallback 缺少key：" + key);
+                return false;
+            }
+        }
+        return true;
+    }
     public void addParam(StringBuilder param, String key, String value) {
         param.append(key).append("=").append(value);
     }
