@@ -44,7 +44,7 @@ public class YueYouBaseChannel extends BaseChannel {
     @Override
     public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
-        channelData.put("name", "BaiJiaH5");
+        channelData.put("name", "YueYouH5");
         return channelData;
     }
 
