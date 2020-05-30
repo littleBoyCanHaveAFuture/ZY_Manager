@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -215,24 +216,56 @@ public class ZiWanBaseChannel extends BaseChannel {
     }
 
     @Override
-    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo) {
+    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo, JSONObject result) {
+        String[] mustKey = {"userToken", "area", "role_name", "new_role", "rank", "money"};
+        for (String index : mustKey) {
+            if (!requestInfo.containsKey(index)) {
+                result.put("message", "缺失参数：" + index);
+                result.put("status", false);
+                return null;
+            }
+        }
         String secretKey = configMap.get(appId).getString(ZiWanConfig.KEY);
 
+        // 升序排列-参数赋值 并签名
         StringBuilder param = new StringBuilder();
-        //升序排列-参数赋值 并签名
-        param.append("area").append("=").append(requestInfo.getString("area"));
-        param.append("&").append("channel_id").append("=").append(requestInfo.get("channel_id"));
-        param.append("&").append("money").append("=").append(requestInfo.get("money"));
-        param.append("&").append("new_role").append("=").append(requestInfo.getString("new_role"));
-        param.append("&").append("rank").append("=").append(requestInfo.get("rank"));
-        param.append("&").append("role_name").append("=").append(requestInfo.get("role_name"));
-        param.append("&").append("userToken").append("=").append(requestInfo.get("userToken"));
+        Arrays.sort(mustKey);
+
+        boolean first = false;
+        for (String key : mustKey) {
+            String value = requestInfo.getString(key);
+            if (!first) {
+                super.addParam(param, key, value);
+                first = true;
+            } else {
+                super.addParamAnd(param, key, value);
+            }
+        }
+        System.out.println("ajaxGetSignature param = " + param);
+
 
         String sign = MD5Util.md5(param.toString() + secretKey);
-        param.append("&").append("sign").append("=").append(sign);
-        JSONObject rsp = new JSONObject();
-        rsp.put("content", requestInfo);
-        rsp.put("sign", sign);
-        return rsp;
+
+        System.out.println("ajaxGetSignature sign = " + sign);
+        /*
+            userToken       必填，接口1 回调获取到的userToken
+            channel_id      必填，渠道id
+            area            必填，区服名
+            role_name       必填，角色名
+            new_role        必填，创建新角色：0为角色升级，1为创建新角
+            rank            必填，等级
+            money           必填，元宝数
+            sign            必填，见附录
+        */
+        JSONObject userData = new JSONObject();
+        userData.put("userToken", requestInfo.getString("userToken"));
+        userData.put("channel_id", requestInfo.getString("channel_id"));
+        userData.put("area", requestInfo.getString("area"));
+        userData.put("role_name", requestInfo.getString("role_name"));
+        userData.put("new_role", requestInfo.getString("new_role"));
+        userData.put("rank", requestInfo.getString("rank"));
+        userData.put("money", requestInfo.getString("money"));
+        userData.put("sign", sign);
+        return userData;
     }
 }

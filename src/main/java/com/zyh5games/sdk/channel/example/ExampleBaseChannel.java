@@ -8,6 +8,7 @@ import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,6 +23,7 @@ public class ExampleBaseChannel extends BaseChannel {
 
     ExampleBaseChannel() {
         channelId = ChannelId.H5_EXAMPLE;
+        configMap = new HashMap<>();
     }
 
     @Override

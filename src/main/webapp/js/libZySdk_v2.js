@@ -6,8 +6,8 @@
  * @version 0.2.7
  */
 //服务器地址
-const ZhiYue_domain = "http://localhost:8080/webGame2";
-// const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
+// const ZhiYue_domain = "http://localhost:8080/webGame2";
+const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
 
 let ZhiYueSDK = {
     GameId: null,//游戏id
@@ -608,7 +608,9 @@ function zyCheckRoleObject(roleInfo) {
         result.message = '调用updateGameRoleInfo()时传递userRoleLevel类型需为int';
         return result;
     }
-
+    roleInfo.GameId = ZhiYueSDK.GameId;
+    roleInfo.GameKey = ZhiYueSDK.GameKey;
+    roleInfo.channelId = ZhiYueSDK.channelId;
     return result;
 }
 
@@ -645,9 +647,6 @@ function zyAjaxUploadGameRole(roleInfo, callback) {
 
     let roleObject = roleInfo;
 
-    roleObject.GameId = ZhiYueSDK.GameId;
-    roleObject.GameKey = ZhiYueSDK.GameKey;
-    roleObject.channelId = ZhiYueSDK.channelId;
 
     if (!roleObject.hasOwnProperty('uid') || roleObject.uid.length <= 0) {
         rspObject.message = "调用失败:缺少uid";

@@ -139,7 +139,7 @@ public abstract class BaseChannel {
         channelOrderNo.put("cpOrderId", cpOrderId);
     }
 
-    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo) {
+    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo, JSONObject result) {
         return null;
     }
 
@@ -165,6 +165,7 @@ public abstract class BaseChannel {
         }
         return true;
     }
+
     /**
      * 检查 key 是否存在
      */
@@ -177,6 +178,20 @@ public abstract class BaseChannel {
         }
         return true;
     }
+
+    /**
+     * 检查 key 是否存在
+     */
+    public boolean channelMustParamJson(String[] mustKey, JSONObject jsonObject) {
+        for (String key : mustKey) {
+            if (!jsonObject.containsKey(key)) {
+                System.out.println("channelPayCallback 缺少key：" + key);
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addParam(StringBuilder param, String key, String value) {
         param.append(key).append("=").append(value);
     }

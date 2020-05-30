@@ -3,7 +3,10 @@ package com.zyh5games.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.*;
 import com.zyh5games.jedis.JedisRechargeCache;
-import com.zyh5games.sdk.*;
+import com.zyh5games.sdk.AccountWorker;
+import com.zyh5games.sdk.GameRoleWorker;
+import com.zyh5games.sdk.LoginWorker;
+import com.zyh5games.sdk.UOrderManager;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelHandler;
 import com.zyh5games.service.AccountService;
@@ -674,22 +677,20 @@ public class NewZySdkController {
         JSONObject result = new JSONObject();
         JSONObject requestInfo = JSONObject.parseObject(jsonRoleInfo);
         do {
-            String[] mustKeysValue = {"userToken", "area", "role_name", "new_role", "rank", "money", "appId", "channelId"};
-            for (String index : mustKeysValue) {
-                if (!requestInfo.containsKey(index)) {
-                    result.put("message", "缺失参数：" + index);
-                    result.put("status", false);
-                    break;
-                }
-            }
             Integer appId = requestInfo.getInteger("appId");
             Integer channelId = requestInfo.getInteger("channelId");
+            if (appId == null || channelId == null) {
+                result.put("message", "缺失参数 appId/channelId");
+                result.put("status", false);
+                break;
+            }
             BaseChannel channelService = channelHandler.getChannel(channelId);
-            JSONObject rsp = channelService.ajaxGetSignature(appId, requestInfo);
-// TODO: 2020/5/29
-            result.put("data", rsp);
-            result.put("message", "签名成功");
-            result.put("status", true);
+            JSONObject rsp = channelService.ajaxGetSignature(appId, requestInfo, result);
+            if (rsp != null) {
+                result.put("data", rsp);
+                result.put("message", "签名成功");
+                result.put("status", true);
+            }
         }
         while (false);
 

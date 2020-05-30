@@ -3,7 +3,6 @@ package com.zyh5games.sdk.channel.yueyou;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
-import com.zyh5games.sdk.channel.example.ExampleConfig;
 import com.zyh5games.util.FeeUtils;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 百家
+ * 悦游
  *
  * @author song minghua
  * @date 2020/5/21
@@ -29,6 +28,7 @@ public class YueYouBaseChannel extends BaseChannel {
 
     YueYouBaseChannel() {
         channelId = ChannelId.H5_YUEYOU;
+        configMap = new HashMap<>();
         loginExtMap = new HashMap<>();
         loginModelMap = new HashMap<>();
     }
@@ -36,7 +36,7 @@ public class YueYouBaseChannel extends BaseChannel {
     @Override
     public JSONArray commonLib() {
         JSONArray libUrl = super.commonLib();
-        libUrl.add("http://www.0713yy.com/Public/static/xigusdk/xgh5sdk.js?" + System.currentTimeMillis());
+        libUrl.add("https://www.0713yy.com/Public/static/xigusdk/xgh5sdk.js?" + System.currentTimeMillis());
         return libUrl;
     }
 
@@ -49,6 +49,14 @@ public class YueYouBaseChannel extends BaseChannel {
     public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
         channelData.put("name", "YueYouH5");
+
+        JSONObject config = configMap.get(appId);
+        if (config != null && !config.isEmpty()) {
+            JSONObject c = new JSONObject();
+            c.put("gameId", config.getString(YueYouConfig.GAME_ID));
+            channelData.put("config", c.toJSONString());
+        }
+
         return channelData;
     }
 
@@ -86,7 +94,7 @@ public class YueYouBaseChannel extends BaseChannel {
     @Override
     public boolean channelLogin(Map<String, String[]> map, JSONObject userData) {
         String[] mustKey = {"channelExt", "email", "game_appid", "new_time", "loginplatform2cp", "user_id",
-                "sdklogindomain", "sdkloginmodel", "icon", "nickname"};
+                "sdklogindomain", "sdkloginmodel"};
         if (!super.channelMustParam(mustKey, map)) {
             return false;
         }
@@ -111,6 +119,7 @@ public class YueYouBaseChannel extends BaseChannel {
 
         System.out.println("param = " + param.toString());
 
+        String userName = map.containsKey("nickname") ? map.get("nickname")[0] : "";
         // 签名验证
         String sign = map.get("sign")[0];
         String serverSign = MD5Util.md5(param.toString() + loginKey);
@@ -130,7 +139,7 @@ public class YueYouBaseChannel extends BaseChannel {
         String channelUid = map.get("user_id")[0];
         loginExtMap.put(channelUid, channelExt);
         loginModelMap.put(channelUid, sdkloginmodel);
-        setUserData(userData, "channelUid", "userName", String.valueOf(channelId), "openid");
+        setUserData(userData, channelUid, userName, String.valueOf(channelId), "");
         return true;
     }
 
@@ -156,31 +165,36 @@ public class YueYouBaseChannel extends BaseChannel {
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(YueYouConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
 
         long time = System.currentTimeMillis() / 1000;
 
         // 加密串
         StringBuilder param = new StringBuilder();
-        String[] signKey = {"amount", "channelExt", "game_appid", "props_name", "trade_no", "sdkloginmodel"};
+        String[] signKey = {"amount", "channelExt", "game_appid", "props_name", "trade_no", "user_id", "sdkloginmodel"};
         Arrays.sort(signKey);
 
-        boolean first = false;
-        for (String key : signKey) {
-            String value = orderData.getString(key);
-            if (!first) {
-                super.addParam(param, key, value);
-                first = true;
-            } else {
-                super.addParamAnd(param, key, value);
-            }
-        }
+        String channelUid = orderData.getString("uid");
+        String money = FeeUtils.yuanToFen(orderData.getString("amount"));
+        String channelExt = loginExtMap.get(channelUid);
+        String props_name = orderData.getString("subject");
+        String trade_no = orderData.getString("extrasParams");
+        String sdkloginmodel = loginModelMap.get(channelUid);
+
+        super.addParam(param, "amount", money);
+        super.addParamAnd(param, "channelExt", channelExt);
+        super.addParamAnd(param, "game_appid", channelGameId);
+        super.addParamAnd(param, "props_name", props_name);
+        super.addParamAnd(param, "sdkloginmodel", sdkloginmodel);
+        super.addParamAnd(param, "trade_no", trade_no);
+        super.addParamAnd(param, "user_id", channelUid);
+
+        param.append(payKey);
 
         System.out.println("param = " + param.toString());
 
-
-        // 签名验证
+        // 签名
         String serverSign = MD5Util.md5(param.toString());
 
         log.info("channelPayInfo serverSign = " + serverSign);
@@ -188,15 +202,13 @@ public class YueYouBaseChannel extends BaseChannel {
         System.out.println("channelPayInfo serverSign = " + serverSign);
 
 
-        String channelUid = orderData.getString("uid");
-        String money = FeeUtils.yuanToFen(orderData.getString("amount"));
         // 渠道订单数据
         JSONObject data = new JSONObject();
         data.put("amount", money);
-        data.put("channelExt", loginExtMap.get(channelUid));
+        data.put("channelExt", channelExt);
         data.put("game_appid", channelGameId);
-        data.put("props_name", orderData.getString("subject"));
-        data.put("trade_no", orderData.getString("extrasParams"));
+        data.put("props_name", props_name);
+        data.put("trade_no", trade_no);
         data.put("user_id", channelUid);
         data.put("sdkloginmodel", loginModelMap.get(channelUid));
         data.put("sign", serverSign);
@@ -205,6 +217,7 @@ public class YueYouBaseChannel extends BaseChannel {
         data.put("role_id", orderData.getString("userRoleId"));
         data.put("role_name", orderData.getString("userRoleName"));
 
+        System.out.println("channelPayInfo sdkloginmodel: " + loginModelMap.toString());
         System.out.println("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
@@ -220,14 +233,27 @@ public class YueYouBaseChannel extends BaseChannel {
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
-        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(YueYouConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
 
-        // 加密串
+        String game_appid = parameterMap.get("game_appid");
+        String channelOrderId = parameterMap.get("out_trade_no");
+        String cpOrderId = parameterMap.get("trade_no");
+        String money = FeeUtils.fenToYuan(parameterMap.get("amount"));
+        if (!channelGameId.equals(parameterMap.get("game_appid"))) {
+            System.out.println("channelPayCallback 渠道参数 游戏id错误 channelGameId = " + channelGameId + "game_appid = " + game_appid);
+            return false;
+        }
+        // 加密串- MD5(amount=[amount]&channel_source=[channel_source]&game_appid=[game_appid]&out_trade_no=[out_trade_no]&payplatform2cp=[payplatform2cp]&trade_no=[trade_no][game_key])
         StringBuilder param = new StringBuilder();
-        super.addParam(param, "", "");
-        super.addParamAnd(param, "", "");
+        super.addParam(param, "amount", parameterMap.get("amount"));
+        super.addParamAnd(param, "channel_source", parameterMap.get("channel_source"));
+        super.addParamAnd(param, "game_appid", parameterMap.get("game_appid"));
+        super.addParamAnd(param, "out_trade_no", parameterMap.get("out_trade_no"));
+        super.addParamAnd(param, "payplatform2cp", parameterMap.get("payplatform2cp"));
+        super.addParamAnd(param, "trade_no", parameterMap.get("trade_no"));
 
+        param.append(payKey);
         System.out.println("param = " + param.toString());
 
         // 签名验证
@@ -244,7 +270,58 @@ public class YueYouBaseChannel extends BaseChannel {
             return false;
         }
         // 渠道订单赋值
-        setChannelOrder(channelOrderNo, "", "cpOrderId", "channelOrderId", "money");
+        setChannelOrder(channelOrderNo, "", cpOrderId, channelOrderId, money);
         return true;
+    }
+
+    @Override
+    public JSONObject ajaxGetSignature(Integer appId, JSONObject requestInfo, JSONObject result) {
+        String[] signKey = {"user_id", "game_appid", "server_id", "server_name", "role_id", "role_name", "level"};
+        for (String index : signKey) {
+            if (!requestInfo.containsKey(index)) {
+                result.put("message", "缺失参数：" + index);
+                result.put("status", false);
+                return null;
+            }
+        }
+
+        int channelId = requestInfo.getInteger("channelId");
+
+        String loginKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
+
+        // 加密字符串
+        StringBuilder param = new StringBuilder();
+
+        Arrays.sort(signKey);
+
+        boolean first = false;
+        for (String key : signKey) {
+            String value = requestInfo.getString(key);
+            if (!first) {
+                super.addParam(param, key, value);
+                first = true;
+            } else {
+                super.addParamAnd(param, key, value);
+            }
+        }
+        System.out.println("ajaxGetSignature param = " + param);
+
+        // 签名验证
+        String sign = MD5Util.md5(param.toString());
+
+        log.info("ajaxGetSignature serverSign = " + sign);
+
+        System.out.println("ajaxGetSignature serverSign = " + sign);
+
+        JSONObject userData = new JSONObject();
+        userData.put("user_id", requestInfo.getString("user_id"));
+        userData.put("game_appid", requestInfo.getString("game_appid"));
+        userData.put("server_id", requestInfo.getString("server_id"));
+        userData.put("server_name", requestInfo.getString("server_name"));
+        userData.put("role_id", requestInfo.getString("role_id"));
+        userData.put("role_name", requestInfo.getString("role_name"));
+        userData.put("level", requestInfo.getString("level"));
+        userData.put("sign", sign);
+        return userData;
     }
 }

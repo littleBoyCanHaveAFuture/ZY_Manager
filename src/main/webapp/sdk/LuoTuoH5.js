@@ -34,14 +34,14 @@ function zyCallChannelPay(order) {
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     let data = {};
+    data.appId = roleInfo.GameId;
+    data.channelId = roleInfo.channelId;
     data.userToken = zySaveChannelParams;
     data.area = roleInfo.serverId;
     data.role_name = roleInfo.userRoleName;
     data.new_role = roleInfo.datatype === 2 ? 1 : 0;
     data.rank = roleInfo.userRoleLevel;
     data.money = roleInfo.userRoleBalance;
-    data.appId = window.PRODUCT_CODE;
-    data.channelId = 8;
 
     let gameUrl = "https://gameluotuo.com/index.php?g=Home&m=GameOauth&a=roles";
 
@@ -56,12 +56,14 @@ function zyCallUploadRole(roleInfo) {
     });
 }
 
-function getChannelSignature(Request, Callback) {
-    jQuery.ajax({
+function getZyChannelSignature(Request, Callback) {
+    $.ajax({
         type: "POST",
         url: ZhiYue_domain + "/ajaxGetSignature",
+        contentType: "text/plain; charset=utf-8",
         data: JSON.stringify(Request),
         dataType: "json",
+        async: true,
         success: function (result) {
             console.log("getChannelSignature success" + result);
             Callback(result.data);
