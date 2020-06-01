@@ -27,10 +27,12 @@ public class ZiWanBaseChannel extends BaseChannel {
     HttpService httpService;
     @Autowired
     AccountService accountService;
+    Map<String, String> tokenMap;
 
     ZiWanBaseChannel() {
         configMap = new HashMap<>();
         channelId = ChannelId.H5_ZIWAN;
+        tokenMap = new HashMap<>();
     }
 
     /**
@@ -102,6 +104,11 @@ public class ZiWanBaseChannel extends BaseChannel {
             String province = userinfo.getString("province");
             String openid = userinfo.getString("openid");
             String uid = userinfo.getString("uid");
+            if (!tokenMap.containsKey(uid)) {
+                tokenMap.put(uid, userToken);
+            } else {
+                tokenMap.replace(uid, userToken);
+            }
 
             setUserData(userData, uid, wechaname, String.valueOf(channelId), openid);
             return true;
@@ -226,21 +233,29 @@ public class ZiWanBaseChannel extends BaseChannel {
             }
         }
         String secretKey = configMap.get(appId).getString(ZiWanConfig.KEY);
+        String channel_Id = configMap.get(appId).getString(ZiWanConfig.CHANNEL_ID);
+
+        String uid = requestInfo.getString("uid");
+        String area = requestInfo.getString("area");
+        String money = requestInfo.getString("money");
+        String new_role = requestInfo.getString("new_role");
+        String rank = requestInfo.getString("rank");
+        String role_name = requestInfo.getString("role_name");
+        String userToken = tokenMap.get(uid);
 
         // 升序排列-参数赋值 并签名
+        String[] signKey = {"userToken", "area", "role_name", "new_role", "rank", "money", "channel_id"};
         StringBuilder param = new StringBuilder();
-        Arrays.sort(mustKey);
+        Arrays.sort(signKey);
 
-        boolean first = false;
-        for (String key : mustKey) {
-            String value = requestInfo.getString(key);
-            if (!first) {
-                super.addParam(param, key, value);
-                first = true;
-            } else {
-                super.addParamAnd(param, key, value);
-            }
-        }
+        super.addParam(param, "area", area);
+        super.addParamAnd(param, "channel_id", channel_Id);
+        super.addParamAnd(param, "money", money);
+        super.addParamAnd(param, "new_role", new_role);
+        super.addParamAnd(param, "rank", rank);
+        super.addParamAnd(param, "role_name", role_name);
+        super.addParamAnd(param, "userToken", userToken);
+
         System.out.println("ajaxGetSignature param = " + param);
 
 
@@ -258,13 +273,13 @@ public class ZiWanBaseChannel extends BaseChannel {
             sign            必填，见附录
         */
         JSONObject userData = new JSONObject();
-        userData.put("userToken", requestInfo.getString("userToken"));
-        userData.put("channel_id", requestInfo.getString("channel_id"));
-        userData.put("area", requestInfo.getString("area"));
-        userData.put("role_name", requestInfo.getString("role_name"));
-        userData.put("new_role", requestInfo.getString("new_role"));
-        userData.put("rank", requestInfo.getString("rank"));
-        userData.put("money", requestInfo.getString("money"));
+        userData.put("userToken", userToken);
+        userData.put("channel_id", channel_Id);
+        userData.put("area", area);
+        userData.put("role_name", role_name);
+        userData.put("new_role", new_role);
+        userData.put("rank", rank);
+        userData.put("money", money);
         userData.put("sign", sign);
         return userData;
     }

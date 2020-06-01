@@ -175,8 +175,8 @@ public class PayCallbackController {
                            @RequestParam("amount") String amount,
                            @RequestBody Map<String, Object> param,
                            HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
     }
 
     /**
@@ -200,8 +200,8 @@ public class PayCallbackController {
                          @RequestParam("sign") String sign,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("h5_ziwan start " + "channelId=" + channelId + " appId=" + appId);
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("openid", openid);
@@ -210,7 +210,7 @@ public class PayCallbackController {
         parameterMap.put("item_id", item_id);
         parameterMap.put("orderid", orderid);
         parameterMap.put("sign", sign);
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         JSONObject channelOrder = new JSONObject();
         boolean result = true;
@@ -256,7 +256,7 @@ public class PayCallbackController {
                 result = false;
                 break;
             }
-
+            log.info("h5_ziwan cpOrderId = " + cpOrderId);
             result = notifyToCp(first, gameNew, order, price, cpOrderId, channelId);
 
         } while (false);
@@ -302,8 +302,8 @@ public class PayCallbackController {
                           @RequestParam("sign") String sign,
 
                           HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("status", status);
@@ -324,7 +324,7 @@ public class PayCallbackController {
 
         parameterMap.put("sign", sign);
 
-        System.out.println("h5_baijia parameterMap =" + parameterMap.toString());
+        log.info("h5_baijia parameterMap =" + parameterMap.toString());
 
         JSONObject channelOrder = new JSONObject();
         boolean result = true;
@@ -413,8 +413,8 @@ public class PayCallbackController {
                            @RequestParam("sign") String sign,
 
                            HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("status", status);
@@ -435,7 +435,7 @@ public class PayCallbackController {
 
         parameterMap.put("sign", sign);
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         JSONObject channelOrder = new JSONObject();
         boolean result = true;
@@ -516,8 +516,8 @@ public class PayCallbackController {
                             @RequestParam("sign") String sign,
 
                             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("order_no", order_no);
@@ -533,7 +533,7 @@ public class PayCallbackController {
         parameterMap.put("time", time);
         parameterMap.put("sign", sign);
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         JSONObject rsp = new JSONObject();
         JSONObject channelOrder = new JSONObject();
@@ -618,8 +618,8 @@ public class PayCallbackController {
                         @RequestParam("sign") String sign,
                         @RequestParam("md5Sign") String md5Sign,
                         HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("nt_data", nt_data);
@@ -627,7 +627,7 @@ public class PayCallbackController {
         parameterMap.put("md5Sign", md5Sign);
 
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         JSONObject rsp = new JSONObject();
         JSONObject channelOrder = new JSONObject();
@@ -739,10 +739,9 @@ public class PayCallbackController {
                           @RequestParam(value = "ext", required = false) String ext,
                           @RequestParam("signType") String signType,
                           @RequestParam("sign") String sign,
-
                           HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
         parameterMap.put("status", status);
@@ -763,7 +762,7 @@ public class PayCallbackController {
 
         parameterMap.put("sign", sign);
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         JSONObject channelOrder = new JSONObject();
         boolean result = true;
@@ -832,12 +831,12 @@ public class PayCallbackController {
     public void h5_yinli(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                          @RequestBody Map<String, Object> param,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
-        System.out.println("callbackPayInfo:" + param.toString());
+        log.info("callbackPayInfo:" + param.toString());
 //        String jsonData = URLDecoder.decode(urlJsonData, String.valueOf(StandardCharsets.UTF_8));
-//        System.out.println("h5_yinli JsonData = " + jsonData);
+//        log.info("h5_yinli JsonData = " + jsonData);
 //
 //        JSONObject data = JSONObject.parseObject(jsonData);
 //
@@ -852,7 +851,7 @@ public class PayCallbackController {
 //        parameterMap.put("ext2", data.getString("ext2"));
 //        parameterMap.put("sign", data.getString("sign"));
 //
-//        System.out.println("parameterMap =" + parameterMap.toString());
+//        log.info("parameterMap =" + parameterMap.toString());
 //
 //        String money = FeeUtils.fenToYuan(data.getString("payCost"));
 //        boolean result = checkOrder(appId, channelId, parameterMap, data, data.getString("gameOrderNo"), data.getString("orderNo"), money);
@@ -884,8 +883,8 @@ public class PayCallbackController {
                           @RequestParam("trade_no") String trade_no,
                           @RequestParam("sign") String sign,
                           HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("callbackPayInfo:" + channelId);
-        System.out.println("callbackPayInfo:" + appId);
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
         JSONObject data = new JSONObject();
 
@@ -898,7 +897,7 @@ public class PayCallbackController {
         parameterMap.put("trade_no", trade_no);
         parameterMap.put("sign", sign);
 
-        System.out.println("parameterMap =" + parameterMap.toString());
+        log.info("parameterMap =" + parameterMap.toString());
 
         String money = FeeUtils.fenToYuan(amount);
         boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
@@ -908,5 +907,100 @@ public class PayCallbackController {
         ResponseUtil.write(response, rsp);
     }
 
+    /**
+     * 掌盟quick
+     * 参数名            类型    是否必传    说明
+     * nt_data	        string	是       通知数据解码后为xml格式 ,具体见2.1.1
+     * sign	            string	是       签名串,具体见第三章
+     * md5Sign	        string	否       分区服的游戏必传,游戏方的区服编号,如s1,s2
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_zhangmeng/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_zhangmeng(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                             @RequestParam("nt_data") String nt_data,
+                             @RequestParam("sign") String sign,
+                             @RequestParam("md5Sign") String md5Sign,
+                             HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("nt_data", nt_data);
+        parameterMap.put("sign", sign);
+        parameterMap.put("md5Sign", md5Sign);
+
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject rsp = new JSONObject();
+        JSONObject channelOrder = new JSONObject();
+        boolean result = false;
+        do {
+            BaseChannel channelSerivce = channelHandler.getChannel(channelId);
+            // quick 解密 将参数放到 parameterMap 里
+            boolean checkOrder = channelSerivce.channelPayCallback(appId, parameterMap, channelOrder);
+            if (!checkOrder) {
+                break;
+            }
+            /*
+             *  is_test	        string	必有	    是否为测试订单 1为测试 0为线上正式订单，游戏应根据情况确定上线后是否向测试订单发放道具。
+             *  channel	        string	必有	    渠道标示ID 注意:游戏可根据实情,确定发放道具时是否校验充值来源渠道是否与该角色注册渠道相符
+             *  channel_uid	    string	必有	    渠道用户唯一标示,该值从客户端GetUserId()中可获取
+             *  game_order	    string	必有	    游戏在调用QuickSDK发起支付时传递的游戏方订单,这里会原样传回
+             *  order_no	    string	必有	    QuickSDK唯一订单号
+             *  pay_time	    string	必有	    支付时间 2015-01-01 23:00:00
+             *  amount	        string	必有	    成交金额，单位元，游戏最终发放道具金额应以此为准
+             *  status	        string	必有	    充值状态:0成功, 1失败(为1时 应返回FAILED失败)
+             *  extras_params	string	必有	    可为空,充值状态游戏客户端调用SDK发起支付时填写的透传参数.没有则为空
+             * */
+            JSONObject quickOrder = JSONObject.parseObject(parameterMap.get("quickOrder"));
+
+            String out_order_no = quickOrder.getString("game_order");
+            String money = quickOrder.getString("amount");
+            String order_no = quickOrder.getString("order_no");
+
+            UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), out_order_no);
+            if (order == null) {
+                log.info("订单为空");
+                break;
+            }
+
+            Integer zhiyueUid = order.getUserID();
+            channelOrder.replace("zy_uid", zhiyueUid);
+            boolean first = false;
+            if (order.getState() == OrderState.STATE_OPEN_PAY) {
+                // 首次回调 已完成支付 但未发货
+                order.setState(OrderState.STATE_PAY_SUCCESS);
+                order.setChannelOrderID(order_no);
+                order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
+                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                orderManager.updateOrder(order);
+                first = true;
+            } else if (order.getState() == OrderState.STATE_PAY_SUCCESS) {
+                // 多次回调 已完成支付 申请发货未发货
+                rsp.put("code", 2);
+                rsp.put("msg", "订单已支付成功");
+            } else {
+                break;
+            }
+
+            // cp请求发货
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
+            if (gameNew == null) {
+                break;
+            }
+
+            result = notifyToCp(first, gameNew, order, money, out_order_no, channelId);
+            if (!result) {
+                rsp.put("code", 3);
+                rsp.put("msg", "发货失败");
+            } else {
+                rsp.put("code", 1);
+                rsp.put("msg", "订单充值成功");
+            }
+
+        } while (false);
+
+        ResponseUtil.write(response, rsp);
+    }
 }

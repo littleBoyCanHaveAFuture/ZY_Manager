@@ -46,36 +46,5 @@ function swPayCallBack(json) {
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     let data = {};
-    // data.userToken = saveChannelParams;
-    // data.area = roleInfo.serverId;
-    // data.role_name = roleInfo.userRoleName;
-    // data.new_role = roleInfo.datatype === 2 ? 1 : 0;
-    // data.rank = roleInfo.userRoleLevel;
-    // data.money = roleInfo.userRoleBalance;
-    // data.appId = window.PRODUCT_CODE;
-    // data.channelId = 8;
 
-    // let gameUrl = "https://gameluotuo.com/index.php?g=Home&m=GameOauth&a=roles";
-    //
-    // getChannelSignature(data, function (result) {
-    //     if (!result.status) return;
-    //
-    //     let gameData = JSON.parse(result.data.content);
-    //     gameData.sign = result.data.sign;
-    //     jQuery.get(gameUrl, gameData, function (s) {
-    //         console.log(s);
-    //     });
-    // });
 }
-
-// function getChannelSignature(Request, Callback) {
-//     jQuery.ajax({
-//         type: "POST",
-//         url: ZhiYue_domain + "/ajaxGetSignature",
-//         data: JSON.stringify(Request),
-//         dataType: "json",
-//         success: function (result) {
-//             Callback(result.data);
-//         }
-//     });
-// }

@@ -453,16 +453,25 @@ function zyLoadSpLib(data, callback) {
 }
 
 function zyGetNowHost() {
-    let requestUri = window.location.href;
+    let requestUri = {};
+    requestUri.wlh = window.location.href;
+    let url = requestUri.wlh;
     //?次数
-    var temp = requestUri.split("?");
+    var temp = url.split("?");
     if (temp.length !== 2) {
         //多次?
-        requestUri = requestUri.replace('?', '|tempCut|');
-        requestUri = requestUri.replace(/\?/g, '&');
-        requestUri = requestUri.replace('|tempCut|', '?');
+        url = url.replace('?', '|tempCut|');
+        url = url.replace(/\?/g, '&');
+        url = url.replace('|tempCut|', '?');
     }
-    return requestUri;
+    if (typeof zyExtraParam == "function") {
+        zyExtraParam(requestUri);
+    }
+    if (requestUri.hasOwnProperty("channelWLH")) {
+        return requestUri.channelWLH;
+    } else {
+        return requestUri.wlh;
+    }
 }
 
 /**

@@ -29,7 +29,7 @@ public class ChannelId {
      */
     public static final int H5_5144WAN = 10;
     /**
-     * 鱼马
+     * 鱼马-quick
      */
     public static final int H5_YUMA = 11;
     /**
@@ -48,4 +48,8 @@ public class ChannelId {
      * 悦游
      */
     public static final int H5_YUEYOU = 15;
+    /**
+     * 掌盟-soeasy
+     */
+    public static final int H5_ZHANGMENG = 16;
 }

@@ -96,7 +96,7 @@ public class NewZySdkController {
         // 3.检查游戏渠道
         ChannelConfig config = configService.selectConfig(appId, channelId, -1);
         if (config == null) {
-            log.error("游戏渠道不存在 appId=" + appId + " channelId=" + channelId);
+            log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
             result.put("status", false);
             result.put("message", "SDK init:游戏渠道不存在！");
             return false;
@@ -698,4 +698,5 @@ public class NewZySdkController {
 
         log.info("/webGame2/ajaxGetSignature\t" + result.toString());
     }
+
 }
