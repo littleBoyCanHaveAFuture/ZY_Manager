@@ -210,7 +210,7 @@ public class ZiWanBaseChannel extends BaseChannel {
 
                 log.info("channelPayCallback 支付成功");
 
-                setChannelOrder(channelOrderNo, "", orderid, "", price);
+                setChannelOrder(channelOrderNo, "", orderId, "", price);
 
                 return true;
             } else if (rsp.getInteger("status") == 4001 || rsp.getInteger("status") == 4002) {
