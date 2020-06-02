@@ -13,8 +13,4 @@ public class ZhangMengConfig {
      * 渠道登录秘钥键值
      */
     public static final String COMMON_KEY = "commonKey";
-    /**
-     * 渠道的支付秘钥键值
-     */
-    public static final String PAY_KEY = "payKey";
 }

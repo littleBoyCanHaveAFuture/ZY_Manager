@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 欢聚
+ * 引力
  * 未接的 todo
  * 1.游戏礼包领取接口
  * 2.游戏登录被顶
@@ -119,7 +119,7 @@ public class YinLiBaseChannel extends BaseChannel {
         super.addParamAnd(param, "gameKey", gameKey);
         super.addParamAnd(param, "sign", sign);
 
-        System.out.println("channelLogin param = " + token + gameKey + gameSecret);
+        log.info("channelLogin param = " + token + gameKey + gameSecret);
         String url = userInfoUrl + param.toString();
 
         /*{
@@ -204,7 +204,7 @@ public class YinLiBaseChannel extends BaseChannel {
         data.put("ext1", ext);
         data.put("ext2", "");
 
-        System.out.println("channelPayInfo data: " + data);
+        log.info("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
         return true;
@@ -239,14 +239,14 @@ public class YinLiBaseChannel extends BaseChannel {
         }
         param.append(gameSecret);
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         String sign = parameterMap.get("sign");
         String serverSign = MD5Util.md5(param.toString());
 
-        System.out.println("channelPayCallback : " + param.toString());
-        System.out.println("channelPayInfo sign: " + sign);
-        System.out.println("channelPayInfo serverSign: " + serverSign);
+        log.info("channelPayCallback : " + param.toString());
+        log.info("channelPayInfo sign: " + sign);
+        log.info("channelPayInfo serverSign: " + serverSign);
 
         if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "", parameterMap.get("gameOrderNo"), parameterMap.get("orderNo"), parameterMap.get("money"));

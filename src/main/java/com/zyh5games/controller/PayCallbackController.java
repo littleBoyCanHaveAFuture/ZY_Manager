@@ -22,8 +22,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,7 +73,7 @@ public class PayCallbackController {
             long orderId = order.getOrderID();
 
             StringBuilder param = new StringBuilder();
-            param.append("amount").append("=").append(price);
+            param.append("amount").append("=").append(price);//金额 元
             param.append("&").append("appId").append("=").append(appId);
             param.append("&").append("cpOrderId").append("=").append(cpOrderId);
             param.append("&").append("orderId").append("=").append(orderId);
@@ -815,48 +818,55 @@ public class PayCallbackController {
     /**
      * 引力
      * 回调body已经过url encode，使用时要使用url decode进行解密等到json
-     *
-     * @param param uid                  KUKU平台用户ID
-     *              orderNo              KUKU平台订单唯一编号
-     *              productId            游戏方支付时传入的商品ID
-     *              gameOrderNo          游戏方支付时传入的游戏方订单编号
-     *              gameKey              KUKU平台分配给游戏方的游戏标识
-     *              payCost              用户真实支付的金额，单位分
-     *              ext1                 游戏方支付时传入的扩展参数2，原样返回
-     *              ext2                 游戏方支付时传入的扩展参数1，原样返回
-     *              sign                 签名
+     * <p>
+     * uid                  KUKU平台用户ID
+     * orderNo              KUKU平台订单唯一编号
+     * productId            游戏方支付时传入的商品ID
+     * gameOrderNo          游戏方支付时传入的游戏方订单编号
+     * gameKey              KUKU平台分配给游戏方的游戏标识
+     * payCost              用户真实支付的金额，单位分
+     * ext1                 游戏方支付时传入的扩展参数2，原样返回
+     * ext2                 游戏方支付时传入的扩展参数1，原样返回
+     * sign                 签名
      */
     @RequestMapping(value = "/callbackPayInfo/h5_yinli/{channelId}/{appId}")
     @ResponseBody
     public void h5_yinli(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
-                         @RequestBody Map<String, Object> param,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
 
-        log.info("callbackPayInfo:" + param.toString());
-//        String jsonData = URLDecoder.decode(urlJsonData, String.valueOf(StandardCharsets.UTF_8));
-//        log.info("h5_yinli JsonData = " + jsonData);
-//
-//        JSONObject data = JSONObject.parseObject(jsonData);
-//
-//        Map<String, String> parameterMap = new HashMap<>();
-//        parameterMap.put("uid", data.getString("uid"));
-//        parameterMap.put("orderNo", data.getString("orderNo"));
-//        parameterMap.put("productId", data.getString("productId"));
-//        parameterMap.put("gameOrderNo", data.getString("gameOrderNo"));
-//        parameterMap.put("gameKey", data.getString("gameKey"));
-//        parameterMap.put("payCost", data.getString("payCost"));
-//        parameterMap.put("ext1", data.getString("ext1"));
-//        parameterMap.put("ext2", data.getString("ext2"));
-//        parameterMap.put("sign", data.getString("sign"));
-//
-//        log.info("parameterMap =" + parameterMap.toString());
-//
-//        String money = FeeUtils.fenToYuan(data.getString("payCost"));
-//        boolean result = checkOrder(appId, channelId, parameterMap, data, data.getString("gameOrderNo"), data.getString("orderNo"), money);
+        int length = request.getContentLength();
+        ServletInputStream input = request.getInputStream();
+        byte[] buffer = new byte[length];
+        input.read(buffer, 0, length);
 
-//        ResponseUtil.write(response, result ? "ok" : "fail");
+        String urlData = new String(buffer);
+
+
+        log.info("callbackPayInfo:" + urlData);
+        String jsonData = URLDecoder.decode(urlData, String.valueOf(StandardCharsets.UTF_8));
+        log.info("h5_yinli JsonData = " + jsonData);
+
+        JSONObject data = JSONObject.parseObject(jsonData);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("uid", data.getString("uid"));
+        parameterMap.put("orderNo", data.getString("orderNo"));
+        parameterMap.put("productId", data.getString("productId"));
+        parameterMap.put("gameOrderNo", data.getString("gameOrderNo"));
+        parameterMap.put("gameKey", data.getString("gameKey"));
+        parameterMap.put("payCost", data.getString("payCost"));
+        parameterMap.put("ext1", data.getString("ext1"));
+        parameterMap.put("ext2", data.getString("ext2"));
+        parameterMap.put("sign", data.getString("sign"));
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        String money = FeeUtils.fenToYuan(data.getString("payCost"));
+        boolean result = checkOrder(appId, channelId, parameterMap, data, data.getString("gameOrderNo"), data.getString("orderNo"), money);
+
+        ResponseUtil.write(response, result ? "ok" : "fail");
     }
 
     /**
@@ -908,27 +918,51 @@ public class PayCallbackController {
     }
 
     /**
-     * 掌盟quick
-     * 参数名            类型    是否必传    说明
-     * nt_data	        string	是       通知数据解码后为xml格式 ,具体见2.1.1
-     * sign	            string	是       签名串,具体见第三章
-     * md5Sign	        string	否       分区服的游戏必传,游戏方的区服编号,如s1,s2
+     * 掌盟  soeasy
+     * 参数名            类型        是否必传        说明
+     *
+     * @param appid     string      Y           同APPID
+     * @param sdkindx   string      Y           平台定义
+     * @param uid       string      Y           用户的唯一标示
+     * @param feeid     string      N           计费点ID
+     * @param feemoney  string      Y           实际扣费金额（分）
+     * @param orderid   string      Y           支付在速易服务器上订单号
+     * @param extradata string      N           Cp自定义参数，响应时透传返回（如游戏服务的订单号）
+     * @param paytime   string      Y           下单时间
+     * @param prover    string      Y           协议版本号初始为1
+     * @param paystatus string      Y           支付状态1为成功，2沙盒测试，其他均为失败
+     * @param sign      string      Y
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_zhangmeng/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_zhangmeng/{channelId}/{appId}", method = RequestMethod.GET)
     @ResponseBody
     public void h5_zhangmeng(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
-                             @RequestParam("nt_data") String nt_data,
+                             @RequestParam("appid") String appid,
+                             @RequestParam("sdkindx") String sdkindx,
+                             @RequestParam("uid") String uid,
+                             @RequestParam(value = "feeid", required = false) String feeid,
+                             @RequestParam("feemoney") String feemoney,
+                             @RequestParam("orderid") String orderid,
+                             @RequestParam(value = "extradata", required = false) String extradata,
+                             @RequestParam("paytime") String paytime,
+                             @RequestParam("prover") String prover,
+                             @RequestParam("paystatus") String paystatus,
                              @RequestParam("sign") String sign,
-                             @RequestParam("md5Sign") String md5Sign,
                              HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
 
         Map<String, String> parameterMap = new HashMap<>();
-        parameterMap.put("nt_data", nt_data);
+        parameterMap.put("appid", appid);
+        parameterMap.put("sdkindx", sdkindx);
+        parameterMap.put("uid", uid);
+        parameterMap.put("feeid", feeid);
+        parameterMap.put("feemoney", feemoney);
+        parameterMap.put("orderid", orderid);
+        parameterMap.put("extradata", extradata);
+        parameterMap.put("paytime", paytime);
+        parameterMap.put("prover", prover);
+        parameterMap.put("paystatus", paystatus);
         parameterMap.put("sign", sign);
-        parameterMap.put("md5Sign", md5Sign);
-
 
         log.info("parameterMap =" + parameterMap.toString());
 
@@ -942,65 +976,16 @@ public class PayCallbackController {
             if (!checkOrder) {
                 break;
             }
-            /*
-             *  is_test	        string	必有	    是否为测试订单 1为测试 0为线上正式订单，游戏应根据情况确定上线后是否向测试订单发放道具。
-             *  channel	        string	必有	    渠道标示ID 注意:游戏可根据实情,确定发放道具时是否校验充值来源渠道是否与该角色注册渠道相符
-             *  channel_uid	    string	必有	    渠道用户唯一标示,该值从客户端GetUserId()中可获取
-             *  game_order	    string	必有	    游戏在调用QuickSDK发起支付时传递的游戏方订单,这里会原样传回
-             *  order_no	    string	必有	    QuickSDK唯一订单号
-             *  pay_time	    string	必有	    支付时间 2015-01-01 23:00:00
-             *  amount	        string	必有	    成交金额，单位元，游戏最终发放道具金额应以此为准
-             *  status	        string	必有	    充值状态:0成功, 1失败(为1时 应返回FAILED失败)
-             *  extras_params	string	必有	    可为空,充值状态游戏客户端调用SDK发起支付时填写的透传参数.没有则为空
-             * */
-            JSONObject quickOrder = JSONObject.parseObject(parameterMap.get("quickOrder"));
+            String cpOrderId = channelOrder.getString("cpOrderId");
+            String channelOrderId = channelOrder.getString("channelOrderId");
+            String money = FeeUtils.fenToYuan(channelOrder.getString("price"));
 
-            String out_order_no = quickOrder.getString("game_order");
-            String money = quickOrder.getString("amount");
-            String order_no = quickOrder.getString("order_no");
-
-            UOrder order = orderManager.getCpOrder(String.valueOf(appId), String.valueOf(channelId), out_order_no);
-            if (order == null) {
-                log.info("订单为空");
-                break;
-            }
-
-            Integer zhiyueUid = order.getUserID();
-            channelOrder.replace("zy_uid", zhiyueUid);
-            boolean first = false;
-            if (order.getState() == OrderState.STATE_OPEN_PAY) {
-                // 首次回调 已完成支付 但未发货
-                order.setState(OrderState.STATE_PAY_SUCCESS);
-                order.setChannelOrderID(order_no);
-                order.setRealMoney(Integer.parseInt(FeeUtils.yuanToFen(money)));
-                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
-                orderManager.updateOrder(order);
-                first = true;
-            } else if (order.getState() == OrderState.STATE_PAY_SUCCESS) {
-                // 多次回调 已完成支付 申请发货未发货
-                rsp.put("code", 2);
-                rsp.put("msg", "订单已支付成功");
-            } else {
-                break;
-            }
-
-            // cp请求发货
-            GameNew gameNew = gameNewService.selectGame(appId, -1);
-            if (gameNew == null) {
-                break;
-            }
-
-            result = notifyToCp(first, gameNew, order, money, out_order_no, channelId);
-            if (!result) {
-                rsp.put("code", 3);
-                rsp.put("msg", "发货失败");
-            } else {
-                rsp.put("code", 1);
-                rsp.put("msg", "订单充值成功");
-            }
+            result = checkOrder(appId, channelId, parameterMap, channelOrder, cpOrderId, channelOrderId, money);
 
         } while (false);
 
+        rsp.put("status", result ? "ok" : "fail");
         ResponseUtil.write(response, rsp);
+        log.info("callbackPayInfo rsp " + rsp.toString());
     }
 }

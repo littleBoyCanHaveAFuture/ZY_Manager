@@ -149,9 +149,52 @@ function zyCallChannelPay(order) {
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
 //ZmSdk.getInstance().reportRoleDetail(roleInfoJSON);
-// roleInfoJSON:{ "datatype": "必填 1.点击分享 2.点击商城", "serverid": "服务器 id",
-// "servername": "服务器名称", "roleid": "角色 id", "rolename": "游戏角色昵称", "rolelevel": "角色等
-// 级","fightvalue": " 战力",(以上字段为必填字段)...]} JSON 
+//     roleInfoJSON:{"
+//     datatype":"必填1.选择服务器2.创建角色3.进入游戏4.等级提升5.退出游戏",
+//     "serverid":"服务器id",
+//     "servername":"服务器名称",
+//     "roleid":"角色id",
+//     "rolename":"游戏角色昵称",
+//     "rolelevel":"角色等级",
+//     "fightvalue":"战力",(以上字段为必填字段)
+//     "moneynum":"游戏币",
+//     "partyname":"工会",
+//     "rolecreatetime":"角色创建时间",
+//     "rolelevelmtime":"角色升级时间",
+//     "gender":"角色性别,可传'男'、'女'",
+//     "professionid":"职业id",
+//     "profession":"职业名称”,
+//     "vip":"vip等级",
+//     "partyid":"所在帮派id",
+//     "partyname":"所在帮派名称",
+//     "partyroleid":"帮派称号id",
+//     "partyrolename":"帮派称号名称",
+//     "friendlist":[{"roleid":"关系角色id","intimacy":"亲密度","nexusid":"关系id,可填数字1:夫妻2:结拜3:情侣4:师徒5:仇人6:其它"
+//     }
+
+    let roleInfoJSON = {};
+    roleInfoJSON.datatype = roleInfo.datatype;
+    roleInfoJSON.serverid = roleInfo.serverId;
+    roleInfoJSON.servername = roleInfo.serverName;
+    roleInfoJSON.roleid = roleInfo.userRoleId;
+    roleInfoJSON.rolename = roleInfo.userRoleName;
+    roleInfoJSON.rolelevel = roleInfo.userRoleLevel;
+    roleInfoJSON.fightvalue = roleInfo.gameRolePower;
+    roleInfoJSON.moneynum = roleInfo.userRoleBalance;
+    roleInfoJSON.partyname = roleInfo.partyName;
+    roleInfoJSON.rolecreatetime = roleInfo.roleCreateTime;
+    roleInfoJSON.rolelevelmtime = roleInfo.roleCreateTime;
+    roleInfoJSON.gender = roleInfo.gameRoleGender;//存疑
+    roleInfoJSON.professionid = roleInfo.professionId;
+    roleInfoJSON.profession = roleInfo.profession;
+    roleInfoJSON.vip = roleInfo.vipLevel;
+    roleInfoJSON.partyid = roleInfo.partyRoleId;
+    roleInfoJSON.partyname = roleInfo.partyName;
+    roleInfoJSON.partyroleid = roleInfo.partyRoleId;
+    roleInfoJSON.partyrolename = roleInfo.partyRoleName;
+    roleInfoJSON.friendlist = roleInfo.friendlist;
+    roleInfoJSON.friendlist = "";
+    ZmSdk.getInstance().reportRoleStatus(roleInfoJSON);
 }
 
 function share() {

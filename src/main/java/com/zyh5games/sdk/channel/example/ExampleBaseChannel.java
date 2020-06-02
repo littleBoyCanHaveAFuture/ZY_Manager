@@ -81,7 +81,7 @@ public class ExampleBaseChannel extends BaseChannel {
         super.addParam(param, "", "");
         super.addParamAnd(param, "", "");
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名验证
         String sign = map.get("sign")[0];
@@ -90,8 +90,8 @@ public class ExampleBaseChannel extends BaseChannel {
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
 
-        System.out.println("channelLogin serverSign = " + serverSign);
-        System.out.println("channelLogin sign       = " + sign);
+        log.info("channelLogin serverSign = " + serverSign);
+        log.info("channelLogin sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", "", String.valueOf(channelId), "");
@@ -122,7 +122,7 @@ public class ExampleBaseChannel extends BaseChannel {
         super.addParam(param, "", "");
         super.addParamAnd(param, "", "");
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名验证
         String sign = "";
@@ -131,8 +131,8 @@ public class ExampleBaseChannel extends BaseChannel {
         log.info("channelPayInfo serverSign = " + serverSign);
         log.info("channelPayInfo sign       = " + sign);
 
-        System.out.println("channelPayInfo serverSign = " + serverSign);
-        System.out.println("channelPayInfo sign       = " + sign);
+        log.info("channelPayInfo serverSign = " + serverSign);
+        log.info("channelPayInfo sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             return false;
@@ -153,7 +153,7 @@ public class ExampleBaseChannel extends BaseChannel {
         data.put("signType", "md5");
         data.put("sign", "sign");*/
 
-        System.out.println("channelPayInfo data: " + data);
+        log.info("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
         return true;
@@ -176,7 +176,7 @@ public class ExampleBaseChannel extends BaseChannel {
         super.addParam(param, "", "");
         super.addParamAnd(param, "", "");
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名验证
         String sign = parameterMap.get("sign");
@@ -185,8 +185,8 @@ public class ExampleBaseChannel extends BaseChannel {
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
 
-        System.out.println("channelPayCallback serverSign = " + serverSign);
-        System.out.println("channelPayCallback sign       = " + sign);
+        log.info("channelPayCallback serverSign = " + serverSign);
+        log.info("channelPayCallback sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             return false;

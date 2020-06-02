@@ -6,23 +6,23 @@ let initParams = {
         success: function (e) {
             if (e === 'success') {
                 /* 支付成功回调方法（仅针对于快捷支付方式有效，该方法不做回调处理，游戏发货请以服务端回调为准）*/
-                Console.log("game tell pay success");//该方法仅供参考
+                console.log("game tell pay success");//该方法仅供参考
             } else if (e === 'payClose') {
                 //用户关闭支付窗口
-                Console.log("game tell pay close");//该方法仅供参考
+                console.log("game tell pay close");//该方法仅供参考
             }
         }
     },
     share: {
         success: function (e) {
             /* 分享成功回调方法*/
-            Console.log("game tell share success");//该方法仅供参考
+            console.log("game tell share success");//该方法仅供参考
         }
     },
     uploadGameRole: {
         success: function (e) {
             /* 上报角色信息回调方法*/
-            Console.log("game tell uploadGameRole success");//该方法仅供参考
+            console.log("game tell uploadGameRole success");//该方法仅供参考
         }
     }
 };
@@ -59,11 +59,20 @@ function zyCallChannelInit(params) {
         gameId = getQueryString(params, 'gameId');
     }
     initParams.gameId = gameId;
+    if (!hasInit) {
+        cySdk = window.CY_GAME_SDK;
+        if (cySdk != null) {
+            cySdk.config(initParams);//初始化
+            hasInit = true;
+        }
+
+    }
 }
 
 //用户点击商品下单
 function zyCallChannelPay(order) {
     if (!hasInit) {
+        cySdk = window.CY_GAME_SDK;
         cySdk.config(initParams);//初始化
         hasInit = true;
     }
@@ -81,6 +90,7 @@ function zyCallChannelPay(order) {
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);
     if (!hasInit) {
+        cySdk = window.CY_GAME_SDK
         cySdk.config(initParams);//初始化
         hasInit = true;
     }

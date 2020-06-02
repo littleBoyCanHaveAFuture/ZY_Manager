@@ -176,7 +176,7 @@ public class ZiWanBaseChannel extends BaseChannel {
         String[] mustKey = {"openid", "price", "other", "item_id", "orderid", "sign"};
         for (String key : mustKey) {
             if (!parameterMap.containsKey(key)) {
-                System.out.println("channelPayCallback 缺少key：" + key);
+                log.info("channelPayCallback 缺少key：" + key);
                 return false;
             }
         }
@@ -256,12 +256,12 @@ public class ZiWanBaseChannel extends BaseChannel {
         super.addParamAnd(param, "role_name", role_name);
         super.addParamAnd(param, "userToken", userToken);
 
-        System.out.println("ajaxGetSignature param = " + param);
+        log.info("ajaxGetSignature param = " + param);
 
 
         String sign = MD5Util.md5(param.toString() + secretKey);
 
-        System.out.println("ajaxGetSignature sign = " + sign);
+        log.info("ajaxGetSignature sign = " + sign);
         /*
             userToken       必填，接口1 回调获取到的userToken
             channel_id      必填，渠道id

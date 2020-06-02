@@ -105,14 +105,14 @@ public class YuMaBaseChannel extends BaseChannel {
         }
 
         String url = loginUrl + param.toString();
-        System.out.println("channelLogin url = " + url);
+        log.info("channelLogin url = " + url);
 
 
         JSONObject rsp = httpService.httpGetJson(url);
         if (rsp != null && rsp.containsKey("userData")) {
             JSONObject quickUserData = rsp.getJSONObject("userData");
 
-            System.out.println("quickUserData = " + quickUserData);
+            log.info("quickUserData = " + quickUserData);
             String channelUid = quickUserData.getString("uid");
             String username = quickUserData.containsKey("username") ? quickUserData.getString("username") : "";
             String token = quickUserData.containsKey("token") ? quickUserData.getString("token") : "";
@@ -232,15 +232,15 @@ public class YuMaBaseChannel extends BaseChannel {
         String param = nt_data + sign + md5Key;
         String serverMd5Sign = MD5Util.md5(param);
 
-        System.out.println("channelPayCallback sign: " + serverMd5Sign);
-        System.out.println("channelPayCallback sign: " + md5Sign);
+        log.info("channelPayCallback sign: " + serverMd5Sign);
+        log.info("channelPayCallback sign: " + md5Sign);
 
         if (!md5Sign.equals(serverMd5Sign)) {
             return false;
         }
         // 解析 nt_data
         String orderData = IOSDesUtil.decode(nt_data, callBackKey);
-        System.out.println("orderData = " + orderData);
+        log.info("orderData = " + orderData);
         JSONObject quickOrder = XmlUtils.getQuickOrderXml(orderData);
         if (quickOrder == null || quickOrder.isEmpty()) {
             return false;

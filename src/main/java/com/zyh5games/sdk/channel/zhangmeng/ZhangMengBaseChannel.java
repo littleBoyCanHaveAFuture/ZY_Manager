@@ -9,6 +9,7 @@ import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ public class ZhangMengBaseChannel extends BaseChannel {
      * 3.渠道登录<p>
      * 3.1 向渠道校验 获取用户数据 <p>
      * 3.2 设置token<p>
+     * 掌盟因为js加载顺序问题 会失败请求一次 待js初始化完成后 回调方法主动调起 cp登录方法，再次完成登录
      *
      * @param map      渠道传入参数
      * @param userData 渠道用户数据
@@ -87,8 +89,8 @@ public class ZhangMengBaseChannel extends BaseChannel {
         super.addParamAnd(param, "uid", uid);
 
         String serverSign = MD5Util.md5(param.toString());
-        System.out.println("channelLogin sign = " + sign);
-        System.out.println("channelLogin serverSign = " + serverSign);
+        log.info("channelLogin sign = " + sign);
+        log.info("channelLogin serverSign = " + serverSign);
 
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", name, String.valueOf(channelId), "");
@@ -116,15 +118,15 @@ public class ZhangMengBaseChannel extends BaseChannel {
      */
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
-        System.out.println(orderData.toJSONString());
-        System.out.println(configMap.toString());
+        log.info(orderData.toJSONString());
+        log.info(configMap.toString());
 
         Integer appId = orderData.getInteger("appId");
 
         String payKey = configMap.get(appId).getString(ZhangMengConfig.COMMON_KEY);
 
         String fee = FeeUtils.yuanToFen(orderData.getString("amount"));
-        System.out.println("fee = " + fee.toString());
+        log.info("fee = " + fee.toString());
         String feeid = orderData.getString("goodsId");
         String feename = orderData.getString("subject");
         String extradata = orderData.getString("extrasParams");
@@ -140,14 +142,14 @@ public class ZhangMengBaseChannel extends BaseChannel {
         param.append(fee);
         param.append(feeid);
         param.append(payKey);
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名验证
         String serverSign = MD5Util.md5(param.toString());
 
         log.info("channelPayInfo serverSign = " + serverSign);
 
-        System.out.println("channelPayInfo serverSign = " + serverSign);
+        log.info("channelPayInfo serverSign = " + serverSign);
 
 
         // 渠道订单数据
@@ -163,7 +165,7 @@ public class ZhangMengBaseChannel extends BaseChannel {
         data.put("servername", servername);
 
 
-        System.out.println("channelPayInfo data: " + data);
+        log.info("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
         return true;
@@ -174,35 +176,67 @@ public class ZhangMengBaseChannel extends BaseChannel {
      *
      * @param appId          指悦游戏id
      * @param parameterMap   渠道回调参数
+     *                       字段        类型        是否必填    备注
+     *                       appid       string      Y           同APPID
+     *                       sdkindx     string      Y           平台定义
+     *                       uid         string      Y           用户的唯一标示
+     *                       feeid       string      N           计费点ID
+     *                       feemoney    string      Y           实际扣费金额（分）
+     *                       orderid     string      Y           支付在速易服务器上订单号
+     *                       extradata   string      N           Cp自定义参数，响应时透传返回（如游戏服务的订单号）
+     *                       paytime     string      Y           下单时间
+     *                       prover      string      Y           协议版本号初始为1
+     *                       paystatus   string      Y           支付状态1为成功，2沙盒测试，其他均为失败signstringY算法见下文
      * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
         String channelGameId = configMap.get(appId).getString(ZhangMengConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(ZhangMengConfig.PAY_KEY);
+        String payKey = configMap.get(appId).getString(ZhangMengConfig.COMMON_KEY);
 
+        String cpOrderId = parameterMap.get("extradata");
+        String channelOrderId = parameterMap.get("orderid");
+        String money = parameterMap.get("feemoney");
+        String time = parameterMap.get("paytime");
+        String[] signKey = {"appid", "sdkindx", "uid", "feeid", "feemoney", "orderid", "extradata", "paytime", "prover", "paystatus"};
+        Arrays.sort(signKey);
         // 加密串
+        boolean first = true;
         StringBuilder param = new StringBuilder();
-        super.addParam(param, "", "");
-        super.addParamAnd(param, "", "");
+        for (String s : signKey) {
+            if (parameterMap.get(s) == null || parameterMap.get(s).isEmpty()) {
+                continue;
+            }
+            if ("sign".equals(s)) {
+                continue;
+            }
+            if (first) {
+                super.addParam(param, s, parameterMap.get(s));
+                first = false;
+            } else {
+                super.addParamAnd(param, s, parameterMap.get(s));
+            }
+        }
+        System.out.println(time);
+        System.out.println(param.toString());
+        log.info("param = " + param.toString());
+        //appid=1052&extradata=20170307135213SkfBjDM&feeid=1&feemoney=100&orderid=3151703071404286&paystatus=1&paytime=2017-03-0713:52:14&prover=1&sdkindx=315&uid=f734d3f81b6e21e952b4ca3074d90a30
+        String serverSignOne = MD5Util.md5(param.toString());
+        String serverSignTwo = MD5Util.md5(serverSignOne + payKey);
 
-        System.out.println("param = " + param.toString());
 
         // 签名验证
         String sign = parameterMap.get("sign");
-        String serverSign = MD5Util.md5(param.toString());
+        String serverSign = serverSignTwo;
 
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
-
-        System.out.println("channelPayCallback serverSign = " + serverSign);
-        System.out.println("channelPayCallback sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             return false;
         }
         // 渠道订单赋值
-        setChannelOrder(channelOrderNo, "", "cpOrderId", "channelOrderId", "money");
+        setChannelOrder(channelOrderNo, "", cpOrderId, channelOrderId, money);
         return true;
     }
 

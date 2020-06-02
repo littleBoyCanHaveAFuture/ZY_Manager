@@ -88,6 +88,7 @@ public class HuanjuBaseChannel extends BaseChannel {
         }
         //  id=1&avatar=http%3A%2F%2Fh5.6816.com%2Fstatic%2Fattachment%2Fuser%2F20160816%2F1471334322441376.png&gameId=113&signType=md5&time=1475042060&uid=29923&userName=dreamfly_1981&userSex=male&sign=6a3f16124a0c641082c17a438d1323a8
         //  Md5(gameId=113&time=1475042196&uid=29923&userName=dreamfly_1981&key=testkey)
+//        gameId=956&time=1591078501&userName=well-done&uid=3385060&key=a9db131a5d5f5b013c374b290599fb68
         String commonKey = configMap.get(appId).getString(HuanJuConfig.COMMON_KEY);
 
         String avatar = map.get("avatar")[0];
@@ -105,19 +106,16 @@ public class HuanjuBaseChannel extends BaseChannel {
         StringBuilder param = new StringBuilder();
         super.addParam(param, "gameId", gameId);
         super.addParamAnd(param, "time", time);
-        super.addParamAnd(param, "userName", userName);
         super.addParamAnd(param, "uid", uid);
+        super.addParamAnd(param, "userName", userName);
         super.addParamAnd(param, "key", commonKey);
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign = " + sign);
 
-        // todo 参数校验有问题 周一重发参数
-        System.out.println("channelLogin serverSign = " + serverSign);
-        System.out.println("channelLogin sign = " + sign);
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", "", String.valueOf(channelId), "");
             return false;
@@ -198,7 +196,7 @@ public class HuanjuBaseChannel extends BaseChannel {
         data.put("signType", "md5");
         data.put("sign", sign);
 
-        System.out.println("channelPayInfo data: " + data);
+        log.info("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
         return true;
@@ -256,13 +254,13 @@ public class HuanjuBaseChannel extends BaseChannel {
         super.addParamAnd(param, "userName", parameterMap.get("userName"));
         super.addParamAnd(param, "key", payKey);
 
-        System.out.println("channelPayCallback : " + param.toString());
+        log.info("channelPayCallback : " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
         String sign = parameterMap.get("sign");
 
-        System.out.println("channelPayCallback sign: " + serverSign);
-        System.out.println("channelPayCallback sign: " + sign);
+        log.info("channelPayCallback sign: " + serverSign);
+        log.info("channelPayCallback sign: " + sign);
 
         if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "",

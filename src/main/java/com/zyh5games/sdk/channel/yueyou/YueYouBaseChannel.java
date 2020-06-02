@@ -117,7 +117,7 @@ public class YueYouBaseChannel extends BaseChannel {
             }
         }
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         String userName = map.containsKey("nickname") ? map.get("nickname")[0] : "";
         // 签名验证
@@ -127,8 +127,8 @@ public class YueYouBaseChannel extends BaseChannel {
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
 
-        System.out.println("channelLogin serverSign = " + serverSign);
-        System.out.println("channelLogin sign       = " + sign);
+        log.info("channelLogin serverSign = " + serverSign);
+        log.info("channelLogin sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", "", String.valueOf(channelId), "");
@@ -192,14 +192,14 @@ public class YueYouBaseChannel extends BaseChannel {
 
         param.append(payKey);
 
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名
         String serverSign = MD5Util.md5(param.toString());
 
         log.info("channelPayInfo serverSign = " + serverSign);
 
-        System.out.println("channelPayInfo serverSign = " + serverSign);
+        log.info("channelPayInfo serverSign = " + serverSign);
 
 
         // 渠道订单数据
@@ -217,8 +217,8 @@ public class YueYouBaseChannel extends BaseChannel {
         data.put("role_id", orderData.getString("userRoleId"));
         data.put("role_name", orderData.getString("userRoleName"));
 
-        System.out.println("channelPayInfo sdkloginmodel: " + loginModelMap.toString());
-        System.out.println("channelPayInfo data: " + data);
+        log.info("channelPayInfo sdkloginmodel: " + loginModelMap.toString());
+        log.info("channelPayInfo data: " + data);
         channelOrderNo.put("data", data.toJSONString());
 
         return true;
@@ -241,7 +241,7 @@ public class YueYouBaseChannel extends BaseChannel {
         String cpOrderId = parameterMap.get("trade_no");
         String money = FeeUtils.fenToYuan(parameterMap.get("amount"));
         if (!channelGameId.equals(parameterMap.get("game_appid"))) {
-            System.out.println("channelPayCallback 渠道参数 游戏id错误 channelGameId = " + channelGameId + "game_appid = " + game_appid);
+            log.info("channelPayCallback 渠道参数 游戏id错误 channelGameId = " + channelGameId + "game_appid = " + game_appid);
             return false;
         }
         // 加密串- MD5(amount=[amount]&channel_source=[channel_source]&game_appid=[game_appid]&out_trade_no=[out_trade_no]&payplatform2cp=[payplatform2cp]&trade_no=[trade_no][game_key])
@@ -254,7 +254,7 @@ public class YueYouBaseChannel extends BaseChannel {
         super.addParamAnd(param, "trade_no", parameterMap.get("trade_no"));
 
         param.append(payKey);
-        System.out.println("param = " + param.toString());
+        log.info("param = " + param.toString());
 
         // 签名验证
         String sign = parameterMap.get("sign");
@@ -263,8 +263,8 @@ public class YueYouBaseChannel extends BaseChannel {
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
 
-        System.out.println("channelPayCallback serverSign = " + serverSign);
-        System.out.println("channelPayCallback sign       = " + sign);
+        log.info("channelPayCallback serverSign = " + serverSign);
+        log.info("channelPayCallback sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             return false;
@@ -304,14 +304,14 @@ public class YueYouBaseChannel extends BaseChannel {
                 super.addParamAnd(param, key, value);
             }
         }
-        System.out.println("ajaxGetSignature param = " + param);
+        log.info("ajaxGetSignature param = " + param);
 
         // 签名验证
         String sign = MD5Util.md5(param.toString());
 
         log.info("ajaxGetSignature serverSign = " + sign);
 
-        System.out.println("ajaxGetSignature serverSign = " + sign);
+        log.info("ajaxGetSignature serverSign = " + sign);
 
         JSONObject userData = new JSONObject();
         userData.put("user_id", requestInfo.getString("user_id"));

@@ -250,10 +250,10 @@ public class Wan5144BaseChannel extends BaseChannel {
         param.append("&").append("userName").append("=").append(parameterMap.get("userName"));
         param.append("&").append("key").append("=").append(payKey);
 
-        System.out.println("channelPayCallback : " + param.toString());
+        log.info("channelPayCallback : " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
-        System.out.println("channelPayInfo sign: " + serverSign);
+        log.info("channelPayInfo sign: " + serverSign);
 
         if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "", parameterMap.get("orderId"), "", parameterMap.get("money"));

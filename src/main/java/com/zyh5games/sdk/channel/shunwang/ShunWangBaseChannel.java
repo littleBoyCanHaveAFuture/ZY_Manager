@@ -132,7 +132,7 @@ public class ShunWangBaseChannel extends BaseChannel {
         param.append(loginKey);
 
         log.info("channelLogin " + param);
-        System.out.println("channelLogin " + param);
+        log.info("channelLogin " + param);
         String serverSign = MD5Util.md5(param.toString());
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
@@ -175,8 +175,8 @@ public class ShunWangBaseChannel extends BaseChannel {
         data.put("time", System.currentTimeMillis() / 1000);
         data.put("otherData", orderData.getString("extrasParams"));
 
-        System.out.println(data.toJSONString());
-        System.out.println(data.toString());
+        log.info(data.toJSONString());
+        log.info(data.toString());
 
         String base64Data = Base64.encode(data.toString(), String.valueOf(StandardCharsets.UTF_8));
         String sign = MD5Util.md5(base64Data + qrCodeKey);
@@ -220,7 +220,7 @@ public class ShunWangBaseChannel extends BaseChannel {
         String[] mustKey = {"order_no", "guid", "money", "platform", "time", "sign"};
         for (String key : mustKey) {
             if (!parameterMap.containsKey(key)) {
-                System.out.println("channelPayCallback 缺少key：" + key);
+                log.info("channelPayCallback 缺少key：" + key);
                 return false;
             }
         }
