@@ -49,7 +49,15 @@ public class ChannelId {
      */
     public static final int H5_YUEYOU = 15;
     /**
+     * 1756
+     */
+    public static final int H5_1756 = 15;
+    /**
      * 掌盟-soeasy
      */
-    public static final int H5_ZHANGMENG = 16;
+    public static final int H5_ZHANGMENG = 17;
+    /**
+     * 一牛
+     */
+    public static final int H5_YINIU = 18;
 }

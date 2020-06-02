@@ -606,7 +606,7 @@ public class ServerController {
 
         ResponseUtil.write(response, result);
 
-        log.info("request: server/getSpList , map: " + result.toString());
+        log.info("request: server/getSpList , end");
     }
 
     /**

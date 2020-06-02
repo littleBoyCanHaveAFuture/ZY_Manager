@@ -246,6 +246,8 @@ public class YuMaBaseChannel extends BaseChannel {
             return false;
         }
         parameterMap.put("quickOrder", quickOrder.toJSONString());
+
+        // todo 给 channelOrderNo 赋值
         return true;
     }
 

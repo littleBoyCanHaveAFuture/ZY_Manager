@@ -69,7 +69,7 @@
         <select title="选择订单状态" id="payRecord_state">
             <option value="-1">所有订单</option>
 <%--            <option value="0">无</option>--%>
-            <option value="1">选择商品-未支付</option>
+<%--            <option value="1">选择商品-未支付</option>--%>
             <option value="2">选择支付方式-未支付</option>
             <option value="3">支付成功-未发货</option>
             <option value="4" selected="selected">支付成功-交易完成</option>

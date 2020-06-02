@@ -96,8 +96,8 @@ public class UOrderManager {
     }
 
     /**
-     * @param appId          游戏id
-     * @param channelID      渠道id
+     * @param appId     游戏id
+     * @param channelID 渠道id
      * @param cpOrderID 渠道订单id
      */
     public UOrder getCpOrder(String appId, String channelID, String cpOrderID) {
@@ -116,6 +116,10 @@ public class UOrderManager {
      */
     public void updateOrder(UOrder order) {
         orderDao.update(order);
+    }
+
+    public void updateCpOrder(UOrder order) {
+        orderDao.updateCpOrder(order);
     }
 
     public void deleteOrder(UOrder order) {

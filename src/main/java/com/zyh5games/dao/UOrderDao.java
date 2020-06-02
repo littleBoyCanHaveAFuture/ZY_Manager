@@ -31,4 +31,5 @@ public interface UOrderDao {
 
     void update(UOrder order);
 
+    int updateCpOrder(UOrder order);
 }

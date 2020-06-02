@@ -179,6 +179,35 @@
         and channelID= #{channelID}
         and channelOrderID=#{channelOrderID}
     </update>
+
+    <update id="updateCpOrder" parameterType="UOrder">
+        update zy_order
+        <set>
+            <if test="realMoney!=null and realMoney!=''  ">
+                realMoney=#{realMoney},
+            </if>
+            <if test="state!=null and state!=''  ">
+                state=#{state},
+            </if>
+            <if test="completeTime!=null and completeTime!=''  ">
+                completeTime=#{completeTime},
+            </if>
+            <if test="channelOrderID!=null and channelOrderID!='' ">
+                channelOrderID = #{channelOrderID},
+            </if>
+            <if test="sdkOrderTime!=null and sdkOrderTime!='' ">
+                sdkOrderTime = #{sdkOrderTime},
+            </if>
+            <if test="completeTime!=null and completeTime!=''  ">
+                completeTime = #{completeTime}
+            </if>
+        </set>
+        <where>
+            appID=#{appID}
+            and channelID= #{channelID}
+            AND cpOrderID = #{cpOrderId}
+        </where>
+    </update>
     <select id="getOrderById" resultType="UOrder">
         <include refid="select_payRecord_column"/>
         where orderID=#{orderID}
