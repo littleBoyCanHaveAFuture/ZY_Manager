@@ -49,9 +49,9 @@ public class ChannelId {
      */
     public static final int H5_YUEYOU = 15;
     /**
-     * 1756
+     * 1758
      */
-    public static final int H5_1756 = 15;
+    public static final int H5_1758 = 16;
     /**
      * 掌盟-soeasy
      */

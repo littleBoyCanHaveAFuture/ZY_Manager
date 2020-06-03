@@ -47,25 +47,25 @@ function zyExtraParam(requestUri) {
     }
     let channelWLH = requestUri.wlh;
     let time = getQueryString(channelWLH, "zysyTime");
-    if (time === null) {
+    if (time === null || time === undefined) {
         channelWLH += "&zysyTime=" + soeasyUserInfo.time;
     } else {
         //替换 todo
     }
     let uid = getQueryString(channelWLH, "zysyUid");
-    if (time === null) {
+    if (uid === null || uid === undefined) {
         channelWLH += "&zysyUid=" + soeasyUserInfo.uid;
     } else {
         //替换 todo
     }
     let name = getQueryString(channelWLH, "zysyName");
-    if (time === null) {
+    if (name === null || name === undefined) {
         channelWLH += "&zysyName=" + soeasyUserInfo.name;
     } else {
         //替换 todo
     }
     let sign = getQueryString(channelWLH, "zysySign");
-    if (time === null) {
+    if (sign === null || sign === undefined) {
         channelWLH += "&zysySign=" + soeasyUserInfo.sign;
     } else {
         //替换 todo

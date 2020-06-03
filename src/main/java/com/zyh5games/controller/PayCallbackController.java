@@ -129,7 +129,7 @@ public class PayCallbackController {
             result = notifyToCp(first, gameNew, order, money, cpOrderId, channelId);
             log.info(" end OrderState = " + order.getState());
         } while (false);
-
+        log.info(" end result = " + result);
         return result;
     }
 
@@ -176,10 +176,11 @@ public class PayCallbackController {
                 res = false;
                 break;
             }
-
+            log.info("first：" + first);
             //支付成功 更新订单 redis-mysql
             if (first) {
                 Account account = accountService.findAccountById(zhiyueUid);
+                log.info("account：" + account != null);
                 if (account != null) {
                     cache.reqPay(String.valueOf(appId), order.getServerID(), String.valueOf(channelId), zhiyueUid, order.getRoleID(), order.getRealMoney(), account.getCreateTime());
                 }
@@ -836,6 +837,44 @@ public class PayCallbackController {
 
         String money = FeeUtils.fenToYuan(amount);
         boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 1758
+     * 参数字段	           类型	    说明	                                是否可空	是否参与签名
+     *
+     * @param params appKey      string	游戏的appKey	                            否	是
+     *               gid         string	用户的gid	                            否	是
+     *               orderId     string	1758订单号	                            否	是
+     *               txId        string	cp订单号	                                否	是
+     *               productDesc string	商品描述	                                否	是
+     *               totalFee    int	    支付金额，单位分	                        否	是
+     *               status      int	    订单状态	                                否	是
+     *               state       string	cp自定义参数	                            是	是
+     *               ext         string	订单其他信息，json结构，预留参数，目前未启用	是	否
+     *               sign        string	参数签名	                                否	签名方法 , 签名工具
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_1758/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_1758(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                        @RequestParam Map<String, String> params,
+                        HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        log.info("parameterMap =" + params.toString());
+
+        JSONObject data = new JSONObject();
+
+        String totalFee = params.get("totalFee");
+        String txId = params.get("txId");
+        String orderId = params.get("orderId");
+        String money = FeeUtils.fenToYuan(totalFee);
+        boolean result = checkOrder(appId, channelId, params, data, txId, orderId, money);
 
         JSONObject rsp = new JSONObject();
         rsp.put("status", result ? "success" : "fail");

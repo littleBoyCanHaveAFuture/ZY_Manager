@@ -18,26 +18,26 @@ function sdkInit(GameId, GameKey, ChannelCode) {
             console.error("ZhiYueSDK init fail");
             return;
         }
-        console.log("ZhiYueSDK init success");
-        ZhiYueSDK.login(function (callbackData) {
-            console.log("login " + JSON.stringify(callbackData));
-            if (callbackData.status) {
-                console.log('GameDemo:ZhiYueSDK登录成功: uid=>' + callbackData.data.uid);
-                //模拟cp服务器进行登录校验
-                zyCheckUserInfo(callbackData);
-                channelUid = callbackData.data.uid;
-                roleID = getRndInteger(1000000, 9999999);
-                console.log("roleID=" + roleID);
-                // uploadRoleInfo(2, channelUid, roleID);
-                // uploadRoleInfo(3, channelUid, roleID);
-                // sdkPay(roleID);
-                // testChannelPayCallback();
-                // uploadRoleInfo(4, channelUid, roleID);
-                // uploadRoleInfo(5, channelUid, roleID);
-            } else {
-                console.log('GameDemo:ZhiYueSDK登录失败:' + callbackData.message);
-            }
-        });
+        // console.log("ZhiYueSDK init success");
+        // ZhiYueSDK.login(function (callbackData) {
+        //     console.log("login " + JSON.stringify(callbackData));
+        //     if (callbackData.status) {
+        //         console.log('GameDemo:ZhiYueSDK登录成功: uid=>' + callbackData.data.uid);
+        //         //模拟cp服务器进行登录校验
+        //         zyCheckUserInfo(callbackData);
+        //         channelUid = callbackData.data.uid;
+        //         roleID = getRndInteger(1000000, 9999999);
+        //         console.log("roleID=" + roleID);
+        //         // uploadRoleInfo(2, channelUid, roleID);
+        //         // uploadRoleInfo(3, channelUid, roleID);
+        //         // sdkPay(roleID);
+        //         // testChannelPayCallback();
+        //         // uploadRoleInfo(4, channelUid, roleID);
+        //         // uploadRoleInfo(5, channelUid, roleID);
+        //     } else {
+        //         console.log('GameDemo:ZhiYueSDK登录失败:' + callbackData.message);
+        //     }
+        // });
     });
 }
 

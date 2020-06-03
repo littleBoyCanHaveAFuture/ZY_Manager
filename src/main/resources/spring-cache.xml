@@ -48,10 +48,19 @@
         <constructor-arg index="4" name="password" type="java.lang.String" value="oURLPXI5qb5uNDPz"/>
     </bean>
 
+    <bean id="prodAli" class="redis.clients.jedis.JedisPool">
+        <!--    自用 阿里云 外网连接-->
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <constructor-arg index="1" type="java.lang.String" name="host"
+                         value="zhiyuesdk.redis.rds.aliyuncs.com"/>
+        <constructor-arg index="2" type="int" name="port" value="6379"/>
+        <constructor-arg index="3" type="int" name="timeout" value="5000"/>
+        <constructor-arg index="4" type="java.lang.String" name="password" value="8a2H2ePcPVseJ9K9"/>
+    </bean>
     <!-- redis 的缓存 -->
     <bean id="jedisManager" class="com.zyh5games.jedis.JedisManager">
-        <!--        <property name="jedisPool" ref="jedisPool_Ali"/>-->
-        <property name="jedisPool" ref="jedisPool_Tencent"/>
+                <property name="jedisPool" ref="jedisPool_Ali"/>
+<!--        <property name="jedisPool" ref="jedisPool_Tencent"/>-->
     </bean>
 
     <!-- 缓存实现，对ShiroCacheManager，我是采用redis的实现 -->
@@ -87,5 +96,6 @@
     <bean id="channelHandler" class="com.zyh5games.sdk.channel.ChannelHandler" init-method="init">
 
     </bean>
+
 
 </beans>

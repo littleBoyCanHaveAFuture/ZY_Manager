@@ -24,7 +24,8 @@ public class ChannelHandler {
      */
     @Autowired
     private Map<String, BaseChannel> channelMap;
-
+    @Autowired
+    private HttpService httpService;
     @Resource
     private ChannelConfigService configService;
 
@@ -71,6 +72,7 @@ public class ChannelHandler {
     public void init() {
         loadChannelApp();
         print();
+        httpService.main(null);
     }
 
 
