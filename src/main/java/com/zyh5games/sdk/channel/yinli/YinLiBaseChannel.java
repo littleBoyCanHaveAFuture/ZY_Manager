@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * 引力
- * 未接的 todo
+ * 未接的
  * 1.游戏礼包领取接口
  * 2.游戏登录被顶
  * 3.游戏服务器列表查询
@@ -107,10 +107,8 @@ public class YinLiBaseChannel extends BaseChannel {
         String gameKey = configMap.get(appId).getString(YinLiConfig.GAME_KEY);
         String gameSecret = configMap.get(appId).getString(YinLiConfig.GAME_SECRET);
 
-
-        String token = map.get("token")[0];
         //  根据token获取用户信息接口
-        //  https://game.kuku168.cn/gameSDK/getUserInfoByToken?token=xxxxxx&gameKey=xxx&sign=xxxx
+        String token = map.get("token")[0];
 
         String sign = MD5Util.md5(gameKey + token + gameSecret);
 
@@ -136,7 +134,6 @@ public class YinLiBaseChannel extends BaseChannel {
             if (rsp.containsKey("code") && rsp.containsKey("data")) {
                 Integer code = rsp.getInteger("code");
                 if (code == 1) {
-                    //&& rsp.getString("msg").equals("ok")
                     JSONObject data = rsp.getJSONObject("data");
                     setUserData(userData, data.getString("uid"), data.getString("nickName"), String.valueOf(channelId), "");
                     return true;
@@ -146,7 +143,6 @@ public class YinLiBaseChannel extends BaseChannel {
 
         setUserData(userData, "", "", "", "");
         return false;
-
     }
 
     /**
@@ -154,6 +150,15 @@ public class YinLiBaseChannel extends BaseChannel {
      *
      * @param orderData      渠道订单请求参数
      * @param channelOrderNo 渠道订单返回参数
+     *                       API002:游戏调用此函数完成支付页面调起
+     *                       参数说明
+     *                       productCost                1000                  必填，     道具支付金额，单位分
+     *                       productId                  'PRO_1234'            必填，     游戏道具ID
+     *                       productName                '100元宝'              必填，     游戏道具名称
+     *                       gameUid                    '123456'              可选，     游戏方用户ID
+     *                       gameOrderNo                'ORD_123456'          可选，     游戏方订单ID
+     *                       ext1                       '123456'              可选，     扩展字段1，支付回调游戏方时原样返回
+     *                       ext2                       '7890'                可选，     扩展字段2，支付回调游戏方时原样返回
      * @return boolean
      */
     @Override
@@ -172,28 +177,6 @@ public class YinLiBaseChannel extends BaseChannel {
         String goodsName = orderData.getString("subject");
         String money = orderData.getString("amount");
         String ext = orderData.getString("extrasParams");
-
-        /*
-            API002:游戏调用此函数完成支付页面调起
-            参数说明
-            productCost:1000,           必填，     道具支付金额，单位分
-            productId:'PRO_1234',       必填，     游戏道具ID
-            productName:'100元宝',       必填，     游戏道具名称
-            gameUid:'123456',           可选，     游戏方用户ID
-            gameOrderNo:'ORD_123456',   可选，     游戏方订单ID
-            ext1:'123456',              可选，     扩展字段1，支付回调游戏方时原样返回
-            ext2:'7890',                可选，     扩展字段2，支付回调游戏方时原样返回
-        */
-
-        StringBuilder param = new StringBuilder();
-        super.addParam(param, "productCost", FeeUtils.yuanToFen(money));
-        super.addParamAnd(param, "productId", goodsId);
-        super.addParamAnd(param, "productName", goodsName);
-        super.addParamAnd(param, "gameUid", channelUid);
-        super.addParamAnd(param, "gameOrderNo", cpOrderNo);
-        super.addParamAnd(param, "ext1", ext);
-        super.addParamAnd(param, "ext2", "");
-
 
         JSONObject data = new JSONObject();
         data.put("productCost", FeeUtils.yuanToFen(money));
@@ -244,15 +227,15 @@ public class YinLiBaseChannel extends BaseChannel {
         String sign = parameterMap.get("sign");
         String serverSign = MD5Util.md5(param.toString());
 
-        log.info("channelPayCallback : " + param.toString());
-        log.info("channelPayInfo sign: " + sign);
-        log.info("channelPayInfo serverSign: " + serverSign);
+        log.info("serverSign  = " + serverSign);
+        log.info("sign        = " + sign);
 
         if (sign.equals(serverSign)) {
             setChannelOrder(channelOrderNo, "", parameterMap.get("gameOrderNo"), parameterMap.get("orderNo"), parameterMap.get("money"));
             return true;
         }
 
+        setChannelOrder(channelOrderNo, "", "", "", "");
         return false;
     }
 }

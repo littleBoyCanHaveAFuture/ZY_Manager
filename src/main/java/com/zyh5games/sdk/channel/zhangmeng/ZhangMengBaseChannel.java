@@ -181,7 +181,7 @@ public class ZhangMengBaseChannel extends BaseChannel {
      *                       sdkindx     string      Y           平台定义
      *                       uid         string      Y           用户的唯一标示
      *                       feeid       string      N           计费点ID
-     *                       feemoney    string      Y           实际扣费金额（分）
+     *                       feemoney    string      Y           实际扣费金额（分）-收到元
      *                       orderid     string      Y           支付在速易服务器上订单号
      *                       extradata   string      N           Cp自定义参数，响应时透传返回（如游戏服务的订单号）
      *                       paytime     string      Y           下单时间

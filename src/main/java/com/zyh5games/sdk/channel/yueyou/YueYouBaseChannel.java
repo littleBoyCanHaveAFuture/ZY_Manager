@@ -168,10 +168,7 @@ public class YueYouBaseChannel extends BaseChannel {
         String channelGameId = configMap.get(appId).getString(YueYouConfig.GAME_ID);
         String payKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
 
-        long time = System.currentTimeMillis() / 1000;
-
         // 加密串
-        StringBuilder param = new StringBuilder();
         String[] signKey = {"amount", "channelExt", "game_appid", "props_name", "trade_no", "user_id", "sdkloginmodel"};
         Arrays.sort(signKey);
 
@@ -182,6 +179,7 @@ public class YueYouBaseChannel extends BaseChannel {
         String trade_no = orderData.getString("extrasParams");
         String sdkloginmodel = loginModelMap.get(channelUid);
 
+        StringBuilder param = new StringBuilder();
         super.addParam(param, "amount", money);
         super.addParamAnd(param, "channelExt", channelExt);
         super.addParamAnd(param, "game_appid", channelGameId);
@@ -196,11 +194,7 @@ public class YueYouBaseChannel extends BaseChannel {
 
         // 签名
         String serverSign = MD5Util.md5(param.toString());
-
-        log.info("channelPayInfo serverSign = " + serverSign);
-
-        log.info("channelPayInfo serverSign = " + serverSign);
-
+        log.info("serverSign = " + serverSign);
 
         // 渠道订单数据
         JSONObject data = new JSONObject();
@@ -260,18 +254,15 @@ public class YueYouBaseChannel extends BaseChannel {
         String sign = parameterMap.get("sign");
         String serverSign = MD5Util.md5(param.toString());
 
-        log.info("channelPayCallback serverSign = " + serverSign);
-        log.info("channelPayCallback sign       = " + sign);
+        log.info("serverSign = " + serverSign);
+        log.info("sign       = " + sign);
 
-        log.info("channelPayCallback serverSign = " + serverSign);
-        log.info("channelPayCallback sign       = " + sign);
-
-        if (!sign.equals(serverSign)) {
-            return false;
+        if (sign.equals(serverSign)) {
+            // 渠道订单赋值
+            setChannelOrder(channelOrderNo, "", cpOrderId, channelOrderId, money);
+            return true;
         }
-        // 渠道订单赋值
-        setChannelOrder(channelOrderNo, "", cpOrderId, channelOrderId, money);
-        return true;
+        return false;
     }
 
     @Override
@@ -284,10 +275,6 @@ public class YueYouBaseChannel extends BaseChannel {
                 return null;
             }
         }
-
-        int channelId = requestInfo.getInteger("channelId");
-
-        String loginKey = configMap.get(appId).getString(YueYouConfig.COMMON_KEY);
 
         // 加密字符串
         StringBuilder param = new StringBuilder();
@@ -304,14 +291,12 @@ public class YueYouBaseChannel extends BaseChannel {
                 super.addParamAnd(param, key, value);
             }
         }
-        log.info("ajaxGetSignature param = " + param);
+        log.info("param = " + param);
 
         // 签名验证
         String sign = MD5Util.md5(param.toString());
 
-        log.info("ajaxGetSignature serverSign = " + sign);
-
-        log.info("ajaxGetSignature serverSign = " + sign);
+        log.info("serverSign = " + sign);
 
         JSONObject userData = new JSONObject();
         userData.put("user_id", requestInfo.getString("user_id"));

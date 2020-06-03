@@ -730,7 +730,7 @@ public class PayCallbackController {
         boolean result = false;
         do {
             String cpOrderId = channelOrder.getString("extradata");
-            String money = FeeUtils.fenToYuan(parameterMap.get("price"));
+            String money = FeeUtils.fenToYuan(parameterMap.get("feemoney"));
 
             result = checkOrder(appId, channelId, parameterMap, channelOrder, cpOrderId, "", money);
 

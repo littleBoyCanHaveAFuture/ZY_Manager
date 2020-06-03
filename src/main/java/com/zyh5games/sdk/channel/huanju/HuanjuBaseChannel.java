@@ -12,10 +12,7 @@ import java.util.Map;
 
 /**
  * 欢聚
- * 未接的 todo
- * 1.游戏礼包领取接口
- * 2.游戏登录被顶
- * 3.游戏服务器列表查询
+ *
  * @author song minghua
  * @date 2020/5/21
  */
@@ -113,16 +110,15 @@ public class HuanjuBaseChannel extends BaseChannel {
         log.info("param = " + param.toString());
 
         String serverSign = MD5Util.md5(param.toString());
-        log.info("channelLogin serverSign = " + serverSign);
-        log.info("channelLogin sign = " + sign);
+        log.info("serverSign = " + serverSign);
+        log.info("sign       = " + sign);
 
-        if (!sign.equals(serverSign)) {
-            setUserData(userData, "", "", String.valueOf(channelId), "");
-            return false;
-        } else {
+        if (sign.equals(serverSign)) {
             setUserData(userData, uid, userName, String.valueOf(channelId), "");
             return true;
         }
+        setUserData(userData, "", "", String.valueOf(channelId), "");
+        return false;
     }
 
     /**
@@ -130,6 +126,19 @@ public class HuanjuBaseChannel extends BaseChannel {
      *
      * @param orderData      渠道订单请求参数
      * @param channelOrderNo 渠道订单返回参数
+     *                       接收参数(CGI)   类型     必选      参于加密    说明
+     *                       gameId		    int	    是	    是	        产品合作ID
+     *                       uid		    string	是	    是	        用户UID (唯一) 我方用户的UID
+     *                       time		    int	    是	    是	        当前时间unix时间戳(服务端会判断时间是否超过配置时间)
+     *                       server		    string	是	    是	        支付时的游戏区服
+     *                       role		    string	是	    是	        支付时角色信息
+     *                       goodsId		string	是	    是	        商品ID（ 没有的话。可以写1，但是不能为空）
+     *                       goodsName	    string	是	    是	        商品名,如：游戏币
+     *                       money		    decimal	是	    是	        商品价格(元) 例：1.00
+     *                       cpOrderId	    string	是	    是	        游戏订单号(回传时原样返回)
+     *                       ext		    string	否	    否	        额外透传参数(原样返回)
+     *                       sign		    string	是	    否	        签名（小写）
+     *                       signType	    string	是	    否	        固定md5
      * @return boolean
      */
     @Override
@@ -149,25 +158,6 @@ public class HuanjuBaseChannel extends BaseChannel {
 
         String time = String.valueOf(System.currentTimeMillis() / 1000);
 
-        /*
-            接收参数(CGI)   类型  必选  参于加密    说明
-            gameId		int	    是	是	        产品合作ID
-            uid		    string	是	是	        用户UID (唯一) 我方用户的UID
-            time		int	    是	是	        当前时间unix时间戳(服务端会判断时间是否超过配置时间)
-            server		string	是	是	        支付时的游戏区服
-            role		string	是	是	        支付时角色信息
-            goodsId		string	是	是	        商品ID（ 没有的话。可以写1，但是不能为空）
-            goodsName	string	是	是	        商品名,如：游戏币
-            money		decimal	是	是	        商品价格(元) 例：1.00
-            cpOrderId	string	是	是	        游戏订单号(回传时原样返回)
-            ext		    string	否	否	        额外透传参数(原样返回)
-            sign		string	是	否	        签名（小写）
-            signType	string	是	否	        固定md5
-
-            Md5(cpOrderId=1475049097&gameId=113&goodsId=1&goodsName=测试商品&money=1&role=1&server=1
-            &time=1475049097&uid=6298253&key=testpaykey)
-            按照参数名从小到大排序(PHP语言中可用ksort进行排序),Key为后台的支付签名.
-        */
         StringBuilder param = new StringBuilder();
         super.addParam(param, "cpOrderId", cpOrderNo);
         super.addParamAnd(param, "gameId", channelGameId);
@@ -208,36 +198,26 @@ public class HuanjuBaseChannel extends BaseChannel {
      * @param appId          指悦游戏id
      * @param parameterMap   渠道回调参数
      * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
+     *                       接收参数(CGI)	类型	        必选	参于加密	说明
+     *                       status		    String	    是	是	    订单状态。“success”为支付成功
+     *                       cpOrderId		String	    是	是	    cp游戏订单号。
+     *                       orderId		    String	    是	是	    欢聚游微游戏订单号
+     *                       uid		        string	    是	是	    欢聚游微游戏用户的uid
+     *                       userName		string	    是	是	    欢聚游微游戏的用户名
+     *                       money		    decimal	    是	是	    支付钱数(元),保留2位小数
+     *                       gameId		    String	    是	是	    游戏的id
+     *                       goodsId		    String	    是	是	    商品ID
+     *                       goodsName		String	    是	是	    商品名
+     *                       server		    String	    是	是	    支付的游戏服
+     *                       role		    String	    是	是	    支付时角色信息,
+     *                       time		    int	        是  是	    当前时间unix时间戳
+     *                       ext		        String(200)	否	否	    额外透传参数(原样返回)
+     *                       sign		    string	    是	否	    加密串
+     *                       signType		string	    是	否	    固定md5
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
         String payKey = configMap.get(appId).getString(HuanJuConfig.PAY_KEY);
-
-        String[] mustKey = {"status", "cpOrderId", "orderId", "uid", "userName", "money", "gameId", "goodsId",
-                "goodsName", "server", "role", "time", "sign", "signType"};
-
-        /*
-            接收参数(CGI)	类型	        必选	参于加密	说明
-            status		    String	    是	是	    订单状态。“success”为支付成功
-            cpOrderId		String	    是	是	    cp游戏订单号。
-            orderId		    String	    是	是	    欢聚游微游戏订单号
-            uid		        string	    是	是	    欢聚游微游戏用户的uid
-            userName		string	    是	是	    欢聚游微游戏的用户名
-            money		    decimal	    是	是	    支付钱数(元),保留2位小数
-            gameId		    String	    是	是	    游戏的id
-            goodsId		    String	    是	是	    商品ID
-            goodsName		String	    是	是	    商品名
-            server		    String	    是	是	    支付的游戏服
-            role		    String	    是	是	    支付时角色信息,
-            time		    int	        是  是	    当前时间unix时间戳
-            ext		        String(200)	否	否	    额外透传参数(原样返回)
-            sign		    string	    是	否	    加密串
-            signType		string	    是	否	    固定md5
-
-            Md5(cpOrderId=1475049097&gameId=11&goodsId=1&goodsName=测试商品&money=1.00&orderId=201705231751455104
-            &role=1&server=1&status=success&time=1475049098&uid=6298253&userName=yx6298253&key=testpaykey)
-            按照参数名从小到大排序(PHP语言中可用ksort进行排序),Key为后台的支付签名.
-        */
 
         StringBuilder param = new StringBuilder();
         super.addParam(param, "cpOrderId", parameterMap.get("cpOrderId"));
@@ -259,12 +239,11 @@ public class HuanjuBaseChannel extends BaseChannel {
         String serverSign = MD5Util.md5(param.toString());
         String sign = parameterMap.get("sign");
 
-        log.info("channelPayCallback sign: " + serverSign);
-        log.info("channelPayCallback sign: " + sign);
+        log.info("serverSign = " + serverSign);
+        log.info("sign       = " + sign);
 
         if (sign.equals(serverSign)) {
-            setChannelOrder(channelOrderNo, "",
-                    parameterMap.get("cpOrderId"), parameterMap.get("orderId"), parameterMap.get("money"));
+            setChannelOrder(channelOrderNo, "", parameterMap.get("cpOrderId"), parameterMap.get("orderId"), parameterMap.get("money"));
             return true;
         }
 

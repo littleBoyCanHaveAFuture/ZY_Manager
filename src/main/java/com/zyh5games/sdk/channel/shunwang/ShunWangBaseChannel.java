@@ -1,9 +1,9 @@
 package com.zyh5games.sdk.channel.shunwang;
 
 import com.alibaba.fastjson.JSONObject;
+import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.HttpService;
-import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.service.AccountService;
 import com.zyh5games.util.Base64;
 import com.zyh5games.util.MD5Util;
@@ -131,8 +131,7 @@ public class ShunWangBaseChannel extends BaseChannel {
         }
         param.append(loginKey);
 
-        log.info("channelLogin " + param);
-        log.info("channelLogin " + param);
+        log.info("channelLogin param = " + param);
         String serverSign = MD5Util.md5(param.toString());
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
@@ -160,6 +159,9 @@ public class ShunWangBaseChannel extends BaseChannel {
      *                       otherData    string    否    透传参数,充值通知接口原样返回，顺网充值中心的游戏不要传
      *                       swTag        string    否    swTag参数
      * @param channelOrderNo 渠道订单返回参数
+     *                       gameId     渠道游戏id
+     *                       data       url数据
+     *                       sign       签名
      * @return boolean
      */
     @Override
@@ -167,6 +169,7 @@ public class ShunWangBaseChannel extends BaseChannel {
         Integer appId = orderData.getInteger("appId");
         String qrCodeKey = configMap.get(appId).getString(ShunWangConfig.QRCODE_KEY);
         String channelGameId = configMap.get(appId).getString(ShunWangConfig.GAME_ID);
+
         JSONObject data = new JSONObject();
         data.put("guid", orderData.getString("uid"));
         data.put("orderNo", orderData.getString("cpOrderNo"));
@@ -175,8 +178,7 @@ public class ShunWangBaseChannel extends BaseChannel {
         data.put("time", System.currentTimeMillis() / 1000);
         data.put("otherData", orderData.getString("extrasParams"));
 
-        log.info(data.toJSONString());
-        log.info(data.toString());
+        log.info("data = " + data.toJSONString());
 
         String base64Data = Base64.encode(data.toString(), String.valueOf(StandardCharsets.UTF_8));
         String sign = MD5Util.md5(base64Data + qrCodeKey);
@@ -249,20 +251,16 @@ public class ShunWangBaseChannel extends BaseChannel {
             e.printStackTrace();
         }
         param.append(payKey);
-        log.info("channelPayCallback " + pp);
-        log.info("channelPayCallback " + param);
+
+        log.info("channelPayCallback param = " + param);
 
         String sign = parameterMap.get("sign");
         String serverSign = MD5Util.md5(param.toString());
+
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
 
-        if (sign.equals(serverSign)) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return sign.equals(serverSign);
     }
 
 

@@ -74,6 +74,13 @@ public class Game1758BaseChannel extends BaseChannel {
      * 3.2 设置token<p>
      *
      * @param map      渠道传入参数
+     *                 参数字段	    类型	    说明	            是否参与签名
+     *                 appKey	    string	游戏的appKey	        是
+     *                 hlmy_gw	    string	1758平台自定义参数	是
+     *                 userToken	string	用户凭证	            是
+     *                 nonce	    string	随机串，不长于32位	是
+     *                 timestamp	long	当前时间戳（秒）	    是
+     *                 sign	        string	参数签名
      * @param userData 渠道用户数据
      * @return boolean
      */
@@ -110,25 +117,19 @@ public class Game1758BaseChannel extends BaseChannel {
         log.info("channelLogin serverSign = " + serverSign);
 
 
-        // x-www-form-urlencoded方式
-        //参数字段	                    类型	        说明
-        //result	                    int	        响应结果，1成功、0失败
-        //errorcode	                    int	        错误码
-        //data	                        object	    业务数据
-        //data.userInfo	                object	    用户资料对象
-        //data.userInfo.gid	            string	    用户唯一识别id
-        //data.userInfo.avatar	        string	    用户头像地址
-        //data.userInfo.nickName	    string	    用户昵称
-        //data.userInfo.sex	            int	        性别，1男、2女、0未知
         /*
-            参数字段	    类型	    说明	            是否参与签名
-            appKey	    string	游戏的appKey	        是
-            hlmy_gw	    string	1758平台自定义参数	是
-            userToken	string	用户凭证	            是
-            nonce	    string	随机串，不长于32位	是
-            timestamp	long	当前时间戳（秒）	    是
-            sign	    string	参数签名
+            x-www-form-urlencoded方式
+            参数字段	                    类型	        说明
+            result	                    int	        响应结果，1成功、0失败
+            errorcode	                int	        错误码
+            data	                    object	    业务数据
+            data.userInfo	            object	    用户资料对象
+            data.userInfo.gid	        string	    用户唯一识别id
+            data.userInfo.avatar	    string	    用户头像地址
+            data.userInfo.nickName	    string	    用户昵称
+            data.userInfo.sex	        int	        性别，1男、2女、0未知
         */
+
         JSONObject reqData = new JSONObject();
         reqData.put("appKey", appKey);
         reqData.put("hlmy_gw", hlmy_gw);
@@ -164,7 +165,35 @@ public class Game1758BaseChannel extends BaseChannel {
      * 4. 渠道调起支付 订单信息
      *
      * @param orderData      渠道订单请求参数
+     *                       HTTP POST， x-www-form-urlencoded方式
+     *                       参数字段	        类型	        说明	                  是否可空	示例	                            是否参与签名
+     *                       appKey	            string	    游戏的appKey             否	    cp从开放平台获取的值	                是
+     *                       gid	            string	    1758用户的gid            否	    8284893998245a9bd7c9c73698facf6d	是
+     *                       hlmy_gw	        string	    1758的自定义参数          否	    登录透传值，例如0_0__	                是
+     *                       totalFee	        int	        支付金额，单位分	        否	    100	                                是
+     *                       productDesc	    string	    商品描述	                否	    月卡	                                是
+     *                       txId	            string	    cp订单号	                否	    10001	                            是
+     *                       state	            string	    自定义参数，              是	    {"roleId":1}	                    是
+     *                       支付通知接口会透传该参数
+     *                       nonce	            string	    随机串，不长于32位	    否	    xyz001	                            是
+     *                       timestamp	        long	    当前时间戳（毫秒）	        否	    1553756241427	                    是
+     *                       serverId	        int	        区服ID	                否	    1	                                否
+     *                       serverName	        string	    区服名称	                否	    1区	                                否
+     *                       roleId	            int	        游戏内角色ID	            否	    1	                                否
+     *                       roleName	        string	    游戏角色名称	            否	    龙傲天	                            否
+     *                       roleCoins	        int	        角色游戏内货币余额	        否	    0	                                否
+     *                       roleLevel	        int	        角色等级	                否	    1	                                否
+     *                       vipLevel	        int	        角色VIP等级	            否	    0	                                否
+     *                       gameRolePower	    int	        角色战力值	            否	    用户游戏中的动态值，例如经验值	        否
+     *                       ext	            string，json格式	额外信息，预留参数，暂未启用	是		                            否
      * @param channelOrderNo 渠道订单返回参数
+     *                       {
+     *                       "result": 1,
+     *                       "errorcode": 0,
+     *                       "data": {
+     *                       "paySafeCode":"yyyy" //支付安全码
+     *                       }
+     *                       }
      * @return boolean
      */
     @Override
@@ -186,30 +215,6 @@ public class Game1758BaseChannel extends BaseChannel {
         String userRoleName = orderData.getString("userRoleName");
         String userLevel = orderData.getString("userLevel");
 
-        /*
-        渠道订单数据
-            参数字段	        类型	        说明	                  是否可空	示例	                            是否参与签名
-            appKey	        string	    游戏的appKey             否	    cp从开放平台获取的值	                是
-            gid	            string	    1758用户的gid            否	    8284893998245a9bd7c9c73698facf6d	是
-            hlmy_gw	        string	    1758的自定义参数          否	    登录透传值，例如0_0__	                是
-            totalFee	    int	        支付金额，单位分	        否	    100	                                是
-            productDesc	    string	    商品描述	                否	    月卡	                                是
-            txId	        string	    cp订单号	                否	    10001	                            是
-            state	        string	    自定义参数，              是	    {"roleId":1}	                    是
-                                        支付通知接口会透传该参数
-            nonce	        string	    随机串，不长于32位	    否	    xyz001	                            是
-            timestamp	    long	    当前时间戳（毫秒）	        否	    1553756241427	                    是
-            serverId	    int	        区服ID	                否	    1	                                否
-            serverName	    string	    区服名称	                否	    1区	                                否
-            roleId	        int	        游戏内角色ID	            否	    1	                                否
-            roleName	    string	    游戏角色名称	            否	    龙傲天	                            否
-            roleCoins	    int	        角色游戏内货币余额	        否	    0	                                否
-            roleLevel	    int	        角色等级	                否	    1	                                否
-            vipLevel	    int	        角色VIP等级	            否	    0	                                否
-            gameRolePower	int	        角色战力值	            否	    用户游戏中的动态值，例如经验值	        否
-            ext	            string，json格式	额外信息，预留参数，暂未启用	是		                            否
-            HTTP POST， x-www-form-urlencoded方式
-        */
         long timestamep = System.currentTimeMillis();
         String random = RandomUtil.rndStr(8, true);
         JSONObject reqData = new JSONObject();
@@ -245,19 +250,15 @@ public class Game1758BaseChannel extends BaseChannel {
                 super.addParamAnd(param, key, reqData.getString(key));
             }
         }
-        log.info("channelPayInfo param: " + param);
-        String sign = MD5Util.md5(param.toString() + secretKey);
-        reqData.put("sign", sign);
-        log.info("channelPayInfo data: " + reqData);
 
-        /*
-        {
-            "result": 1,
-            "errorcode": 0,
-            "data": {
-                "paySafeCode":"yyyy" //支付安全码
-            }
-        }*/
+        log.info("param = " + param);
+
+        String sign = MD5Util.md5(param.toString() + secretKey);
+
+        reqData.put("sign", sign);
+
+        log.info("data = " + reqData);
+
         JSONObject rsp = httpService.httpPostXwwFormUrlEncoded(payUrl, reqData);
         if (rsp.containsKey("result") && rsp.getInteger("result") == 1) {
             JSONObject data = rsp.getJSONObject("data");
