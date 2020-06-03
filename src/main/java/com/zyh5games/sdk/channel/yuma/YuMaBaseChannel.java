@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 顺网
+ * 鱼马-quick聚合
  *
  * @author song minghua
  * @date 2020/5/21
@@ -80,7 +80,6 @@ public class YuMaBaseChannel extends BaseChannel {
         } else {
             return null;
         }
-
     }
 
     /**
@@ -101,12 +100,10 @@ public class YuMaBaseChannel extends BaseChannel {
         StringBuilder param = new StringBuilder();
 
         for (String key : map.keySet()) {
-            param.append("&").append(key).append("=").append(map.get(key)[0]);
+            super.addParamAnd(param, key, map.get(key)[0]);
         }
 
         String url = loginUrl + param.toString();
-        log.info("channelLogin url = " + url);
-
 
         JSONObject rsp = httpService.httpGetJson(url);
         if (rsp != null && rsp.containsKey("userData")) {
@@ -138,6 +135,23 @@ public class YuMaBaseChannel extends BaseChannel {
      *
      * @param orderData      渠道订单请求参数
      * @param channelOrderNo 渠道订单返回参数
+     *                       orderInfo.productCode      = “05425578266356246482673853629430”;
+     *                       orderInfo.uid              = 'uid';
+     *                       orderInfo.username         = 'username';
+     *                       orderInfo.userRoleId       = 'roleId1';
+     *                       orderInfo.userRoleName     = '小朋友';
+     *                       orderInfo.serverId         = 1;
+     *                       orderInfo.userServer       = '内测1区';
+     *                       orderInfo.userLevel        = 1;
+     *                       orderInfo.cpOrderNo        = 'cpOrderNo000001';
+     *                       orderInfo.amount           = '0.01';
+     *                       orderInfo.subject          = '大袋钻石';
+     *                       orderInfo.desc             = '一大袋钻石60个';
+     *                       orderInfo.callbackUrl      = '';
+     *                       orderInfo.extrasParams     = '';
+     *                       orderInfo.goodsId          = 'goods';
+     *                       orderInfo.count            = 60;
+     *                       orderInfo.quantifier       = '个';
      * @return boolean
      */
     @Override
@@ -168,28 +182,8 @@ public class YuMaBaseChannel extends BaseChannel {
         String goodsId = orderData.getString("goodsId");
         String channelToken = orderData.getString("channelToken");
 
-        /*向quick 下单参数
-            orderInfo = new Object();
-            orderInfo.productCode = “05425578266356246482673853629430”;
-            orderInfo.uid = 'uid';
-            orderInfo.username = 'username';
-            orderInfo.userRoleId = 'roleId1';
-            orderInfo.userRoleName = '小朋友';
-            orderInfo.serverId= 1;
-            orderInfo.userServer = '内测1区';
-            orderInfo.userLevel = 1;
-            orderInfo.cpOrderNo = 'cpOrderNo000001';
-            orderInfo.amount = '0.01';
-            orderInfo.subject = '大袋钻石';
-            orderInfo.desc = '一大袋钻石60个';
-            orderInfo.callbackUrl = '';
-            orderInfo.extrasParams = '';
-            orderInfo.goodsId = 'goods';
-            orderInfo.count = 60;
-            orderInfo.quantifier = '个';
-        */
+        //js调用支付，这里给正确格式即可
         JSONObject reqData = new JSONObject();
-
         reqData.put("productCode", productCode);
         reqData.put("uid", channelUid);
         reqData.put("username", username);
@@ -238,16 +232,31 @@ public class YuMaBaseChannel extends BaseChannel {
         if (!md5Sign.equals(serverMd5Sign)) {
             return false;
         }
-        // 解析 nt_data
+
+        /*
+         * 解析 nt_data
+         *  is_test	        string	必有	    是否为测试订单 1为测试 0为线上正式订单，游戏应根据情况确定上线后是否向测试订单发放道具。
+         *  channel	        string	必有	    渠道标示ID 注意:游戏可根据实情,确定发放道具时是否校验充值来源渠道是否与该角色注册渠道相符
+         *  channel_uid	    string	必有	    渠道用户唯一标示,该值从客户端GetUserId()中可获取
+         *  game_order	    string	必有	    游戏在调用QuickSDK发起支付时传递的游戏方订单,这里会原样传回
+         *  order_no	    string	必有	    QuickSDK唯一订单号
+         *  pay_time	    string	必有	    支付时间 2015-01-01 23:00:00
+         *  amount	        string	必有	    成交金额，单位元，游戏最终发放道具金额应以此为准
+         *  status	        string	必有	    充值状态:0成功, 1失败(为1时 应返回FAILED失败)
+         *  extras_params	string	必有	    可为空,充值状态游戏客户端调用SDK发起支付时填写的透传参数.没有则为空
+         * */
         String orderData = IOSDesUtil.decode(nt_data, callBackKey);
         log.info("orderData = " + orderData);
         JSONObject quickOrder = XmlUtils.getQuickOrderXml(orderData);
         if (quickOrder == null || quickOrder.isEmpty()) {
             return false;
         }
-        parameterMap.put("quickOrder", quickOrder.toJSONString());
 
-        // todo 给 channelOrderNo 赋值
+        String cpOrderId = quickOrder.getString("game_order");
+        String channelOrderId = quickOrder.getString("order_no");
+        String money = quickOrder.getString("amount");
+
+        setChannelOrder(channelOrderNo, "", cpOrderId, channelOrderId, money);
         return true;
     }
 
@@ -263,16 +272,16 @@ public class YuMaBaseChannel extends BaseChannel {
 
 
         /*
-         *
          * token          必须      游戏客户端从SDK客户端中获取的token值,原样传递无需解密,此值长度范围小于512,CP需预留足够长度
          * product_code   必须      Quick后台查看游戏信息里可获取此值
          * uid            必须      从客户端接口获取到的渠道原始uid,无需任何加工如拼接渠道ID等
-         * channel_code	  选传	   传入此值将校验uid和token是否与channel_code一致,若游戏运营过程有发生玩家渠道间帐号转移,应确保此值正确 （该接口为客户端文档中的渠道类型接口）
+         * channel_code	  选传	   传入此值将校验uid和token是否与channel_code一致,
+         *                          若游戏运营过程有发生玩家渠道间帐号转移,应确保此值正确 （该接口为客户端文档中的渠道类型接口）
          * */
         StringBuilder param = new StringBuilder();
-        param.append("&").append("token").append("=").append(clientToken);
-        param.append("&").append("product_code").append("=").append(productCode);
-        param.append("&").append("uid").append("=").append(channelUid);
+        super.addParamAnd(param, "token", clientToken);
+        super.addParamAnd(param, "product_code", productCode);
+        super.addParamAnd(param, "uid", channelUid);
 
         String url = loginCheckUrl + param.toString();
 
