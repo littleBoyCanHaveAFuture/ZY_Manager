@@ -72,7 +72,6 @@ public class ChannelHandler {
     public void init() {
         loadChannelApp();
         print();
-        httpService.main(null);
     }
 
 

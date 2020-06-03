@@ -208,7 +208,9 @@ public class GameController {
 
             if (res > 0) {
                 result.put("appid", game.getAppId());
+                cache.setGAMEIDInfo(String.valueOf(game.getAppId()));
             }
+
         } while (false);
 
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
