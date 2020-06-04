@@ -638,6 +638,7 @@ public class JedisRechargeCache {
     /**
      * 设置游戏渠道区服信息
      */
+    @Deprecated
     public void setServerInfo(String appId,
                               String channelId,
                               String serverId) {
@@ -648,6 +649,27 @@ public class JedisRechargeCache {
             jds.select(DB_INDEX);
 
             String key = RedisKey_Gen.get_ServerInfo(appId, channelId);
+            jds.sadd(key, serverId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 2020年6月4日16:15:02
+     * 设置游戏渠道区服信息
+     */
+    public void setGameServerInfo(String appId, String serverId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_GameServerInfo(appId);
             jds.sadd(key, serverId);
         } catch (Exception e) {
             isBroken = true;

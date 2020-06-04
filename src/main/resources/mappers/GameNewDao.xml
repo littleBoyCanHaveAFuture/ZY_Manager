@@ -140,7 +140,7 @@
         where app_id = #{gameId,jdbcType=INTEGER}
     </delete>
 
-    <update id="updateGame" parameterType="Game">
+    <update id="updateGame" parameterType="GameNew">
         update zy_gamen
         <set>
             <if test="appName != null and  appName!='' ">
@@ -177,7 +177,7 @@
         where app_id=#{appId}
     </update>
 
-    <insert id="insertGame" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="Game">
+    <insert id="insertGame" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="GameNew">
         insert into zy_gamen(owner_id,
                              app_id,
                              app_name,

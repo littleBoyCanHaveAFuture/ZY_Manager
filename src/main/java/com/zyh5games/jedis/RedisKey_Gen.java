@@ -119,6 +119,20 @@ public class RedisKey_Gen {
     }
 
     /**
+     * 2020年6月4日16:15:46
+     * 获取游戏-渠道的区服信息
+     */
+    public static String get_GameServerInfo(String gameId) {
+        String key = RedisKey_Header.GAME_INFO +
+                ":" + GAME_ID + ":" + gameId +
+                "#" + RedisKey_Tail.SERVERINFO;
+        if (isLog) {
+            log.info("get_GameServerInfo:\t" + key);
+        }
+        return key;
+    }
+
+    /**
      * 新增创号
      * <p>
      * Bit map

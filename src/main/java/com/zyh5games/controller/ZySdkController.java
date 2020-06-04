@@ -35,8 +35,8 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/webGame2")
-public class NewZySdkController {
-    private static final Logger log = Logger.getLogger(NewZySdkController.class);
+public class ZySdkController {
+    private static final Logger log = Logger.getLogger(ZySdkController.class);
     public static String[] keys = {"createRole", "levelUp", "enterGame", "exitGame"};
     @Autowired
     JedisRechargeCache cache;
@@ -615,6 +615,8 @@ public class NewZySdkController {
                     cache.enterGame(gameId, String.valueOf(serverId), channelId, gameRole.getRoleId());
                     //设置区服信息
                     cache.setServerInfo(gameId, channelId, String.valueOf(serverId));
+                    //设置游戏区服信息
+                    cache.setGameServerInfo(gameId, String.valueOf(serverId));
                 }
                 break;
                 // 角色升级
