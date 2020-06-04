@@ -55,4 +55,5 @@ public interface SpListDao {
     int addSp(Map<String, Object> map);
 
 
+    List<Sp> getSpName(List<Integer> spidList);
 }

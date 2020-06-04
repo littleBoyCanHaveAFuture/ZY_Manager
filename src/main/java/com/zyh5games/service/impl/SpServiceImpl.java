@@ -49,7 +49,7 @@ public class SpServiceImpl implements SpService {
     }
 
     @Override
-    public Sp getSp(Integer spId,Integer userId) {
+    public Sp getSp(Integer spId, Integer userId) {
         return spDao.getSp(spId);
     }
 
@@ -66,5 +66,15 @@ public class SpServiceImpl implements SpService {
     @Override
     public int addSp(Map<String, Object> map, Integer userId) {
         return spDao.addSp(map);
+    }
+
+    /**
+     * 根据渠道id获取名称
+     *
+     * @param spidList
+     */
+    @Override
+    public List<Sp> getSpName(List<Integer> spidList, Integer userId) {
+        return spDao.getSpName(spidList);
     }
 }

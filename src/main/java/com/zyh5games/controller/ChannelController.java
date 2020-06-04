@@ -2,9 +2,11 @@ package com.zyh5games.controller;
 
 import com.zyh5games.common.Constants;
 import com.zyh5games.entity.GameNew;
+import com.zyh5games.entity.Sp;
 import com.zyh5games.jedis.JedisRechargeCache;
 import com.zyh5games.service.ChannelConfigService;
 import com.zyh5games.service.GameNewService;
+import com.zyh5games.service.SpService;
 import com.zyh5games.util.ResponseUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -18,6 +20,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +40,8 @@ public class ChannelController {
     private GameNewService gameNewService;
     @Resource
     private ChannelConfigService channelConfigService;
+    @Resource
+    private SpService spService;
 
     private Integer getUserId() {
         //可以设置缓存 redis 登录时设置过期时间 24小时 todo
@@ -76,7 +82,11 @@ public class ChannelController {
         //游戏id
         List<Integer> channelIdList = channelConfigService.selectGameConfig(gameId, -1);
 
-        JSONArray rows = JSONArray.fromObject(channelIdList);
+        List<Integer> serverIdList = new ArrayList(channelIdList);
+        // 根据 渠道id 查询渠道名称
+        List<Sp> list = spService.getSpName(serverIdList, -1);
+
+        JSONArray rows = JSONArray.fromObject(list);
         result.put("rows", rows.toString());
         result.put("total", channelIdList.size());
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
@@ -91,12 +101,23 @@ public class ChannelController {
             ResponseUtil.writeRelogin(response);
             return;
         }
-
+        Set<String> rsServerIdSet = new HashSet<>();
         JSONObject result = new JSONObject();
-        //todo 无法查询 -1 渠道
-        Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
-        result.put("rows", serverIdSet.toString());
-        result.put("total", serverIdSet.size());
+        Set<String> channelIdSet;
+        if (spId == -1) {
+            channelIdSet = cache.getSPIDInfo(String.valueOf(gameId));
+            //渠道id
+            for (String channelId : channelIdSet) {
+                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), channelId);
+                rsServerIdSet.addAll(serverIdSet);
+            }
+        } else {
+            Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
+            rsServerIdSet.addAll(serverIdSet);
+        }
+
+        result.put("rows", rsServerIdSet.toString());
+        result.put("total", rsServerIdSet.size());
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
 
         ResponseUtil.write(response, result);

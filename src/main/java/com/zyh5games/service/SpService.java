@@ -20,7 +20,8 @@ public interface SpService {
 
     Long getTotalSp(Integer userId);
 
-    Sp getSp(Integer spId,Integer userId);
+    Sp getSp(Integer spId, Integer userId);
+
     /**
      * 删除渠道信息
      */
@@ -35,4 +36,9 @@ public interface SpService {
      * 添加渠道信息
      */
     int addSp(Map<String, Object> map, Integer userId);
+
+    /**
+     * 根据渠道id获取名称
+     */
+    List<Sp> getSpName(List<Integer> spidList, Integer userId);
 }

@@ -224,7 +224,7 @@ public class ServerController {
                     isOpt = true;
                 } else {
                     //超级管理员也阔以直接操作
-                    User currUser = userService.getUserById(userId, userId);
+                    User currUser = userService.getUserById(userId, -1);
                     if (currUser == null) {
                         log.info("changeGameSp err2");
                         return;

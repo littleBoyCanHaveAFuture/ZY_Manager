@@ -26,11 +26,11 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200306"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=06041500"></script>
 </head>
 <body style="margin:1px;">
 
-<table id="dg" title="使用指南：请先选择游戏、渠道" class="easyui-datagrid" pagination="true" fitcolumns="true"
+<table id="dg" title="分渠道概况" class="easyui-datagrid" pagination="true" fitcolumns="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#tb">
     <thead>
 
@@ -95,12 +95,12 @@
             "付费ARPU": "paidARPU",
             "活跃ARPU": "activeARPU",
             "当日首次付费人数": "nofPayers",
-            "当日首次付费金额(分)": "nofPayment",
+            "当日首次付费金额": "nofPayment",
             "注册付费人数": "registeredPayers",
             "注册付费金额": "registeredPayment",
             "注册付费ARPU": "registeredPaymentARPU",
 
-            "累计充值(分)": "totalPayment",
+            "累计充值": "totalPayment",
             "累计创角": "totalCreateRole",
             "累计充值人数": "totalRechargeNums",
             "总付费率": "totalRechargeRates",

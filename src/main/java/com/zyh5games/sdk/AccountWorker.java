@@ -87,7 +87,7 @@ public class AccountWorker {
             log.info("init lastUserId:" + AccountWorker.lastUserId);
 
             AccountWorker.lastAppId = this.lastAppId();
-            log.info("init lastUserId:" + AccountWorker.lastAppId);
+            log.info("init lastAppId:" + AccountWorker.lastAppId);
             System.out.println("init lastUserId:" + AccountWorker.lastAppId);
         } catch (Exception e) {
             e.printStackTrace();

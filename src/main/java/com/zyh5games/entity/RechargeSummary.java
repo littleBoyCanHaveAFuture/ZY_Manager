@@ -19,7 +19,7 @@ public class RechargeSummary {
      * 全服概况
      * yyyyMMdd
      */
-    public String date;
+    private String date;
 
     /**
      * 新增创号
@@ -28,31 +28,31 @@ public class RechargeSummary {
      * 1.注册官方账号
      * 2.渠道账号首次登录任意游戏
      */
-    public int newAddCreateAccount;
+    private int newAddCreateAccount;
 
     /**
      * 新增创角
      * :角色数：当天创建的
      */
-    public int newAddCreateRole;
+    private int newAddCreateRole;
 
     /**
      * 新增创角去除滚服
      * 角色数：当天创建的，且是账号首个角色
      */
-    public int newAddCreateRoleRemoveOld;
+    private int newAddCreateRoleRemoveOld;
 
     /**
      * 创角率
      * :当天新增创角/当天新增创号
      */
-    public double createAccountRate;
+    private double createAccountRate;
 
 
     /**
      * 创角转化率：该渠道：新增创角之和/新增创号之和
      */
-    public double createAccountTransRate;
+    private double createAccountTransRate;
 
     //通用
     /**
@@ -60,78 +60,78 @@ public class RechargeSummary {
      * :当日上线的不同角色
      * 时间段：一个角色只算一次
      */
-    public int activePlayer;
+    private int activePlayer;
     /**
      * 充值次数
      * :当日充值成功的订单数目
      */
-    public int rechargeTimes;
+    private int rechargeTimes;
     /**
      * 充值人数
      * :当日充值成功的角色数目(不同的角色数目)
      */
-    public int rechargeNumber;
+    private int rechargeNumber;
     /**
      * 充值金额
      * :当日充值成功的金额之和
      */
-    public int rechargePayment;
+    private int rechargePayment;
     /**
      * 活跃付费率
      * :当日充值的角色数目/当日上线的角色数目
      */
-    public double activePayRate;
+    private double activePayRate;
     /**
      * 付费ARPU
      * :当日充值总额/当日充值的角色数目
      */
-    public double paidARPU;
+    private double paidARPU;
     /**
      * 活跃ARPU
      * :当日充值总额/当日上线的角色数目
      */
-    public double activeARPU;
+    private double activeARPU;
     /**
      * 当日首次付费人数
      * 角色数目：注册时间超过一天的，首次充值的
      */
-    public int nofPayers;
+    private int nofPayers;
     /**
      * 当日首次付费金额
      * 当天充值总金额：注册时间超过一天的，首次充值的角色
      */
-    public int nofPayment;
+    private int nofPayment;
     /**
      * 注册付费人数
      * : 当日注册并且充值的账号数目
      */
-    public int registeredPayers;
+    private int registeredPayers;
     /**
      * 注册付费金额
      * : 当日注册并且充值的角色支付金额数目
      */
-    public int registeredPayment;
+    private int registeredPayment;
     /**
      * 注册付费ARPU
      * : 当日注册并且充值的玩家支付金额数目/当日注册并且充值的玩家账号数目
      */
-    public double registeredPaymentARPU;
+    private double registeredPaymentARPU;
 
 
 //分服2
     /**
      * 服务器id
      */
-    public int serverId;
+    private int serverId;
     /**
      * 开服天数
      */
-    public int openDay;
+    private int openDay;
 
     /**
      * 新增创号
      */
-    public int newaddplayer;
+    private int newaddplayer;
 
 
 //分服概况\分渠道 =2/3
@@ -139,43 +139,43 @@ public class RechargeSummary {
      * 累计充值
      * 开服起：每天充值金额之和
      */
-    public int totalPayment;
+    private int totalPayment;
 
     /**
      * 累计创角
      * 开服起：每天新增创角之和
      */
-    public int totalCreateRole;
+    private int totalCreateRole;
     /**
      * 累计充值人数
      * 开服起：不同充值角色数目之和（每个角色只计算一次）
      */
-    public int totalRechargeNums;
+    private int totalRechargeNums;
     /**
      * 总付费率
      * 付费角色数目/所有的角色数目
      */
-    public double totalRechargeRates;
+    private double totalRechargeRates;
     /**
      * 该渠道该游戏所有的账号数目
      */
-    public double totalAccounts;
+    private double totalAccounts;
 
 //    分渠道概况3
     /**
      * 渠道id
      */
-    public int spId;
+    private int spId;
     /**
      * 注收比
      * 该服务器充值总金额/总创角数
      */
-    public double zhushoubi;
+    private double zhushoubi;
     /**
      * 无用
      * 新增注收比
      */
-    public double addzhushoubi;
+    private double addzhushoubi;
 
     public RechargeSummary() {
     }

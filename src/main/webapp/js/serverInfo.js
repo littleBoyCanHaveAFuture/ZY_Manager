@@ -97,12 +97,14 @@ function initSpGameServer(type) {
 
     let url = "";
     if (type === 1) {
+        //查询区服
         url = "/channel/getAllChannel";
         url += "?gameId=" + gameId;
     } else if (type === 2) {
         //查询游戏
         url = "/channel/getAllGame";
     } else {
+        //查询渠道
         url = "/channel/getAllServerId";
         url += "?gameId=" + gameId;
         url += "&spId=" + spId;
@@ -131,7 +133,11 @@ function initSpGameServer(type) {
             select_spId.find("option").remove();
             select_spId.append("<option value=-1 selected=selected>请选择</option>");
             for (let res = 0; res < response.total; res++) {
-                select_spId.append("<option value='" + response.rows[res] + "'>" + response.rows[res] + "</option>");
+
+                let serverId = response.rows[res].spId;
+                let name = serverId + "\t" + response.rows[res].name;
+
+                select_spId.append("<option  value='" + serverId + "'>" + name + "</option>");
             }
             break;
         case 2:
@@ -202,8 +208,31 @@ function search(type) {
                         row.date = row.date.substring(0, 4) + "-" + row.date.substring(4, 6) + "-" + row.date.substring(6);
                         row.createAccountRate = row.createAccountRate + "%";
                         row.activePayRate = row.activePayRate + "%";
-                        let money = row.rechargePayment;
-                        row.rechargePayment = changeMoneyToYuan(money);
+
+                        let rechargePayment = row.rechargePayment;
+                        row.rechargePayment = changeMoneyToYuan(rechargePayment);
+
+                        let nofPayment = row.nofPayment;
+                        row.nofPayment = changeMoneyToYuan(nofPayment);
+
+                        let registeredPayment = row.registeredPayment;
+                        row.registeredPayment = changeMoneyToYuan(registeredPayment);
+
+                        let totalPayment = row.totalPayment;
+                        row.totalPayment = changeMoneyToYuan(totalPayment);
+
+                        let activePayRate = row.activePayRate;
+                        row.activePayRate = point2(activePayRate);
+
+                        let registeredPaymentARPU = row.registeredPaymentARPU;
+                        row.registeredPaymentARPU = point2ARPU(registeredPaymentARPU);
+
+                        let activeARPU = row.activeARPU;
+                        row.activeARPU = point2ARPU(activeARPU);
+
+                        let paidARPU = row.paidARPU;
+                        row.paidARPU = point2ARPU(paidARPU);
+
                         return row;
                     });
                 }
@@ -225,6 +254,44 @@ function search(type) {
             tip("ERROR！", "查询失败");
         }
     });
+}
+
+/**
+ * @param {string} data eg:10.2132%
+ *
+ * */
+function point2(data) {
+    let data2 = "";
+    let dataSpiltOne = data.toString().split("%");
+    let dataSpilt = dataSpiltOne[0].split(".");
+    let dataOne = dataSpilt[0];
+    data2 += dataOne;
+    if (dataSpilt.length === 2) {
+        let dataTwo = dataSpilt[1];
+        if (dataTwo.length >= 2) {
+            data2 += "" + "." + dataTwo.substring(0, 2);
+        }
+    }
+    data2 += "%";
+    return data2;
+}
+
+/**
+ * @param {number} data eg:10.2132
+ *
+ * */
+function point2ARPU(data) {
+    let data2 = "";
+    let dataSpilt = Math.floor(data).toString().split(".");
+    let dataOne = dataSpilt[0];
+    data2 += dataOne;
+    if (dataSpilt.length === 2) {
+        let dataTwo = dataSpilt[1];
+        if (dataTwo.length >= 2) {
+            data2 += "" + "." + dataTwo.substring(0, 2);
+        }
+    }
+    return data2;
 }
 
 function changeMoneyToYuan(tmoney) {

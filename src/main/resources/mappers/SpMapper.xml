@@ -61,6 +61,16 @@
         </if>
     </select>
 
+    <select id="getSpName" resultType="Sp" parameterType="list">
+        select spId,name from zy_sp
+        <where>
+            spId in
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
     <select id="getSp" resultMap="SpResult">
         <include refid="select_sp_column"/>
 
@@ -139,7 +149,8 @@
     </update>
 
     <insert id="addSp" parameterType="map">
-        insert into zy_sp(spId, parent, name, state, shareLinkUrl, icon_url, version,channel_sdk_code,channel_config_key)
-        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl}, #{iconUrl}, #{version},#{code}, #{config})
+        insert into zy_sp(spId, parent, name, state, shareLinkUrl, icon_url, version, channel_sdk_code,
+                          channel_config_key)
+        VALUES (#{spId}, #{parent}, #{name}, #{state}, #{shareLinkUrl}, #{iconUrl}, #{version}, #{code}, #{config})
     </insert>
 </mapper>

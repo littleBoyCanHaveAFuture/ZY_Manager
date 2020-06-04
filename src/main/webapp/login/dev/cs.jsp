@@ -34,8 +34,8 @@
 
 <h1></h1>
 <div class="login-form" id="login">
-    <div class="head-info"><img src="image/zhiyue.png"/></div>
-    <div style="margin-bottom: 2em;"><img src="image/jiemian5.png" style="width: 80%"></div>
+    <div class="head-info"><img src="../image/zhiyue.png"/></div>
+    <div style="margin-bottom: 2em;"><img src="../image/jiemian5.png" style="width: 80%"></div>
 
     <div class="key">
         <input type="text" value="" placeholder="请输入账号" class="text" id="username">
@@ -75,8 +75,8 @@
 </div>
 
 <div class="login-form" id="reg" hidden="hidden">
-    <div class="head-info"><img src="image/zhiyue.png"/></div>
-    <div><img src="image/jiemian5.png" style="width: 80%"></div>
+    <div class="head-info"><img src="../image/zhiyue.png"/></div>
+    <div><img src="../image/jiemian5.png" style="width: 80%"></div>
 
     <div class="reg-info">
         <span class="regtip">一键注册</span>
@@ -97,8 +97,8 @@
 </div>
 
 <div class="login-form" id="zyreg" hidden="hidden">
-    <div class="head-info"><img src="image/zhiyue.png"/></div>
-    <div style="margin-bottom: 2em;"><img src="image/jiemian5.png" style="width: 80%"></div>
+    <div class="head-info"><img src="../image/zhiyue.png"/></div>
+    <div style="margin-bottom: 2em;"><img src="../image/jiemian5.png" style="width: 80%"></div>
 
     <div class="key">
         <input type="text" value="" placeholder="请输入账号" class="text" id="reg_username">

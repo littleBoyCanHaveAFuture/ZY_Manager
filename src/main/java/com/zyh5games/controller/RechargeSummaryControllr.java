@@ -22,7 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author song minghua
@@ -129,6 +130,7 @@ public class RechargeSummaryControllr {
                 default:
                     break;
             }
+
             if (res != null) {
                 result.put("rows", JSONArray.fromObject(res));
                 result.put("total", res.size());

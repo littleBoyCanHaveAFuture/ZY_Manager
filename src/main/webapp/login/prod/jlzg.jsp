@@ -21,7 +21,7 @@
     <script src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.min.js"></script>
     <script src="${pageContext.request.contextPath}/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
     <script src="${pageContext.request.contextPath}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-    <script src="${pageContext.request.contextPath}/js/vconsole.min.js"></script>
+<%--    <script src="${pageContext.request.contextPath}/js/vconsole.min.js"></script>--%>
     <script src="${pageContext.request.contextPath}/js/clipboard.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
     <script src="${pageContext.request.contextPath}/js/md5.js"></script>
@@ -141,9 +141,9 @@
 
     $(function () {
         // 初始化
-        window.vConsole = new window.VConsole();
-        console.log('Hello world');
-        console.log(window.location.href);
+        // window.vConsole = new window.VConsole();
+        // console.log('Hello world');
+        // console.log(window.location.href);
 
         if (channelId !== 0) {
             return;
@@ -168,9 +168,9 @@
         let zy_password = getCookies("zy_password");
         let zy_channelUid = getCookies("zy_channelUid");
 
-        console.info("zy_account=" + zy_account);
-        console.info("zy_password=" + zy_password);
-        console.info("zy_channelUid=" + zy_channelUid);
+        // console.info("zy_account=" + zy_account);
+        // console.info("zy_password=" + zy_password);
+        // console.info("zy_channelUid=" + zy_channelUid);
 
         // 指悦官方渠道-无账号自动注册
         if (zy_account === "" || zy_password === "" || zy_channelUid === "") {

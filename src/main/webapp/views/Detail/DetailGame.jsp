@@ -25,11 +25,11 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js?v=20200306"></script>
+            src="${pageContext.request.contextPath}/js/serverInfo.js?v=06041513"></script>
 </head>
 <body style="margin:1px;">
 
-<table id="dg" title="使用指南：请先选择游戏、渠道，再查询区服！" class="easyui-datagrid" pagination="true" fitcolumns="true"
+<table id="dg" title="全服概况" class="easyui-datagrid" pagination="true" fitcolumns="true"
        rownumbers="true" fit="true" showFooter="true" toolbar="#tb">
     <thead>
     </thead>
@@ -39,7 +39,9 @@
     <div id="tbs">
         <label for="save_gameId"></label>
         <span style="color: blue;">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId" onchange="initSpGameServer(1)">
+        <select title="选择游戏" id="save_gameId" name="gameId"
+<%--                onchange="initSpGameServer(1)"--%>
+        >
             <option value=" -1" selected="selected">请选择</option>
         </select>
 
@@ -91,9 +93,9 @@
             "付费ARPU": "paidARPU",
             "活跃ARPU": "activeARPU",
             "当日首次付费人数": "nofPayers",
-            "当日首次付费金额(分)": "nofPayment",
+            "当日首次付费金额": "nofPayment",
             "注册付费人数": "registeredPayers",
-            "注册付费金额(分)": "registeredPayment",
+            "注册付费金额": "registeredPayment",
             "注册付费ARPU": "registeredPaymentARPU",
         };
         initDatagrid(commonResult);
