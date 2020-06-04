@@ -1063,6 +1063,10 @@ public class JedisRechargeCache {
 
     }
 
+    /**
+     * 新增账号
+     * 游戏
+     */
     public void getDayNewAddAccount_Server(String gameId, String serverId, List<String> timeList,
                                            Map<String, Map<String, Double>> resultList) {
         Jedis jds = null;

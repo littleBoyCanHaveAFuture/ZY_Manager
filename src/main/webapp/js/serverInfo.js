@@ -212,9 +212,6 @@ function search(type) {
                         let rechargePayment = row.rechargePayment;
                         row.rechargePayment = changeMoneyToYuan(rechargePayment);
 
-                        let nofPayment = row.nofPayment;
-                        row.nofPayment = changeMoneyToYuan(nofPayment);
-
                         let registeredPayment = row.registeredPayment;
                         row.registeredPayment = changeMoneyToYuan(registeredPayment);
 
@@ -232,6 +229,10 @@ function search(type) {
 
                         let paidARPU = row.paidARPU;
                         row.paidARPU = point2ARPU(paidARPU);
+
+                        row.nofPayers = row.activePlayer - row.registeredPayers;
+
+                        row.nofPayment = row.rechargePayment - row.registeredPayment;
 
                         return row;
                     });
