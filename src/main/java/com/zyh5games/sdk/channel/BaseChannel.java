@@ -1,6 +1,7 @@
 package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
+import com.zyh5games.entity.UOrder;
 import com.zyh5games.util.RandomUtil;
 import lombok.Data;
 import net.sf.json.JSONArray;
@@ -16,15 +17,15 @@ import java.util.Map;
 public abstract class BaseChannel {
     private static final Logger log = Logger.getLogger(BaseChannel.class);
     /**
-     * 渠道id
-     */
-    public Integer channelId;
-    /**
      * 渠道的游戏配置 <p>
      * 指悦游戏id-该渠道的配置
      * </p>
      */
     public Map<Integer, JSONObject> configMap;
+    /**
+     * 渠道id
+     */
+    public Integer channelId;
     /**
      * 是否开启
      */
@@ -192,6 +193,14 @@ public abstract class BaseChannel {
         return true;
     }
 
+    /**
+     * 检查 订单金额
+     * 有折扣的怎么处理
+     */
+    public boolean checkOrderMoney(String channelMoney, UOrder order) {
+        return true;
+    }
+
     public void addParam(StringBuilder param, String key, String value) {
         param.append(key).append("=").append(value);
     }
@@ -199,4 +208,5 @@ public abstract class BaseChannel {
     public void addParamAnd(StringBuilder param, String key, String value) {
         param.append("&").append(key).append("=").append(value);
     }
+
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 1758
@@ -29,12 +30,12 @@ public class Game1758BaseChannel extends BaseChannel {
     @Autowired
     HttpService httpService;
 
-    Map<String, String> hlmyGwMap;
+    static Map<String, String> hlmyGwMap;
 
     Game1758BaseChannel() {
         channelId = ChannelId.H5_1758;
-        configMap = new HashMap<>();
-        hlmyGwMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
+        hlmyGwMap = new ConcurrentHashMap<>();
     }
 
     @Override

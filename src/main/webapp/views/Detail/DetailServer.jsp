@@ -88,7 +88,7 @@
         let commonResult = {
             "服务器": "serverId",
             "开服天数": "openDay",
-            "新增账号": "newaddplayer",
+            // "新增账号": "newaddplayer",
             "新增创角": "newAddCreateRole",
 
             "活跃玩家": "activePlayer",

@@ -7,10 +7,34 @@ $(function () {
 
     let params = requestUri.split('?')[1];
 
-    sdkInit(appId, GameKey, channelId);
+    // sdkInit(appId, GameKey, channelId);
+
 });
 let channelUid = 0;
 let roleID = 0;
+
+function test111() {
+    console.log("test");
+    $.ajax({
+        url: "/sdkPay/callbackPayInfo/h5_huanju/14/14?gameId=956&ext=e9b0fcb7-0e7c-4dcf-a936-778e3a453b5c&server=1&role=8716289&orderId=202006050942186339&goodsId=1&sign=6b5ced13243d9a9b80e7be7c2409a73a&userName=well-done&uid=3385060&money=10.00&signType=md5&time=1591321358&cpOrderId=e9b0fcb7-0e7c-4dcf-a936-778e3a453b5c&goodsName=1000元宝&status=success",
+        type: "post",
+        async: false,
+        success: function (result) {
+            console.info(result === "success");
+            console.info("result=" + result);
+            let str = result.toString();
+            str = str.replace(/\n/g, "br");
+            console.info("result=" + str);
+            str = str.replace(/\r/g, "br2");
+            console.info("result=" + str);
+            str = str.replace(/"/g, "br3");
+            console.info("result=" + str);
+            str = str.replace(/\\/g, "br3");
+            console.info("result=" + str);
+            id = result;
+        }
+    });
+}
 
 function sdkInit(GameId, GameKey, ChannelCode) {
     ZhiYueSDK.init(GameId, GameKey, ChannelCode, function (status) {
@@ -140,7 +164,7 @@ function uploadRoleInfo(type, uid, roleId) {
     roleInfo.profession = '武士';
     roleInfo.friendlist = '';
     if (type !== 2) {
-         roleInfo = {
+        roleInfo = {
             "datatype": 3,
             "roleCreateTime": 1590376401,
             "uid": "10000210268567",

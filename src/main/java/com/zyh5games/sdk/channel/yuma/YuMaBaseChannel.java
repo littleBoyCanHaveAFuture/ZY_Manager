@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 鱼马-quick聚合
@@ -31,7 +32,7 @@ public class YuMaBaseChannel extends BaseChannel {
     AccountService accountService;
 
     YuMaBaseChannel() {
-        configMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_YUMA;
     }
 

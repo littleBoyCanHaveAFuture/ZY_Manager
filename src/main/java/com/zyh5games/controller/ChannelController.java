@@ -93,6 +93,7 @@ public class ChannelController {
         ResponseUtil.write(response, result);
     }
 
+    //查询区服
     @RequestMapping(value = "/getAllServerId", method = RequestMethod.GET)
     public void getAllServerId(Integer gameId, Integer spId,
                                HttpServletResponse response) throws Exception {
@@ -101,21 +102,22 @@ public class ChannelController {
             ResponseUtil.writeRelogin(response);
             return;
         }
-        Set<String> rsServerIdSet = new HashSet<>();
-        JSONObject result = new JSONObject();
-        Set<String> channelIdSet;
-        if (spId == -1) {
-            channelIdSet = cache.getSPIDInfo(String.valueOf(gameId));
-            //渠道id
-            for (String channelId : channelIdSet) {
-                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), channelId);
-                rsServerIdSet.addAll(serverIdSet);
-            }
-        } else {
-            Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
-            rsServerIdSet.addAll(serverIdSet);
-        }
 
+        JSONObject result = new JSONObject();
+//        Set<String> channelIdSet;
+//        if (spId == -1) {
+//            channelIdSet = cache.getSPIDInfo(String.valueOf(gameId));
+//            //渠道id
+//            for (String channelId : channelIdSet) {
+//                Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), channelId);
+//                rsServerIdSet.addAll(serverIdSet);
+//            }
+//        } else {
+//            Set<String> serverIdSet = cache.getServerInfo(String.valueOf(gameId), String.valueOf(spId));
+//            rsServerIdSet.addAll(serverIdSet);
+//        }
+
+        Set<String> rsServerIdSet= cache.getGameServerInfo(String.valueOf(gameId));
         result.put("rows", rsServerIdSet.toString());
         result.put("total", rsServerIdSet.size());
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);

@@ -3,7 +3,10 @@ package com.zyh5games.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.GameInfo;
 import com.zyh5games.entity.RechargeSummary;
-import com.zyh5games.jedis.*;
+import com.zyh5games.jedis.JedisRechargeCache;
+import com.zyh5games.jedis.RedisKey_Gen;
+import com.zyh5games.jedis.RedisKey_Member;
+import com.zyh5games.jedis.RedisKey_Tail;
 import com.zyh5games.service.RechargeSummaryService;
 import com.zyh5games.util.StringUtils;
 import org.apache.log4j.Logger;
@@ -141,11 +144,39 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         }
         String gameId = gameInfo.getGameId();
 
+
+//        Map<String, Map<String, Double>> resultList = new HashMap<>();
+//        // 区服id 新增账号
+//        Map<String, Double> newaddPlayer = new HashMap<>();
+//        Set<String> serverIdSet = cache.getGameServerInfo(gameId);
+//        for (String serverId : serverIdSet) {
+//            //未生成的数据的日期
+//            List<String> unCalDay = new ArrayList<>();
+//            //已生成的数据的日期-数据
+//            Map<String, String> rssMap = new HashMap<>();
+//            //获取数据
+//            cache.getRSByServer(gameId, serverId, timeList, unCalDay, rssMap);
+//            cache.getDayNewAddAccount_Server(gameId, serverId, unCalDay, resultList);
+//
+//            Double score = 0D;
+//            for (String day : unCalDay) {
+//                Map<String, Double> timeCAServerMap = resultList.get(RedisKey_Tail.NEW_ADD_FIRST_ACCOUNT);
+//                //这个数据和游戏区服有关 和渠道无关 不需要多次计算
+//                if (timeCAServerMap != null && timeCAServerMap.containsKey(day)) {
+//                    score += timeCAServerMap.get(day);
+//                }
+//            }
+//            if (!newaddPlayer.containsKey(serverId)) {
+//                newaddPlayer.put(serverId, score);
+//            }
+//        }
+
         //查询-游戏、不同渠道- 相同区服合并，区服id排序的结果
         for (Map.Entry<String, Set<String>> gameEntry : channelInfoMap.entrySet()) {
             int calNACA = 3;
             //渠道id
             String channelId = gameEntry.getKey();
+
             //先计算每个区服该时间段的数据-再计算所有区服改时间段的数据
             for (String serverId : sortSet) {
                 //未生成的数据的日期
@@ -160,6 +191,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                 if (unCalDay.size() > 0) {
                     result = this.getRsDataFromRedis(gameId, channelId, serverId, unCalDay, calNACA);
                     calNACA = 2;
+
                 }
                 if (rssMap.size() > 0) {
                     for (Map.Entry<String, String> entry : rssMap.entrySet()) {
@@ -188,6 +220,9 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         for (Map.Entry<String, RechargeSummary> serverEntry : totalMap.entrySet()) {
             RechargeSummary rs = serverEntry.getValue();
             rs.calculate(2);
+            String serverId = String.valueOf(rs.getServerId());
+//            int newaddplayer = newaddPlayer.containsKey(serverId) ? newaddPlayer.get(serverId).intValue() : 0;
+//            rs.setNewaddplayer(newaddplayer);
         }
 
         return new ArrayList<>(totalMap.values());
@@ -349,10 +384,10 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         if (type == 1) {
             cache.getDayNewAddAccount(gameId, channelId, unCalDay, resultList);
         } else if (type == 2) {
-            cache.getDayNewAddAccount_Server(gameId, serverId, unCalDay, resultList);
+//            cache.getDayNewAddAccount_Server(gameId, serverId, unCalDay, resultList);
         } else if (type == 3) {
             cache.getDayNewAddAccount(gameId, channelId, unCalDay, resultList);
-            cache.getDayNewAddAccount_Server(gameId, serverId, unCalDay, resultList);
+//            cache.getDayNewAddAccount_Server(gameId, serverId, unCalDay, resultList);
         }
         //redis键类型：有序集合(sorted set)
         //新增创角
@@ -373,9 +408,11 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         cache.getDayPayInfo(gameId, channelId, serverId, unCalDay, resultList);
 
 
-        //取值
+        //取值 分服概况数据
+        // 游戏-区服-天
+//        Map<String, Double> timeCAServerMap = resultList.get(RedisKey_Tail.NEW_ADD_FIRST_ACCOUNT);
 
-        Map<String, Double> timeCAServerMap = resultList.get(RedisKey_Tail.NEW_ADD_FIRST_ACCOUNT);
+
         //新增创号
         Map<String, Double> timeCAMap = resultList.get(RedisKey_Tail.NEW_ADD_CREATE_ACCOUNT);
         //新增创角
@@ -405,13 +442,14 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
                     rs.setNewAddCreateAccount(rs.getNewAddCreateAccount() + timeCAMap.get(day).intValue());
                 }
             }
-            if (type == 2 || type == 3) {
-                Double score = 0D;
-                if (timeCAServerMap != null && timeCAServerMap.containsKey(day)) {
-                    score = timeCAServerMap.get(day);
-                }
-                rs.setNewaddplayer(rs.getNewaddplayer() + score.intValue());
-            }
+//            if (type == 2 || type == 3) {
+//                Double score = 0D;
+//                //这个数据和游戏区服有关 和渠道无关 不需要多次计算
+//                if (timeCAServerMap != null && timeCAServerMap.containsKey(day)) {
+//                    score = timeCAServerMap.get(day);
+//                }
+//                rs.setNewaddplayer(rs.getNewaddplayer() + score.intValue());
+//            }
             //新增创角
             if (timecrMap.containsKey(day)) {
                 rs.setNewAddCreateRole(rs.getNewAddCreateRole() + timecrMap.get(day).intValue());

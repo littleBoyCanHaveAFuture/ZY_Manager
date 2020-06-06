@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 紫菀/骆驼
@@ -23,16 +23,16 @@ import java.util.Map;
 @Component("8")
 public class ZiWanBaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(ZiWanBaseChannel.class);
+    static Map<String, String> tokenMap;
     @Autowired
     HttpService httpService;
     @Autowired
     AccountService accountService;
-    Map<String, String> tokenMap;
 
     ZiWanBaseChannel() {
-        configMap = new HashMap<>();
         channelId = ChannelId.H5_ZIWAN;
-        tokenMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
+        tokenMap = new ConcurrentHashMap<>();
     }
 
     /**

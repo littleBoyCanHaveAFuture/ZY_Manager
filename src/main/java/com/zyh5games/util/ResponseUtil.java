@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.common.Constants;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -17,6 +18,7 @@ public class ResponseUtil {
         response.setContentType("text/html;charset=utf-8");
 /*        tomcat 已经处理
         response.addHeader("Access-Control-Allow-Origin", "*");*/
+        System.out.println(o.toString());
         PrintWriter out = response.getWriter();
         out.println(o.toString());
         out.flush();
@@ -35,4 +37,12 @@ public class ResponseUtil {
         out.flush();
         out.close();
     }
+
+    public static void callBack(HttpServletResponse response, Object o) throws IOException {
+        PrintWriter out = response.getWriter();
+        out.println(o.toString());
+        out.flush();
+        out.close();
+    }
+
 }

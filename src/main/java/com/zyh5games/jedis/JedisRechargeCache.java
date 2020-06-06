@@ -455,63 +455,6 @@ public class JedisRechargeCache {
     }
 
     /**
-     * 渠道用户登录 设置token 有效期 2小时
-     *
-     * @param appId      游戏id
-     * @param channelId  渠道id
-     * @param ChannelUid 渠道uid
-     */
-    public String saveToken(String appId,
-                            Integer channelId,
-                            String ChannelUid) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-            long timestamp = System.currentTimeMillis();
-
-            String tokenKey = RedisKey_Gen.get_LoginToken(appId, String.valueOf(channelId));
-            String value = RandomUtil.rndSecertKey() + "#" + timestamp;
-            jds.hset(tokenKey, ChannelUid, value);
-            return value;
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return "";
-    }
-
-    /**
-     * 渠道用户登录 设置token 有效期 2小时
-     *
-     * @param appId      游戏id
-     * @param channelId  渠道id
-     * @param ChannelUid 渠道uid
-     */
-    public String getToken(String appId,
-                           Integer channelId,
-                           String ChannelUid) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            String tokenKey = RedisKey_Gen.get_LoginToken(appId, String.valueOf(channelId));
-            return jds.hget(tokenKey, ChannelUid);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return "";
-    }
-
-    /**
      * 获取游戏信息
      */
     public Set<String> getGAMEIDInfo() {
@@ -677,6 +620,27 @@ public class JedisRechargeCache {
         } finally {
             returnResource(jds, isBroken);
         }
+    }
+
+    /**
+     * 获取游戏渠道区服信息
+     */
+    public Set<String> getGameServerInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_GameServerInfo(appId);
+            return jds.smembers(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
     }
 
     /**

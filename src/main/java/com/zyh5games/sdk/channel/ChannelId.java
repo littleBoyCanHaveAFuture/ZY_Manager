@@ -60,4 +60,30 @@ public class ChannelId {
      * 一牛
      */
     public static final int H5_YINIU = 18;
+    /**
+     * 奇游
+     */
+    public static final int H5_QIYOU = 19;
+
+    /**
+     * 三唐
+     */
+    public static final int H5_SANTANG = 20;
+    /**
+     * 小y=一牛=悦游
+     */
+    public static final int H5_XIAOY = 21;
+    /**
+     * 77
+     */
+    public static final int H5_77 = 22;
+    /**
+     * 羊羔
+     */
+    public static final int H5_YANGGAO = 23;
+    /**
+     * so游记
+     */
+    public static final int H5_SOYOUJI = 24;
+
 }

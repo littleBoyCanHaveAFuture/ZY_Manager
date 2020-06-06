@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 引力
@@ -32,7 +33,7 @@ public class YinLiBaseChannel extends BaseChannel {
     HttpService httpService;
 
     YinLiBaseChannel() {
-        configMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_HUANJU;
     }
 

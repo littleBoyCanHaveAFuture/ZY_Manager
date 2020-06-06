@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 悦游
@@ -23,14 +24,14 @@ import java.util.Map;
 public class YueYouBaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(YueYouBaseChannel.class);
 
-    Map<String, String> loginExtMap;
-    Map<String, String> loginModelMap;
+    static Map<String, String> loginExtMap;
+    static Map<String, String> loginModelMap;
 
     YueYouBaseChannel() {
         channelId = ChannelId.H5_YUEYOU;
-        configMap = new HashMap<>();
-        loginExtMap = new HashMap<>();
-        loginModelMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
+        loginExtMap = new ConcurrentHashMap<>();
+        loginModelMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -123,9 +124,6 @@ public class YueYouBaseChannel extends BaseChannel {
         // 签名验证
         String sign = map.get("sign")[0];
         String serverSign = MD5Util.md5(param.toString() + loginKey);
-
-        log.info("channelLogin serverSign = " + serverSign);
-        log.info("channelLogin sign       = " + sign);
 
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);

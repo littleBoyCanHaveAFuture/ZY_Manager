@@ -1,4 +1,4 @@
-let yiniuGameId = "";
+let xiaoyGameId = "";
 
 function getQueryString(url, key) {
     let list = url.split("&");
@@ -15,7 +15,7 @@ function zyCallChannelInit(params) {
     let config = getQueryString(params, "zhiyue_channel_config");
     console.log(config);
     config = JSON.parse(config);
-    yiniuGameId = config.gameId;
+    xiaoyGameId = config.gameId;
 }
 
 function zyCallChannelPay(order) {
@@ -46,12 +46,13 @@ function zyCallUploadRole(roleInfo) {
     jsonData.appId = roleInfo.GameId;
     jsonData.channelId = roleInfo.channelId;
     jsonData.user_id = roleInfo.uid;
-    jsonData.game_appid = yiniuGameId;
+    jsonData.game_appid = xiaoyGameId;
     jsonData.server_id = roleInfo.serverId;
     jsonData.server_name = roleInfo.serverName;
     jsonData.role_id = roleInfo.userRoleId;
     jsonData.role_name = roleInfo.userRoleName;
     jsonData.level = roleInfo.userRoleLevel;
+
     getZyChannelSignature(jsonData, function (data) {
         xgGame.jointCreateRole(data)
     });
@@ -84,7 +85,7 @@ function getZyChannelSignature(Request, Callback) {
         success: function (result) {
             console.log(result);
             if (result.status) {
-                console.log("getChannelSignature success" + result);
+                console.info("getChannelSignature success" + result);
                 Callback(result.data);
             } else {
                 console.log("getChannelSignature error" + result);

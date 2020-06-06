@@ -19,6 +19,8 @@ public class GameInfo {
     private Map<String, Set<String>> spInfo;
     //排重后的区服id
     private Set<String> serverInfo;
+    //对应渠道id
+    private Set<String> spIdInfo;
 
     public GameInfo(String gameId) {
         this.gameId = gameId;
@@ -37,6 +39,13 @@ public class GameInfo {
         }
     }
 
+    public void addServerInfo(Set<String> serverInfo) {
+        if (this.serverInfo == null) {
+            this.serverInfo = new HashSet<>();
+        }
+        this.serverInfo.addAll(serverInfo);
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -46,5 +55,13 @@ public class GameInfo {
                     .append("\tvalue=").append(entry.getValue());
         }
         return stringBuilder.toString();
+    }
+
+    public void addChannelInfo(Set<String> channelIdSet) {
+        if (this.spIdInfo == null) {
+            this.spIdInfo = new HashSet<>();
+        }
+        this.spIdInfo.addAll(channelIdSet);
+
     }
 }

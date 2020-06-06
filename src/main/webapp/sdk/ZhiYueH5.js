@@ -38,7 +38,8 @@ function zyCallChannelPay(order) {
  * @param passBackParams    透传参数
  * */
 function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackParams, spId) {
-    let param = "?orderId=" + orderId
+    let param = "?v=" + new Date().getTime()
+        + "&orderId=" + orderId
         + "&body=" + body
         + "&subject=" + subject
         + "&totalAmount=" + totalAmount
@@ -46,8 +47,7 @@ function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackP
         + "&passBackParams=" + passBackParams
         + "&appId=" + ZhiYueSDK.GameId + "&spId=" + spId;
 
-    let payUrl = "http://zy.hysdgame.cn/pay/static/pay.html" + encodeURI(param);
-    payUrl = "http://zyh5games.com/pay/static/pay.html" + encodeURI(param);
+    let payUrl = "https://zyh5games.com/pay/static/pay.html" + encodeURI(param);
     //苹果浏览器
     let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
         navigator.userAgent &&
@@ -55,7 +55,8 @@ function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackP
         navigator.userAgent.indexOf('FxiOS') === -1;
     if (isSafari) {
         // alert("苹果");
-        openWin(payUrl);
+        // openWin(payUrl);
+        newWin(payUrl, "zyOpenWin");
     } else {
         // alert("其他");
         window.open(payUrl);
@@ -63,6 +64,7 @@ function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackP
 }
 
 let openWin = function (payUrl) {
+    // alert("苹果打开支付2");
     //打开一个新窗口
     let winRef = window.open('', "_blank");
     //假装获取请求支付参数
@@ -72,10 +74,23 @@ let openWin = function (payUrl) {
         success: function () {
             //设置新窗口的跳转地址
             // winRef.location.href = "www.baidu.com";
-            winRef.location.href = payUrl;
+            window.location.href = payUrl;
         }
     })
 };
+
+function newWin(url, id) {
+    // window.location.href = url;
+    let a = document.createElement('zyOpenWin');
+    a.setAttribute('href', url);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('id', id);
+    // 防止反复添加
+    if (!document.getElementById(id)) document.body.appendChild(a);
+    a.onclick = openWin(url);
+
+    a.click();
+}
 
 function zyCallUploadRole(roleInfo) {
     console.log(roleInfo);

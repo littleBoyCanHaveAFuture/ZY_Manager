@@ -52,8 +52,8 @@ function zyCallUploadRole(roleInfo) {
     jsonData.role_id = roleInfo.userRoleId;
     jsonData.role_name = roleInfo.userRoleName;
     jsonData.level = roleInfo.userRoleLevel;
-    getZyChannelSignature(jsonData, function () {
-        xgGame.jointCreateRole(jsonData)
+    getZyChannelSignature(jsonData, function (data) {
+        xgGame.jointCreateRole(data)
     });
 }
 

@@ -1,4 +1,4 @@
-let yiniuGameId = "";
+let yanggaoGameId = "";
 
 function getQueryString(url, key) {
     let list = url.split("&");
@@ -15,7 +15,7 @@ function zyCallChannelInit(params) {
     let config = getQueryString(params, "zhiyue_channel_config");
     console.log(config);
     config = JSON.parse(config);
-    yiniuGameId = config.gameId;
+    yanggaoGameId = config.gameId;
 }
 
 function zyCallChannelPay(order) {
@@ -46,7 +46,7 @@ function zyCallUploadRole(roleInfo) {
     jsonData.appId = roleInfo.GameId;
     jsonData.channelId = roleInfo.channelId;
     jsonData.user_id = roleInfo.uid;
-    jsonData.game_appid = yiniuGameId;
+    jsonData.game_appid = yanggaoGameId;
     jsonData.server_id = roleInfo.serverId;
     jsonData.server_name = roleInfo.serverName;
     jsonData.role_id = roleInfo.userRoleId;

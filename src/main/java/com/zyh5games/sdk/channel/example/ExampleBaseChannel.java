@@ -3,13 +3,16 @@ package com.zyh5games.sdk.channel.example;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
+import com.zyh5games.sdk.channel.santang.SanTangConfig;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 模板
@@ -23,7 +26,7 @@ public class ExampleBaseChannel extends BaseChannel {
 
     ExampleBaseChannel() {
         channelId = ChannelId.H5_EXAMPLE;
-        configMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -78,17 +81,24 @@ public class ExampleBaseChannel extends BaseChannel {
 
         // 加密串
         StringBuilder param = new StringBuilder();
-        super.addParam(param, "", "");
-        super.addParamAnd(param, "", "");
+        Arrays.sort(mustKey);
+        boolean isFirst = true;
+        for (String key : mustKey) {
+            String value = map.get(key)[0];
+            if (isFirst) {
+                isFirst = false;
+                super.addParam(param, key, value);
+            } else {
+                super.addParamAnd(param, key, value);
+            }
+        }
+        param.append(loginKey);
 
         log.info("param = " + param.toString());
 
         // 签名验证
         String sign = map.get("sign")[0];
         String serverSign = MD5Util.md5(param.toString());
-
-        log.info("channelLogin serverSign = " + serverSign);
-        log.info("channelLogin sign       = " + sign);
 
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
@@ -185,8 +195,6 @@ public class ExampleBaseChannel extends BaseChannel {
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
 
-        log.info("channelPayCallback serverSign = " + serverSign);
-        log.info("channelPayCallback sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             return false;

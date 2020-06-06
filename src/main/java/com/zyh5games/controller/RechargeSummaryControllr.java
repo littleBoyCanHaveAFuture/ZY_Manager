@@ -35,7 +35,7 @@ public class RechargeSummaryControllr {
     private static final Logger log = Logger.getLogger(RechargeSummaryControllr.class);
     @Autowired
     JedisRechargeCache cache;
-    @Resource
+    @Resource(name = "RechargeSummaryService")
     private RechargeSummaryService rsService;
     @Autowired
     private HttpServletRequest request;

@@ -88,7 +88,10 @@ public class PayCallbackController {
                 result = false;
                 break;
             }
-
+            //某些清况 检查金额 todo
+            if (!channelSerivce.checkOrderMoney(money, order)) {
+                return false;
+            }
             Integer zhiyueUid = order.getUserID();
             channelOrder.replace("zy_uid", zhiyueUid);
 
@@ -525,23 +528,23 @@ public class PayCallbackController {
      */
     @RequestMapping(value = "/callbackPayInfo/h5_huanju/{channelId}/{appId}")
     @ResponseBody
-    public void h5_huanju(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
-                          @RequestParam("status") String status,
-                          @RequestParam("cpOrderId") String cpOrderId,
-                          @RequestParam("orderId") String orderId,
-                          @RequestParam("uid") String uid,
-                          @RequestParam("userName") String userName,
-                          @RequestParam("money") String money,
-                          @RequestParam("gameId") String gameId,
-                          @RequestParam("goodsId") String goodsId,
-                          @RequestParam("goodsName") String goodsName,
-                          @RequestParam("server") String server,
-                          @RequestParam("role") String role,
-                          @RequestParam("time") String time,
-                          @RequestParam(value = "ext", required = false) String ext,
-                          @RequestParam("signType") String signType,
-                          @RequestParam("sign") String sign,
-                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String h5_huanju(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                            @RequestParam("status") String status,
+                            @RequestParam("cpOrderId") String cpOrderId,
+                            @RequestParam("orderId") String orderId,
+                            @RequestParam("uid") String uid,
+                            @RequestParam("userName") String userName,
+                            @RequestParam("money") String money,
+                            @RequestParam("gameId") String gameId,
+                            @RequestParam("goodsId") String goodsId,
+                            @RequestParam("goodsName") String goodsName,
+                            @RequestParam("server") String server,
+                            @RequestParam("role") String role,
+                            @RequestParam("time") String time,
+                            @RequestParam(value = "ext", required = false) String ext,
+                            @RequestParam("signType") String signType,
+                            @RequestParam("sign") String sign,
+                            HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
 
@@ -569,8 +572,8 @@ public class PayCallbackController {
         JSONObject channelOrder = new JSONObject();
 
         boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, cpOrderId, orderId, money);
-
-        ResponseUtil.write(response, result ? "success" : "fail");
+//        ResponseUtil.write(response, result ? "success" : "fail");
+        return result ? "success" : "fail";
     }
 
     /**
@@ -821,6 +824,206 @@ public class PayCallbackController {
         String orderId = params.get("orderId");
         String money = FeeUtils.fenToYuan(totalFee);
         boolean result = checkOrder(appId, channelId, params, data, txId, orderId, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 小y
+     * 回调body已经过url encode，使用时要使用url decode进行解密等到json
+     * <p>
+     *
+     * @param amount         金额，单位为分
+     * @param channel_source 数据来源
+     * @param game_appid     游戏编号----运营方为游戏分配的唯一编号
+     * @param out_trade_no   渠道方订单号
+     * @param payplatform2cp 用于 CP 要求平台特别传输其他参数，默认是访问 ip
+     * @param trade_no       游戏透传参数（默认为游戏订单号，回调时候原样返回）
+     * @param sign           按照上方签名机制进行签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_xiaoy/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_xiaoy(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                         @RequestParam("amount") String amount,
+                         @RequestParam("channel_source") String channel_source,
+                         @RequestParam("game_appid") String game_appid,
+                         @RequestParam("out_trade_no") String out_trade_no,
+                         @RequestParam("payplatform2cp") String payplatform2cp,
+                         @RequestParam("trade_no") String trade_no,
+                         @RequestParam("sign") String sign,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("amount", amount);
+        parameterMap.put("channel_source", channel_source);
+        parameterMap.put("game_appid", game_appid);
+        parameterMap.put("out_trade_no", out_trade_no);
+        parameterMap.put("payplatform2cp", payplatform2cp);
+        parameterMap.put("trade_no", trade_no);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        String money = FeeUtils.fenToYuan(amount);
+        boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+
+    /**
+     * 三唐
+     * <p>
+     * 参数名              备注                      说明
+     * pf               平台名                         固定值:3tang
+     * sid              游戏区服                       根据玩家所在区服传值
+     * openid           玩家唯一标志三唐 openid
+     * billDate         玩家下单时间                   Unixtime 格式标准时间
+     * st_trade_no      三唐平台订单号
+     * cp_trade_no      CP 方订单号                   跟调起充值接口传入的 CP 方,订单号是一致的
+     * cash             玩家充值金额                  单位是元
+     * sign             签名（md5 加密 小写）          md5(pf&sid&openid&billDate&st_trade_no&cp_trade_no&cash& APPKEY )注意：&是变量连接符,不要放到加密里APPKEY 由三唐平台分配或双方协定
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_santang/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_santang(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                           @RequestParam("pf") String pf,
+                           @RequestParam("sid") String sid,
+                           @RequestParam("openid") String openid,
+                           @RequestParam("billDate") String billDate,
+                           @RequestParam("st_trade_no") String st_trade_no,
+                           @RequestParam("cp_trade_no") String cp_trade_no,
+                           @RequestParam("cash") String cash,
+                           @RequestParam("sign") String sign,
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("pf", pf);
+        parameterMap.put("sid", sid);
+        parameterMap.put("openid", openid);
+        parameterMap.put("billDate", billDate);
+        parameterMap.put("st_trade_no", st_trade_no);
+        parameterMap.put("cp_trade_no", cp_trade_no);
+        parameterMap.put("cash", cash);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, cp_trade_no, st_trade_no, cash);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("result", result ? 1 : 0);
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 羊羔
+     * <p>
+     *
+     * @param amount         金额，单位为分
+     * @param channel_source 数据来源
+     * @param game_appid     游戏编号----运营方为游戏分配的唯一编号
+     * @param out_trade_no   渠道方订单号
+     * @param payplatform2cp 用于 CP 要求平台特别传输其他参数，默认是访问 ip
+     * @param trade_no       游戏透传参数（默认为游戏订单号，回调时候原样返回）
+     * @param sign           按照上方签名机制进行签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_yanggao/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_yanggao(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                           @RequestParam("amount") String amount,
+                           @RequestParam("channel_source") String channel_source,
+                           @RequestParam("game_appid") String game_appid,
+                           @RequestParam("out_trade_no") String out_trade_no,
+                           @RequestParam("payplatform2cp") String payplatform2cp,
+                           @RequestParam("trade_no") String trade_no,
+                           @RequestParam("sign") String sign,
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("amount", amount);
+        parameterMap.put("channel_source", channel_source);
+        parameterMap.put("game_appid", game_appid);
+        parameterMap.put("out_trade_no", out_trade_no);
+        parameterMap.put("payplatform2cp", payplatform2cp);
+        parameterMap.put("trade_no", trade_no);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        String money = FeeUtils.fenToYuan(amount);
+        boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 奇游
+     * <p>
+     *
+     * @param order_no   平台支付订单	                            是	201912181137114223
+     * @param cp_order   游戏订单号	                            是
+     * @param user_id    平台用户ID，和登录注册时返回的user_id一致	是
+     * @param product_id 游戏商品ID	                            是
+     * @param price      充值金额（元）	                        是
+     * @param role_id    角色ID	                                是
+     * @param server_id  服务器ID	                            是
+     * @param ext        扩展参数，透传下单时提供的extension	    否	默认空字符串
+     * @param time       Unix时间戳	                            是
+     * @param sign       加密串	                                是	详见下面sign生成算法
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_qiyou/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_qiyou(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                         @RequestParam("order_no") String order_no,
+                         @RequestParam("cp_order") String cp_order,
+                         @RequestParam("user_id") String user_id,
+                         @RequestParam("product_id") String product_id,
+                         @RequestParam("price") String price,
+                         @RequestParam("role_id") String role_id,
+                         @RequestParam("server_id") String server_id,
+                         @RequestParam("ext") String ext,
+                         @RequestParam("time") String time,
+                         @RequestParam("sign") String sign,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("order_no", order_no);
+        parameterMap.put("cp_order", cp_order);
+        parameterMap.put("user_id", user_id);
+        parameterMap.put("product_id", product_id);
+        parameterMap.put("price", price);
+        parameterMap.put("role_id", role_id);
+        parameterMap.put("server_id", server_id);
+        parameterMap.put("ext", ext);
+        parameterMap.put("time", time);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, cp_order, order_no, price);
 
         JSONObject rsp = new JSONObject();
         rsp.put("status", result ? "success" : "fail");

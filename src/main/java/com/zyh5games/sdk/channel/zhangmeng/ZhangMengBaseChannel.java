@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 掌盟
@@ -25,7 +25,7 @@ public class ZhangMengBaseChannel extends BaseChannel {
 
     ZhangMengBaseChannel() {
         channelId = ChannelId.H5_ZHANGMENG;
-        configMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
     }
 
     @Override

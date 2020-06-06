@@ -32,14 +32,13 @@ function zyCallChannelPay(order) {
 
 /**
  * 展示二维码
- * todo
  * cp 应该提供一个二维码弹窗样式及关闭按钮
  * */
 function swPayCallBack(json) {
     console.info(json.response.msg);
     console.info(json.response.qrcode);
     if (json.response.code === 0) {
-        $("#id_qrcode").attr("src", "data:image/jpeg;base64," + json.response.qrcode);
+        $("#zhiyue_qrcode").attr("src", "data:image/jpeg;base64," + json.response.qrcode);
     }
 }
 

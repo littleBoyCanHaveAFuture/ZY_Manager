@@ -97,14 +97,14 @@ function initSpGameServer(type) {
 
     let url = "";
     if (type === 1) {
-        //查询区服
+        //查询渠道
         url = "/channel/getAllChannel";
         url += "?gameId=" + gameId;
     } else if (type === 2) {
         //查询游戏
         url = "/channel/getAllGame";
     } else {
-        //查询渠道
+        //查询区服
         url = "/channel/getAllServerId";
         url += "?gameId=" + gameId;
         url += "&spId=" + spId;

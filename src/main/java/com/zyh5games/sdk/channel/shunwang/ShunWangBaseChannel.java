@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 顺网
@@ -35,7 +36,7 @@ public class ShunWangBaseChannel extends BaseChannel {
     AccountService accountService;
 
     ShunWangBaseChannel() {
-        configMap = new HashMap<>();
+        configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_SHUNWANG;
     }
 

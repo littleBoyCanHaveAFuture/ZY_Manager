@@ -80,20 +80,20 @@ public class ChannelHandler {
         if (channel.getConfigMap() == null || channel.getConfigMap().size() == 0) {
             channel.setConfigMap(appConfigMap.get(channelId));
         } else {
-            List<ChannelConfig> channelConfigList = configService.selectChannelConfig(channelId, -1);
-            for (ChannelConfig config : channelConfigList) {
-                Integer appId = config.getAppId();
-                String configKey = config.getConfigKey();
-                if (configKey != null && !configKey.isEmpty()) {
-                    JSONObject jsonObject = JSONObject.parseObject(configKey);
-                    if (channel.getConfigMap().containsKey(appId)) {
-                        channel.getConfigMap().replace(appId, jsonObject);
-                    } else {
-                        channel.getConfigMap().put(appId, jsonObject);
-                    }
-                    System.out.println("[" + channelId + "]getChannel[" + appId + "] = " + jsonObject);
-                }
-            }
+//            List<ChannelConfig> channelConfigList = configService.selectChannelConfig(channelId, -1);
+//            for (ChannelConfig config : channelConfigList) {
+//                Integer appId = config.getAppId();
+//                String configKey = config.getConfigKey();
+//                if (configKey != null && !configKey.isEmpty()) {
+//                    JSONObject jsonObject = JSONObject.parseObject(configKey);
+//                    if (channel.getConfigMap().containsKey(appId)) {
+//                        channel.getConfigMap().replace(appId, jsonObject);
+//                    } else {
+//                        channel.getConfigMap().put(appId, jsonObject);
+//                    }
+//                    System.out.println("[" + channelId + "]getChannel[" + appId + "] = " + jsonObject);
+//                }
+//            }
         }
         return channel;
     }

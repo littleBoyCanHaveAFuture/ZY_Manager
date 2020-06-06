@@ -419,7 +419,7 @@ function zyCheckOrderObject(orderInfo) {
  * */
 function zyLoadSpLib(data, callback) {
     let libUrl = data.channelPlatform.libUrl;
-    let spLib = "https://zyh5games.com/sdk/channel/" + data.channelData.name + ".js";
+    let spLib = "https://zyh5games.com/sdk/channel/" + data.channelData.name + ".js?" + new Date().getTime();
     let name = "";
     if (!data.channelData.hasOwnProperty("name")) {
         spLib = null;
