@@ -31,8 +31,6 @@ public class ZyChannelController {
     JedisRechargeCache cache;
     @Resource
     AccountWorker accountWorker;
-    @Resource
-    LoginWorker loginWorker;
     @Autowired
     private HttpServletRequest request;
     @Resource

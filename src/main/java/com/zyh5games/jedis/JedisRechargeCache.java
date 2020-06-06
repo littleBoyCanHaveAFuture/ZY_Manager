@@ -4,7 +4,6 @@ package com.zyh5games.jedis;
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.RechargeSummary;
 import com.zyh5games.util.DateUtil;
-import com.zyh5games.util.RandomUtil;
 import com.zyh5games.util.SerializeUtil;
 import org.apache.log4j.Logger;
 import redis.clients.jedis.*;
@@ -22,6 +21,10 @@ public class JedisRechargeCache {
      * Redis 分片(分区)，也可以在配置文件中配置
      */
     private static final int DB_INDEX = 5;
+    /**
+     * sms片区
+     */
+    private static final int SMS_DB_INDEX = 6;
     private JedisManager jedisManager;
 
     private boolean isLog = false;
@@ -106,6 +109,30 @@ public class JedisRechargeCache {
         jedis.close();
     }
 
+    /**
+     * sms 手机注册验证码
+     *
+     * @param key        键值
+     * @param code       验证码
+     * @param expireTime 过期时间，秒
+     */
+    public void setSmsKey(String key, Integer expireTime, String code) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(SMS_DB_INDEX);
+
+            jds.set(key, code);
+            jds.expire(key, expireTime);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
     public void setChannelLoginToken(String gameId, String channelId, String channelUid, String token) {
         Jedis jds = null;
         boolean isBroken = false;
@@ -146,8 +173,11 @@ public class JedisRechargeCache {
         try {
             jds = this.jedisManager.getJedis();
             jds.select(DB_INDEX);
-
-            return jds.get(key);
+            String res = jds.get(key);
+            if (res == null || res.equals("nil")) {
+                return "";
+            }
+            return res;
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -164,6 +194,21 @@ public class JedisRechargeCache {
             jds = jedisManager.getJedis();
             jds.select(DB_INDEX);
             jds.set(key, value);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    public void setExpire(String key, int expire) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            jds.expire(key, expire);
         } catch (Exception e) {
             isBroken = true;
             e.printStackTrace();
@@ -337,7 +382,8 @@ public class JedisRechargeCache {
     /**
      * 查询有序集合键值
      */
-    public void zScan(Map<String, Object> map, String key, List<String> timeList, String cursor, Jedis jds, boolean isInt) {
+    public void zScan(Map<String, Object> map, String key, List<String> timeList, String cursor, Jedis jds,
+                      boolean isInt) {
         do {
             //使用scan命令获取500条数据，使用cursor游标记录位置，下次循环使用
             ScanResult<Tuple> scanResult = jds.zscan(key, cursor);
@@ -885,7 +931,8 @@ public class JedisRechargeCache {
      * @param payamounts 支付金额
      * @param createTime 账号注册时间
      */
-    public void reqPay(String appId, String serverId, String channelId, long accountId, String roleId, long payamounts,
+    public void reqPay(String appId, String serverId, String channelId, long accountId, String roleId,
+                       long payamounts,
                        String createTime) {
         Jedis jds = null;
         boolean isBroken = false;
@@ -1186,7 +1233,8 @@ public class JedisRechargeCache {
      *                   key keytail
      *                   value （times，score）
      */
-    public void getDayZScore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
+    public void getDayZScore
+    (Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1294,7 +1342,8 @@ public class JedisRechargeCache {
      * @param unCalDay 未查询到的时间区间
      * @return
      */
-    public void getRSByDay(String gameId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
+    public void getRSByDay(String
+                                   gameId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1343,7 +1392,8 @@ public class JedisRechargeCache {
      * @param rsMap
      * @return
      */
-    public void setRSByServer(String gameId, String serverId, List<String> timeList, Map<String, RechargeSummary> rsMap) {
+    public void setRSByServer(String gameId, String
+            serverId, List<String> timeList, Map<String, RechargeSummary> rsMap) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1392,7 +1442,8 @@ public class JedisRechargeCache {
      * @param unCalDay 未查询到的时间区间
      * @return
      */
-    public void getRSByServer(String gameId, String serverId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
+    public void getRSByServer(String gameId, String
+            serverId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1441,7 +1492,8 @@ public class JedisRechargeCache {
      * @param rsMap
      * @return
      */
-    public void setRSByChannel(String gameId, String channelId, List<String> timeList, Map<String, RechargeSummary> rsMap) {
+    public void setRSByChannel(String gameId, String
+            channelId, List<String> timeList, Map<String, RechargeSummary> rsMap) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1490,7 +1542,8 @@ public class JedisRechargeCache {
      * @param unCalDay 未查询到的时间区间
      * @return
      */
-    public void getRSByChannel(String gameId, String channelId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
+    public void getRSByChannel(String gameId, String
+            channelId, List<String> timeList, List<String> unCalDay, Map<String, String> rsMap) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1537,7 +1590,8 @@ public class JedisRechargeCache {
      * @param timeList 时间段
      * @param rs       存储的对象
      */
-    public void setRS_Active(String gameId, String channelId, String serverId, List<String> timeList, RechargeSummary rs, Integer type, String day) {
+    public void setRS_Active(String gameId, String channelId, String
+            serverId, List<String> timeList, RechargeSummary rs, Integer type, String day) {
         Jedis jds = null;
         boolean isBroken = false;
         try {

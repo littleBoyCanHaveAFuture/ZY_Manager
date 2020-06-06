@@ -59,6 +59,7 @@ public class AccountWorker {
      * 已存在的最大appid
      */
     public static AtomicInteger lastAppId;
+
     @Autowired
     JedisRechargeCache cache;
     @Resource
@@ -108,10 +109,10 @@ public class AccountWorker {
             String channelUid = jsonObject.getString("channelUid");
 
             String channelUname = jsonObject.containsKey("channelUname") ? jsonObject.getString("channelUname") : "";
-            String channelUnick = jsonObject.containsKey("channelUname") ? jsonObject.getString("channelUnick") : "";
-            String phone = jsonObject.containsKey("channelUname") ? jsonObject.getString("phone") : "";
-            String deviceCode = jsonObject.containsKey("channelUname") ? jsonObject.getString("deviceCode") : "";
-            String imei = jsonObject.containsKey("channelUname") ? jsonObject.getString("imei") : "";
+            String channelUnick = jsonObject.containsKey("channelUnick") ? jsonObject.getString("channelUnick") : "";
+            String phone = jsonObject.containsKey("phone") ? jsonObject.getString("phone") : "";
+            String deviceCode = jsonObject.containsKey("deviceCode") ? jsonObject.getString("deviceCode") : "";
+            String imei = jsonObject.containsKey("imei") ? jsonObject.getString("imei") : "";
 
             String ip = jsonObject.getString("ip");
 
@@ -295,5 +296,65 @@ public class AccountWorker {
             cache.register(true, appId, account.getId(), channelId);
         } while (false);
         return account;
+    }
+
+    public Account phoneReg(JSONObject rsqData) throws Exception {
+        JSONObject reply = new JSONObject();
+        Account account = new Account();
+        do {
+            int appId = rsqData.getInteger("appId");
+            int channelId = rsqData.getInteger("channelId");
+            String addParam = rsqData.containsKey("addParam") ? rsqData.getString("addParam") : "";
+            String ip = rsqData.getString("ip");
+            String password = rsqData.getString("password");
+            String phone = rsqData.getString("phone");
+
+            account.setName(phone);
+            account.setPwd(password);
+            account.setPhone(phone);
+            account.setCreateIp(ip);
+            account.setCreateTime(DateUtil.getCurrentDateStr());
+            account.setCreateDevice("");
+            account.setDeviceCode("");
+            account.setChannelId("0");
+            account.setChannelUserName("");
+            account.setChannelUserNick("");
+            account.setLastLoginTime(0L);
+            account.setToken("");
+            account.setAddParam(addParam);
+
+            accountService.createAccount(account);
+            if (account.getId() < 0) {
+                if (account.getId() == -2) {
+                    log.error("账号名重复");
+                    reply.put("state", false);
+                    reply.put("message", "账号名重复");
+                    break;
+                } else {
+                    log.error("注册失败");
+                    reply.put("state", false);
+                    reply.put("message", "注册失败");
+                    break;
+                }
+            }
+            //官方
+            account.setChannelUserId(account.getId().toString());
+
+            //更新uid
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", account.getId());
+            map.put("channelUid", account.getId());
+            accountService.updateAccountUid(map);
+
+            //注册成功 相关数据存入redis
+            cache.register(true, appId, account.getId(), channelId);
+        } while (false);
+        return account;
+    }
+
+    public boolean existAccount(String name) {
+
+        return accountService.existAccount(name) > 0;
+
     }
 }

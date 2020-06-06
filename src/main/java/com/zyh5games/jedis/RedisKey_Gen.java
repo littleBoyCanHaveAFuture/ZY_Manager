@@ -13,6 +13,48 @@ public class RedisKey_Gen {
 
     private static final boolean isLog = false;
 
+    /**
+     * 手机验证码
+     */
+    public static String get_SmsRegisterKey(String gameId, String phone) {
+        String key = "SMS" + ":" + "APPID" + ":" + gameId + ":" + "Register" + "#" + phone;
+        if (isLog) {
+            log.info("get_SmsRegisterKey:\t" + key);
+        }
+        return key;
+    }
+    /**
+     * 手机验证码
+     */
+    public static String get_SmsLoginKey(String gameId, String phone) {
+        String key = "SMS" + ":" + "APPID" + ":" + gameId + ":" + "Login" + "#" + phone;
+        if (isLog) {
+            log.info("get_SmsLoginKey:\t" + key);
+        }
+        return key;
+    }
+    /**
+     * 手机注册验证码请求时间
+     */
+    public static String get_SmsRegisterTimeKey(String gameId, String phone) {
+        String key = "SMS" + ":" + "APPID" + ":" + gameId + ":" + "RegisterTime" + "#" + phone;
+        if (isLog) {
+            log.info("get_SmsRegisterKey:\t" + key);
+        }
+        return key;
+    }
+
+    /**
+     * 手机登录验证码请求时间
+     */
+    public static String get_SmsLoginTimeKey(String gameId, String phone) {
+        String key = "SMS" + ":" + "APPID" + ":" + gameId + ":" + "LoginTime" + "#" + phone;
+        if (isLog) {
+            log.info("get_SmsLoginTimeKey:\t" + key);
+        }
+        return key;
+    }
+
     public static String get_ChannelLoginToken(String gameId, String channelId, String channelUid) {
         String key = "Login" +
                 ":" + SP_ID + ":" + channelId +

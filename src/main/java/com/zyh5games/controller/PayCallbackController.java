@@ -201,10 +201,25 @@ public class PayCallbackController {
     @ResponseBody
     public void h5_example(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                            @RequestParam("amount") String amount,
+                           @RequestParam("cpOrderId") String cpOrderId,
+                           @RequestParam("channelOrderId") String channelOrderId,
                            @RequestBody Map<String, Object> param,
                            HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("amount", amount);
+        parameterMap.put("cpOrderId", cpOrderId);
+        parameterMap.put("channelOrderId", channelOrderId);
+
+        JSONObject channelOrder = new JSONObject();
+
+        boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, cpOrderId, channelOrderId, amount);
+
+
+        ResponseUtil.write(response, result ? "success" : "fail");
+        log.info("h5_ziwan end " + result);
     }
 
     /**
@@ -1025,8 +1040,6 @@ public class PayCallbackController {
 
         boolean result = checkOrder(appId, channelId, parameterMap, data, cp_order, order_no, price);
 
-        JSONObject rsp = new JSONObject();
-        rsp.put("status", result ? "success" : "fail");
-        ResponseUtil.write(response, rsp);
+        ResponseUtil.write(response, result ? "0" : "-1");
     }
 }

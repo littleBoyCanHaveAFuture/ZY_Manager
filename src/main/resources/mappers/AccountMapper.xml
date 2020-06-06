@@ -100,6 +100,13 @@
         where channelId = #{channelId}
           and channelUserId = #{channelUid}
     </select>
+
+    <select id="existAccount" parameterType="string" resultType="int">
+        select count(*)
+        from zy_account
+        where name = #{name}
+    </select>
+
     <update id="updateAccountUid" parameterType="map">
         update zy_account
         <set>

@@ -98,5 +98,8 @@
 
     </bean>
 
+    <bean id="gameWorker" class="com.zyh5games.sdk.GameWorker" init-method="init">
+
+    </bean>
 
 </beans>

@@ -41,7 +41,6 @@ public class AccountServiceImpl implements AccountService {
                 //仅使主键重复异常被忽略
                 if (err.contains(MysqlUtil.excep_sql) && err.contains(MysqlUtil.excep_pri)) {
                     log.info("err1");
-                    continue;
                 } else if (err.contains(MysqlUtil.excep_uni)) {
                     log.info("err2");
                     account.setId(-2);
@@ -145,5 +144,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void updateAccountUid(Map<String, Object> map) {
         accountDao.updateAccountUid(map);
+    }
+
+    /**
+     * 根据账户名判断用户存在
+     *
+     * @param name
+     */
+    @Override
+    public Integer existAccount(String name) {
+        return accountDao.existAccount(name);
     }
 }

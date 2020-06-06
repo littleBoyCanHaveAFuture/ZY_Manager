@@ -21,6 +21,17 @@ public class HttpService {
     @Autowired
     private RestOperations restOperations;
 
+    public JSONObject httpGetJsonNo(String notifyUrl) {
+        JSONObject json = new JSONObject();
+        try {
+            String rsp = restOperations.getForObject(notifyUrl, String.class);
+            json = JSONObject.parseObject(rsp);
+        } catch (Exception e) {
+            json.put("status", false);
+            json.put("message", e.getMessage());
+        }
+        return json;
+    }
 
     public JSONObject httpGetJson(String notifyUrl) {
         log.info("BaseChannel httpGetJson =" + notifyUrl);

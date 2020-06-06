@@ -59,4 +59,6 @@ public interface AccountDao {
     Account findAccountById(@Param("id") int id);
 
     Account findAccountByOpenId(@Param("channelId") String channelId, @Param("openId") String openId);
+
+    Integer existAccount(@Param("name") String name);
 }

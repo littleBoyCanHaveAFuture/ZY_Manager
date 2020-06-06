@@ -80,4 +80,8 @@ public interface AccountService {
      */
     void updateAccountUid(Map<String, Object> map);
 
+    /**
+     * 根据账户名判断用户存在
+     */
+    Integer existAccount(String name);
 }

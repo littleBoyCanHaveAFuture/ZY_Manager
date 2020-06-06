@@ -25,27 +25,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class GameWorker {
     private static final Logger log = Logger.getLogger(GameWorker.class);
+
     /**
      * 所有渠道信息
      */
-    public static Map<Integer, Sp> spMap;
+    private Map<Integer, Sp> spMap;
     /**
      * 所有游戏信息
      */
-    public static Map<Integer, GameNew> gameMap;
+    private Map<Integer, GameNew> gameMap;
     /**
      * 游戏对应渠道信息
      */
-    public static Map<Integer, Map<Integer, ChannelConfig>> channelConfigMapMap;
-
-
-    static {
-        //最好指定大小 todo
-        spMap = new ConcurrentHashMap<>();
-        gameMap = new ConcurrentHashMap<>();
-        channelConfigMapMap = new ConcurrentHashMap<>();
-    }
-
+    private Map<Integer, Map<Integer, ChannelConfig>> channelConfigMapMap;
     @Resource
     private SpService spService;
     @Resource
@@ -53,8 +45,11 @@ public class GameWorker {
     @Resource
     private ChannelConfigService configService;
 
-
     public void init() {
+        spMap = new ConcurrentHashMap<>();
+        gameMap = new ConcurrentHashMap<>();
+        channelConfigMapMap = new ConcurrentHashMap<>();
+
         log.info("------------------GameWorker init start-------------------");
         List<Sp> spList = spService.getAllSp(-1);
         for (Sp sp : spList) {
@@ -85,9 +80,16 @@ public class GameWorker {
         }
 
         log.info("------------------GameWorker init finished-------------------");
-        System.out.println(spMap.toString());
-        System.out.println(gameMap.toString());
-        System.out.println(channelConfigMapMap.toString());
+        for (Sp sp : spList) {
+            System.out.println("sp[" + sp.getSpId() + "] = " + sp.toString());
+        }
+        for (GameNew gameNew : gameList) {
+            Integer appId = gameNew.getAppId();
+            System.out.println("GameNew[" + appId + "] = " + gameNew.toString());
+        }
+        for (ChannelConfig channelConfig : configList) {
+            System.out.println("ChannelConfig[" + channelConfig.getAppId() + "][" + channelConfig.getChannelId() + "] = " + channelConfig.toString());
+        }
     }
 
     public Sp getSp(Integer channelId) {
@@ -137,6 +139,4 @@ public class GameWorker {
 
         return null;
     }
-
-
 }
