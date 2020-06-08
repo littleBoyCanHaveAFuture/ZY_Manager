@@ -13,7 +13,7 @@
     <link href="${pageContext.request.contextPath}/css/font-awesome.min93e3.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/animate.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/style.min862f.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/login/prod/style.css?1923" rel='stylesheet' type='text/css'/>
+    <link href="${pageContext.request.contextPath}/login/dev/style.css?1118" rel='stylesheet' type='text/css'/>
     <link href="${pageContext.request.contextPath}/images/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
     <!--[if lt IE 9]>
     <meta http-equiv="refresh" content="0;ie.html"/>
@@ -42,8 +42,11 @@
         <input type="password" value="" placeholder="设置密码" id="password">
     </div>
     <div class="key" id="phoneLogin" hidden="hidden">
-        <input type="number" class="code" placeholder="请输入手机验证码" required maxlength="6" id="phone_logincode">
-        <input type="button" class="obtain generate_code" value=" 获取验证码" onclick="getLoginCode(this);">
+        <input type="number" class="text" placeholder="请输入手机验证码" required maxlength="6" id="phone_logincode">
+    </div>
+    <div class="key" id="phoneLoginClick" hidden="hidden">
+        <input type="button" class="getcode" value=" 获取验证码"
+               onclick="getLoginCode(this);">
     </div>
     <div id="nnnn">
         <span class="logintip1">我已详细阅读并同意 指悦网络科技游戏隐私保护协议</span>
@@ -64,7 +67,7 @@
             一键注册
         </button>
         <button class="btn btn-login" onClick="hiddenNormal()" style="margin-left: 20%;width: 25%;color: #ebaf61;">
-            手机登陆
+            <span id="lll">手机登陆</span>
         </button>
     </div>
     <div class="outer">
@@ -135,7 +138,7 @@
     </div>
     <div class="key">
         <input type="number" class="code" placeholder="请输入手机验证码" required maxlength="6" id="phone_code">
-        <input type="button" class="obtain generate_code" value=" 获取验证码" onclick="getCode(this);">
+        <input type="button" class="getcode" value=" 获取验证码" onclick="getCode(this);">
     </div>
     <div class="outer">
         <button type="button" onclick="phone();" class="btn btn-primary block  m-b reg111"
@@ -275,14 +278,36 @@
         document.getElementById("login").hidden = true;
     }
 
-    function hiddenNormal() {
-        //显示
-        document.getElementById("phoneLogin").hidden = false;
-        document.getElementById("nameLogin").hidden = false;
-        //隐藏
+    let res = false;
 
-        document.getElementById("password").hidden = true;
-        document.getElementById("nnnn").hidden = true;
+    function hiddenNormal() {
+        if (res) {
+            //显示
+            document.getElementById("password").hidden = false;
+            document.getElementById("nnnn").hidden = false;
+
+
+            //隐藏
+            document.getElementById("phoneLogin").hidden = true;
+            document.getElementById("nameLogin").hidden = true;
+            document.getElementById("phoneLoginClick").hidden = true;
+
+            res = false;
+            $("#lll").html("手机登录");
+        } else {
+            res = true;
+            //显示
+            document.getElementById("phoneLogin").hidden = false;
+            document.getElementById("nameLogin").hidden = false;
+            document.getElementById("phoneLoginClick").hidden = false;
+            //隐藏
+
+            document.getElementById("password").hidden = true;
+            document.getElementById("nnnn").hidden = true;
+
+            $("#lll").html("返回");
+        }
+
 
     }
 
@@ -321,14 +346,15 @@
     }
 
     //倒计时
-    let codeTime = 10;
+    let codeTime = 60;
     let countdown = 60;
 
     function getCode(val) {
         countdown = codeTime;
         if (checkPhoneReg()) {
-            setTime(val);
-            ZhiYuePhoneCode();
+            ZhiYuePhoneCode(val, function (res) {
+                setTime(val, res)
+            });
         } else {
             alert("手机号码有误，请重填");
             countdown = 0;
@@ -338,15 +364,19 @@
     function getLoginCode(val) {
         countdown = codeTime;
         if (checkPhoneLogin()) {
-            setTime(val);
-            ZhiYuePhoneLoginCode();
+            ZhiYuePhoneLoginCode(val, function (res) {
+                setTime(val, res)
+            });
         } else {
             alert("手机号码有误，请重填");
             countdown = 0;
         }
     }
 
-    function setTime(val) {
+    function setTime(val, res) {
+        if (res !== undefined && !res) {
+            return;
+        }
         if (countdown === 0) {
             val.removeAttribute("disabled");
             val.value = "获取验证码";
@@ -361,6 +391,7 @@
             setTime(val);
         }, 1000);
     }
+
 </script>
 
 </body>

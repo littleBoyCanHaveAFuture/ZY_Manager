@@ -37,13 +37,22 @@ public class SmsController {
      */
     public static Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
     /**
-     * 注册码过期时间
+     * 注册码cd
      */
     public static Integer regExpireTime = 60 * 1000;
     /**
-     * 注册码过期时间
+     * 登录码cd
      */
     public static Integer loginExpireTime = 60 * 1000;
+    /**
+     * 注册码 有效时间
+     */
+    public static Integer regTime = 10 * 60;
+    /**
+     * 登录码 有效时间
+     */
+    public static Integer loginTime = 10 * 60;
+
     /**
      * sms 注册验证码
      */
@@ -84,8 +93,11 @@ public class SmsController {
         return true;
     }
 
+    /**
+     * 注册、登录 cd
+     */
     public boolean checkTime(String key, JSONObject rspJson, Integer type) {
-        String lastTime = cache.getString(key);
+        String lastTime = cache.getSmsString(key);
         long time = 0L;
         int expireTime = 0;
         if (type == 1) {
@@ -95,17 +107,17 @@ public class SmsController {
             time = loginExpireTime;
             expireTime = loginExpireTime / 1000;
         }
+        //是否cd中
         if (!lastTime.isEmpty()) {
             long lt = Long.parseLong(lastTime);
             if (System.currentTimeMillis() - lt < time) {
                 rspJson.put("status", false);
-                rspJson.put("message", "请稍后再试");
+                rspJson.put("message", "处于cd 请稍后再试");
                 return false;
             }
         } else {
-            cache.setString(key, String.valueOf(System.currentTimeMillis()));
-            cache.setExpire(key, expireTime);
-
+            //无cd
+            cache.setSmsKey(key, expireTime, String.valueOf(System.currentTimeMillis()));
         }
         return true;
     }
@@ -117,7 +129,6 @@ public class SmsController {
     @ResponseBody
     public void sdkPhoneRegister(@RequestParam("phone") String phone,
                                  @RequestParam("appId") String appId,
-                                 @RequestParam("appKey") String appKey,
                                  HttpServletResponse response) throws Exception {
         log.info("start: /webGame2/PhoneCodeReg\t");
         JSONObject rspJson = new JSONObject();
@@ -130,12 +141,6 @@ public class SmsController {
                 break;
             }
 
-            GameNew gameNew = gameWorker.getGameNew(Integer.parseInt(appId));
-            if (gameNew == null || !gameNew.getSecertKey().equals(appKey)) {
-                rspJson.put("message", "游戏 或 秘钥 不存在");
-                rspJson.put("status", false);
-                break;
-            }
             if (accountWorker.existAccount(phone)) {
                 rspJson.put("message", "账号已存在");
                 rspJson.put("status", false);
@@ -143,7 +148,7 @@ public class SmsController {
             }
 
             int code = RandomUtil.rndInt(1000, 9999);
-            cache.setSmsKey(key, regExpireTime / 1000, String.valueOf(code));
+            cache.setSmsKey(key, regTime, String.valueOf(code));
             String url = regSmsUrl + "?phone=" + phone + "&code=" + code;
 
             JSONObject rsp = httpService.httpGetJsonNo(url);
@@ -172,7 +177,6 @@ public class SmsController {
     @ResponseBody
     public void sdkPhoneLogin(@RequestParam("phone") String phone,
                               @RequestParam("appId") String appId,
-                              @RequestParam("appKey") String appKey,
                               HttpServletResponse response) throws Exception {
         log.info("start: /zhiYueSms/PhoneCodeLogin\t");
         JSONObject rspJson = new JSONObject();
@@ -185,16 +189,9 @@ public class SmsController {
                 break;
             }
 
-            GameNew gameNew = gameWorker.getGameNew(Integer.parseInt(appId));
-            if (gameNew == null || !gameNew.getSecertKey().equals(appKey)) {
-                rspJson.put("message", "游戏 或 秘钥 不存在");
-                rspJson.put("status", false);
-                break;
-            }
-
             int code = RandomUtil.rndInt(1000, 9999);
-            String k = RedisKey_Gen.get_SmsLoginKey(appId, phone);
-            cache.setSmsKey(k, loginExpireTime / 1000, String.valueOf(code));
+            String key1 = RedisKey_Gen.get_SmsLoginKey(appId, phone);
+            cache.setSmsKey(key1, loginTime, String.valueOf(code));
             String url = loginSmsUrl + "?phone=" + phone + "&code=" + code;
 
             JSONObject rsp = httpService.httpGetJsonNo(url);
@@ -241,6 +238,7 @@ public class SmsController {
             int channelId = reqJson.getInteger("channelId");
             String appKey = reqJson.getString("appKey");
             String phone = reqJson.getString("phone");
+            String code = reqJson.getString("code");
 
             GameNew gameNew = gameWorker.getGameNew(appId);
             if (gameNew == null || !gameNew.getSecertKey().equals(appKey)) {
@@ -250,9 +248,9 @@ public class SmsController {
             }
             //检查code
             String key = RedisKey_Gen.get_SmsRegisterKey(String.valueOf(appId), phone);
-            String redisCode = cache.getString(key);
-            if (redisCode.isEmpty()) {
-                result.put("message", "验证码过期");
+            String redisCode = cache.getSmsString(key);
+            if (!redisCode.equals(code)) {
+                result.put("message", "验证码错误 redisCode=" + redisCode + " code=" + code);
                 result.put("status", false);
                 break;
             }
@@ -308,17 +306,14 @@ public class SmsController {
             if (!checkPhone(phone, rspJson)) {
                 break;
             }
-            String key = RedisKey_Gen.get_SmsLoginTimeKey(appId, phone);
-//            if (!checkTime(key, rspJson, 2)) {
-//                break;
-//            }
-            String k = RedisKey_Gen.get_SmsLoginKey(appId, phone);
-            String redisCode = cache.getString(k);
-//            if (!redisCode.equals(code)) {
-//                rspJson.put("message", "验证码错误");
-//                rspJson.put("status", false);
-//                break;
-//            }
+
+            String key = RedisKey_Gen.get_SmsLoginKey(appId, phone);
+            String redisCode = cache.getSmsString(key);
+            if (!redisCode.equals(code)) {
+                rspJson.put("message", "验证码错误 redisCode=" + redisCode + " code=" + code);
+                rspJson.put("status", false);
+                break;
+            }
             GameNew gameNew = gameWorker.getGameNew(Integer.parseInt(appId));
             if (gameNew == null || !gameNew.getSecertKey().equals(appKey)) {
                 rspJson.put("message", "游戏 或 秘钥 不存在");
@@ -331,6 +326,7 @@ public class SmsController {
                 rspJson.put("status", false);
                 break;
             }
+
             String channelUid = account.getChannelUserId();
 
             StringBuilder loginUrl = new StringBuilder(gameNew.getLoginUrl());
@@ -342,6 +338,7 @@ public class SmsController {
             rspJson.put("message", "登录成功");
             rspJson.put("channelUid", channelUid);
             rspJson.put("loginUrl", loginUrl);
+            cache.setSmsExpire(key, 10);
         } while (false);
 
         ResponseUtil.write(response, rspJson);

@@ -133,6 +133,45 @@ public class JedisRechargeCache {
         }
     }
 
+    public String getSmsString(String key) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = this.jedisManager.getJedis();
+            jds.select(SMS_DB_INDEX);
+            String res = jds.get(key);
+            if (res == null || res.equals("nil")) {
+                return "";
+            }
+            return res;
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+    /**
+     * @param key
+     * @param expire cd 单位 秒
+     */
+    public void setSmsExpire(String key, int expire) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+            jds.expire(key, expire);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
     public void setChannelLoginToken(String gameId, String channelId, String channelUid, String token) {
         Jedis jds = null;
         boolean isBroken = false;
@@ -202,6 +241,10 @@ public class JedisRechargeCache {
         }
     }
 
+    /**
+     * @param key
+     * @param expire cd 单位 秒
+     */
     public void setExpire(String key, int expire) {
         Jedis jds = null;
         boolean isBroken = false;

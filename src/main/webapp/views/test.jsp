@@ -517,7 +517,7 @@
         //
         //     },
         //     error: function () {
-        //         tip("ERROR！", "查询失败");
+                tip("ERROR！", "查询失败");
         //     }
         // });
         test();

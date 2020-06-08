@@ -133,15 +133,11 @@ function ZhiyueLogin(loginInfo, callback) {
         success: function (result) {
             console.info(result);
             if (result.hasOwnProperty('status')) {
+                rspObj.status = result.status;
+                rspObj.message = result.message;
                 if (result.status === true) {
-                    rspObj.status = true;
-                    rspObj.message = result.message;
-
                     rspObj.uid = result.channelUid;
                     rspObj.loginUrl = result.loginUrl;
-                } else {
-                    rspObj.status = false;
-                    rspObj.message = result.message;
                 }
             } else {
                 rspObj.status = false;
@@ -157,40 +153,39 @@ function ZhiyueLogin(loginInfo, callback) {
     });
 }
 
-function ZhiYuePhoneCode() {
+function ZhiYuePhoneCode(val, callback) {
     let phone = $("#phone_username").val();
 
     let url = "https://zyh5games.com/zysdk/zhiYueSms/PhoneCodeReg" + "?" +
-        "phone=" + phone + "&appId=" + appId + "&appKey=" + appKey;
+        "phone=" + phone + "&appId=" + appId;
     url = "/zhiYueSms/PhoneCodeReg" + "?" +
-        "phone=" + phone + "&appId=" + appId + "&appKey=" + appKey;
+        "phone=" + phone + "&appId=" + appId;
     let rspObj = {};
+
     $.ajax({
         url: url,
         type: "get",
         dataType: "json",
         async: false,
         success: function (result) {
-            console.info(result);
+            console.log(result);
             if (result.hasOwnProperty('status')) {
-                if (result.status === true) {
-                    tip("获取验证码成功，请稍后");
-                } else {
-                    tip("获取验证码失败");
-                }
+                callback(result.status);
+            } else {
+                callback(false);
             }
-            console.log(result.message);
+            alert(result.message);
         }
     });
 }
 
-function ZhiYuePhoneLoginCode() {
+function ZhiYuePhoneLoginCode(val, callback) {
     let phone = $("#username").val();
 
     let url = "https://zyh5games.com/zysdk/zhiYueSms/PhoneCodeLogin" + "?" +
-        "phone=" + phone + "&appId=" + appId + "&appKey=" + appKey;
+        "phone=" + phone + "&appId=" + appId;
     url = "/zhiYueSms/PhoneCodeLogin" + "?" +
-        "phone=" + phone + "&appId=" + appId + "&appKey=" + appKey;
+        "phone=" + phone + "&appId=" + appId;
     let rspObj = {};
     $.ajax({
         url: url,
@@ -198,15 +193,13 @@ function ZhiYuePhoneLoginCode() {
         dataType: "json",
         async: false,
         success: function (result) {
-            console.info(result);
+            console.log(result);
             if (result.hasOwnProperty('status')) {
-                if (result.status === true) {
-                    tip("获取验证码成功，请稍后");
-                } else {
-                    tip("获取验证码失败");
-                }
+                callback(result.status);
+            } else {
+                callback(false);
             }
-            console.log(result.message);
+            alert(result.message);
         }
     });
 }

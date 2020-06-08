@@ -57,6 +57,7 @@ function initQiYouSDK() {
                 hasInit = true;
                 console.info("login succecss");
             }
+            window.DSSDK.logLoadingFinish();
         })
     } else {
         console.log("fail initQiYouSDK");
@@ -66,9 +67,6 @@ function initQiYouSDK() {
 
 function zyCallChannelInit(params) {
     initQiYouSDK();
-    if (!hasInit && window.DSSDK !== null && window.DSSDK !== undefined) {
-        window.DSSDK.logLoadingFinish();
-    }
 }
 
 function zyExtraParam(requestUri) {

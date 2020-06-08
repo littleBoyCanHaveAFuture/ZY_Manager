@@ -157,6 +157,7 @@ public class ZyChannelController {
                 result.put("message", "登录失败，密码错误");
                 break;
             }
+
             String channelUid = account.getChannelUserId();
             // http://localhost:8080/login/jlzg.html?GameId=14&GameKey=u6d3047qbltix34a9l0g2bvs5e8q82ol
             StringBuilder loginUrl = new StringBuilder(gameNew.getLoginUrl());
@@ -164,6 +165,7 @@ public class ZyChannelController {
             loginUrl.append("&").append("GameKey").append("=").append(appKey);
             loginUrl.append("&").append("ChannelCode").append("=").append(channelId);
             loginUrl.append("&").append("ChannelUid").append("=").append(channelUid);
+
             result.put("status", true);
             result.put("message", "登录成功");
             result.put("channelUid", channelUid);
