@@ -7,7 +7,7 @@ $(function () {
 
     let params = requestUri.split('?')[1];
 
-    // sdkInit(appId, GameKey, channelId);
+    sdkInit(appId, GameKey, channelId);
 
 });
 let channelUid = 0;

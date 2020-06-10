@@ -17,4 +17,10 @@ public class ExampleConfig {
      * 渠道的支付秘钥键值
      */
     public static final String PAY_KEY = "payKey";
+    /**
+     * /**
+     * 渠道秘钥键值
+     */
+    public static final String COMMON_KEY = "commonKey";
+
 }

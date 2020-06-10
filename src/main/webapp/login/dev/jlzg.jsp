@@ -148,7 +148,11 @@
         <button class="btn btn-login " onclick="showLoginPage()">
             点击返回
         </button>
+        <button type="button" class="btn btn-primary block  m-b reg111" id="mybtn">
+            测试
+        </button>
     </div>
+
 </div>
 <div hidden="hidden">
     <label for="appId"></label>
@@ -392,6 +396,58 @@
         }, 1000);
     }
 
+    var btn = document.getElementById("mybtn"); // 取得该按钮的引用
+    btn.onclick = function () {
+        // alert('clicked');
+        alert(this.id); // mybtn
+        // loadZyPayHtml();
+    };
+    loadZyPayHtml();
+    function loadZyPayHtml() {
+        let payUrl = "https://zyh5games.com/pay/static/pay.html";
+        //苹果浏览器
+        let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+            navigator.userAgent &&
+            navigator.userAgent.indexOf('CriOS') === -1 &&
+            navigator.userAgent.indexOf('FxiOS') === -1;
+        if (isSafari) {
+            alert("苹果");
+            // openWin(payUrl);
+            newWin(payUrl, "zyOpenWin");
+        } else {
+            alert("其他");
+            window.open(payUrl);
+        }
+    }
+
+    let openWin = function (payUrl) {
+        // alert("苹果打开支付2");
+        //打开一个新窗口
+        let winRef = window.open('', "_blank");
+        //假装获取请求支付参数
+        $.ajax({
+            type: 'get',
+            url: "https://zyh5games.com/zysdk/test/hello",
+            success: function () {
+                //设置新窗口的跳转地址
+                winRef.location.href = "www.baidu.com";
+                // window.location.href = payUrl;
+            }
+        })
+    };
+
+    function newWin(url, id) {
+        window.location.href = url;
+        let a = document.createElement('zyOpenWin');
+        a.setAttribute('href', url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('id', id);
+        // 防止反复添加
+        if (!document.getElementById(id)) document.body.appendChild(a);
+        a.onclick = openWin(url);
+
+        a.click();
+    }
 </script>
 
 </body>

@@ -141,9 +141,6 @@ public class ExampleBaseChannel extends BaseChannel {
         log.info("channelPayInfo serverSign = " + serverSign);
         log.info("channelPayInfo sign       = " + sign);
 
-        log.info("channelPayInfo serverSign = " + serverSign);
-        log.info("channelPayInfo sign       = " + sign);
-
         if (!sign.equals(serverSign)) {
             return false;
         }

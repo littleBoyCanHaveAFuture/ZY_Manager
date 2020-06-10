@@ -25,6 +25,14 @@ public class JedisRechargeCache {
      * sms片区
      */
     private static final int SMS_DB_INDEX = 6;
+    /**
+     * 新 汇总 片区
+     */
+    private static final int Recharge_DB_INDEX = 6;
+    /**
+     * 新 汇总 片区
+     */
+    private static final int Recharge_TEST_DB_INDEX = 7;
     private JedisManager jedisManager;
 
     private boolean isLog = false;
@@ -690,47 +698,7 @@ public class JedisRechargeCache {
         }
     }
 
-    /**
-     * 2020年6月4日16:15:02
-     * 设置游戏渠道区服信息
-     */
-    public void setGameServerInfo(String appId, String serverId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
 
-            String key = RedisKey_Gen.get_GameServerInfo(appId);
-            jds.sadd(key, serverId);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-    }
-
-    /**
-     * 获取游戏渠道区服信息
-     */
-    public Set<String> getGameServerInfo(String appId) {
-        Jedis jds = null;
-        boolean isBroken = false;
-        try {
-            jds = jedisManager.getJedis();
-            jds.select(DB_INDEX);
-
-            String key = RedisKey_Gen.get_GameServerInfo(appId);
-            return jds.smembers(key);
-        } catch (Exception e) {
-            isBroken = true;
-            e.printStackTrace();
-        } finally {
-            returnResource(jds, isBroken);
-        }
-        return null;
-    }
 
     /**
      * 获取游戏渠道区服信息
@@ -1276,8 +1244,7 @@ public class JedisRechargeCache {
      *                   key keytail
      *                   value （times，score）
      */
-    public void getDayZScore
-    (Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
+    public void getDayZScore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
         Jedis jds = null;
         boolean isBroken = false;
         try {
@@ -1668,4 +1635,120 @@ public class JedisRechargeCache {
             returnResource(jds, isBroken);
         }
     }
+
+
+    //20200610
+    /**
+     * 2020年6月4日16:15:02
+     * 设置游戏渠道区服信息
+     */
+    public void setGameServerInfo(String appId, String serverId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_GameServerInfo(appId);
+            jds.sadd(key, serverId);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    /**
+     * 获取游戏渠道区服信息
+     */
+    public Set<String> getGameServerInfo(String appId) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            String key = RedisKey_Gen.get_GameServerInfo(appId);
+            return jds.smembers(key);
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+        return null;
+    }
+
+//    public void getDayGameServerScore(Map<String,String> key, Integer score) {
+//        Jedis jds = null;
+//        boolean isBroken = false;
+//        try {
+//            jds = jedisManager.getJedis();
+//            jds.select(Recharge_TEST_DB_INDEX);
+//            jds.
+//        } catch (Exception e) {
+//            isBroken = true;
+//            e.printStackTrace();
+//        } finally {
+//            returnResource(jds, isBroken);
+//        }
+//    }
+
+//    public void getDayRechargeSummaryZscore(Map<String, List<String>> keyListMap, List<String> timeList, Map<String, Map<String, Double>> resultList) {
+//        Jedis jds = null;
+//        boolean isBroken = false;
+//        try {
+//            jds = jedisManager.getJedis();
+//            jds.select(DB_INDEX);
+//
+//            Pipeline pipeline = jds.pipelined();
+//
+//            for (Map.Entry<String, List<String>> entry : keyListMap.entrySet()) {
+//                String type = entry.getKey();
+//                //同一渠道 同一游戏 不同区服
+//                List<String> keyList = entry.getValue();
+//                // 按照时间顺序 获取分数
+//                for (String key : keyList) {
+//                    for (String times : timeList) {
+//                        pipeline.zscore(key, times);
+//                        if (isLog) {
+//                            log.info(key + "\t" + times);
+//                        }
+//                    }
+//                }
+//            }
+//            //res 大小为：键类型数*区服数*天数
+//            // [key][serverId][day]
+//            List<Object> res = pipeline.syncAndReturnAll();
+//            if (res == null || res.size() == 0) {
+//                return;
+//            }
+//
+//            int i = 0;
+//            for (Map.Entry<String, List<String>> entry : keyListMap.entrySet()) {
+//                List<String> keyList = entry.getValue();
+//                for (String key : keyList) {
+//                    Map<String, Double> resultmap = new HashMap<>();
+//                    for (String times : timeList) {
+//                        if (res.get(i) == null) {
+//                            resultmap.put(times, 0D);
+//                        } else {
+//                            Double d = Double.parseDouble(res.get(i).toString());
+//                            resultmap.put(times, d);
+//                        }
+//                        i++;
+//                    }
+//                    resultList.put(entry.getKey(), resultmap);
+//                }
+//            }
+//        } catch (Exception e) {
+//            isBroken = true;
+//            e.printStackTrace();
+//        } finally {
+//            returnResource(jds, isBroken);
+//        }
+//    }
+//
+
 }

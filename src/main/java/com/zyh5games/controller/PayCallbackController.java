@@ -1042,4 +1042,97 @@ public class PayCallbackController {
 
         ResponseUtil.write(response, result ? "0" : "-1");
     }
+
+    /**
+     * 77
+     *
+     * @param qqes_order String	    是   SDK订单号
+     * @param cp_order   String	    是   cp订单号
+     * @param fee        float	    是   订单金额（元）
+     * @param cpgameid   Integer	是   cp在我们平台的游戏id
+     * @param timestamp  String	    是   请求时间戳，Unix时间戳，10位
+     * @param sign       String	    否   签名字符串，算法： 除非字段标注为不需要参与签名，否则请求参数都参与签名，按参数值自然升序，然后拼接成字符串(比如a=1&b=2&c=3&签名秘钥)，然后md5生成签名字符串
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_77/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_77(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                      @RequestParam("qqes_order") String qqes_order,
+                      @RequestParam("cp_order") String cp_order,
+                      @RequestParam("fee") String fee,
+                      @RequestParam("cpgameid") String cpgameid,
+                      @RequestParam("timestamp") String timestamp,
+                      @RequestParam("sign") String sign,
+                      HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("qqes_order", qqes_order);
+        parameterMap.put("cp_order", cp_order);
+        parameterMap.put("fee", fee);
+        parameterMap.put("cpgameid", cpgameid);
+        parameterMap.put("timestamp", timestamp);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, cp_order, qqes_order, fee);
+
+        ResponseUtil.write(response, result ? "success" : "fail");
+    }
+
+    /**
+     * soyouji
+     * <p>
+     *
+     * @param uid       用户在汇米网络的用户ID # length <= 20
+     * @param nonce     随机字符串，可为空 # length <= 64
+     * @param time      操作发生时的UNIX时间戳，精确到秒 # length = 10
+     * @param money     订单金额，币种人民币，单位分，此值必须为正整数 # length <= 20
+     * @param propsname 游戏商品名 # length <= 128
+     * @param order     由游戏开发商产生的唯一订单号 # length <= 128
+     * @param token     校验token # length <= 128
+     * @param pay_code  #
+     *                  0 # 支付失败
+     *                  1 # 支付成功
+     * @param sign      #
+     *                  --- # 签名，用于请求合法性校验
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_soyouji/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_soyouji(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                           @RequestParam("uid") String uid,
+                           @RequestParam("nonce") String nonce,
+                           @RequestParam("time") String time,
+                           @RequestParam("money") String money,
+                           @RequestParam("propsname") String propsname,
+                           @RequestParam("order") String order,
+                           @RequestParam("token") String token,
+                           @RequestParam("pay_code") String pay_code,
+                           @RequestParam("sign") String sign,
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("uid", uid);
+        parameterMap.put("nonce", nonce);
+        parameterMap.put("time", time);
+        parameterMap.put("money", money);
+        parameterMap.put("propsname", propsname);
+        parameterMap.put("order", order);
+        parameterMap.put("token", token);
+        parameterMap.put("pay_code", pay_code);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, order, "", FeeUtils.fenToYuan(money));
+
+        ResponseUtil.write(response, result ? "1" : "0");
+    }
 }

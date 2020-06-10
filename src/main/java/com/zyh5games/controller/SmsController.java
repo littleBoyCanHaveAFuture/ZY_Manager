@@ -9,6 +9,7 @@ import com.zyh5games.sdk.AccountWorker;
 import com.zyh5games.sdk.GameWorker;
 import com.zyh5games.sdk.channel.HttpService;
 import com.zyh5games.service.AccountService;
+import com.zyh5games.service.GameNewService;
 import com.zyh5games.util.RandomUtil;
 import com.zyh5games.util.ResponseUtil;
 import com.zyh5games.util.StringUtils;
@@ -74,7 +75,8 @@ public class SmsController {
     private HttpServletRequest request;
     @Resource
     private AccountService accountService;
-
+    @Resource
+    private GameNewService gameNewService;
     /**
      * 判断是否合法手机号
      */

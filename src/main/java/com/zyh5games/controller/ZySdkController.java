@@ -62,45 +62,45 @@ public class ZySdkController {
     private ChannelHandler channelHandler;
 
     public boolean checkSdk(Integer type, Integer appId, Integer channelId, String appKey, JSONObject result) {
-        // 1.检查游戏秘钥
-        GameNew gameNew = gameNewService.selectGame(appId, -1);
-        if (gameNew == null) {
-            log.error("游戏不存在 appId=" + appId);
-            result.put("status", false);
-            result.put("message", "SDK init:游戏不存在！");
-            return false;
-        }
-        if (!gameNew.getSecertKey().equals(appKey)) {
-            log.error("游戏秘钥错误 appId=" + appId);
-            log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
-            log.error("游戏秘钥错误 收到  key=" + appKey);
-            result.put("status", false);
-            result.put("message", "SDK init:游戏秘钥错误！");
-            return false;
-        }
-
-        // 2.渠道基本配置 和游戏无关
-        Sp sp = spService.getSp(channelId, -1);
-        if (sp == null) {
-            result.put("status", false);
-            result.put("message", "游戏渠道不存在！");
-            return false;
-        }
-        if (type == 1) {
-            String channelCode = sp.getCode();
-            result.put("channelCode", channelCode);
-        } else if (type == 2) {
-            result.put("channel_name", sp.getCode());
-        }
-
-        // 3.检查游戏渠道
-        ChannelConfig config = configService.selectConfig(appId, channelId, -1);
-        if (config == null) {
-            log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
-            result.put("status", false);
-            result.put("message", "SDK init:游戏渠道不存在！");
-            return false;
-        }
+        // 1.检查游戏秘钥 todo redis缓存
+//        GameNew gameNew = gameNewService.selectGame(appId, -1);
+//        if (gameNew == null) {
+//            log.error("游戏不存在 appId=" + appId);
+//            result.put("status", false);
+//            result.put("message", "SDK init:游戏不存在！");
+//            return false;
+//        }
+//        if (!gameNew.getSecertKey().equals(appKey)) {
+//            log.error("游戏秘钥错误 appId=" + appId);
+//            log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
+//            log.error("游戏秘钥错误 收到  key=" + appKey);
+//            result.put("status", false);
+//            result.put("message", "SDK init:游戏秘钥错误！");
+//            return false;
+//        }
+//
+//        // 2.渠道基本配置 和游戏无关
+//        Sp sp = spService.getSp(channelId, -1);
+//        if (sp == null) {
+//            result.put("status", false);
+//            result.put("message", "游戏渠道不存在！");
+//            return false;
+//        }
+//        if (type == 1) {
+//            String channelCode = sp.getCode();
+//            result.put("channelCode", channelCode);
+//        } else if (type == 2) {
+//            result.put("channel_name", sp.getCode());
+//        }
+//
+//        // 3.检查游戏渠道
+//        ChannelConfig config = configService.selectConfig(appId, channelId, -1);
+//        if (config == null) {
+//            log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
+//            result.put("status", false);
+//            result.put("message", "SDK init:游戏渠道不存在！");
+//            return false;
+//        }
 
         return true;
     }
@@ -583,7 +583,7 @@ public class ZySdkController {
             Account account = accountService.findUserBychannelUid(channelId, channelUid);
             if (account == null) {
                 result.put("message", "账号不存在");
-                result.put("state", false);
+                result.put("status", false);
                 break;
             }
 
@@ -595,7 +595,7 @@ public class ZySdkController {
                 case 2: {
                     if (gameRole != null) {
                         result.put("message", "角色已存在");
-                        result.put("state", false);
+                        result.put("status", false);
                         ResponseUtil.write(response, result);
                         return;
                     }
@@ -610,7 +610,7 @@ public class ZySdkController {
                         gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, DateUtil.getCurrentDateStr(), roleId, userRoleBalance, userRoleName, "");
                     }
                     result.put("message", "进入游戏 上报成功");
-                    result.put("state", true);
+                    result.put("status", true);
                     //设置活跃玩家、在线玩家
                     cache.enterGame(gameId, String.valueOf(serverId), channelId, gameRole.getRoleId());
                     //设置区服信息
@@ -627,7 +627,7 @@ public class ZySdkController {
                         gameRoleWorker.updateGameRole(gameId, channelId, channelUid, serverId, "", roleId, userRoleBalance, userRoleName, "");
                     }
                     result.put("message", "角色升级 上报成功");
-                    result.put("state", true);
+                    result.put("status", true);
                 }
                 break;
                 // 退出游戏
@@ -640,7 +640,7 @@ public class ZySdkController {
                     //查询redis-移除在线玩家 todo h5没法监控 数据不可靠
                     cache.exitGame(gameId, channelId, String.valueOf(serverId), account.getId());
                     result.put("message", "退出游戏 上报成功");
-                    result.put("state", true);
+                    result.put("status", true);
                 }
                 break;
                 default:

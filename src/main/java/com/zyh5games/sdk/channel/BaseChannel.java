@@ -7,6 +7,7 @@ import lombok.Data;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -191,6 +192,40 @@ public abstract class BaseChannel {
             }
         }
         return true;
+    }
+
+    public StringBuilder signMap(String[] signKey, Map<String, String> parameterMap) {
+        StringBuilder param = new StringBuilder();
+        Arrays.sort(signKey);
+
+        boolean first = false;
+        for (String key : signKey) {
+            String value = parameterMap.get(key);
+            if (!first) {
+                addParam(param, key, value);
+                first = true;
+            } else {
+                addParamAnd(param, key, value);
+            }
+        }
+        log.info("param = " + param);
+        return param;
+    }
+
+    public void signJson(StringBuilder param, String[] signKey, JSONObject requestInfo) {
+        Arrays.sort(signKey);
+
+        boolean first = false;
+        for (String key : signKey) {
+            String value = requestInfo.getString(key);
+            if (!first) {
+                addParam(param, key, value);
+                first = true;
+            } else {
+                addParamAnd(param, key, value);
+            }
+        }
+        log.info("param = " + param);
     }
 
     /**

@@ -89,8 +89,12 @@ public class ZiWanBaseChannel extends BaseChannel {
 
         String url = ZiWanConfig.LOGIN_URL + "&" + param.toString();
         log.info("channelLogin = " + url);
-
+        long start = System.currentTimeMillis();
+        log.info("start = " + start);
         JSONObject jsonObject = httpService.httpGetJson(url);
+        long end = System.currentTimeMillis();
+        log.info("end = " + end);
+        log.info("use = " + (end - start));
         // userinfo (获取到的用户信息，status为1001时有，包含wechaname，用户名称；portrait，用户头像；sex，性别；city，城市；province 省会;openid 用户标识，uid 用户ID)
         if (jsonObject.containsKey("status") && jsonObject.getInteger("status") == 1001) {
             log.info("紫菀平台 登录校验成功");

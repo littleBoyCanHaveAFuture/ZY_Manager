@@ -51,45 +51,45 @@ public class GameWorker {
         channelConfigMapMap = new ConcurrentHashMap<>();
 
         log.info("------------------GameWorker init start-------------------");
-        List<Sp> spList = spService.getAllSp(-1);
-        for (Sp sp : spList) {
-            Integer spId = sp.getSpId();
-            spMap.put(spId, sp);
-        }
-
-        Map<String, Object> map = new HashMap<>();
-        List<GameNew> gameList = gameNewService.getGameList(map, -1);
-        for (GameNew gameNew : gameList) {
-            Integer appId = gameNew.getAppId();
-            gameMap.put(appId, gameNew);
-        }
-
-        List<ChannelConfig> configList = configService.selectAll(-1);
-        for (ChannelConfig channelConfig : configList) {
-            Integer appId = channelConfig.getAppId();
-            Integer channelId = channelConfig.getChannelId();
-            if (!channelConfigMapMap.containsKey(appId)) {
-                Map<Integer, ChannelConfig> channelConfigMap = new HashMap<>();
-
-                channelConfigMap.put(channelId, channelConfig);
-                channelConfigMapMap.put(appId, channelConfigMap);
-            } else {
-                Map<Integer, ChannelConfig> channelConfigMap = channelConfigMapMap.get(appId);
-                channelConfigMap.put(channelId, channelConfig);
-            }
-        }
+//        List<Sp> spList = spService.getAllSp(-1);
+//        for (Sp sp : spList) {
+//            Integer spId = sp.getSpId();
+//            spMap.put(spId, sp);
+//        }
+//
+//        Map<String, Object> map = new HashMap<>();
+//        List<GameNew> gameList = gameNewService.getGameList(map, -1);
+//        for (GameNew gameNew : gameList) {
+//            Integer appId = gameNew.getAppId();
+//            gameMap.put(appId, gameNew);
+//        }
+//
+//        List<ChannelConfig> configList = configService.selectAll(-1);
+//        for (ChannelConfig channelConfig : configList) {
+//            Integer appId = channelConfig.getAppId();
+//            Integer channelId = channelConfig.getChannelId();
+//            if (!channelConfigMapMap.containsKey(appId)) {
+//                Map<Integer, ChannelConfig> channelConfigMap = new HashMap<>();
+//
+//                channelConfigMap.put(channelId, channelConfig);
+//                channelConfigMapMap.put(appId, channelConfigMap);
+//            } else {
+//                Map<Integer, ChannelConfig> channelConfigMap = channelConfigMapMap.get(appId);
+//                channelConfigMap.put(channelId, channelConfig);
+//            }
+//        }
 
         log.info("------------------GameWorker init finished-------------------");
-        for (Sp sp : spList) {
-            System.out.println("sp[" + sp.getSpId() + "] = " + sp.toString());
-        }
-        for (GameNew gameNew : gameList) {
-            Integer appId = gameNew.getAppId();
-            System.out.println("GameNew[" + appId + "] = " + gameNew.toString());
-        }
-        for (ChannelConfig channelConfig : configList) {
-            System.out.println("ChannelConfig[" + channelConfig.getAppId() + "][" + channelConfig.getChannelId() + "] = " + channelConfig.toString());
-        }
+//        for (Sp sp : spList) {
+//            System.out.println("sp[" + sp.getSpId() + "] = " + sp.toString());
+//        }
+//        for (GameNew gameNew : gameList) {
+//            Integer appId = gameNew.getAppId();
+//            System.out.println("GameNew[" + appId + "] = " + gameNew.toString());
+//        }
+//        for (ChannelConfig channelConfig : configList) {
+//            System.out.println("ChannelConfig[" + channelConfig.getAppId() + "][" + channelConfig.getChannelId() + "] = " + channelConfig.toString());
+//        }
     }
 
     public Sp getSp(Integer channelId) {
