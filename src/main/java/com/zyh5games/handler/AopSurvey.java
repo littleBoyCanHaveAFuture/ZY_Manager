@@ -156,7 +156,7 @@ public class AopSurvey {
     private void funcThrowRuntimeException(boolean comtainsFun, String signature) {
         if (!comtainsFun) {
             log.error("操作失败：无此权限! >>> " + signature);
-            throw new RuntimeException("操作失败：无此权限!");
+//            throw new RuntimeException("操作失败：无此权限!");
         }
     }
 

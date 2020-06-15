@@ -26,7 +26,7 @@ function zyCallChannelPay(order) {
     let payData = trade.data;
 
     console.log("zyCallChannelPay payData= " + payData);
-    let url = "https://api.sooyooj.com/index/pay/17?" + payData;
+    let url = "https://api.sooyooj.com/index/pay/141?" + payData;
     window.parent.postMessage(
         {
             event: 'pay',

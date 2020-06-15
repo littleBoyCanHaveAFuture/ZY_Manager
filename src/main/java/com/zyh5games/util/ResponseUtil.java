@@ -18,7 +18,7 @@ public class ResponseUtil {
         response.setContentType("text/html;charset=utf-8");
 /*        tomcat 已经处理
         response.addHeader("Access-Control-Allow-Origin", "*");*/
-        System.out.println(o.toString());
+//        System.out.println(o.toString());
         PrintWriter out = response.getWriter();
         out.println(o.toString());
         out.flush();

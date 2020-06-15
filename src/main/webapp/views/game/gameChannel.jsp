@@ -32,7 +32,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/jquery.tips.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/gameChannel.js?0528"></script>
+            src="${pageContext.request.contextPath}/js/gameChannel.js?0953"></script>
 </head>
 <body>
 

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.HttpService;
-import com.zyh5games.sdk.channel.example.ExampleConfig;
 import com.zyh5games.util.FeeUtils;
 import com.zyh5games.util.MD5Util;
 import com.zyh5games.util.RandomUtil;
@@ -173,7 +172,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
         data.put("nonce", "nonce");
         data.put("time", System.currentTimeMillis() / 1000);
         data.put("serverid", serverId);
-        data.put("server_name", "");
+        data.put("server_name", serverId);
         data.put("roleid", userRoleId);
         data.put("role_name", userRoleName);
         data.put("money", FeeUtils.yuanToFen(amount));
@@ -190,7 +189,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
         log.info("param = " + param.toString());
 
         // 签名验证
-        String serverSign = MD5Util.md5(param.toString());
+        String serverSign = MD5Util.md5(param.toString() + payKey);
 
         log.info("channelPayInfo serverSign = " + serverSign);
 
@@ -207,12 +206,22 @@ public class SoYouJiBaseChannel extends BaseChannel {
      *
      * @param appId          指悦游戏id
      * @param parameterMap   渠道回调参数
+     *                       uid       用户在汇米网络的用户ID # length <= 20
+     *                       nonce     随机字符串，可为空 # length <= 64
+     *                       time      操作发生时的UNIX时间戳，精确到秒 # length = 10
+     *                       money     订单金额，币种人民币，单位分，此值必须为正整数 # length <= 20
+     *                       propsname 游戏商品名 # length <= 128
+     *                       order     由游戏开发商产生的唯一订单号 # length <= 128
+     *                       token     校验token # length <= 128
+     *                       pay_code  #0支付失败|1 支付成功
+     *                       sign      #
+     *                       *                  --- # 签名，用于请求合法性校验
      * @param channelOrderNo 渠道回调校验成功后，设置向cp请求发货的数据格式
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
-        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(SoYouJiConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(SoYouJiConfig.COMMON_KEY);
 
         // 加密串
         String[] signKey = {"uid", "nonce", "time", "money", "propsname", "order",
@@ -236,7 +245,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
         String nonce = parameterMap.get("nonce");
         String time = parameterMap.get("time");
         String order = parameterMap.get("order");
-        String reqParam = "nonce=" + nonce + "&time=" + time + "&order=" + order;
+        String reqParam = "nonce=" + nonce + "&order=" + order + "&time=" + time;
         String reqSign = MD5Util.md5(reqParam + payKey);
         // 验证订单查询 todo
         // # 查询订单；"nothing" 表示订单不存在 、"unpaid" 表示未支付、"paid" 表示已支付但游戏开发商尚未做出正确反馈、"succeed" 表示订单已完成、"failed" 表示用户已支付但物品发放失败

@@ -114,6 +114,7 @@ public class PayCallbackController {
                     log.info("checkOrder 支付成功待发货 order = " + order.getOrderID());
                 }
                 break;
+                case OrderState.STATE_PAY_FINISHED:
                 default:
                     isReturn = true;
                     break;
@@ -129,7 +130,9 @@ public class PayCallbackController {
                 break;
             }
 
-            result = notifyToCp(first, gameNew, order, money, cpOrderId, channelId);
+            //订单金额 非实际支付
+            String orderMoney = FeeUtils.fenToYuan(order.getMoney());
+            result = notifyToCp(first, gameNew, order, orderMoney, cpOrderId, channelId);
             log.info(" end OrderState = " + order.getState());
         } while (false);
         log.info(" end result = " + result);
@@ -183,7 +186,7 @@ public class PayCallbackController {
             //支付成功 更新订单 redis-mysql
             if (first) {
                 Account account = accountService.findAccountById(zhiyueUid);
-                log.info("account：" + account != null);
+                log.info("account：" + (account != null));
                 if (account != null) {
                     cache.reqPay(String.valueOf(appId), order.getServerID(), String.valueOf(channelId), zhiyueUid, order.getRoleID(), order.getRealMoney(), account.getCreateTime());
                 }
@@ -1100,9 +1103,9 @@ public class PayCallbackController {
      * @param sign      #
      *                  --- # 签名，用于请求合法性校验
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_soyouji/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_SOyouji/{channelId}/{appId}", method = RequestMethod.GET)
     @ResponseBody
-    public void h5_soyouji(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+    public void h5_SOyouji(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                            @RequestParam("uid") String uid,
                            @RequestParam("nonce") String nonce,
                            @RequestParam("time") String time,
@@ -1135,4 +1138,62 @@ public class PayCallbackController {
 
         ResponseUtil.write(response, result ? "1" : "0");
     }
+
+    /**
+     * zhaoshouyou
+     *
+     * @param user_id   Int	        是	付费用户id
+     * @param username  String	    是	付费用户名
+     * @param to_uid    Int	        是	充入用户id
+     * @param to_user   String	    是	充入用户名
+     * @param pay_id    string	    是	支付id
+     * @param money     Smallint	是	充值金额
+     * @param game_id   Int	        是	游戏id
+     * @param server_id Int	        是	区/服 id
+     * @param cp_order  String	    是	游戏充值(订单号)
+     * @param time      Int	        是	充值发起时间
+     * @param extra     String	    否	额外信息good_id
+     * @param sign      string	    是	签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_zhaoshouyou/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_zhaoshouyou(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                               @RequestParam("user_id") String user_id,
+                               @RequestParam("username") String username,
+                               @RequestParam("to_uid") String to_uid,
+                               @RequestParam("to_user") String to_user,
+                               @RequestParam("pay_id") String pay_id,
+                               @RequestParam("money") String money,
+                               @RequestParam("game_id") String game_id,
+                               @RequestParam("server_id") String server_id,
+                               @RequestParam("cp_order") String cp_order,
+                               @RequestParam("time") String time,
+                               @RequestParam("extra") String extra,
+                               @RequestParam("sign") String sign,
+                               HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("user_id", user_id);
+        parameterMap.put("username", username);
+        parameterMap.put("to_uid", to_uid);
+        parameterMap.put("to_user", to_user);
+        parameterMap.put("pay_id", pay_id);
+        parameterMap.put("money", money);
+        parameterMap.put("game_id", game_id);
+        parameterMap.put("server_id", server_id);
+        parameterMap.put("cp_order", cp_order);
+        parameterMap.put("time", time);
+        parameterMap.put("extra", extra);
+        parameterMap.put("sign", sign);
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, cp_order, "", money);
+
+        ResponseUtil.write(response, result ? "success" : "fail");
+    }
+
 }

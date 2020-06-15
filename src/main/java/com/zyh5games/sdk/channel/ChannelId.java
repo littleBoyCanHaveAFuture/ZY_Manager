@@ -85,5 +85,9 @@ public class ChannelId {
      * so游记
      */
     public static final int H5_SOYOUJI = 24;
+    /**
+     * 找游戏
+     */
+    public static final int H5_ZHAOSHOUYOU = 25;
 
 }

@@ -63,44 +63,44 @@ public class ZySdkController {
 
     public boolean checkSdk(Integer type, Integer appId, Integer channelId, String appKey, JSONObject result) {
         // 1.检查游戏秘钥 todo redis缓存
-//        GameNew gameNew = gameNewService.selectGame(appId, -1);
-//        if (gameNew == null) {
-//            log.error("游戏不存在 appId=" + appId);
-//            result.put("status", false);
-//            result.put("message", "SDK init:游戏不存在！");
-//            return false;
-//        }
-//        if (!gameNew.getSecertKey().equals(appKey)) {
-//            log.error("游戏秘钥错误 appId=" + appId);
-//            log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
-//            log.error("游戏秘钥错误 收到  key=" + appKey);
-//            result.put("status", false);
-//            result.put("message", "SDK init:游戏秘钥错误！");
-//            return false;
-//        }
-//
-//        // 2.渠道基本配置 和游戏无关
-//        Sp sp = spService.getSp(channelId, -1);
-//        if (sp == null) {
-//            result.put("status", false);
-//            result.put("message", "游戏渠道不存在！");
-//            return false;
-//        }
-//        if (type == 1) {
-//            String channelCode = sp.getCode();
-//            result.put("channelCode", channelCode);
-//        } else if (type == 2) {
-//            result.put("channel_name", sp.getCode());
-//        }
-//
-//        // 3.检查游戏渠道
-//        ChannelConfig config = configService.selectConfig(appId, channelId, -1);
-//        if (config == null) {
-//            log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
-//            result.put("status", false);
-//            result.put("message", "SDK init:游戏渠道不存在！");
-//            return false;
-//        }
+        GameNew gameNew = gameNewService.selectGame(appId, -1);
+        if (gameNew == null) {
+            log.error("游戏不存在 appId=" + appId);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏不存在！");
+            return false;
+        }
+        if (!gameNew.getSecertKey().equals(appKey)) {
+            log.error("游戏秘钥错误 appId=" + appId);
+            log.error("游戏秘钥错误 正确  key=" + gameNew.getSecertKey());
+            log.error("游戏秘钥错误 收到  key=" + appKey);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏秘钥错误！");
+            return false;
+        }
+
+        // 2.渠道基本配置 和游戏无关
+        Sp sp = spService.getSp(channelId, -1);
+        if (sp == null) {
+            result.put("status", false);
+            result.put("message", "游戏渠道不存在！");
+            return false;
+        }
+        if (type == 1) {
+            String channelCode = sp.getCode();
+            result.put("channelCode", channelCode);
+        } else if (type == 2) {
+            result.put("channel_name", sp.getCode());
+        }
+
+        // 3.检查游戏渠道
+        ChannelConfig config = configService.selectConfig(appId, channelId, -1);
+        if (config == null) {
+            log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
+            result.put("status", false);
+            result.put("message", "SDK init:游戏渠道不存在！");
+            return false;
+        }
 
         return true;
     }

@@ -127,6 +127,29 @@ public class ExampleBaseChannel extends BaseChannel {
 
         long time = System.currentTimeMillis() / 1000;
 
+        String channelId = orderData.getString("channelId");
+        String gameKey = orderData.getString("gameKey");
+        String channelUid = orderData.getString("uid");
+        String username = orderData.getString("username");
+        String userRoleId = orderData.getString("userRoleId");
+        String userRoleName = orderData.getString("userRoleName");
+
+        String serverId = orderData.getString("serverId");
+        String userServer = orderData.getString("userServer");
+        String userLevel = orderData.getString("userLevel");
+        String cpOrderNo = orderData.getString("cpOrderNo");
+        String amount = orderData.getString("amount");
+
+        String count = orderData.getString("count");
+        String quantifier = orderData.getString("quantifier");
+        String subject = orderData.getString("subject");
+        String desc = orderData.getString("desc");
+        String callbackUrl = orderData.getString("callbackUrl");
+
+        String extrasParams = orderData.getString("extrasParams");
+        String goodsId = orderData.getString("goodsId");
+        String channelToken = orderData.getString("channelToken");
+
         // 加密串
         StringBuilder param = new StringBuilder();
         super.addParam(param, "", "");

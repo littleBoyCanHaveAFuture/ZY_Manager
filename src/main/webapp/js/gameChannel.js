@@ -16,7 +16,7 @@ $(function () {
             iconCls: 'icon-save',
             handler: function () {
                 dlg.dialog("close");
-                loadGameSpTab(1);
+                loadGameSpTab(1, 1, 20);
             }
         }]
     });
@@ -41,6 +41,26 @@ $(function () {
         pageList: [10, 20]
     });
 
+    let opts1 = getDatagridOptions(dg1);
+    let pager1 = dg1.datagrid('getPager');
+    let pageNumber1 = opts1.pageNumber;
+    let pageSize1 = opts1.pageSize;
+
+    pager1.pagination({
+        pageSize: 20,
+        pageList: [20, 50, 100],
+        beforePageText: '第',
+        afterPageText: '页    共 {pages} 页',
+        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+        onChangePageSize: function () {
+        },
+        onSelectPage: function (pageNum, pageSize) {
+            opts.pageNumber = pageNum;
+            opts.pageSize = pageSize;
+            loadGameSpTab(1, pageNum, pageSize);
+        }
+    });
+
     let dg2 = $('#dg2');
     dg2.datagrid({
         rownumbers: true,
@@ -54,28 +74,32 @@ $(function () {
             {field: 'operation', title: '配置', width: 150, align: 'center', formatter: set_select},
         ]],
         pagination: true,
-        pageSize: 10,
-        pageList: [10, 20]
+    });
+    let opts = getDatagridOptions(dg2);
+    let pager = dg2.datagrid('getPager');
+    let pageNumber = opts.pageNumber;
+    let pageSize = opts.pageSize;
+
+    pager.pagination({
+        pageSize: 20,
+        pageList: [20, 50, 100],
+        beforePageText: '第',
+        afterPageText: '页    共 {pages} 页',
+        displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+        onChangePageSize: function () {
+        },
+        onSelectPage: function (pageNum, pageSize) {
+            opts.pageNumber = pageNum;
+            opts.pageSize = pageSize;
+            loadGameSpTab(2, pageNum, pageSize);
+        }
     });
 
-    let rows = [];
-    rows.push({
-        icon: 1,
-        name: 2,
-        channelid: 3,
-        version: 4,
-        status: 0,
-    });
-    let data = {
-        total: rows.length,
-        rows: rows
-    };
-    // dg2.datagrid('loadData', data);
-    loadGameSpTab(1);
+    loadGameSpTab(1, 1, 20);
 });
 
-//查询游戏的渠道
-function loadGameSpTab(type) {
+/**查询游戏的渠道*/
+function loadGameSpTab(type, pageNumber, pageSize) {
     let url;
     let dg;
     if (type === 1) {
@@ -86,8 +110,8 @@ function loadGameSpTab(type) {
         dg = $("#dg2");
     }
     let opts = getDatagridOptions(dg);
-    let pageNumber = opts.pageNumber;
-    let pageSize = opts.pageSize;
+    // let pageNumber = opts.pageNumber;
+    // let pageSize = opts.pageSize;
 
     let gameId = $("#appid").val();
     let serverId = $("#serverid").val();
@@ -100,10 +124,10 @@ function loadGameSpTab(type) {
         name = null;
     }
     if (checkParam(pageNumber) || pageNumber <= 0) {
-        pageNumber = null;
+        pageNumber = 1;
     }
     if (checkParam(pageSize) || pageSize <= 0) {
-        pageSize = null;
+        pageSize = 20;
     }
 
 
@@ -176,7 +200,7 @@ function sp_Select() {
     let dlg = $("#dd");
     dlg.dialog({
         onOpen: function () {
-            loadGameSpTab(2);
+            loadGameSpTab(2, 1, 20);
         }
     });
     dlg.dialog("open").dialog("setTitle", "修改游戏-渠道信息");
@@ -200,33 +224,8 @@ function editOpt(index) {
     if (row) {
         console.info(row);
         changeSdk(row);
-        loadGameSpTab(2);
+        loadGameSpTab(2, 1, 20);
     }
-}
-
-function sdkCancel(app_id, channel_id) {
-    let response = "fail";
-    $.messager.confirm("系统提示", "确定要取消吗?您配置的数据将会被清空！",
-        function (result) {
-            if (result) {
-                // $.ajax({
-                //     type: 'post',
-                //     url: 'product/deleteSdk',
-                //     data: {'app_id': app_id, 'channel_id': channel_id},
-                //     dataType: 'json',
-                //     async: false,
-                //     success: function (res) {
-                // if (res.result === 'success') {
-                //     response = res.result;
-                // }
-
-                // }
-                // });
-                response = "success";
-            }
-        });
-
-    return response;
 }
 
 /**
@@ -419,37 +418,6 @@ function setValue(res) {
     }
     save_Config = res.c
 
-}
-
-function updateConfigKey() {
-    console.info($("#dlg-appid").val());
-    console.info($("#dlg-channelid").val());
-    $.ajax({
-        type: 'post',
-        url: '/game/updateConfig',
-        data: {
-            "appId": $("#dlg-appid").val(),
-            "channelId": $("#dlg-channelid").val()
-        },
-        dataType: 'json',
-        success: function (res) {
-            console.info(res);
-            if (res.hasOwnProperty("resultCode") && res.resultCode === 501) {
-                relogin();
-                return;
-            }
-            parapame = res;
-            channel_sdk_name = res.channel_sdk_name;
-
-            if (res.channel_config_key != null && res.channel_config_key !== "") {
-                // arr = JSON.parse(parapame.channel_config_key);
-                arr = parapame.channel_config_key;
-                configKey(arr, "table_report");
-                $("#gameTest").hide();
-            }
-            setValue(res);
-        }
-    });
 }
 
 //保存

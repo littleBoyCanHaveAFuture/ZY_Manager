@@ -9,7 +9,6 @@ public class PageBean {
 
     private int page; // 页码
     private int pageSize; // 单页数据量
-    private int start;
 
 
     public PageBean(int page, int pageSize) {

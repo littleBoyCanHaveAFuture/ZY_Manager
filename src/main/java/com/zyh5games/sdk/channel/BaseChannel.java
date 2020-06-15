@@ -7,6 +7,7 @@ import lombok.Data;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -98,7 +99,7 @@ public abstract class BaseChannel {
      * @param channelOrderNo 渠道订单返回参数
      * @return boolean
      */
-    public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
+    public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) throws UnsupportedEncodingException {
         return false;
     }
 
@@ -161,7 +162,7 @@ public abstract class BaseChannel {
     public boolean channelMustParam(String[] mustKey, Map<String, String[]> map) {
         for (String key : mustKey) {
             if (!map.containsKey(key)) {
-                System.out.println("channelPayCallback 缺少key：" + key);
+                log.info("channelPayCallback 缺少key：" + key);
                 return false;
             }
         }
@@ -212,6 +213,19 @@ public abstract class BaseChannel {
         return param;
     }
 
+    public StringBuilder signMapNoKey(String[] signKey, Map<String, String> parameterMap) {
+        StringBuilder param = new StringBuilder();
+        Arrays.sort(signKey);
+
+        boolean first = false;
+        for (String key : signKey) {
+            String value = parameterMap.get(key);
+            param.append(value);
+        }
+        log.info("param = " + param);
+        return param;
+    }
+
     public void signJson(StringBuilder param, String[] signKey, JSONObject requestInfo) {
         Arrays.sort(signKey);
 
@@ -226,6 +240,18 @@ public abstract class BaseChannel {
             }
         }
         log.info("param = " + param);
+    }
+
+    public StringBuilder signJsonNoKey(String[] signKey, JSONObject requestInfo) {
+        StringBuilder param = new StringBuilder();
+        Arrays.sort(signKey);
+
+        for (String key : signKey) {
+            String value = requestInfo.getString(key);
+            param.append(value);
+        }
+        log.info("param = " + param);
+        return param;
     }
 
     /**

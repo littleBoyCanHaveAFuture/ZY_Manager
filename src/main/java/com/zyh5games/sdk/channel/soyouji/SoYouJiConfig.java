@@ -16,7 +16,7 @@ public class SoYouJiConfig {
     /**
      * 渠道订单查询
      */
-    public static final String PAY_URL = "https://api.sooyooj.com/index/order/query/141";
+    public static final String PAY_URL = "https://api.sooyooj.com/index/order/query/141?";
 
 
 }
