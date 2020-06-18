@@ -14,6 +14,6 @@ public class YouXiFunConfig {
      */
     public static final String COMMON_KEY = "commonKey";
 
-    public static final String Login_URL = " https://sdkapiv2.youxifan.com/sdkapi/members/checkToken";
+    public static final String Login_URL = "https://sdkapiv2.youxifan.com/sdkapi/members/checkToken";
 
 }

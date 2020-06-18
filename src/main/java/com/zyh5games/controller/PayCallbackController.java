@@ -28,9 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author song minghua
@@ -1264,9 +1262,9 @@ public class PayCallbackController {
      * 游戏fan
      * <p>
      */
-    @RequestMapping(value = "/callbackPayInfo/h5_youxifan/{channelId}/{appId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/callbackPayInfo/h5_youxifun/{channelId}/{appId}", method = RequestMethod.POST)
     @ResponseBody
-    public void h5_youxifan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+    public void h5_youxifun(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
                             @RequestBody String datas,
                             HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
@@ -1278,14 +1276,26 @@ public class PayCallbackController {
         JSONObject data = new JSONObject();
         Map<String, String> parameterMap = new HashMap<>();
 
-        for (String s : body) {
+        Integer len = body.length;
+        StringBuilder param = new StringBuilder();
+        for (int index = 0; index < len; index++) {
+            String s = body[index];
             String[] p = s.split("=");
             String key = p[0];
             String value = p.length == 2 ? p[1] : "";
             System.out.println("key = " + key + "[" + value + "]");
             parameterMap.put(key, value);
             data.put(key, value);
+            if (key.equals("userId") || key.equals("sign")) {
+            } else {
+                if (index > 1) {
+                    param.append("&");
+                }
+                param.append(s);
+            }
         }
+
+        parameterMap.put("param", param.toString());
 
         String cpOrderNo = data.getString("attach");
         String channelOrder = data.getString("orderid");
@@ -1319,22 +1329,22 @@ public class PayCallbackController {
     @RequestMapping(value = "/callbackPayInfo/h5_daqin/{channelId}/{appId}")
     @ResponseBody
     public String h5_daqin(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
-                            @RequestParam("status") String status,
-                            @RequestParam("cpOrderId") String cpOrderId,
-                            @RequestParam("orderId") String orderId,
-                            @RequestParam("uid") String uid,
-                            @RequestParam("userName") String userName,
-                            @RequestParam("money") String money,
-                            @RequestParam("gameId") String gameId,
-                            @RequestParam("goodsId") String goodsId,
-                            @RequestParam("goodsName") String goodsName,
-                            @RequestParam("server") String server,
-                            @RequestParam("role") String role,
-                            @RequestParam("time") String time,
-                            @RequestParam(value = "ext", required = false) String ext,
-                            @RequestParam("signType") String signType,
-                            @RequestParam("sign") String sign,
-                            HttpServletRequest request, HttpServletResponse response) throws Exception {
+                           @RequestParam("status") String status,
+                           @RequestParam("cpOrderId") String cpOrderId,
+                           @RequestParam("orderId") String orderId,
+                           @RequestParam("uid") String uid,
+                           @RequestParam("userName") String userName,
+                           @RequestParam("money") String money,
+                           @RequestParam("gameId") String gameId,
+                           @RequestParam("goodsId") String goodsId,
+                           @RequestParam("goodsName") String goodsName,
+                           @RequestParam("server") String server,
+                           @RequestParam("role") String role,
+                           @RequestParam("time") String time,
+                           @RequestParam(value = "ext", required = false) String ext,
+                           @RequestParam("signType") String signType,
+                           @RequestParam("sign") String sign,
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
 

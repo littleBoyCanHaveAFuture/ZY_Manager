@@ -4,16 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.HttpService;
-import com.zyh5games.sdk.channel.example.ExampleConfig;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -83,8 +80,8 @@ public class YouXiFanChannel extends BaseChannel {
         int appId = Integer.parseInt(map.get("GameId")[0]);
         int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
 
-        String loginUrl = configMap.get(appId).getString(YouXiFunConfig.Login_URL);
-        String loginKey = configMap.get(appId).getString(ExampleConfig.LOGIN_KEY);
+        String loginUrl = YouXiFunConfig.Login_URL;
+        String loginKey = configMap.get(appId).getString(YouXiFunConfig.COMMON_KEY);
 
         // 参数
         String token = map.get("token")[0];
@@ -145,8 +142,8 @@ public class YouXiFanChannel extends BaseChannel {
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String channelGameId = configMap.get(appId).getString(ExampleConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(ExampleConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(YouXiFunConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(YouXiFunConfig.COMMON_KEY);
 
         long time = System.currentTimeMillis() / 1000;
 
@@ -190,7 +187,7 @@ public class YouXiFanChannel extends BaseChannel {
         super.addParamAnd(param, "roleId", userRoleId);
         super.addParamAnd(param, "serverId", serverId);
         super.addParamAnd(param, "uId", channelUid);
-        super.addParamAnd(param, "", payKey);
+        param.append("&").append(payKey);
 
         log.info("param = " + param.toString());
 
@@ -214,7 +211,7 @@ public class YouXiFanChannel extends BaseChannel {
         data.put("amount", amount);
         data.put("roleid", userRoleId);
         data.put("serverid", serverId);
-        data.put("productname", subject);
+        data.put("productname", "巨龙战歌");
         data.put("attach", cpOrderNo);
         data.put("productdesc", desc);
         data.put("payCpSign", serverSign);
@@ -240,32 +237,17 @@ public class YouXiFanChannel extends BaseChannel {
         String payKey = configMap.get(appId).getString(YouXiFunConfig.COMMON_KEY);
 
         // 加密串
-        Set<String> keySet = new LinkedHashSet<>(parameterMap.keySet());
-        keySet.remove("sign");
-        keySet.remove("userId");
+        String param = parameterMap.get("param");
+        param += "&appkey=" + payKey;
 
-        StringBuilder param = new StringBuilder();
-        boolean first = false;
-        for (String key : keySet) {
-            String value = parameterMap.get(key);
-            if (!first) {
-                super.addParam(param, key, value);
-                first = true;
-            } else {
-                super.addParamAnd(param, key, value);
-            }
-        }
-        super.addParamAnd(param, "", payKey);
-
-        log.info("param = " + param.toString());
+        log.info("param = " + param);
 
         // 签名验证
         String sign = parameterMap.get("sign");
-        String serverSign = MD5Util.md5(param.toString());
+        String serverSign = MD5Util.md5(param);
 
         log.info("channelPayCallback serverSign = " + serverSign);
         log.info("channelPayCallback sign       = " + sign);
-
 
         if (!sign.equals(serverSign)) {
             return false;

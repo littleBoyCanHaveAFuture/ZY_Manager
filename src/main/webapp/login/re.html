@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>index</title>
+    <meta charset="utf-8">
+    <script src="https://lib.baomitu.com/jquery/3.5.0/jquery.min.js"></script>
+</head>
+<body>
+</body>
+<script>
+    /*获取到Url里面的参数*/
+    (function ($) {
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+    })(jQuery);
+
+    function GetRequest() {
+        var url = location.search; //获取url中"?"符后的字串
+        var theRequest = new Object();
+        if (url.indexOf("?") === 0) {
+            var str = url.substr(1);
+            return str;
+        }
+        return theRequest;
+    }
+
+    let url = $.getUrlParam('url');
+    url = GetRequest();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "http://" + url;
+    }
+    // alert(url);
+    window.location.replace(url);
+</script>
+</html>
+
