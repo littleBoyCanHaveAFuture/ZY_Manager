@@ -30,6 +30,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
 
     SoYouJiBaseChannel() {
         channelId = ChannelId.H5_SOYOUJI;
+        channelName = "SO游记";
         configMap = new ConcurrentHashMap<>();
         extMap = new ConcurrentHashMap<>();
 
@@ -228,6 +229,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
                 "token", "pay_code"};
 
         StringBuilder param = super.signMap(signKey, parameterMap);
+        log.info("param = " + param);
 
         // 签名验证
         String sign = parameterMap.get("sign");
@@ -289,6 +291,7 @@ public class SoYouJiBaseChannel extends BaseChannel {
         StringBuilder param = new StringBuilder();
         super.signJson(param, signKey, requestInfo);
 
+        log.info("param = " + param);
         // 签名验证
         String sign = MD5Util.md5(param.toString() + roleKey);
         log.info("serverSign = " + sign);

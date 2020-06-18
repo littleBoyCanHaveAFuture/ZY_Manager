@@ -29,6 +29,7 @@ public class YueYouBaseChannel extends BaseChannel {
 
     YueYouBaseChannel() {
         channelId = ChannelId.H5_YUEYOU;
+        channelName = "悦游";
         configMap = new ConcurrentHashMap<>();
         loginExtMap = new ConcurrentHashMap<>();
         loginModelMap = new ConcurrentHashMap<>();

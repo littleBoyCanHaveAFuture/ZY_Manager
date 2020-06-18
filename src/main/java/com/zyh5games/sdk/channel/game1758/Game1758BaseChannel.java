@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,14 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component("16")
 public class Game1758BaseChannel extends BaseChannel {
     private static final Logger log = Logger.getLogger(Game1758BaseChannel.class);
-
+    static Map<String, String> hlmyGwMap;
     @Autowired
     HttpService httpService;
 
-    static Map<String, String> hlmyGwMap;
-
     Game1758BaseChannel() {
         channelId = ChannelId.H5_1758;
+        channelName = "1758";
         configMap = new ConcurrentHashMap<>();
         hlmyGwMap = new ConcurrentHashMap<>();
     }

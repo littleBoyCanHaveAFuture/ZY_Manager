@@ -38,6 +38,7 @@ public class ShunWangBaseChannel extends BaseChannel {
     ShunWangBaseChannel() {
         configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_SHUNWANG;
+        channelName = "顺网";
     }
 
     @Override

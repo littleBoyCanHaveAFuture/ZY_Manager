@@ -17,6 +17,11 @@ public class ChannelId {
      */
     public static final int H5_ZHIYUE = 0;
     /**
+     * 闲兔
+     */
+    public static final int H5_XianTu = 0;
+
+    /**
      * 紫菀/骆驼
      */
     public static final int H5_ZIWAN = 8;
@@ -89,5 +94,21 @@ public class ChannelId {
      * 找游戏
      */
     public static final int H5_ZHAOSHOUYOU = 25;
+    /**
+     * 游戏fun
+     */
+    public static final int H5_YOUXIFAN = 26;
 
+    /**
+     * 果盘
+     */
+    public static final int H5_GuoPan = 27;
+    /**
+     * 七乐
+     */
+    public static final int H5_QiLe = 28;
+    /**
+     * 大秦
+     */
+    public static final int H5_DaQin = 29;
 }

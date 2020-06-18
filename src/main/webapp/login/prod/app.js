@@ -196,10 +196,10 @@ function DisplayAndHiddenBtn(btnId, type) {
     }
 }
 
-let prod = false;
+let prod = true;
 let url = "/zhiyue";
 if (prod) {
-    url = "/zysdk/zhiyue";
+    url = "https://zyh5games.com/zysdk/zhiyue";
 }
 
 

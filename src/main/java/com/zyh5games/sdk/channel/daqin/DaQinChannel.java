@@ -1,4 +1,4 @@
-package com.zyh5games.sdk.channel.huanju;
+package com.zyh5games.sdk.channel.daqin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
@@ -11,24 +11,23 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * 欢聚
- *
+ * 大秦
  * @author song minghua
  * @date 2020/5/21
  */
-@Component("14")
-public class HuanjuBaseChannel extends BaseChannel {
-    private static final Logger log = Logger.getLogger(HuanjuBaseChannel.class);
+@Component("29")
+public class DaQinChannel extends BaseChannel {
+    private static final Logger log = Logger.getLogger(DaQinChannel.class);
 
-    HuanjuBaseChannel() {
-        channelId = ChannelId.H5_HUANJU;
-        channelName = "欢聚";
+    DaQinChannel() {
+        channelId = ChannelId.H5_DaQin;
+        channelName = "大秦";
     }
 
     @Override
     public JSONArray commonLib() {
         JSONArray libUrl = super.commonLib();
-        libUrl.add("https://issue.hjygame.com/sdk/cy.sdk.js");
+        libUrl.add("https://issue.hjygame.com/sdk/cy.sdk.js" + "?" + System.currentTimeMillis());
         return libUrl;
     }
 
@@ -40,7 +39,7 @@ public class HuanjuBaseChannel extends BaseChannel {
     @Override
     public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
-        channelData.put("name", "HuanJuH5");
+        channelData.put("name", "DaQinH5");
         return channelData;
     }
 
@@ -84,10 +83,7 @@ public class HuanjuBaseChannel extends BaseChannel {
         if (!super.channelMustParam(mustKey, map)) {
             return false;
         }
-        //  id=1&avatar=http%3A%2F%2Fh5.6816.com%2Fstatic%2Fattachment%2Fuser%2F20160816%2F1471334322441376.png&gameId=113&signType=md5&time=1475042060&uid=29923&userName=dreamfly_1981&userSex=male&sign=6a3f16124a0c641082c17a438d1323a8
-        //  Md5(gameId=113&time=1475042196&uid=29923&userName=dreamfly_1981&key=testkey)
-//        gameId=956&time=1591078501&userName=well-done&uid=3385060&key=a9db131a5d5f5b013c374b290599fb68
-        String commonKey = configMap.get(appId).getString(HuanJuConfig.COMMON_KEY);
+        String commonKey = configMap.get(appId).getString(DaQinConfig.LOGIN_KEY);
 
         String avatar = map.get("avatar")[0];
         String fromUid = map.containsKey("fromUid") ? map.get("fromUid")[0] : "";
@@ -145,8 +141,8 @@ public class HuanjuBaseChannel extends BaseChannel {
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String channelGameId = configMap.get(appId).getString(HuanJuConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(HuanJuConfig.PAY_KEY);
+        String channelGameId = configMap.get(appId).getString(DaQinConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(DaQinConfig.PAY_KEY);
 
         String cpOrderNo = orderData.getString("cpOrderNo");
         String channelUid = orderData.getString("uid");
@@ -218,7 +214,7 @@ public class HuanjuBaseChannel extends BaseChannel {
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
-        String payKey = configMap.get(appId).getString(HuanJuConfig.PAY_KEY);
+        String payKey = configMap.get(appId).getString(DaQinConfig.PAY_KEY);
 
         StringBuilder param = new StringBuilder();
         super.addParam(param, "cpOrderId", parameterMap.get("cpOrderId"));

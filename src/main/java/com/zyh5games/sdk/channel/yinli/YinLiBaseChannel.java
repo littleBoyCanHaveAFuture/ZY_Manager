@@ -35,6 +35,7 @@ public class YinLiBaseChannel extends BaseChannel {
     YinLiBaseChannel() {
         configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_HUANJU;
+        channelName = "引力";
     }
 
     @Override

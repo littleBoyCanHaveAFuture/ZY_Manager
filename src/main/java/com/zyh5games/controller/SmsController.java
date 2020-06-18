@@ -38,19 +38,19 @@ public class SmsController {
      */
     public static Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
     /**
-     * 注册码cd
+     * 注册码cd 60s
      */
     public static Integer regExpireTime = 60 * 1000;
     /**
-     * 登录码cd
+     * 登录码cd 60s
      */
     public static Integer loginExpireTime = 60 * 1000;
     /**
-     * 注册码 有效时间
+     * 注册码 有效时间 10分钟
      */
     public static Integer regTime = 10 * 60;
     /**
-     * 登录码 有效时间
+     * 登录码 有效时间 10分钟
      */
     public static Integer loginTime = 10 * 60;
 
@@ -77,6 +77,7 @@ public class SmsController {
     private AccountService accountService;
     @Resource
     private GameNewService gameNewService;
+
     /**
      * 判断是否合法手机号
      */
@@ -96,7 +97,7 @@ public class SmsController {
     }
 
     /**
-     * 注册、登录 cd
+     * 注册、登录 cd 60s 才能请求一次
      */
     public boolean checkTime(String key, JSONObject rspJson, Integer type) {
         String lastTime = cache.getSmsString(key);
@@ -112,9 +113,11 @@ public class SmsController {
         //是否cd中
         if (!lastTime.isEmpty()) {
             long lt = Long.parseLong(lastTime);
-            if (System.currentTimeMillis() - lt < time) {
+            long curr = System.currentTimeMillis();
+            if (curr - lt < time) {
+                long left = time - (curr - lt);
                 rspJson.put("status", false);
-                rspJson.put("message", "处于cd 请稍后再试");
+                rspJson.put("message", "处于cd 请等待" + left / 1000 + "s 再试");
                 return false;
             }
         } else {
@@ -150,7 +153,8 @@ public class SmsController {
             }
 
             int code = RandomUtil.rndInt(1000, 9999);
-            cache.setSmsKey(key, regTime, String.valueOf(code));
+            String keyCode = RedisKey_Gen.get_SmsRegisterKey(appId, phone);
+            cache.setSmsKey(keyCode, regTime, String.valueOf(code));
             String url = regSmsUrl + "?phone=" + phone + "&code=" + code;
 
             JSONObject rsp = httpService.httpGetJsonNo(url);
@@ -336,6 +340,7 @@ public class SmsController {
             loginUrl.append("&").append("GameKey").append("=").append(appKey);
             loginUrl.append("&").append("ChannelCode").append("=").append(channelId);
             loginUrl.append("&").append("ChannelUid").append("=").append(channelUid);
+
             rspJson.put("status", true);
             rspJson.put("message", "登录成功");
             rspJson.put("channelUid", channelUid);

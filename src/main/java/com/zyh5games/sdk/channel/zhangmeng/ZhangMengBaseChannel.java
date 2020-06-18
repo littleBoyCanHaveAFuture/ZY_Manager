@@ -25,6 +25,7 @@ public class ZhangMengBaseChannel extends BaseChannel {
 
     ZhangMengBaseChannel() {
         channelId = ChannelId.H5_ZHANGMENG;
+        channelName = "掌盟";
         configMap = new ConcurrentHashMap<>();
     }
 

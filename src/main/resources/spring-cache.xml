@@ -30,7 +30,6 @@
 
     <!-- redis 配置,也可以把配置挪到properties配置文件中,再读取 -->
     <bean id="jedisPool_Ali" class="redis.clients.jedis.JedisPool">
-        <!--    自用 阿里云 外网连接-->
         <constructor-arg index="0" ref="jedisPoolConfig"/>
         <constructor-arg index="1" type="java.lang.String" name="host"
                          value="r-bp1a0bf9408e94c4pd.redis.rds.aliyuncs.com"/>

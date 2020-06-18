@@ -26,6 +26,7 @@ public class ExampleBaseChannel extends BaseChannel {
 
     ExampleBaseChannel() {
         channelId = ChannelId.H5_EXAMPLE;
+        channelName = "EXAMPLE 游戏";
         configMap = new ConcurrentHashMap<>();
     }
 

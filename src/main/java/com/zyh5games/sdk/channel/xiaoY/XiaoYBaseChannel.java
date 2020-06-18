@@ -28,6 +28,7 @@ public class XiaoYBaseChannel extends BaseChannel {
 
     XiaoYBaseChannel() {
         channelId = ChannelId.H5_XIAOY;
+        channelName = "小Y";
         configMap = new ConcurrentHashMap<>();
         loginExtMap = new ConcurrentHashMap<>();
         loginModelMap = new ConcurrentHashMap<>();

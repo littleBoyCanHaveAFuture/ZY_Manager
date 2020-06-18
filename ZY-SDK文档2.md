@@ -1,11 +1,11 @@
 ##H5游戏接入文档（网页）
 ###游戏参数
    
-    游戏：巨龙战歌
-    GameId = 14
-    GameKey = u6d3047qbltix34a9l0g2bvs5e8q82ol
-    channelId = 8
-    callbackKey = oI4FzZkBVsd18ptwdwZ8cPT23n3yN99D
+    游戏：海盗传说
+    GameId = 18
+    GameKey = jat7e8e3w04lh2g213ie4f8ro4mhpx4n
+    channelId = 28
+    callbackKey = taani1t80g33dm3o600tyum8fm6um623
     
 ###流程描述:
 1. 游戏开发者在游戏主页引入libZySdk_v2.js类库.

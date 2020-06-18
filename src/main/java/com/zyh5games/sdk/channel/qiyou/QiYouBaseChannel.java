@@ -28,6 +28,7 @@ public class QiYouBaseChannel extends BaseChannel {
 
     QiYouBaseChannel() {
         channelId = ChannelId.H5_QIYOU;
+        channelName = "奇游";
         configMap = new ConcurrentHashMap<>();
     }
 

@@ -28,6 +28,7 @@ public class YangGaoBaseChannel extends BaseChannel {
 
     YangGaoBaseChannel() {
         channelId = ChannelId.H5_YANGGAO;
+        channelName = "羊羔";
         configMap = new ConcurrentHashMap<>();
         loginExtMap = new ConcurrentHashMap<>();
         loginModelMap = new ConcurrentHashMap<>();

@@ -63,6 +63,9 @@ public class ZyChannelController {
                     break;
                 }
             }
+            if(result.containsKey("status")){
+                break;
+            }
             int appId = reqJson.getInteger("appId");
             int channelId = reqJson.getInteger("channelId");
             String appKey = reqJson.getString("appKey");

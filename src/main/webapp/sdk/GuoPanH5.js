@@ -8,55 +8,28 @@ function getQueryString(url, key) {
     }
 }
 
-let ZhaoShouYouParam = {};
-
 function zyCallChannelInit(params) {
-    ZhaoShouYouParam.game_id = getQueryString(params, 'game_id');
-    ZhaoShouYouParam.user_id = getQueryString(params, 'user_id');
+
 }
 
 /**
  *  quick登录,模拟quick正常登录回调，给QuickSDK赋值
  */
 function zyCallChannelLogin(data) {
-    // if (!hasInit) {
-    //     let productCode = quickConfig.ProductCode;
-    //     let productKey = quickConfig.ProductKey;
-    //     QuickSDK.init(productCode, productKey, true, function () {
-    //         console.log("quick init success");
-    //         hasInit = true;
-    //     })
-    // }
-    // if (data.hasOwnProperty("quickData")) {
-    //     console.info("zyCallChannelLogin quick ---->doLoginCallback");
-    //     doLoginCallback(data.quickData);
-    // } else {
-    //     console.info("zyCallChannelLogin quick ---->fail");
-    //     data.userData.uid = "";
-    // }
+
 }
 
 function zyCallChannelPay(order) {
     console.log("zyCallChannelPay=" + JSON.stringify(order));
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
-    let payData = trade.data
+    let payData = JSON.parse(trade.data);
 
     console.log("zyCallChannelPay payData= " + trade.data);
-    let payUrl = "https://api.sy12306.com/game/h5gamepay_9";
-    payUrl += "?" + payData;
-    // $.ajax({
-    //     url: payUrl,
-    //     type: 'get',
-    //     success: function (res) {
-    //         console.log(res);
-    //     },
-    //     error: function (e) {
-    //         console.log(e)
-    //     }
-    // })
-    // loadZsyPayHtml(payUrl);
-    window.location.href = payUrl;
+
+    let url = "http://h5.guopan.cn/api/sdk_pay.php";
+    url += payData;
+    loadZyPayHtml(url);
 }
 
 /**
@@ -84,68 +57,7 @@ function zyCallChannelPay(order) {
  *  @param  {string}             roleInfo.friendlist        角色好友列表
  * */
 function zyCallUploadRole(roleInfo) {
-    console.log(roleInfo);
-    /**
-     * role.role_id         String      是    角色id
-     * role.role_name       String      是    角色名
-     * role.server_id       Int         是    区服id
-     * role.server_name     String      是    区服名
-     * role.event           Int         是    角色事件1--角色登录 2--角色创建3--角色升级 4--角色下线
-     * role.role_level      Int         是    角色等级
-     * role.role_vip        Int         是    角色vip等级
-     * role.combat_num      String      是    战力  使用字符串表示数字，最大9223372036854775807，系统有合法判断
-     * format               String      是    固定为 jsonp
-     * extra                String      否    附加信息 可以为空
-     * app_id               Int         是    就是登陆时传入的game_id参数
-     * user_id              Int         是    就是登陆时传入的user_id参数
-     */
-    let datatype = roleInfo.datatype;
-    if (roleInfo.datatype === 3) {
-        datatype = 1;
-    } else if (roleInfo.datatype === 2) {
-        datatype = 2;
-    } else if (roleInfo.datatype === 4) {
-        datatype = 3;
-    } else if (roleInfo.datatype === 5) {
-        datatype = 4;
-    } else {
-        return;
-    }
-    let role = {
-        role_id: roleInfo.userRoleId,
-        role_name: roleInfo.userRoleName,
-        server_id: roleInfo.serverId,
-        server_name: roleInfo.serverName,
-        event: datatype,
-        role_level: roleInfo.userRoleLevel,
-        role_vip: roleInfo.vipLevel,
-        combat_num: roleInfo.gameRolePower
-    };
-
-    let data = {
-        role: role,
-        format: 'jsonp',
-        extra: '',
-        app_id: ZhaoShouYouParam.game_id,
-        user_id: ZhaoShouYouParam.user_id
-    };
-
-    $.ajax({
-        url: 'https://api.sy12306.com/v8/user/uprole',
-        type: 'post',
-        data: data,
-        dataType: 'jsonp',
-        success: function (res) {
-            console.log(res);
-            if (res.code === 200) {
-                console.log(res.msg);
-            }
-        },
-        error: function (e) {
-            console.log(e)
-        }
-    })
-
+    // console.log(roleInfo);
 }
 
 function share() {
@@ -156,18 +68,16 @@ function zyCallChannelLogout() {
 
 }
 
-function loadZsyPayHtml(payUrl) {
+function loadZyPayHtml(payUrl) {
+
     //苹果浏览器
     let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
         navigator.userAgent &&
         navigator.userAgent.indexOf('CriOS') === -1 &&
         navigator.userAgent.indexOf('FxiOS') === -1;
     if (isSafari) {
-        // alert("苹果");
-        // openWin(payUrl);
         newWin(payUrl, "zyOpenWin");
     } else {
-        // alert("其他");
         window.open(payUrl);
     }
 }

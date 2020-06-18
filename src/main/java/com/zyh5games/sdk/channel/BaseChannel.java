@@ -2,14 +2,14 @@ package com.zyh5games.sdk.channel;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.UOrder;
+import com.zyh5games.util.MD5Util;
 import com.zyh5games.util.RandomUtil;
 import lombok.Data;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author song minghua
@@ -35,7 +35,7 @@ public abstract class BaseChannel {
     /**
      * 渠道名称
      */
-    String channelName;
+    public String channelName;
 
     /**
      * 从数据库加载配置
@@ -209,7 +209,7 @@ public abstract class BaseChannel {
                 addParamAnd(param, key, value);
             }
         }
-        log.info("param = " + param);
+
         return param;
     }
 
@@ -217,12 +217,10 @@ public abstract class BaseChannel {
         StringBuilder param = new StringBuilder();
         Arrays.sort(signKey);
 
-        boolean first = false;
         for (String key : signKey) {
             String value = parameterMap.get(key);
             param.append(value);
         }
-        log.info("param = " + param);
         return param;
     }
 
@@ -239,20 +237,27 @@ public abstract class BaseChannel {
                 addParamAnd(param, key, value);
             }
         }
-        log.info("param = " + param);
     }
 
-    public StringBuilder signJsonNoKey(String[] signKey, JSONObject requestInfo) {
+    public String jsonToUrlString(JSONObject data) {
+        Set<String> keySet = data.keySet();
+        Set<String> sortSet = new TreeSet<>(Comparator.naturalOrder());
+        sortSet.addAll(keySet);
+
         StringBuilder param = new StringBuilder();
-        Arrays.sort(signKey);
-
-        for (String key : signKey) {
-            String value = requestInfo.getString(key);
-            param.append(value);
+        boolean first = false;
+        for (String key : sortSet) {
+            String value = data.getString(key);
+            if (!first) {
+                addParam(param, key, value);
+                first = true;
+            } else {
+                addParamAnd(param, key, value);
+            }
         }
-        log.info("param = " + param);
-        return param;
+        return param.toString();
     }
+
 
     /**
      * 检查 订单金额
@@ -270,4 +275,7 @@ public abstract class BaseChannel {
         param.append("&").append(key).append("=").append(value);
     }
 
+    public String sign(StringBuilder param, String key) {
+        return MD5Util.md5(param.toString() + key);
+    }
 }

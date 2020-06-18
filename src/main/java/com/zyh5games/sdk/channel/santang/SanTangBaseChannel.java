@@ -27,6 +27,7 @@ public class SanTangBaseChannel extends BaseChannel {
 
     SanTangBaseChannel() {
         channelId = ChannelId.H5_SANTANG;
+        channelName = "三唐";
         configMap = new ConcurrentHashMap<>();
         userIdMap = new ConcurrentHashMap<>();
     }

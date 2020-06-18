@@ -168,9 +168,9 @@
         let zy_password = getCookies("zy_password");
         let zy_channelUid = getCookies("zy_channelUid");
 
-        // console.info("zy_account=" + zy_account);
-        // console.info("zy_password=" + zy_password);
-        // console.info("zy_channelUid=" + zy_channelUid);
+        console.info("zy_account=[" + zy_account + "]");
+        console.info("zy_password=[" + zy_password + "]");
+        console.info("zy_channelUid=[" + zy_channelUid + "]");
 
         // 指悦官方渠道-无账号自动注册
         if (zy_account === "" || zy_password === "" || zy_channelUid === "") {

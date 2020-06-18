@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author song minghua
@@ -29,15 +27,21 @@ public class ChannelHandler {
     @Resource
     private ChannelConfigService configService;
 
-    public BaseChannel getBy(String entNum) {
-        return channelMap.get(entNum);
-    }
-
     public void print() {
         System.out.println("===== BaseChannel extends Map =====");
-        channelMap.forEach((name, impl) -> {
-            System.out.println(name + "->channelData" + ":" + impl.channelLib(-1));
-        });
+        Set<Integer> sortSet = new TreeSet<>(Comparator.naturalOrder());
+//        sortSet.addAll(channelMap.keySet());
+        for(String k:channelMap.keySet()){
+            sortSet.add(Integer.parseInt(k));
+        }
+        for (Integer key : sortSet) {
+            BaseChannel channel = channelMap.get(String.valueOf(key));
+            String name = channel.channelLib(-1).getString("name");
+            System.out.println(key + "\t=[" + channel.channelName + "]\t[" + name + "]");
+        }
+//        channelMap.forEach((name, impl) -> {
+//            System.out.println(name + "->channelData" + ":" + impl.channelLib(-1));
+//        });
     }
 
     /**
@@ -77,6 +81,9 @@ public class ChannelHandler {
 
     public BaseChannel getChannel(Integer channelId) {
         BaseChannel channel = this.channelMap.get(String.valueOf(channelId));
+        if (channel == null) {
+            return null;
+        }
         if (channel.getConfigMap() == null || channel.getConfigMap().size() == 0) {
             channel.setConfigMap(appConfigMap.get(channelId));
         } else {

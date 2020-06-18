@@ -28,7 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author song minghua
@@ -92,6 +94,7 @@ public class PayCallbackController {
             if (!channelSerivce.checkOrderMoney(money, order)) {
                 return false;
             }
+            //检查uid
             Integer zhiyueUid = order.getUserID();
             channelOrder.replace("zy_uid", zhiyueUid);
 
@@ -122,7 +125,7 @@ public class PayCallbackController {
             if (isReturn) {
                 return result;
             }
-            log.info(" mid OrderState = " + order.getState());
+
             // cp请求发货
             GameNew gameNew = gameNewService.selectGame(appId, -1);
             if (gameNew == null) {
@@ -133,6 +136,7 @@ public class PayCallbackController {
             //订单金额 非实际支付
             String orderMoney = FeeUtils.fenToYuan(order.getMoney());
             result = notifyToCp(first, gameNew, order, orderMoney, cpOrderId, channelId);
+
             log.info(" end OrderState = " + order.getState());
         } while (false);
         log.info(" end result = " + result);
@@ -1087,7 +1091,7 @@ public class PayCallbackController {
     }
 
     /**
-     * soyouji
+     * so游记
      * <p>
      *
      * @param uid       用户在汇米网络的用户ID # length <= 20
@@ -1140,7 +1144,7 @@ public class PayCallbackController {
     }
 
     /**
-     * zhaoshouyou
+     * 找手游
      *
      * @param user_id   Int	        是	付费用户id
      * @param username  String	    是	付费用户名
@@ -1196,4 +1200,169 @@ public class PayCallbackController {
         ResponseUtil.write(response, result ? "success" : "fail");
     }
 
+    /**
+     * 找手游
+     * <p>
+     * 必选  类型及范围  说明
+     *
+     * @param trade_no     true  string  果盘唯一订单号
+     * @param serialNumber true  string  游戏方订单序列号
+     * @param money        true  string  消费金额。单位是元，精确到分，如10.00。请务必校验金额与玩家下单的商品价值是否一致
+     * @param status       true  string  状态；0=失败；1=成功；2=失败，原因是余额不足。
+     * @param t            true  string  时间戳(果盘服务器发起通知的北京时间)
+     * @param sign         true  string  加密串 sign=md5(serialNumber+money+status+t+SERVER_KEY) 是五个变量值拼接后经 md5 后的值，其中SERVER_KEY 在果盘开放平台上获得。
+     * @param appid        false  string
+     * @param item_id      false  string
+     * @param item_price   false  string
+     * @param item_count   false  string
+     * @param reserved     false  string  扩展参数，SDK 发起支付时有传递，则这里会回传。
+     * @param game_uin     true  string  玩家游戏 uid；请务必校验该 game_uin 和下单时对应的角色 game_uin 是否一致，防止“任意充”
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_guopan/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_guopan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                          @RequestParam("trade_no") String trade_no,
+                          @RequestParam("serialNumber") String serialNumber,
+                          @RequestParam("money") String money,
+                          @RequestParam("status") String status,
+                          @RequestParam("t") String t,
+                          @RequestParam("sign") String sign,
+                          @RequestParam(value = "appid", required = false) String appid,
+                          @RequestParam(value = "item_id", required = false) String item_id,
+                          @RequestParam(value = "item_price", required = false) String item_price,
+                          @RequestParam(value = "item_count", required = false) String item_count,
+                          @RequestParam(value = "reserved", required = false) String reserved,
+                          @RequestParam(value = "game_uin", required = false) String game_uin,
+                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("trade_no", trade_no);
+        parameterMap.put("serialNumber", serialNumber);
+        parameterMap.put("money", money);
+        parameterMap.put("status", status);
+        parameterMap.put("t", t);
+        parameterMap.put("sign", sign);
+        parameterMap.put("appid", appid);
+        parameterMap.put("item_id", item_id);
+        parameterMap.put("item_price", item_price);
+        parameterMap.put("item_count", item_count);
+        parameterMap.put("reserved", reserved);
+        parameterMap.put("game_uin", game_uin);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, serialNumber, trade_no, money);
+
+        ResponseUtil.write(response, result ? "success" : "fail");
+    }
+
+    /**
+     * 游戏fan
+     * <p>
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_youxifan/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_youxifan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                            @RequestBody String datas,
+                            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+
+        String[] body = URLDecoder.decode(datas, String.valueOf(StandardCharsets.UTF_8)).split("&");
+
+        JSONObject data = new JSONObject();
+        Map<String, String> parameterMap = new HashMap<>();
+
+        for (String s : body) {
+            String[] p = s.split("=");
+            String key = p[0];
+            String value = p.length == 2 ? p[1] : "";
+            System.out.println("key = " + key + "[" + value + "]");
+            parameterMap.put(key, value);
+            data.put(key, value);
+        }
+
+        String cpOrderNo = data.getString("attach");
+        String channelOrder = data.getString("orderid");
+        String amount = data.getString("amount");
+
+        boolean result = checkOrder(appId, channelId, parameterMap, data, cpOrderNo, channelOrder, amount);
+
+        ResponseUtil.write(response, result ? "success" : "error");
+    }
+
+    /**
+     * 大秦
+     * <p>
+     * 接收参数(CGI)	类型	        必选	参于加密	说明
+     * status		    String	    是	是	    订单状态。“success”为支付成功
+     * cpOrderId		String	    是	是	    cp游戏订单号。
+     * orderId		    String	    是	是	    欢聚游微游戏订单号
+     * uid		        string	    是	是	    欢聚游微游戏用户的uid
+     * userName		    string	    是	是	    欢聚游微游戏的用户名
+     * money		    decimal	    是	是	    支付钱数(元),保留2位小数
+     * gameId		    String	    是	是	    游戏的id
+     * goodsId		    String	    是	是	    商品ID
+     * goodsName		String	    是	是	    商品名
+     * server		    String	    是	是	    支付的游戏服
+     * role		        String	    是	是	    支付时角色信息,
+     * time		        int	        是  是	    当前时间unix时间戳
+     * ext		        String(200)	否	否	    额外透传参数(原样返回)
+     * sign		        string	    是	否	    加密串
+     * signType		    string	    是	否	    固定md5
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_daqin/{channelId}/{appId}")
+    @ResponseBody
+    public String h5_daqin(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                            @RequestParam("status") String status,
+                            @RequestParam("cpOrderId") String cpOrderId,
+                            @RequestParam("orderId") String orderId,
+                            @RequestParam("uid") String uid,
+                            @RequestParam("userName") String userName,
+                            @RequestParam("money") String money,
+                            @RequestParam("gameId") String gameId,
+                            @RequestParam("goodsId") String goodsId,
+                            @RequestParam("goodsName") String goodsName,
+                            @RequestParam("server") String server,
+                            @RequestParam("role") String role,
+                            @RequestParam("time") String time,
+                            @RequestParam(value = "ext", required = false) String ext,
+                            @RequestParam("signType") String signType,
+                            @RequestParam("sign") String sign,
+                            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("status", status);
+        parameterMap.put("cpOrderId", cpOrderId);
+        parameterMap.put("orderId", orderId);
+        parameterMap.put("uid", uid);
+        parameterMap.put("userName", userName);
+        parameterMap.put("money", money);
+
+        parameterMap.put("gameId", gameId);
+        parameterMap.put("goodsId", goodsId);
+        parameterMap.put("goodsName", goodsName);
+        parameterMap.put("server", server);
+        parameterMap.put("role", role);
+        parameterMap.put("time", time);
+        parameterMap.put("ext", ext);
+        parameterMap.put("signType", signType);
+
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject channelOrder = new JSONObject();
+
+        boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, cpOrderId, orderId, money);
+//        ResponseUtil.write(response, result ? "success" : "fail");
+        return result ? "success" : "fail";
+    }
 }

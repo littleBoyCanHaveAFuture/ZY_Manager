@@ -808,9 +808,9 @@ public class ServerController {
         PageBean pageBean = new PageBean(Integer.parseInt(page), Integer.parseInt(rows));
 
         do {
-            Integer start = pageBean.getStart();
+            int start = pageBean.getStart();
             Integer pageSize = pageBean.getPageSize();
-            Integer end = start + pageSize;
+            int end = start + pageSize;
 
             System.out.println("此次获取 第" + page + "页，条数范围[ " + start + " , " + end + " ]");
 

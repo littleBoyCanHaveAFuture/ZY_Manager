@@ -9,42 +9,32 @@ function getQueryString(url, key) {
 }
 
 function zyCallChannelInit(params) {
-    // let gameId = 0;
-    // if (typeof (params) == 'object') {
-    //     window.PRODUCT_CODE = params.productCode;
-    //     gameId = params.gameId;
-    // } else {
-    //     window.PRODUCT_CODE = getQueryString(params, 'productCode');
-    // }
+
 }
-/**
- *  quick登录,模拟quick正常登录回调，给QuickSDK赋值
- */
+
 function zyCallChannelLogin(data) {
-    // if (!hasInit) {
-    //     let productCode = quickConfig.ProductCode;
-    //     let productKey = quickConfig.ProductKey;
-    //     QuickSDK.init(productCode, productKey, true, function () {
-    //         console.log("quick init success");
-    //         hasInit = true;
-    //     })
-    // }
-    // if (data.hasOwnProperty("quickData")) {
-    //     console.info("zyCallChannelLogin quick ---->doLoginCallback");
-    //     doLoginCallback(data.quickData);
-    // } else {
-    //     console.info("zyCallChannelLogin quick ---->fail");
-    //     data.userData.uid = "";
-    // }
+
 }
+
 function zyCallChannelPay(order) {
     console.log("zyCallChannelPay=" + JSON.stringify(order));
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
-    let payData = JSON.parse(trade.data)
+    let payData = JSON.parse(trade.data);
 
     console.log("zyCallChannelPay payData= " + trade.data);
 
+    // var params = {
+    //     amount: 1, //金额(元，最低一元)
+    //     roleid: 1, //游戏角色id
+    //     serverid: 1, //充值服务器id
+    //     productname: '充值的游戏名称', //充值的游戏名称
+    //     attach: 'xxxx', //游戏方扩展参数
+    //     productdesc: '商品描述', //充值的商品描述
+    //     payCpSign: 'xxxx', // 充值加签处理 详情请看下面充值加签处理 md5加密
+    //     cpUid: 'xxxx' // 游戏帐号ID
+    // };
+    YXFH5SDK.openPay(payData) //调起支付
 }
 
 /**

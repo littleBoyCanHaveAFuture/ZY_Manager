@@ -56,6 +56,8 @@ function zyCallChannelInit(params) {
     } else {
         gameId = getQueryString(params, 'gameId');
     }
+    console.log(params);
+    console.log(gameId);
     initParams.gameId = gameId;
     if (!hasInit) {
         cySdk = window.CY_GAME_SDK;
@@ -63,7 +65,6 @@ function zyCallChannelInit(params) {
             cySdk.config(initParams);//初始化
             hasInit = true;
         }
-
     }
 }
 

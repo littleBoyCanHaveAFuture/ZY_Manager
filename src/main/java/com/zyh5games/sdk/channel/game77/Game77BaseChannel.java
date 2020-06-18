@@ -27,6 +27,7 @@ public class Game77BaseChannel extends BaseChannel {
 
     Game77BaseChannel() {
         channelId = ChannelId.H5_77;
+        channelName = "77游戏";
         configMap = new ConcurrentHashMap<>();
         channelMap = new ConcurrentHashMap<>();
         extlMap = new ConcurrentHashMap<>();
@@ -303,7 +304,7 @@ public class Game77BaseChannel extends BaseChannel {
             }
 
             super.signJson(param, signKey3, requestInfo);
-
+            log.info("param = " + param);
             // 签名验证
             String sign = MD5Util.md5(param.toString() + "&" + roleKey);
 
@@ -327,7 +328,7 @@ public class Game77BaseChannel extends BaseChannel {
             String[] signKey2 = {"cpgameid", "qqesuid", "channelid", "cpguid", "roleName", "serverId",
                     "level", "ext", "timestamp"};
             super.signJson(param, signKey2, requestInfo);
-
+            log.info("param = " + param);
             // 签名验证
             String sign = MD5Util.md5(param.toString() + "&" + roleKey);
 

@@ -34,6 +34,7 @@ public class YuMaBaseChannel extends BaseChannel {
     YuMaBaseChannel() {
         configMap = new ConcurrentHashMap<>();
         channelId = ChannelId.H5_YUMA;
+        channelName = "鱼马";
     }
 
     @Override

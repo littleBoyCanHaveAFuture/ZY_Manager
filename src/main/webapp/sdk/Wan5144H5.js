@@ -27,10 +27,8 @@ function getQueryString(url, key) {
 function zyCallChannelInit(params) {
     let gameId = 0;
     if (typeof (params) == 'object') {
-        window.PRODUCT_CODE = params.productCode;
         gameId = params.gameId;
     } else {
-        window.PRODUCT_CODE = getQueryString(params, 'productCode');
         gameId = getQueryString(params, 'gameId');
     }
     initParams.gameId = gameId;

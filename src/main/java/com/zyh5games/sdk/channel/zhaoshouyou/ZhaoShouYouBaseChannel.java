@@ -26,6 +26,7 @@ public class ZhaoShouYouBaseChannel extends BaseChannel {
 
     ZhaoShouYouBaseChannel() {
         channelId = ChannelId.H5_ZHAOSHOUYOU;
+        channelName = "找手游";
         configMap = new ConcurrentHashMap<>();
     }
 
@@ -160,13 +161,18 @@ public class ZhaoShouYouBaseChannel extends BaseChannel {
         data.put("cp_order", cpOrderNo);
         data.put("cp_return", "");
         data.put("time", time);
-        data.put("extra", extrasParams);
+        data.put("extra", "");
 
         String[] signKey = {"user_id", "username", "game_id", "server_id", "money", "subject", "body", "cp_order",
                 "cp_return", "time", "extra"};
+        Arrays.sort(signKey);
         // 加密串
-        StringBuilder param = super.signJsonNoKey(signKey, data);
 
+        StringBuilder param = new StringBuilder();
+        for (String key : signKey) {
+            param.append(data.getString(key));
+        }
+        param.append(payKey);
         log.info("param = " + param.toString());
 
         // 签名验证
@@ -183,11 +189,20 @@ public class ZhaoShouYouBaseChannel extends BaseChannel {
         }
         log.info("channelPayInfo data: " + data);
 
+        boolean first = true;
         StringBuilder orderParam = new StringBuilder();
-        for (String key : data.keySet()) {
-            super.addParamAnd(orderParam, key, data.getString(key));
+        for (String key : signKey) {
+            if (first) {
+                first = false;
+                super.addParam(orderParam, key, data.getString(key));
+            } else {
+                super.addParamAnd(orderParam, key, data.getString(key));
+            }
         }
-        orderParam.substring(1);
+        super.addParamAnd(orderParam, "sign", data.getString("sign"));
+
+        log.info("channelPayInfo data: " + orderParam);
+
         channelOrderNo.put("data", orderParam.toString());
 
         return true;

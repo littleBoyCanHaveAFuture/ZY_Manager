@@ -2,8 +2,8 @@ package com.zyh5games.sdk.channel.zhiyue;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.entity.Account;
-import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.BaseChannel;
+import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.baijia.BaiJiaConfig;
 import com.zyh5games.service.AccountService;
 import org.apache.log4j.Logger;
@@ -26,6 +26,7 @@ public class ZhiYueBaseChannel extends BaseChannel {
 
     ZhiYueBaseChannel() {
         channelId = ChannelId.H5_ZHIYUE;
+        channelName = "指悦官方";
     }
 
     /**

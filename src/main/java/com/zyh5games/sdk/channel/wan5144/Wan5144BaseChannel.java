@@ -25,6 +25,7 @@ public class Wan5144BaseChannel extends BaseChannel {
 
     Wan5144BaseChannel() {
         channelId = ChannelId.H5_5144WAN;
+        channelName = "5144玩";
     }
 
     @Override

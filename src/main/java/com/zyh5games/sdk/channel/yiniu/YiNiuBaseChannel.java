@@ -28,6 +28,7 @@ public class YiNiuBaseChannel extends BaseChannel {
 
     YiNiuBaseChannel() {
         channelId = ChannelId.H5_YINIU;
+        channelName = "一牛";
         configMap = new ConcurrentHashMap<>();
         loginExtMap = new ConcurrentHashMap<>();
         loginModelMap = new ConcurrentHashMap<>();
@@ -127,8 +128,6 @@ public class YiNiuBaseChannel extends BaseChannel {
         log.info("channelLogin serverSign = " + serverSign);
         log.info("channelLogin sign       = " + sign);
 
-        log.info("channelLogin serverSign = " + serverSign);
-        log.info("channelLogin sign       = " + sign);
 
         if (!sign.equals(serverSign)) {
             setUserData(userData, "", "", String.valueOf(channelId), "");

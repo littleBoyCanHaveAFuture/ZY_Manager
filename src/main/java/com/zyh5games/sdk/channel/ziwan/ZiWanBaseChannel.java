@@ -31,6 +31,7 @@ public class ZiWanBaseChannel extends BaseChannel {
 
     ZiWanBaseChannel() {
         channelId = ChannelId.H5_ZIWAN;
+        channelName = "紫菀/骆驼";
         configMap = new ConcurrentHashMap<>();
         tokenMap = new ConcurrentHashMap<>();
     }

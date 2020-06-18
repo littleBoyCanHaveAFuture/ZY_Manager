@@ -1,8 +1,8 @@
 package com.zyh5games.sdk.channel.baijia;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.sdk.channel.BaseChannel;
+import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
@@ -26,6 +26,7 @@ public class BaiJiaBaseChannel extends BaseChannel {
 
     BaiJiaBaseChannel() {
         channelId = ChannelId.H5_BAIJIA;
+        channelName = "百家游戏";
     }
 
     @Override
