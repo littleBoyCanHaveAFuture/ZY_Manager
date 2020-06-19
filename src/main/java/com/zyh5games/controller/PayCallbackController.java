@@ -1375,4 +1375,156 @@ public class PayCallbackController {
 //        ResponseUtil.write(response, result ? "success" : "fail");
         return result ? "success" : "fail";
     }
+
+    /**
+     * 盛娱
+     *
+     * @param datas datas.origin_order_no 原始订单号
+     *              datas.order_id        平台订单号
+     *              datas.type            充值类型（direct 平台直充 order 订单充值）
+     *              datas.money           充值金额(单位分)
+     *              datas.game_id         游戏ID
+     *              datas.game_area       区服ID
+     *              datas.pay_channel     支付渠道     wechat     alipay    coin
+     *              datas.status          订单状态 1 表示成功，只有成功才会发通知
+     *              datas.complete_at     成功时间戳
+     *              datas.extra_data      透传参数
+     *              datas.sign            签名字符串
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_shengyu/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_shengyu(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                           @RequestBody String datas,
+                           HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = JSONObject.parseObject(datas);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("origin_order_no", data.getString("origin_order_no"));
+        parameterMap.put("order_id", data.getString("order_id"));
+        parameterMap.put("type", data.getString("type"));
+        parameterMap.put("money", data.getString("money"));
+        parameterMap.put("game_id", data.getString("game_id"));
+        parameterMap.put("game_area", data.getString("game_area"));
+        parameterMap.put("pay_channel", data.getString("pay_channel"));
+        parameterMap.put("status", data.getString("status"));
+        parameterMap.put("complete_at", data.getString("complete_at"));
+        parameterMap.put("extra_data", data.getString("extra_data"));
+        parameterMap.put("sign", data.getString("sign"));
+
+        log.info("parameterMap =" + parameterMap.toString());
+        String yuan = FeeUtils.fenToYuan(data.getString("money"));
+        boolean result = checkOrder(appId, channelId, parameterMap, data, data.getString("origin_order_no"), data.getString("order_id"), yuan);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "ok" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 游心
+     * 回调body已经过url encode，使用时要使用url decode进行解密等到json
+     * <p>
+     *
+     * @param amount         金额，单位为分
+     * @param channel_source 数据来源
+     * @param game_appid     游戏编号----运营方为游戏分配的唯一编号
+     * @param out_trade_no   渠道方订单号
+     * @param payplatform2cp 用于 CP 要求平台特别传输其他参数，默认是访问 ip
+     * @param trade_no       游戏透传参数（默认为游戏订单号，回调时候原样返回）
+     * @param sign           按照上方签名机制进行签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_youxin/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_youxin(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                          @RequestParam("amount") String amount,
+                          @RequestParam("channel_source") String channel_source,
+                          @RequestParam("game_appid") String game_appid,
+                          @RequestParam("out_trade_no") String out_trade_no,
+                          @RequestParam("payplatform2cp") String payplatform2cp,
+                          @RequestParam("trade_no") String trade_no,
+                          @RequestParam("sign") String sign,
+                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("amount", amount);
+        parameterMap.put("channel_source", channel_source);
+        parameterMap.put("game_appid", game_appid);
+        parameterMap.put("out_trade_no", out_trade_no);
+        parameterMap.put("payplatform2cp", payplatform2cp);
+        parameterMap.put("trade_no", trade_no);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        String money = FeeUtils.fenToYuan(amount);
+        boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+
+    /**
+     * 天天玩
+     * 回调body已经过url encode，使用时要使用url decode进行解密等到json
+     * <p>
+     *
+     * @param actor_id
+     * @param app_id       分配给游戏里的gameId
+     * @param app_user_id  游戏内的userid，允许自定义。不做校验，下单值原样返回
+     * @param real_amount  充值金额
+     * @param app_order_id 传入的订单号，允许自定义。不做校验，下单值原样返回
+     * @param order_id     平台的订单号，在充值未返回success时，会在后续进行补单，游戏需防止重复发放奖励
+     * @param payment_time 充值时间
+     * @param ext          玩家所在区服，用于区分统计
+     * @param sign         平台计算的签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_tiantianwan/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_tiantianwan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                               @RequestParam("actor_id") String actor_id,
+                               @RequestParam("app_id") String app_id,
+                               @RequestParam("app_user_id") String app_user_id,
+                               @RequestParam("real_amount") String real_amount,
+                               @RequestParam("app_order_id") String app_order_id,
+                               @RequestParam("order_id") String order_id,
+                               @RequestParam("payment_time") String payment_time,
+                               @RequestParam("ext") String ext,
+                               @RequestParam("sign") String sign,
+                               HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("actor_id", actor_id);
+        parameterMap.put("app_id", app_id);
+        parameterMap.put("app_user_id", app_user_id);
+        parameterMap.put("real_amount", real_amount);
+        parameterMap.put("app_order_id", app_order_id);
+        parameterMap.put("order_id", order_id);
+        parameterMap.put("payment_time", payment_time);
+        parameterMap.put("ext", ext);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+//        String money = FeeUtils.fenToYuan(amount);
+        boolean result = checkOrder(appId, channelId, parameterMap, data, app_order_id, order_id, real_amount);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+
 }

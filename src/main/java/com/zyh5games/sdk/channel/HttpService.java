@@ -21,6 +21,57 @@ public class HttpService {
     @Autowired
     private RestOperations restOperations;
 
+    /**
+     * 盛娱请求头加额外参数
+     */
+    public JSONObject httpGetJsonExtraHeader(String notifyUrl, HttpHeaders headers) {
+        log.info("BaseChannel httpGetJsonExtraHeader =" + notifyUrl);
+
+        JSONObject json = new JSONObject();
+        try {
+            HttpEntity<String> strEntity = new HttpEntity<>("", headers);
+            String rsp = restOperations.getForObject(notifyUrl, String.class, strEntity);
+            log.info("httpGet：" + rsp);
+            json = JSONObject.parseObject(rsp);
+            System.out.println(json);
+        } catch (Exception e) {
+            json.put("status", false);
+            json.put("message", e.getMessage());
+        }
+        return json;
+    }
+
+    /**
+     * 盛娱请求头加额外参数
+     */
+    public JSONObject httpPostXwwFormUrlEncodedExtraHeader(String notifyUrl, JSONObject data, HttpHeaders headers) {
+        log.info("httpPostXwwFormUrlEncodedExtraHeader = " + notifyUrl);
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        for (String key : data.keySet()) {
+            postParameters.add(key, data.get(key));
+        }
+
+        headers.add("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<MultiValueMap<String, Object>> r = new HttpEntity<>(postParameters, headers);
+
+        log.info("httpPostXwwFormUrlEncoded = data = " + data.toString());
+
+        JSONObject json = new JSONObject();
+        try {
+            String rsp = restTemplate.postForObject(notifyUrl, r, String.class);
+            log.info("httpPost：" + rsp);
+            json = JSONObject.parseObject(rsp);
+            System.out.println(json);
+        } catch (Exception e) {
+            log.info("httpPostXwwFormUrlEncoded  e = " + e);
+            json.put("status", false);
+            json.put("message", e.getMessage());
+        }
+
+        return json;
+    }
+
+
     public JSONObject httpGetJsonNo(String notifyUrl) {
         JSONObject json = new JSONObject();
         try {
@@ -100,12 +151,11 @@ public class HttpService {
             System.out.println(json);
         } catch (Exception e) {
             log.info("httpPostXwwFormUrlEncoded  e = " + e);
-            data.put("status", false);
-            data.put("message", e.getMessage());
+            json.put("status", false);
+            json.put("message", e.getMessage());
         }
 
         return json;
     }
-
 
 }

@@ -111,4 +111,16 @@ public class ChannelId {
      * 大秦
      */
     public static final int H5_DaQin = 29;
+    /**
+     * 大秦
+     */
+    public static final int H5_ShengYu = 30;
+    /**
+     * 游心
+     */
+    public static final int H5_YouXin = 31;
+    /**
+     * 天天玩
+     */
+    public static final int H5_TianTianWan = 32;
 }
