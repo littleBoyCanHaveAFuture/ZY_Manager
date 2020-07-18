@@ -81,8 +81,8 @@ public class GameRoleServiceImpl implements GameRoleService {
      * @param accountId
      */
     @Override
-    public boolean existRole(String accountId) {
-        String res = gameRoleDao.existRole(accountId);
-        return res != null && res.equals("1");
+    public boolean existRole(String accountId, String appId) {
+        String res = gameRoleDao.existRole(accountId, appId);
+        return res != null && "1".equals(res);
     }
 }

@@ -98,7 +98,7 @@ public class ZySdkController {
         if (config == null) {
             log.error("游戏渠道配置不存在 appId=" + appId + " channelId=" + channelId);
             result.put("status", false);
-            result.put("message", "SDK init:游戏渠道不存在！");
+            result.put("message", "SDK init:游戏渠道配置不存在！");
             return false;
         }
 
@@ -158,7 +158,7 @@ public class ZySdkController {
         gameRole.setCreateTime(DateUtil.formatDate(roleCreateTime * 1000, DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
         gameRole.setLastLoginTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
         gameRole.setName(userRoleName);
-        boolean res = gameRoleWorker.existRole(String.valueOf(zhiyueUid));
+        boolean res = gameRoleWorker.existRole(String.valueOf(zhiyueUid), "");
         //插入mysql
         gameRoleWorker.createGameRole(gameRole);
         //redis
@@ -320,7 +320,6 @@ public class ZySdkController {
                     break;
                 }
             }
-
 
             channelData.put("channel_id", channelId);
             channelData.put("channel_name", result.getString("channel_name"));
@@ -580,6 +579,10 @@ public class ZySdkController {
             long roleCreateTime = roleInfo.getLongValue("roleCreateTime");
             String userRoleBalance = roleInfo.getString("userRoleBalance");
 
+            if (userRoleName.contains("username_")) {
+                userRoleName = userRoleName.replace("username_", "");
+            }
+            System.out.println(userRoleName);
             Account account = accountService.findUserBychannelUid(channelId, channelUid);
             if (account == null) {
                 result.put("message", "账号不存在");

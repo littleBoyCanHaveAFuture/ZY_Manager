@@ -22,8 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author song minghua
@@ -144,6 +143,87 @@ public class RechargeSummaryControllr {
         result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
         ResponseUtil.write(response, result);
     }
+
+
+    void getGameInfo(Integer gameId, Integer channelId, Integer serverId, Map<String, Set<String>> channelMap, Set<String> serverAllSet) {
+        Set<String> gameInfoSet = cache.getGAMEIDInfo();
+        if (gameId != -1) {
+            gameInfoSet.clear();
+            gameInfoSet.add(String.valueOf(gameId));
+        }
+
+        for (String fGameId : gameInfoSet) {
+            Set<String> channelSet = cache.getSPIDInfo(fGameId);
+            if (channelId != -1) {
+                channelSet.clear();
+                channelSet.add(String.valueOf(channelId));
+            }
+            channelMap.put(fGameId, channelSet);
+            for (String fChannelId : channelSet) {
+                Set<String> serverSet = cache.getServerInfo(fGameId, fChannelId);
+                if (serverId != -1) {
+                    serverSet.clear();
+                    serverSet.add(String.valueOf(serverId));
+                }
+                serverAllSet.addAll(serverSet);
+            }
+        }
+    }
+
+
+    @RequestMapping(value = "/day", method = RequestMethod.POST)
+    @ResponseBody
+    public void Day(Integer type,
+                    Integer gameId, Integer channelId, Integer serverId,
+                    String startTime, String endTime,
+                    HttpServletResponse response) throws Exception {
+        long start = System.currentTimeMillis();
+        JSONObject result = new JSONObject();
+        do {
+            if (gameId == null || gameId == -1) {
+                result.put("message", "游戏id为空或未选择");
+                result.put("state", false);
+                break;
+            }
+            if (startTime == null || endTime == null) {
+                result.put("message", "日期为空");
+                result.put("state", false);
+                break;
+            }
+            List<String> timeList = DateUtil.transTimes(startTime, endTime, DateUtil.FORMAT_YYYY_MMDD_HHmm);
+            System.out.println(timeList);
+
+            Map<String, Set<String>> channelMap = new HashMap<>();
+            Set<String> serverAllSet = new LinkedHashSet<>();
+
+            getGameInfo(gameId, channelId, serverId, channelMap, serverAllSet);
+            if (type == 1) {
+                List<RechargeSummary> res = rsService.rsDay(channelMap, serverAllSet, timeList);
+                if (res != null) {
+                    result.put("rows", JSONArray.fromObject(res));
+                    result.put("total", res.size());
+                    result.put("state", true);
+                    result.put("message", "查询成功");
+                }
+            } else if (type == 2) {
+                List<RechargeSummary> res = rsService.rsChannel(channelMap, serverAllSet, timeList);
+                if (res != null) {
+                    result.put("rows", JSONArray.fromObject(res));
+                    result.put("total", res.size());
+                    result.put("state", true);
+                    result.put("message", "查询成功");
+                }
+            }
+
+        } while (false);
+
+        long end = System.currentTimeMillis();
+
+        result.put("time", new DecimalFormat("0.00").format((double) (System.currentTimeMillis() - start) / 1000));
+        result.put("resultCode", Constants.RESULT_CODE_SUCCESS);
+        ResponseUtil.write(response, result);
+    }
+
 
 }
 

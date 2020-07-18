@@ -100,6 +100,16 @@
         <%--            </a>--%>
         <%--        </div>--%>
 
+        <a href="javascript:openTab('全服概况','Detail/Day.jsp','icon-wenzhang')"
+           class="easyui-linkbutton"
+           data-options="plain:true,iconCls:'icon-wenzhang'"
+           style="width: 150px;">全服概况
+        </a>
+        <a href="javascript:openTab('分渠道概况','Detail/Channel.jsp','icon-wenzhang')"
+           class="easyui-linkbutton"
+           data-options="plain:true,iconCls:'icon-wenzhang'"
+           style="width: 150px;">分渠道概况
+        </a>
         <div title="游戏概况" data-options="selected:true,iconCls:'icon-wenzhangs'">
             <a href="javascript:openTab('全服概况','Detail/DetailGame.jsp','icon-wenzhang')"
                class="easyui-linkbutton"

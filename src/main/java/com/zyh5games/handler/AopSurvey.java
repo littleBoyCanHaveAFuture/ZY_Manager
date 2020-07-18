@@ -23,6 +23,7 @@ public class AopSurvey {
         allJumpFuncsList.add("com.zyh5games.service.impl.PictureServiceImpl");
         allJumpFuncsList.add("com.zyh5games.service.impl.AccountServiceImpl");
         allJumpFuncsList.add("com.zyh5games.service.impl.GameRoleServiceImpl");
+        allJumpFuncsList.add("com.zyh5games.service.impl.RechargeSummaryImpl");
         // UserServiceImpl
         allJumpFuncMethodList.add("login");
         //ServerListServiceImpl

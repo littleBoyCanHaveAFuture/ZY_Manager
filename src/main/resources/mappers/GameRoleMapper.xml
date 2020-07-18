@@ -91,7 +91,16 @@
     <select id="existRole" parameterType="string" resultType="string">
         select 1
         from zy_role
-        where accountId = #{accountId}
+        <where>
+            <if test="accountId!=null and accountId!='' ">
+                and accountId=#{accountId}
+            </if>
+            <if test="gameId!=null and gameId!='' ">
+                and gameId=#{gameId}
+            </if>
+        </where>
+
+
         limit 1
     </select>
 </mapper>

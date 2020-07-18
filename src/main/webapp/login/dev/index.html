@@ -279,7 +279,9 @@
         let appId = $.getUrlParam('appId');
         let channelId = 0;
         let appKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
-
+        if (appId === "20") {
+            appKey = "y24t2ngxjo2upafio4998uer171q4c8l";
+        }
 
         $("#url_appId").val(appId);
         $("#url_channelId").val(channelId);

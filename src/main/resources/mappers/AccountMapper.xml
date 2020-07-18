@@ -38,7 +38,7 @@
                addParam
         FROM zy_account
     </sql>
-    <insert id="create" parameterType="Account">
+    <insert id="create" parameterType="Account" useGeneratedKeys="true" keyProperty="id">
         insert into zy_account(id, name, pwd, phone, createIp, createTime,
                                createDevice, deviceCode, channelId, channelUserId, channelUserName,
                                channelUserNick, lastLoginTime, token, addParam)

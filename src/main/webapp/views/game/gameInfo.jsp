@@ -69,6 +69,7 @@
     </div>
 
 </div>
+
 </body>
 <script>
     let t_type = $("#type");

@@ -27,5 +27,5 @@ public interface GameRoleDao {
 
     GameRole findGameRole(Map<String, Object> map);
 
-    String existRole(@Param("accountId") String accountId);
+    String existRole(@Param("accountId") String accountId, @Param("gameId") String gameId);
 }

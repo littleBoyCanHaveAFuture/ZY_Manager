@@ -64,6 +64,7 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
             log.info("RS集合：" + gameInfo.toString());
         }
         return GameInfoMap;
+
     }
 
     /**
@@ -518,7 +519,71 @@ public class RechargeSummaryImpl implements RechargeSummaryService {
         rs.setTotalCreateRole(rs.getTotalCreateRole() + (timeTotalCreateRole == null ? 0 : (int) (double) timeTotalCreateRole));
     }
 
+    @Override
+    public List<RechargeSummary> rsDay(Map<String, Set<String>> channelMap, Set<String> serverSet, List<String> dayList) {
+        Map<String, RechargeSummary> dayMap = new LinkedHashMap<>();
+        RechargeSummary total = new RechargeSummary();
+        total.setDate("游戏汇总");
+        dayMap.put("游戏汇总", total);
 
+        for (String day : dayList) {
+            RechargeSummary rs = new RechargeSummary();
+            rs.setDate(day);
+            dayMap.put(day, rs);
+        }
+
+        for (Map.Entry<String, Set<String>> entry : channelMap.entrySet()) {
+            String appId = entry.getKey();
+            Set<String> channelSet = entry.getValue();
+
+
+            cache.getRsDayInfo(dayMap, dayList, appId, serverSet, channelSet);
+
+
+        }
+
+        for (String day : dayList) {
+            RechargeSummary rs = dayMap.get(day);
+            total.addDayInfo(rs);
+            rs.calculate(1);
+        }
+        total.calculate(1);
+
+        return new ArrayList<>(dayMap.values());
+    }
+
+    @Override
+    public List<RechargeSummary> rsChannel(Map<String, Set<String>> channelIdMap, Set<String> serverSet, List<String> dayList) {
+        Map<String, RechargeSummary> channelMap = new LinkedHashMap<>();
+        RechargeSummary total = new RechargeSummary();
+        total.setSpId(-1);
+        channelMap.put("-1", total);
+
+
+        for (Map.Entry<String, Set<String>> entry : channelIdMap.entrySet()) {
+            String appId = entry.getKey();
+            Set<String> channelSet = entry.getValue();
+            for (String channel : channelSet) {
+                RechargeSummary rs = new RechargeSummary();
+                rs.setSpId(Integer.parseInt(channel));
+                channelMap.put(channel, rs);
+            }
+            cache.getRsChannelInfo(channelMap, dayList, appId, serverSet, channelSet);
+
+        }
+        for (Map.Entry<String, Set<String>> entry : channelIdMap.entrySet()) {
+            String appId = entry.getKey();
+            Set<String> channelSet = entry.getValue();
+            for (String channel : channelSet) {
+                RechargeSummary rs = channelMap.get(channel);
+                total.addDayInfo(rs);
+                rs.calculate(2);
+            }
+        }
+        total.calculate(2);
+
+        return new ArrayList<>(channelMap.values());
+    }
 }
 
 

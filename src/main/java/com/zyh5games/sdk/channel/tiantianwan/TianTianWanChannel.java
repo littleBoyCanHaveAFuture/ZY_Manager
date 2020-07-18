@@ -6,6 +6,7 @@ import com.zyh5games.sdk.GameRoleWorker;
 import com.zyh5games.sdk.channel.BaseChannel;
 import com.zyh5games.sdk.channel.ChannelId;
 import com.zyh5games.service.AccountService;
+import com.zyh5games.util.FeeUtils;
 import com.zyh5games.util.MD5Util;
 import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
@@ -41,7 +42,8 @@ public class TianTianWanChannel extends BaseChannel {
     @Override
     public JSONArray commonLib() {
         JSONArray libUrl = super.commonLib();
-        libUrl.add("https://dayplay.pagecp.com/js/d2f_loader.js" + "?" + System.currentTimeMillis());
+//        libUrl.add("https://dayplay.pagecp.com/js/d2f_loader.js" + "?" + System.currentTimeMillis());
+        libUrl.add("https://h5sdk-cdn.pagecp.com/js/jssdk/d2f.js" + "?" + System.currentTimeMillis());
         return libUrl;
     }
 
@@ -65,16 +67,26 @@ public class TianTianWanChannel extends BaseChannel {
      */
     @Override
     public String channelToken(Map<String, String[]> map) {
+        String result = "false";
+        // 玩家是否首次进该游戏
         if (map.containsKey("openId") && map.get("openId").length > 0) {
-            Account account = accountService.findUserBychannelUid(String.valueOf(channelId), map.get("openId")[0]);
+            String openId = map.get("openId")[0];
+            String appId = map.get("GameId")[0];
+            log.info("openId =" + openId);
+            log.info("appId =" + appId);
+            Account account = accountService.findUserBychannelUid(String.valueOf(channelId), openId);
             if (account != null) {
-                return gameRoleWorker.existRole(String.valueOf(account.getId())) ? "false" : "true";
+                String accountId = String.valueOf(account.getId());
+                log.info("accountId =" + accountId);
+
+                result = gameRoleWorker.existRole(accountId, appId) ? "false" : "true";
             } else {
-                return "false";
+                return "true";
             }
-        } else {
-            return null;
         }
+        log.info("result =" + result);
+
+        return result;
     }
 
     /**
@@ -105,9 +117,9 @@ public class TianTianWanChannel extends BaseChannel {
 
         String openId = map.get("openId")[0];
         String noice = map.get("noice")[0];
-        long curr = System.currentTimeMillis();
-        if (curr - Long.parseLong(noice) > 5 * 60 * 1000) {
-            log.info("登录5分钟内有效 已超时");
+        long curr = System.currentTimeMillis() / 1000;
+        if (curr - Long.parseLong(noice) > 5 * 60) {
+            log.info("登录5分钟内有效 已超时 curr = " + curr);
             return false;
         }
         // 加密串
@@ -175,7 +187,7 @@ public class TianTianWanChannel extends BaseChannel {
 
         JSONObject rsp = new JSONObject();
         rsp.put("orderData", data);
-        rsp.put("amount", amount);
+        rsp.put("amount", FeeUtils.yuanToFen(amount));
 
         log.info("channelPayInfo data: " + rsp);
         channelOrderNo.put("data", rsp.toJSONString());

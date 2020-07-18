@@ -114,7 +114,7 @@
         select_dlg_discount.find("option").remove();
         select_dlg_discount.append("<option value=-1 selected=selected>请选择</option>");
 
-        for (let res = 1; res <= 9; res++) {
+        for (let res = 1; res <= 10; res++) {
             let value = res * 10;
             select_dlg_discount.append("<option  value='" + value + "'>" + value + "%" + "</option>");
         }

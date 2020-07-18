@@ -17,8 +17,15 @@ function zyCallChannelPay(order) {
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
     let data = trade.data;
-    loadZyPayHtml(data.orderId, data.body, data.subject,
-        data.totalAmount, data.productId, data.passBackParams,
+    let channelUid = getQueryString(window.location.href, "ChannelUid");
+
+    loadZyPayHtml(
+        data.orderId,
+        data.body,
+        data.subject,
+        data.totalAmount,
+        data.productId,
+        data.passBackParams,
         trade.spId);
 
 }
@@ -42,19 +49,8 @@ function loadZyPayHtml(orderId, body, subject, totalAmount, productId, passBackP
         + "&appId=" + ZhiYueSDK.GameId + "&spId=" + spId;
 
     let payUrl = "https://zyh5games.com/pay/static/pay.html" + encodeURI(param);
-    //苹果浏览器
-    let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
-        navigator.userAgent &&
-        navigator.userAgent.indexOf('CriOS') === -1 &&
-        navigator.userAgent.indexOf('FxiOS') === -1;
-    if (isSafari) {
-        // alert("苹果");
-        // openWin(payUrl);
-        newWin(payUrl, "zyOpenWin");
-    } else {
-        // alert("其他");
-        window.open(payUrl);
-    }
+
+    openPayHtml(payUrl);
 }
 
 let openWin = function (payUrl) {
@@ -91,4 +87,19 @@ function zyCallUploadRole(roleInfo) {
 
 }
 
+
+function openPayHtml(payUrl) {
+    //苹果浏览器
+    let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+        navigator.userAgent &&
+        navigator.userAgent.indexOf('CriOS') === -1 &&
+        navigator.userAgent.indexOf('FxiOS') === -1;
+    if (isSafari) {
+        // alert("苹果");
+        newWin(payUrl, "zyOpenWin");
+    } else {
+        // alert("其他");
+        window.open(payUrl);
+    }
+}
 

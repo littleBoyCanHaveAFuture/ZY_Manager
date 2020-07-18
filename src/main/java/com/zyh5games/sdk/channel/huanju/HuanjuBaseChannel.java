@@ -171,6 +171,8 @@ public class HuanjuBaseChannel extends BaseChannel {
         super.addParamAnd(param, "uid", channelUid);
         super.addParamAnd(param, "key", payKey);
 
+        log.info("channelPayInfo param = " + param.toString());
+
         String sign = MD5Util.md5(param.toString());
 
         JSONObject data = new JSONObject();

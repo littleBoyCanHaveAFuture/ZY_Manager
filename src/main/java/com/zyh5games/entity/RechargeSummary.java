@@ -180,6 +180,39 @@ public class RechargeSummary {
     public RechargeSummary() {
     }
 
+    public static void main(String[] args) {
+//        RechargeSummary s = new RechargeSummary();
+//        s.date = "11111";
+//        String json = JSONObject.toJSONString(s);
+//        RechargeSummary ss = JSONObject.parseObject(json, RechargeSummary.class);
+//        System.out.println(json);
+
+
+        Set<String> set = new HashSet<>();
+
+        set.add("20200303");
+        set.add("20180103");
+        set.add("20180104");
+        set.add("20180105");
+        set.add("20180101");
+        set.stream().sorted(Comparator.reverseOrder());
+        System.out.println(set.toString());
+    }
+
+    public void addDayInfo(RechargeSummary rs) {
+        this.newAddCreateAccount += rs.getNewAddCreateAccount();
+        this.newAddCreateRole += rs.getNewAddCreateRole();
+        this.newAddCreateRoleRemoveOld += rs.getNewAddCreateRoleRemoveOld();
+        this.activePlayer += rs.getActivePlayer();
+        this.rechargeTimes += rs.getRechargeTimes();
+        this.rechargeNumber += rs.getRechargeNumber();
+        this.rechargePayment += rs.getRechargePayment();
+        this.registeredPayers += rs.getRegisteredPayers();
+        this.registeredPayment += rs.getRegisteredPayment();
+
+        this.totalPayment += rs.getTotalPayment();
+//        this.totalRechargeTimes += rs.getTotalRechargeTimes();
+    }
 
     /**
      * 计算各种
@@ -257,7 +290,6 @@ public class RechargeSummary {
         }
     }
 
-
     public void add(RechargeSummary add) {
         //1/3
         newAddCreateAccount += add.newAddCreateAccount;
@@ -274,25 +306,6 @@ public class RechargeSummary {
         registeredPayment += add.registeredPayment;
         newaddplayer += add.newaddplayer;
 
-    }
-
-    public static void main(String[] args) {
-//        RechargeSummary s = new RechargeSummary();
-//        s.date = "11111";
-//        String json = JSONObject.toJSONString(s);
-//        RechargeSummary ss = JSONObject.parseObject(json, RechargeSummary.class);
-//        System.out.println(json);
-
-
-        Set<String> set = new HashSet<>();
-
-        set.add("20200303");
-        set.add("20180103");
-        set.add("20180104");
-        set.add("20180105");
-        set.add("20180101");
-        set.stream().sorted(Comparator.reverseOrder());
-        System.out.println(set.toString());
     }
 
 }

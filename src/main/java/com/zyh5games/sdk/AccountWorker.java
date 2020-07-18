@@ -262,7 +262,7 @@ public class AccountWorker {
             account.setCreateTime(DateUtil.getCurrentDateStr());
             account.setCreateDevice("");
             account.setDeviceCode("");
-            account.setChannelId("0");
+            account.setChannelId(String.valueOf(channelId));
             account.setChannelUserName("");
             account.setChannelUserNick("");
             account.setLastLoginTime(0L);

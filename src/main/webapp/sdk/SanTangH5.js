@@ -46,7 +46,8 @@ function zyCallChannelPay(order) {
      * sign           是           md5(gid&sid&openid&userid&money& APPKEY)注：&是变量连接符,不要放到加密里。APPKEY 由三唐平台分配
      *
      */
-    window.parent.postMessage(payData, '*');
+    // window.parent.postMessage(payData, '*');
+    window.top.postMessage(payData, '*');
 }
 
 /**

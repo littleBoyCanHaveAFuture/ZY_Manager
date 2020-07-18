@@ -39,5 +39,5 @@ public interface GameRoleService {
     /**
      * 该账号是否存在角色
      */
-    boolean existRole(String accountId);
+    boolean existRole(String accountId,String appId);
 }

@@ -9,7 +9,7 @@ function getQueryString(url, key) {
 }
 
 let hasInit = false;
-let zyYuMaChannelUid = "";
+let zyBaoYuChannelUid = "";
 /**
  * @param  {string}     params.zhiyue_channel_config.ProductCode
  * @param  {string}     params.zhiyue_channel_config.ProductKey
@@ -24,11 +24,9 @@ let quickConfig = {};
  * */
 function zyCallChannelInit(params) {
     // 参数分割
-    let channelUid = getQueryString(params, "zyYuMaChannelUid");
     let config = getQueryString(params, "zhiyue_channel_config");
     console.log(config);
     quickConfig = JSON.parse(config);
-
 }
 
 /**

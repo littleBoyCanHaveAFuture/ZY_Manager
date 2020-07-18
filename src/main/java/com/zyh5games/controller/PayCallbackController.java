@@ -143,9 +143,13 @@ public class PayCallbackController {
 
     /**
      * 渠道订单回调地址
+     * <p>
      * 支付成功-核对订单 渠道->sdk回调->cp->通知sdk->渠道
+     * <p>
      * 通知cp发货
+     * <p>
      * 1.指悦支付 在 ijpay--master里面发货 这里不处理
+     * <p>
      * 2.渠道在这里处理
      */
     public boolean notifyToCp(boolean first, GameNew gameNew, UOrder order,
@@ -198,6 +202,66 @@ public class PayCallbackController {
         return res;
     }
 
+    /**
+     * 支付服通知
+     *
+     * @param orderId        指悦订单
+     * @param channelOrderId 渠道（敏付）订单
+     * @param amount         实际支付金额 元
+     * @param secretKey      32位随机秘钥
+     */
+    @RequestMapping(value = "/minPay", method = RequestMethod.POST)
+    @ResponseBody
+    public void payServer(@RequestParam("orderId") String orderId,
+                          @RequestParam("channelOrderId") String channelOrderId,
+                          @RequestParam("amount") String amount,
+                          @RequestParam("secretKey") String secretKey,
+                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("payServer start ");
+        boolean result = false;
+        do {
+            String key = "CNnhJ0fjfLFZ7f70tsVbWYjESiPZ4Pgj";
+            if (!secretKey.equals(key)) {
+                log.info("payServer key error " + secretKey);
+                break;
+            }
+
+            UOrder order = orderManager.getUOrderById(orderId);
+            if (order == null) {
+                log.info("payServer order 不存在 " + orderId);
+                break;
+            }
+            Integer appId = order.getAppID();
+            // cp请求发货
+            GameNew gameNew = gameNewService.selectGame(appId, -1);
+            if (gameNew == null) {
+                log.info("payServer GameNew 不存在 " + appId);
+                break;
+            }
+
+            boolean first = false;
+            String fen = FeeUtils.yuanToFen(amount);
+            if (OrderState.STATE_OPEN_PAY == order.getState()) {
+                // 首次回调 已完成支付 但未发货
+                order.setState(OrderState.STATE_PAY_SUCCESS);
+                order.setChannelOrderID(channelOrderId);
+                order.setRealMoney(Integer.parseInt(fen));
+                order.setSdkOrderTime(DateUtil.formatDate(System.currentTimeMillis(), DateUtil.FORMAT_YYYY_MMDD_HHmmSS));
+                orderManager.updateCpOrder(order);
+                first = true;
+            } else if (OrderState.STATE_PAY_SUCCESS == order.getState()) {
+
+            } else {
+                return;
+            }
+            //订单金额 非实际支付
+            String orderMoney = FeeUtils.fenToYuan(order.getMoney());
+            result = notifyToCp(first, gameNew, order, orderMoney, order.getCpOrderId(), order.getChannelID());
+        } while (false);
+
+        ResponseUtil.write(response, result ? "success" : "fail");
+        log.info("payServer end " + result);
+    }
 
     /**
      * 模板
@@ -1199,7 +1263,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 找手游
+     * 果盘
      * <p>
      * 必选  类型及范围  说明
      *
@@ -1489,17 +1553,17 @@ public class PayCallbackController {
      */
     @RequestMapping(value = "/callbackPayInfo/h5_tiantianwan/{channelId}/{appId}", method = RequestMethod.GET)
     @ResponseBody
-    public void h5_tiantianwan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
-                               @RequestParam("actor_id") String actor_id,
-                               @RequestParam("app_id") String app_id,
-                               @RequestParam("app_user_id") String app_user_id,
-                               @RequestParam("real_amount") String real_amount,
-                               @RequestParam("app_order_id") String app_order_id,
-                               @RequestParam("order_id") String order_id,
-                               @RequestParam("payment_time") String payment_time,
-                               @RequestParam("ext") String ext,
-                               @RequestParam("sign") String sign,
-                               HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String h5_tiantianwan(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                                 @RequestParam("actor_id") String actor_id,
+                                 @RequestParam("app_id") String app_id,
+                                 @RequestParam("app_user_id") String app_user_id,
+                                 @RequestParam("real_amount") String real_amount,
+                                 @RequestParam("app_order_id") String app_order_id,
+                                 @RequestParam("order_id") String order_id,
+                                 @RequestParam("payment_time") String payment_time,
+                                 @RequestParam("ext") String ext,
+                                 @RequestParam("sign") String sign,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("callbackPayInfo:" + channelId);
         log.info("callbackPayInfo:" + appId);
 
@@ -1521,10 +1585,70 @@ public class PayCallbackController {
 //        String money = FeeUtils.fenToYuan(amount);
         boolean result = checkOrder(appId, channelId, parameterMap, data, app_order_id, order_id, real_amount);
 
-        JSONObject rsp = new JSONObject();
-        rsp.put("status", result ? "success" : "fail");
-        ResponseUtil.write(response, rsp);
+        return result ? "success" : "fail";
     }
 
+    /**
+     * 5144玩_2
+     * 名称	        参数名	    类型	    提供方	必填      说明
+     * 商户ID	    pid	        string	我	    是	    贵方在我方唯一标识
+     * 游戏ID	    gid	        string	贵	    是	    贵方游戏唯一标识
+     * 游戏服ID	    sid	        string	贵	    是	    贵方游戏服唯一标识
+     * 玩家id	    uid	        string	我	    是	    我方玩家唯一标识
+     * 时间戳	    time	    string	-	    是	    Unix time
+     * 订单号	    orderid	    string	我	    是	    我方订单唯一标识
+     * 充值金额	    money	    string	我	    是	    人民币，单位元
+     * 请求类型	    type	    string	我	    是	    固定值：pay
+     * 自定义参数	other	    string	贵	    是	    贵方自定义参数值，如贵方订单号，我方会在充值回调里，传回给贵方，可为空
+     * Sign	        sign        string  我      是	    MD5（pid#gid#sid#uid#time#orderid#money#pkey）,Md5只加密参数值，32位小写，用英文#连接各参数值
+     * 充值密钥	    pkey		        我		        我方提供不以明文显示在前端，只用于加密
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_5144wan2/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_5144wan2(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                            @RequestParam("pid") String pid,
+                            @RequestParam("gid") String gid,
+                            @RequestParam("sid") String sid,
+                            @RequestParam("uid") String uid,
+                            @RequestParam("time") String time,
+                            @RequestParam("orderid") String orderid,
+                            @RequestParam("money") String money,
+                            @RequestParam("type") String type,
+                            @RequestParam("other") String other,
+                            @RequestParam("sign") String sign,
+                            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
 
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("pid", pid);
+        parameterMap.put("gid", gid);
+        parameterMap.put("sid", sid);
+        parameterMap.put("uid", uid);
+        parameterMap.put("time", time);
+        parameterMap.put("orderid", orderid);
+
+        parameterMap.put("money", money);
+        parameterMap.put("type", type);
+        parameterMap.put("other", other);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject channelOrder = new JSONObject();
+        boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, "", "", money);
+
+        JSONObject rsp = new JSONObject();
+        if (result) {
+            rsp.put("code", "1");
+            // 充值成功 Unicode
+            rsp.put("msg", "\u5145\u503c\u6210\u529f");
+        } else {
+            // 其他错误 Unicode
+            rsp.put("code", "18");
+            rsp.put("msg", "\u5176\u4ed6\u9519\u8bef");
+        }
+
+        ResponseUtil.write(response, rsp.toString());
+    }
 }

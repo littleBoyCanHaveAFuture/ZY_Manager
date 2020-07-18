@@ -8,6 +8,7 @@
 //服务器地址
 // const ZhiYue_domain = "http://localhost:8080/webGame2";
 const ZhiYue_domain = "https://zyh5games.com/zysdk/webGame2";
+// const ZhiYue_domain = "http://114.55.211.2:8081/webGame";
 
 let ZhiYueSDK = {
     GameId: null,//游戏id
@@ -56,7 +57,7 @@ let ZhiYueSDK = {
     },
     /**
      * 4.上传角色信息
-     * @param   {objcet}      roleInfo
+     * @param   {Object}      roleInfo
      * @param   {function}      callback        回调函数
      *  */
     uploadGameRoleInfo: function (roleInfo, callback) {
@@ -130,6 +131,7 @@ function zyDoInit(params, callback) {
         var params = '';
     }
     ZhiYueAjax.get(ZhiYue_domain + "/initApi?" + params, function (data) {
+        data = JSON.parse(data);
         if (data.hasOwnProperty('status') && data.status === true) {
             //load channel lib
             zyLoadSpLib(data, function () {
@@ -152,35 +154,6 @@ function zyDoInit(params, callback) {
             callback(data.status);
         }
     });
-
-    $.ajax({
-        type: "GET",
-        url: ZhiYue_domain + "/initApi?" + params,
-        dataType: "json",
-        success: function (data) {
-            if (data.hasOwnProperty('status') && data.status === true) {
-                //load channel lib
-                zyLoadSpLib(data, function () {
-                    let initParam = params + '&zhiyue_channel_token=' + data.channelToken;
-                    if (data.channelData.hasOwnProperty("config")) {
-                        initParam += "&zhiyue_channel_config=" + data.channelData.config;
-                    }
-                    zyCallChannelInit(initParam);
-                    callback(data.status);
-                    if (data.hasOwnProperty('channelToken')) {
-                        zySaveChannelParams = data.channelToken;
-                    }
-                    if (data.hasOwnProperty('channelCode')) {
-                        ZhiYueSDK.channelCode = data.channelCode;
-                    }
-                });
-            } else {
-                setLog(JSON.stringify(data), 1);
-                data.status = false;
-                callback(data.status);
-            }
-        }
-    })
 }
 
 /**
@@ -194,14 +167,18 @@ function zyAutoLogin() {
     } catch (e) {
         var params = '';
     }
-    $.ajax({
-        type: "GET",
-        url: ZhiYue_domain + "/loginApi?" + params,
-        dataType: "json",
-        success: function (data) {
-            zyDoLoginCallback(data);
-        }
-    })
+    ZhiYueAjax.get(ZhiYue_domain + "/loginApi?" + params, function (data) {
+        data = JSON.parse(data);
+        zyDoLoginCallback(data);
+    });
+    // $.ajax({
+    //     type: "GET",
+    //     url: ZhiYue_domain + "/loginApi?" + params,
+    //     dataType: "json",
+    //     success: function (data) {
+    //         zyDoLoginCallback(data);
+    //     }
+    // })
 }
 
 let zyUserData = {};
@@ -480,7 +457,7 @@ function zyGetNowHost() {
     requestUri.wlh = window.location.href;
     let url = requestUri.wlh;
     //?次数
-    var temp = url.split("?");
+    let temp = url.split("?");
     if (temp.length !== 2) {
         //多次?
         url = url.replace('?', '|tempCut|');
@@ -509,19 +486,19 @@ let zyGetParamsArr = null;
 
 function zyGetParamsExtQuick(key) {
     if (zyGetParamsArr == null) {
-        var domain = window.location.href;
+        let domain = window.location.href;
         domain = domain.replace('??', "?");
-        var urlParams = domain.split("?");
-        var channelToken = '';
-        var getParamsData = new Object();
+        let urlParams = domain.split("?");
+        let channelToken = '';
+        let getParamsData = new Object();
         if (urlParams.length >= 2) {
             urlParamsArr = urlParams[1];
-            var keyVal = urlParamsArr.split("&");
-            for (var ki in keyVal) {
-                var thisKeyVal = keyVal[ki].split("=");
+            let keyVal = urlParamsArr.split("&");
+            for (let ki in keyVal) {
+                let thisKeyVal = keyVal[ki].split("=");
                 if (thisKeyVal.length >= 2) {
-                    var paramsKey = thisKeyVal[0];
-                    var paramsVal = thisKeyVal[1];
+                    let paramsKey = thisKeyVal[0];
+                    let paramsVal = thisKeyVal[1];
                     getParamsData[paramsKey] = paramsVal;
                 }
             }
@@ -739,20 +716,20 @@ let ZhiYueAjax = {
         xhr.send();
     },
 
-    // // data应为'a=a1&b=b1'这种字符串格式，在jq里如果data为对象会自动将对象转成这种字符串格式
-    // post: function (url, data, fn) {
-    //     var xhr = new XMLHttpRequest();
-    //     xhr.open('POST', url, false);
-    //     // 添加http头，发送信息至服务器时内容编码类型
-    //     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    //     xhr.onreadystatechange = function () {
-    //         if (xhr.readyState === 4) {
-    //             if (xhr.status === 200 || xhr.status === 304) {
-    //                 // console.log(xhr.responseText);
-    //                 fn.call(xhr.responseText);
-    //             }
-    //         }
-    //     };
-    //     xhr.send(data);
-    // }
+    // data应为'a=a1&b=b1'这种字符串格式，在jq里如果data为对象会自动将对象转成这种字符串格式
+    post: function (url, data, fn) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', url, false);
+        // 添加http头，发送信息至服务器时内容编码类型
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 304) {
+                    // console.log(xhr.responseText);
+                    fn.call(xhr.responseText);
+                }
+            }
+        };
+        xhr.send(data);
+    }
 };

@@ -277,12 +277,14 @@
         })(jQuery);
 
         let appId = $.getUrlParam('appId');
-        let channelId = 0;
+        let channelId = $.getUrlParam('channelId');
         let appKey = "u6d3047qbltix34a9l0g2bvs5e8q82ol";
         if (appId === "20") {
             appKey = "y24t2ngxjo2upafio4998uer171q4c8l";
         }
 
+        console.info("appId=[" + appId + "]");
+        console.info("channelId=[" + channelId + "]");
         $("#url_appId").val(appId);
         $("#url_channelId").val(channelId);
         $("#url_appKey").val(appKey);
@@ -294,6 +296,8 @@
         console.info("zy_account=[" + zy_account + "]");
         console.info("zy_password=[" + zy_password + "]");
         console.info("zy_channelUid=[" + zy_channelUid + "]");
+
+
         $("#loginname").val(zy_account);
         $("#password").val(zy_password);
         // resetLogin();

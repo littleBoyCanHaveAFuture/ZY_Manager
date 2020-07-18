@@ -699,7 +699,6 @@ public class JedisRechargeCache {
     }
 
 
-
     /**
      * 获取游戏渠道区服信息
      */
@@ -1638,6 +1637,7 @@ public class JedisRechargeCache {
 
 
     //20200610
+
     /**
      * 2020年6月4日16:15:02
      * 设置游戏渠道区服信息
@@ -1751,4 +1751,323 @@ public class JedisRechargeCache {
 //    }
 //
 
+
+    public void getRsDayInfo(Map<String, RechargeSummary> dayMap, List<String> dayList, String appId, Set<String> serverSet, Set<String> channelSet) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            long startT = System.currentTimeMillis();
+            Pipeline pipeline = jds.pipelined();
+
+            // 每天的数据
+            for (String day : dayList) {
+                for (String channel : channelSet) {
+                    // 新增创号
+                    String key = RedisKey_Gen.get_AccountCreate_Day(channel, appId, day);
+                    pipeline.bitcount(key);
+                }
+            }
+            List<Object> res = pipeline.syncAndReturnAll();
+            int index = 0;
+            for (String day : dayList) {
+                RechargeSummary rs = dayMap.get(day);
+                for (String channel : channelSet) {
+                    Object value = res.get(index++);
+                    if (value != null) {
+                        rs.setNewAddCreateAccount(rs.getNewAddCreateAccount() + (int) Long.parseLong(value.toString()));
+                    }
+                }
+            }
+
+            pipeline = jds.pipelined();
+            for (String day : dayList) {
+                for (String channel : channelSet) {
+                    for (String server : serverSet) {
+                        //新增创角
+                        String key2 = RedisKey_Gen.get_RolesCreate_Day(channel, appId, server);
+                        pipeline.zscore(key2, day);
+                        //新增创角去除滚服
+                        String key3 = RedisKey_Gen.get_RolesCreate_First(channel, appId, server);
+                        pipeline.zscore(key3, day);
+
+                        //注册付费金额
+                        String key4 = RedisKey_Gen.get_RegisterPaid_Amounts(channel, appId, server);
+                        pipeline.zscore(key4, day);
+                        //注册付费账号数
+                        String key5 = RedisKey_Gen.get_RegisterPaid_Accounts(channel, appId, server);
+                        pipeline.zscore(key5, day);
+
+                        //当日首次付费人数
+                        String key6 = RedisKey_Gen.get_FirstPaid_Roles(channel, appId, server);
+                        pipeline.zscore(key6, day);
+                        //当日首次付费金额
+                        String key7 = RedisKey_Gen.get_FirstPaid_Roles_Amounts(channel, appId, server);
+                        pipeline.zscore(key7, day);
+
+                        //充值次数
+                        String key8 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key8, RedisKey_Member.RECHARGE_TIMES);
+                        //充值人数
+                        String key9 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key9, RedisKey_Member.RECHARGE_PLAYERS);
+                        //充值金额
+                        String key10 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key10, RedisKey_Member.RECHARGE_AMOUNTS);
+                    }
+                }
+            }
+
+            index = 0;
+            List<Object> res2 = pipeline.syncAndReturnAll();
+            for (String day : dayList) {
+                RechargeSummary rs = dayMap.get(day);
+                for (String channel : channelSet) {
+                    for (String server : serverSet) {
+                        double newAddCreateRole = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double newAddCreateRoleRemoveOld = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double registeredPayment = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double registeredPayers = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double nofPayPayers = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double nofPayAmount = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double rechargeTimes = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double rechargeNumber = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double rechargePayment = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        rs.setNewAddCreateRole(rs.getNewAddCreateRole() + (int) newAddCreateRole);
+                        rs.setNewAddCreateRoleRemoveOld(rs.getNewAddCreateRoleRemoveOld() + (int) newAddCreateRoleRemoveOld);
+
+                        rs.setRegisteredPayers(rs.getRegisteredPayers() + (int) registeredPayers);
+                        rs.setRegisteredPayment(rs.getRegisteredPayment() + (int) registeredPayment);
+
+                        rs.setNofPayers(rs.getNofPayers() + (int) nofPayPayers);
+                        rs.setNofPayment(rs.getNofPayment() + (int) nofPayAmount);
+
+                        rs.setRechargeTimes(rs.getRechargeTimes() + (int) rechargeTimes);
+                        rs.setRechargeNumber(rs.getRechargeNumber() + (int) rechargeNumber);
+                        rs.setRechargePayment(rs.getRechargePayment() + (int) rechargePayment);
+                    }
+                }
+            }
+
+            pipeline = jds.pipelined();
+            for (String day : dayList) {
+                String key11 = RedisKey_Gen.get_RolesActive_Day_Game(appId, day);
+                pipeline.scard(key11);
+            }
+            List<Object> res3 = pipeline.syncAndReturnAll();
+            index = 0;
+            for (String day : dayList) {
+                RechargeSummary rs = dayMap.get(day);
+                Object value = res3.get(index++);
+                if (value != null) {
+                    rs.setActivePlayer(rs.getActivePlayer() + (int) Long.parseLong(value.toString()));
+                }
+            }
+            long endT = System.currentTimeMillis();
+            log.info("use =" + (endT - startT));
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    public void getRsChannelInfo(Map<String, RechargeSummary> channelMap, List<String> dayList, String appId, Set<String> serverSet, Set<String> channelSet) {
+        Jedis jds = null;
+        boolean isBroken = false;
+        try {
+            jds = jedisManager.getJedis();
+            jds.select(DB_INDEX);
+
+            long startT = System.currentTimeMillis();
+            Pipeline pipeline = jds.pipelined();
+
+            for (String channel : channelSet) {
+                for (String day : dayList) {
+                    // 新增创号
+                    String key = RedisKey_Gen.get_AccountCreate_Day(channel, appId, day);
+                    pipeline.bitcount(key);
+                }
+            }
+            List<Object> res = pipeline.syncAndReturnAll();
+            int index = 0;
+            for (String channel : channelSet) {
+                RechargeSummary rs = channelMap.get(channel);
+                for (String day : dayList) {
+                    Object value = res.get(index++);
+                    if (value != null) {
+                        rs.setNewAddCreateAccount(rs.getNewAddCreateAccount() + (int) Long.parseLong(value.toString()));
+                    }
+                }
+            }
+
+            pipeline = jds.pipelined();
+            for (String channel : channelSet) {
+                for (String day : dayList) {
+                    for (String server : serverSet) {
+                        //新增创角
+                        String key2 = RedisKey_Gen.get_RolesCreate_Day(channel, appId, server);
+                        pipeline.zscore(key2, day);
+                        //新增创角去除滚服
+                        String key3 = RedisKey_Gen.get_RolesCreate_First(channel, appId, server);
+                        pipeline.zscore(key3, day);
+
+                        //注册付费金额
+                        String key4 = RedisKey_Gen.get_RegisterPaid_Amounts(channel, appId, server);
+                        pipeline.zscore(key4, day);
+                        //注册付费账号数
+                        String key5 = RedisKey_Gen.get_RegisterPaid_Accounts(channel, appId, server);
+                        pipeline.zscore(key5, day);
+
+                        //当日首次付费人数
+                        String key6 = RedisKey_Gen.get_FirstPaid_Roles(channel, appId, server);
+                        pipeline.zscore(key6, day);
+                        //当日首次付费金额
+                        String key7 = RedisKey_Gen.get_FirstPaid_Roles_Amounts(channel, appId, server);
+                        pipeline.zscore(key7, day);
+
+                        //充值次数
+                        String key8 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key8, RedisKey_Member.RECHARGE_TIMES);
+                        //充值人数
+                        String key9 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key9, RedisKey_Member.RECHARGE_PLAYERS);
+                        //充值金额
+                        String key10 = RedisKey_Gen.get_RolesPayInfo_Day(channel, appId, server, day);
+                        pipeline.zscore(key10, RedisKey_Member.RECHARGE_AMOUNTS);
+                    }
+                }
+            }
+
+            index = 0;
+            List<Object> res2 = pipeline.syncAndReturnAll();
+            for (String channel : channelSet) {
+                RechargeSummary rs = channelMap.get(channel);
+                for (String day : dayList) {
+                    for (String server : serverSet) {
+                        double newAddCreateRole = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double newAddCreateRoleRemoveOld = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double registeredPayment = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double registeredPayers = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double nofPayPayers = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double nofPayAmount = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        double rechargeTimes = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double rechargeNumber = Double.parseDouble(getValue(res2, index));
+                        index++;
+                        double rechargePayment = Double.parseDouble(getValue(res2, index));
+                        index++;
+
+                        rs.setNewAddCreateRole(rs.getNewAddCreateRole() + (int) newAddCreateRole);
+                        rs.setNewAddCreateRoleRemoveOld(rs.getNewAddCreateRoleRemoveOld() + (int) newAddCreateRoleRemoveOld);
+
+                        rs.setRegisteredPayers(rs.getRegisteredPayers() + (int) registeredPayers);
+                        rs.setRegisteredPayment(rs.getRegisteredPayment() + (int) registeredPayment);
+
+                        rs.setNofPayers(rs.getNofPayers() + (int) nofPayPayers);
+                        rs.setNofPayment(rs.getNofPayment() + (int) nofPayAmount);
+
+                        rs.setRechargeTimes(rs.getRechargeTimes() + (int) rechargeTimes);
+                        rs.setRechargeNumber(rs.getRechargeNumber() + (int) rechargeNumber);
+                        rs.setRechargePayment(rs.getRechargePayment() + (int) rechargePayment);
+                    }
+                }
+            }
+
+            pipeline = jds.pipelined();
+            for (String channel : channelSet) {
+                for (String day : dayList) {
+                    String key11 = RedisKey_Gen.get_RolesActive_Day_Channel(appId, channel, day);
+                    pipeline.scard(key11);
+                }
+            }
+            List<Object> res3 = pipeline.syncAndReturnAll();
+            index = 0;
+            for (String channel : channelSet) {
+                RechargeSummary rs = channelMap.get(channel);
+                for (String day : dayList) {
+                    Object value = res3.get(index++);
+                    if (value != null) {
+                        rs.setActivePlayer(rs.getActivePlayer() + (int) Long.parseLong(value.toString()));
+                    }
+                }
+            }
+            long endT = System.currentTimeMillis();
+            log.info("use =" + (endT - startT));
+        } catch (Exception e) {
+            isBroken = true;
+            e.printStackTrace();
+        } finally {
+            returnResource(jds, isBroken);
+        }
+    }
+
+    public String getValue(List<Object> res, Integer index) {
+        if (res.get(index) == null) {
+            return "0";
+        } else {
+            return res.get(index).toString();
+        }
+    }
+
+    public Boolean getBooleanValue(List<Object> res, Integer index) {
+        int i = index;
+        if (res.get(i) == null) {
+            return false;
+        } else {
+            return (boolean) res.get(i);
+        }
+    }
+
+    public Long getLongValue(List<Object> res, Integer index) {
+        int i = index;
+        if (res.get(i) == null) {
+            return (long) 0;
+        } else {
+            return (Long) res.get(i);
+        }
+    }
+
+    public Double getDoubleValue(List<Object> res, Integer index) {
+        int i = index;
+        if (res.get(i) == null) {
+            return null;
+        } else {
+            return (Double) res.get(i);
+        }
+    }
+
+    public BitSet getBitSetValue(List<Object> res, Integer index) {
+        int i = index;
+        if (res.get(i) == null) {
+            return null;
+        } else {
+            return BitSet.valueOf((byte[]) res.get(i));
+        }
+    }
 }

@@ -142,3 +142,6 @@ function zyCallUploadRole(roleInfo) {
     cySdk.uploadGameRole(roleParam);
 }
 
+function zyCallChannelLogout() {
+    cySdk.repeatLogin();
+}

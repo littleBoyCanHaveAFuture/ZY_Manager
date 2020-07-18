@@ -11,11 +11,11 @@ function initTableColumns() {
         rownumbers: true,
         columns: [[
             {field: 'iconUrl', title: '渠道图标', align: 'center', formatter: showPhoto},
-            {field: 'parent', title: '父渠道', align: 'center',hidden:true},
+            {field: 'parent', title: '父渠道', align: 'center', hidden: true},
             {field: 'spId', title: '渠道id', align: 'center'},
             {field: 'name', title: '渠道名称', align: 'center'},
-            {field: 'state', title: '状态', align: 'center',hidden:true},
-            {field: 'shareLinkUrl', title: '分享链接', align: 'center',hidden:true},
+            {field: 'state', title: '状态', align: 'center', hidden: true},
+            {field: 'shareLinkUrl', title: '分享链接', align: 'center', hidden: true},
             {field: 'version', title: '版本号', align: 'center'},
             {field: 'code', title: '英文简称（渠道回调地址有关）', align: 'center'},
             {field: 'config', title: 'json配置', align: 'center', hidden: true},
@@ -299,4 +299,44 @@ function relogin() {
                 parent.location.href = "../login.jsp";
             }
         });
+}
+
+function test() {
+    var Ajax = {
+        get: function (url, fn) {
+            // XMLHttpRequest对象用于在后台与服务器交换数据
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', url, false);
+            xhr.onreadystatechange = function () {
+                // readyState == 4说明请求已完成
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200 || xhr.status === 304) {
+                        console.log(xhr.responseText);
+                        fn.call(xhr.responseText);
+                    }
+                }
+            };
+            xhr.send();
+        },
+
+        // data应为'a=a1&b=b1'这种字符串格式，在jq里如果data为对象会自动将对象转成这种字符串格式
+        post: function (url, data, fn) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, false);
+            // 添加http头，发送信息至服务器时内容编码类型
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200 || xhr.status === 304) {
+                        // console.log(xhr.responseText);
+                        fn.call(xhr.responseText);
+                    }
+                }
+            };
+            xhr.send(data);
+        }
+    }
+    Ajax.get(ZhiYue_domain + "/initApi?" + params,function () {
+
+    })
 }

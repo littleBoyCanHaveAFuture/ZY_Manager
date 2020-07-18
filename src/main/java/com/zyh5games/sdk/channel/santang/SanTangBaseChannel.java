@@ -186,9 +186,10 @@ public class SanTangBaseChannel extends BaseChannel {
         try {
             if (appId == 14) {
                 data.put("gamename", URLEncoder.encode("巨龙战歌", String.valueOf(StandardCharsets.UTF_8)));
-                data.put("item", URLEncoder.encode(subject, String.valueOf(StandardCharsets.UTF_8)));
+            } else if (appId == 20) {
+                data.put("gamename", URLEncoder.encode("傲视苍穹", String.valueOf(StandardCharsets.UTF_8)));
             }
-
+            data.put("item", URLEncoder.encode(subject, String.valueOf(StandardCharsets.UTF_8)));
             data.put("rolename", URLEncoder.encode(userRoleId, String.valueOf(StandardCharsets.UTF_8)));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

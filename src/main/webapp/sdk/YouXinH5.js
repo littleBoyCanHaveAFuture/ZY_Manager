@@ -42,6 +42,7 @@ function zyCallUploadRole(roleInfo) {
         level 角色等级
         sign 按照上方签名机制进行签名
     */
+    let level = Number.parseInt(roleInfo.userRoleLevel);
     let jsonData = {};
     jsonData.appId = roleInfo.GameId;
     jsonData.channelId = roleInfo.channelId;
@@ -51,7 +52,7 @@ function zyCallUploadRole(roleInfo) {
     jsonData.server_name = roleInfo.serverName;
     jsonData.role_id = roleInfo.userRoleId;
     jsonData.role_name = roleInfo.userRoleName;
-    jsonData.level = roleInfo.userRoleLevel;
+    jsonData.level = level;
 
     getZyChannelSignature(jsonData, function (data) {
         xgGame.jointCreateRole(data)

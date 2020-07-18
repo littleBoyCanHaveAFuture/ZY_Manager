@@ -1,12 +1,11 @@
 ##H5游戏接入文档（网页）
 ###游戏参数
    
-    游戏：海盗传说
-    GameId = 18
-    GameKey = jat7e8e3w04lh2g213ie4f8ro4mhpx4n
-    channelId = 28
-    callbackKey = taani1t80g33dm3o600tyum8fm6um623
-    
+    游戏: 傲视苍穹
+    GameId: 20
+    channelId: 0
+    GameKey: y24t2ngxjo2upafio4998uer171q4c8l
+    callbackKey: oa2cgh1g1i32i3ehi4oqw264qixm39b1
 ###流程描述:
 1. 游戏开发者在游戏主页引入libZySdk_v2.js类库.
 2. 引入类库后 调用类库中的初始化方法.
@@ -18,7 +17,8 @@
 
 #####1. 引用JS类库.
 ````
-  js文件地址：https://zyh5games.com/sdk/libZySdk_v2.js 
+    js文件地址：https://zyh5games.com/sdk/libZySdk_v2.js 
+    js文件地址：https://zyh5games.com/sdk/libZySdk_v3.js (请使用这个)
 ````  
 注意: 游戏应原样引入此JS,不能随意变更协议为https或在后面附加时间戳。    
 
@@ -109,6 +109,7 @@ ZhiYueSDK.login(function (callbackData) {
 ######4.2 API地址
 ````
 地址: http://zy.hysdgame.cn:8080/webGame2/checkUserInfo
+测试地址：http://114.55.211.2:8081/webGame/checkUserInfo
 ````
 ######4.3 请求方法
     

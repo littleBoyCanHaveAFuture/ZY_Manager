@@ -34,8 +34,15 @@ public class AccountServiceImpl implements AccountService {
 
             try {
                 int res = accountDao.create(account);
-                log.info("createAccount success:" + res);
-                break;
+                if (res >= 1) {
+                    log.info("createAccount success:" + res);
+                    break;
+                } else {
+                    account.setId(-4);
+                    break;
+                }
+
+
             } catch (DataAccessException e) {
                 String err = e.getMessage();
                 //仅使主键重复异常被忽略

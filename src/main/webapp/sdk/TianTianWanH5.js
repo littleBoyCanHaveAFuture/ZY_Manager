@@ -11,31 +11,40 @@ function getQueryString(url, key) {
 let ttwAppId = 0;
 let ttwOpenId = "";
 let ttwFirst = false;
+let shareInfo = {
+    title: '传奇青春，热血相伴！',
+    imgUrl: 'cdn.xxx.com/img/shareIcon.jpg',
+    desc: '多角色养成系统，全民BOSS争夺玩法等传奇经典玩法应有尽有，带您重新回味经典。极速升级，自动打怪，带给您不一样的极致享受。',
+    openId: "dasdasdasdhjfhopenid",
+    status: "serverid"
+};
 
 function zyCallChannelInit(params) {
+    console.log(params);
     ttwAppId = getQueryString(params, "appId");
     ttwOpenId = getQueryString(params, "openId");
-    let config = getQueryString(params, "zhiyue_channel_config");
+    let config = getQueryString(params, "zhiyue_channel_token");
     if (config === "true") {
         ttwFirst = true;
     }
-    let shareInfo = {
-        title: '传奇青春，热血相伴！',
-        imgUrl: 'cdn.xxx.com/img/shareIcon.jpg',
-        desc: '多角色养成系统，全民BOSS争夺玩法等传奇经典玩法应有尽有，带您重新回味经典。极速升级，自动打怪，带给您不一样的极致享受。',
-        openId: "dasdasdasdhjfhopenid",
-        status: "serverid"
-    };
-    d2f.init(ttwAppId, function () {
-        console.log('初始化完成');
-    }, shareInfo, false);
+
+    if (window.hasOwnProperty("d2f")) {
+        window.d2f.init(ttwAppId, function () {
+            console.log('初始化完成');
+        }, shareInfo, false);
+    }
+
 }
 
 /**
  *  quick登录,模拟quick正常登录回调，给QuickSDK赋值
  */
 function zyCallChannelLogin(data) {
-
+    if (window.hasOwnProperty("d2f")) {
+        window.d2f.init(ttwAppId, function () {
+            console.log('初始化完成');
+        }, shareInfo, false);
+    }
 }
 
 function zyCallChannelPay(order) {
@@ -43,7 +52,7 @@ function zyCallChannelPay(order) {
 
     let trade = JSON.parse(order.zhiyueOrder.channelOrder);
     let payData = JSON.parse(trade.data);
-    let orderData = JSON.parse(payData.orderData);
+    let orderData = payData.orderData;
 
     console.log("zyCallChannelPay payData= " + trade.data);
     /**
@@ -90,29 +99,47 @@ let hasSend = false;
  *  @param  {string}             roleInfo.friendlist        角色好友列表
  * */
 function zyCallUploadRole(roleInfo) {
-    // console.log(roleInfo);
+    console.log(roleInfo);
     let type = roleInfo.datatype;
+    let name = roleInfo.userRoleName;
+    let sName = name.split("username_");
+    if (sName.length === 2 && sName[1] !== "") {
+        name = sName[1];
+    }
+    console.log(roleInfo.userRoleBalance);
     if (type === 3) {
+        console.log("ttwFirst = " + ttwFirst);
+        if (ttwFirst && !hasSend) {
+            hasSend = true;
+            //用户第一次进入游戏时调用
+            //（选服页 根据登录时传入的openid来做判断）
+            d2f.reportData({
+                action: "enterCreate",
+                roleid: ttwOpenId,
+                srvid: roleInfo.serverId,
+                pfid: ttwAppId
+            });
+        }
         d2f.reportData({
             action: "enterGame",            //进入游戏登录页时调用
             roleid: ttwOpenId,
             srvid: roleInfo.serverId,
             rolelevel: roleInfo.userRoleLevel,
             pfid: ttwAppId,
-            rolename: roleInfo.userRoleName,
+            rolename: name,
             power: roleInfo.gameRolePower,
             cproleid: roleInfo.userRoleId,//最长30位
-            currency: 0,
+            currency: roleInfo.userRoleBalance,
         })
     } else if (type === 2) {
         d2f.reportData({
             action: "create_role", //创建角色
             roleid: ttwOpenId,
             srvid: roleInfo.serverId,
-            rolelevel: roleInfo.userRoleLevel,
+            rolelevel: 1,
             cproleid: roleInfo.userRoleId,//最长30位
             pfid: ttwAppId,
-            rolename: roleInfo.userRoleName,
+            rolename: name,
         })
     } else if (roleInfo.datatype === 4) {
         d2f.reportData({
@@ -122,19 +149,11 @@ function zyCallUploadRole(roleInfo) {
             rolelevel: roleInfo.userRoleLevel,
             cproleid: roleInfo.userRoleId,//最长30位
             pfid: ttwAppId,
-            rolename: roleInfo.userRoleName,
+            rolename: name,
         });
     } else {
-        if (ttwFirst && !hasSend) {
-            //用户第一次进入游戏时调用
-            //（选服页 根据登录时传入的openid来做判断）
-            d2f.reportData({
-                action: "enterCreate",
-                roleid: ttwOpenId,
-                pfid: ttwAppId
-            });
-            hasSend = true;
-        }
+
+
     }
 }
 

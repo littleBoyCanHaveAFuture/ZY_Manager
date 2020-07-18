@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,10 +19,6 @@ public class GameRoleWorker {
 
     public boolean createGameRole(GameRole role) {
         return gameRoleService.createGameRole(role);
-    }
-
-    public void updateGameRole(Map<String, Object> map) {
-        gameRoleService.updateGameRole(map);
     }
 
     public void updateGameRole(String gameId, String channelId, String channelUid, String serverId, String lastLoginTime,
@@ -41,18 +36,6 @@ public class GameRoleWorker {
         gameRoleService.updateGameRole(map);
     }
 
-    public String getLastLoginTime(Map<String, Object> map) {
-        return gameRoleService.getLastLoginTime(map);
-    }
-
-    public List<GameRole> findGamerole(Map<String, Object> map) {
-        return gameRoleService.findUser(map);
-    }
-
-    public GameRole findGameRole(Map<String, Object> map) {
-        return gameRoleService.findGameRole(map);
-    }
-
     public GameRole findGameRole(String gameId, String channelId, String serverId, String channelUid, String roleId) {
         Map<String, Object> map = new HashMap<>();
         map.put("gameId", gameId);
@@ -63,7 +46,7 @@ public class GameRoleWorker {
         return gameRoleService.findGameRole(map);
     }
 
-    public boolean existRole(String accountId) {
-        return gameRoleService.existRole(accountId);
+    public boolean existRole(String accountId, String appId) {
+        return gameRoleService.existRole(accountId, appId);
     }
 }

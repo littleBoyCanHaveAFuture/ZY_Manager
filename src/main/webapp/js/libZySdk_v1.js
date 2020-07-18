@@ -32,7 +32,7 @@ let ZySDK = {
     /**
      * 1.sdk初始化函数
      * @param sZyGameId         平台游戏id（后台自动分配 ）
-     * @param sZyGameKey        平台秘钥（后台自动分配 ）zy_game
+     * @param sZyGameKey        平台秘钥（后台自动分配 ）zy_gamen
      * @param sZyChannelId      平台渠道id（后台自动分配 ）
      * @param callback          自定义回调函数
      * */

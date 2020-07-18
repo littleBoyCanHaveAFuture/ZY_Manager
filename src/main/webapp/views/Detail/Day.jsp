@@ -25,7 +25,7 @@
     <script type="text/javascript"
             src="${pageContext.request.contextPath}/js/common.js"></script>
     <script type="text/javascript"
-            src="${pageContext.request.contextPath}/js/serverInfo.js?v=06041601"></script>
+            src="${pageContext.request.contextPath}/js/rsUtils.js?v=06041601"></script>
 </head>
 <body style="margin:1px;">
 
@@ -39,20 +39,13 @@
     <div id="tbs">
         <label for="save_gameId"></label>
         <span style="color: blue;">游戏:</span>
-        <select title="选择游戏" id="save_gameId" name="gameId"
-<%--                onchange="initSpGameServer(1)"--%>
-        >
-            <option value=" -1" selected="selected">请选择</option>
+        <select title="选择游戏" id="save_gameId" name="gameId">
         </select>
 
-        <%--        <label for="save_spId"></label>--%>
-        <%--        <span style="color: blue; margin-left:50px">渠道:</span>--%>
         <select title="选择渠道" id="save_spId" name="spId" onchange="initSpGameServer(3)" hidden="hidden">
             <option value="-1" selected="selected">请选择</option>
         </select>
 
-        <%--        <label for="save_serverId"></label>--%>
-        <%--        <span style="color: blue; margin-left:50px">区服:</span>--%>
         <select title="选择区服" id="save_serverId" name="serverId" hidden="hidden">
             <option value=" -1" selected="selected">请选择</option>
         </select>
@@ -70,6 +63,7 @@
         <a href="javascript:search(1)" class="easyui-linkbutton" style="margin-left:50px"
            iconCls=" icon-search" plain="true">查询统计数据</a>
         <span id="loadrs">(未查询)</span>
+
         <a href="javascript:exportToLocal()" class="easyui-linkbutton" style="float: right"
            iconCls="icon-save" plain="true">导出excel表格</a>
     </div>
@@ -83,20 +77,20 @@
             "新增创号": "newAddCreateAccount",
             "新增创角": "newAddCreateRole",
             "新增创角去除滚服": "newAddCreateRoleRemoveOld",
-            // "创角率": "createAccountRate",
+            "创角率": "createAccountRate",
 
             "活跃玩家": "activePlayer",
             "充值次数": "rechargeTimes",
             "充值人数": "rechargeNumber",
             "充值金额": "rechargePayment",
-            // "活跃付费率": "activePayRate",
-            // "付费ARPU": "paidARPU",
-            // "活跃ARPU": "activeARPU",
-            // "当日首次付费人数": "nofPayers",
-            // "当日首次付费金额": "nofPayment",
-            // "注册付费人数": "registeredPayers",
-            // "注册付费金额": "registeredPayment",
-            // "注册付费ARPU": "registeredPaymentARPU",
+            "活跃付费率": "activePayRate",
+            "付费ARPU": "paidARPU",
+            "活跃ARPU": "activeARPU",
+            "当日首次付费人数": "nofPayers",
+            "当日首次付费金额": "nofPayment",
+            "注册付费人数": "registeredPayers",
+            "注册付费金额": "registeredPayment",
+            "注册付费ARPU": "registeredPaymentARPU",
         };
         initDatagrid(commonResult);
         initSpGameServer(2);

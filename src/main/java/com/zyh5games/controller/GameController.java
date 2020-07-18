@@ -259,6 +259,12 @@ public class GameController {
             String callBackUrl = "https://zyh5games.com/zysdk/weGame2/callbackPayInfo/{channel_code}/{sdkindex}/{appid}";
 
             String loginUrlReal = "http://www.zyh5games.com:8080/login/prod/{game}.jsp?" + "GameId=" + appId + "&GameKey=" + gameNew.getSecertKey() + "&ChannelCode=" + channelId;
+
+            //
+            loginUrl = gameNew.getLoginUrl();
+            callBackUrl = "http://zyh5games.com/zysdk/sdkPay/callbackPayInfo/" + sp.getCode() + "/" + channelId + "/" + appId;
+            loginUrlReal = loginUrl + "GameId=" + appId + "&GameKey=" + gameNew.getSecertKey() + "&ChannelCode=" + channelId;
+
             config.setAppId(appId);
             config.setChannelId(channelId);
 

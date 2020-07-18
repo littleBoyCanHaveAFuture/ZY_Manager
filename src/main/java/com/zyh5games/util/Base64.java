@@ -229,8 +229,7 @@ public final class Base64 {
         if (!isData((d3)) || !isData((d4))) {
             if (isPad(d3) && isPad(d4)) {
                 //last 4 bits should be zero
-                if ((b2 & 0xf) != 0)
-                {
+                if ((b2 & 0xf) != 0) {
                     return null;
                 }
                 byte[] tmp = new byte[i * 3 + 1];
@@ -240,8 +239,7 @@ public final class Base64 {
             } else if (!isPad(d3) && isPad(d4)) {
                 b3 = base64Alphabet[d3];
                 //last 2 bits should be zero
-                if ((b3 & 0x3) != 0)
-                {
+                if ((b3 & 0x3) != 0) {
                     return null;
                 }
                 byte[] tmp = new byte[i * 3 + 2];
@@ -313,6 +311,12 @@ public final class Base64 {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(Base64.decode("MTIzMTIzIUAjIUAjISNAISM="));
+//        System.out.println(Base64.decode("MTIzMTIzIUAjIUAjISNAISM="));
+        String userRoleName = "username_111";
+        if (userRoleName.contains("username_")) {
+            userRoleName = userRoleName.replace("username_", "");
+        }
+        System.out.println(userRoleName);
     }
+
 }

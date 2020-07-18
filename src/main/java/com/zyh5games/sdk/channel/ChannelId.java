@@ -123,4 +123,21 @@ public class ChannelId {
      * 天天玩
      */
     public static final int H5_TianTianWan = 32;
+
+    /**
+     * 指悦2
+     */
+    public static final int H5_ZhiYue2 = 36;
+    /**
+     * 指悦2
+     */
+    public static final int H5_ZhiYue3 = 37;
+    /**
+     * 5144玩2
+     */
+    public static final int H5_5144WAN2 = 38;
+    /**
+     * 暴雨
+     */
+    public static final int H5_BaoYu = 39;
 }

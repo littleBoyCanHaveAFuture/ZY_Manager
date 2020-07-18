@@ -5,6 +5,7 @@ import com.zyh5games.entity.RechargeSummary;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -34,5 +35,9 @@ public interface RechargeSummaryService {
      */
     List<RechargeSummary> getServerResult(GameInfo gameInfo, List<String> timeList) throws Exception;
 
+
+    List<RechargeSummary> rsDay(Map<String, Set<String>> channelMap, Set<String> serverAllSet, List<String> timeList);
+
+    List<RechargeSummary> rsChannel(Map<String, Set<String>> channelMap, Set<String> serverAllSet, List<String> timeList);
 
 }
