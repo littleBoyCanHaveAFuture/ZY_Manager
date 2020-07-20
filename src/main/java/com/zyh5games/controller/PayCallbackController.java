@@ -829,7 +829,7 @@ public class PayCallbackController {
     }
 
     /**
-     * 悦游
+     * 一牛
      * 回调body已经过url encode，使用时要使用url decode进行解密等到json
      * <p>
      *
@@ -1651,4 +1651,189 @@ public class PayCallbackController {
 
         ResponseUtil.write(response, rsp.toString());
     }
+
+    /**
+     * 暴雨quick
+     * 参数名            类型    是否必传    说明
+     * nt_data	        string	是       通知数据解码后为xml格式 ,具体见2.1.1
+     * sign	            string	是       签名串,具体见第三章
+     * md5Sign	        string	否       分区服的游戏必传,游戏方的区服编号,如s1,s2
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_baoyu/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_baoyu(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                         @RequestParam("nt_data") String nt_data,
+                         @RequestParam("sign") String sign,
+                         @RequestParam("md5Sign") String md5Sign,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("nt_data", nt_data);
+        parameterMap.put("sign", sign);
+        parameterMap.put("md5Sign", md5Sign);
+
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject rsp = new JSONObject();
+        JSONObject channelOrder = new JSONObject();
+
+        boolean result = false;
+        do {
+            result = checkOrder(appId, channelId, parameterMap, channelOrder, "", "", "");
+            if (!result) {
+                rsp.put("code", 3);
+                rsp.put("msg", "发货失败");
+            } else {
+                rsp.put("code", 1);
+                rsp.put("msg", "订单充值成功");
+            }
+
+        } while (false);
+
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 手游大侠
+     * 回调body已经过url encode，使用时要使用url decode进行解密等到json
+     * <p>
+     *
+     * @param amount         金额，单位为分
+     * @param channel_source 数据来源
+     * @param game_appid     游戏编号----运营方为游戏分配的唯一编号
+     * @param out_trade_no   渠道方订单号
+     * @param payplatform2cp 用于 CP 要求平台特别传输其他参数，默认是访问 ip
+     * @param trade_no       游戏透传参数（默认为游戏订单号，回调时候原样返回）
+     * @param sign           按照上方签名机制进行签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_shouyoudaxia/{channelId}/{appId}", method = RequestMethod.GET)
+    @ResponseBody
+    public void h5_shouyoudaxia(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                                @RequestParam("amount") String amount,
+                                @RequestParam("channel_source") String channel_source,
+                                @RequestParam("game_appid") String game_appid,
+                                @RequestParam("out_trade_no") String out_trade_no,
+                                @RequestParam("payplatform2cp") String payplatform2cp,
+                                @RequestParam("trade_no") String trade_no,
+                                @RequestParam("sign") String sign,
+                                HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        JSONObject data = new JSONObject();
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("amount", amount);
+        parameterMap.put("channel_source", channel_source);
+        parameterMap.put("game_appid", game_appid);
+        parameterMap.put("out_trade_no", out_trade_no);
+        parameterMap.put("payplatform2cp", payplatform2cp);
+        parameterMap.put("trade_no", trade_no);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        String money = FeeUtils.fenToYuan(amount);
+        boolean result = checkOrder(appId, channelId, parameterMap, data, trade_no, out_trade_no, money);
+
+        JSONObject rsp = new JSONObject();
+        rsp.put("status", result ? "success" : "fail");
+        ResponseUtil.write(response, rsp);
+    }
+
+    /**
+     * 紫霞
+     *
+     * @param uid      用户登录ID
+     * @param gkey     游戏名字(拼音字母缩写)
+     * @param skey     传用户角色所在的游戏区服id
+     * @param order_id 订单号(游戏方自己的订单号)
+     * @param money    人民币数量(单位:元) 只能为正整数(需要厂家与原始订单进行校验比对)
+     * @param time     时间戳
+     * @param sign     双方协定的密钥(生成规则为：md5($uid.$gkey.$skey.$time.$order_id.$money.'#'.$pkey) (pkey为充值密钥)
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_zixia/{channelId}/{appId}")
+    @ResponseBody
+    public void h5_zixia(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                         @RequestParam("uid") String uid,
+                         @RequestParam("gkey") String gkey,
+                         @RequestParam("skey") String skey,
+                         @RequestParam("order_id") String order_id,
+                         @RequestParam("money") String money,
+                         @RequestParam("time") String time,
+                         @RequestParam("sign") String sign,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("uid", uid);
+        parameterMap.put("gkey", gkey);
+        parameterMap.put("skey", skey);
+        parameterMap.put("order_id", order_id);
+        parameterMap.put("money", money);
+        parameterMap.put("time", time);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject rsp = new JSONObject();
+        JSONObject channelOrder = new JSONObject();
+
+        boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, "", "", money);
+
+        //订单充值成功/发货失败
+        rsp.put("code", result ? 1 : 0);
+        ResponseUtil.write(response, rsp);
+    }
+
+
+    /**
+     * 天宇-41
+     * <p>
+     *
+     * @param out_order_no cp订单编号
+     * @param order_no     订单编号
+     * @param amount       支付金额，单位元
+     * @param role_id      玩家角色id
+     * @param pay_time     支付时间(YY-mm-dd HH:ii:ss) 2017-12-31 12:22:22
+     * @param cp_game_id   游戏id(对接群获取)
+     * @param sign         签名
+     */
+    @RequestMapping(value = "/callbackPayInfo/h5_tianyu/{channelId}/{appId}", method = RequestMethod.POST)
+    @ResponseBody
+    public void h5_tianyu(@PathVariable("channelId") Integer channelId, @PathVariable("appId") Integer appId,
+                          @RequestParam("out_order_no") String out_order_no,
+                          @RequestParam("order_no") String order_no,
+                          @RequestParam("amount") String amount,
+                          @RequestParam("role_id") String role_id,
+                          @RequestParam("pay_time") String pay_time,
+                          @RequestParam("cp_game_id") String cp_game_id,
+                          @RequestParam("sign") String sign,
+                          HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("callbackPayInfo:" + channelId);
+        log.info("callbackPayInfo:" + appId);
+
+        Map<String, String> parameterMap = new HashMap<>();
+        parameterMap.put("out_order_no", out_order_no);
+        parameterMap.put("order_no", order_no);
+        parameterMap.put("amount", amount);
+        parameterMap.put("role_id", role_id);
+        parameterMap.put("pay_time", pay_time);
+        parameterMap.put("cp_game_id", cp_game_id);
+        parameterMap.put("sign", sign);
+
+        log.info("parameterMap =" + parameterMap.toString());
+
+        JSONObject channelOrder = new JSONObject();
+
+        boolean result = checkOrder(appId, channelId, parameterMap, channelOrder, out_order_no, order_no, amount);
+
+        //订单充值成功/发货失败
+        ResponseUtil.write(response, result ? "SUCCESS" : "FAIL");
+    }
+
 }

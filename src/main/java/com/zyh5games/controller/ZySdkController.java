@@ -372,8 +372,8 @@ public class ZySdkController {
      * 2.跳转到渠道支付页面
      *
      * @param data json 字符串
-     *             channelId        必传     QuickSDK后台自动分配的渠道参数
-     *             gameKey	        必传	    QuickSDK后台自动分配的游戏参数
+     *             channelId        必传     指悦后台自动分配的渠道参数
+     *             gameKey	        必传	    指悦后台自动分配的游戏参数
      *             uid	            必传	    渠道UID
      *             username	        必传	    渠道username
      *             userRoleId	    必传	    游戏内角色ID

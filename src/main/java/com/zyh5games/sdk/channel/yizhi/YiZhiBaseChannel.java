@@ -1,4 +1,4 @@
-package com.zyh5games.sdk.channel.baoyu;
+package com.zyh5games.sdk.channel.yizhi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
@@ -22,18 +22,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author song minghua
  * @date 2020/5/21
  */
-@Component("39")
-public class BaoYuBaseChannel extends BaseChannel {
-    private static final Logger log = Logger.getLogger(BaoYuBaseChannel.class);
+@Component("42")
+public class YiZhiBaseChannel extends BaseChannel {
+    private static final Logger log = Logger.getLogger(YiZhiBaseChannel.class);
     @Autowired
     HttpService httpService;
     @Autowired
     AccountService accountService;
 
-    BaoYuBaseChannel() {
+    YiZhiBaseChannel() {
         configMap = new ConcurrentHashMap<>();
-        channelId = ChannelId.H5_BaoYu;
-        channelName = "暴雨";
+        channelId = ChannelId.H5_YiZhi;
+        channelName = "倚智";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BaoYuBaseChannel extends BaseChannel {
     @Override
     public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
-        channelData.put("name", "BaoYuH5");
+        channelData.put("name", "YiZHiH5");
 
         JSONObject config = configMap.get(appId);
         if (config != null && !config.isEmpty()) {
@@ -96,7 +96,7 @@ public class BaoYuBaseChannel extends BaseChannel {
     public boolean channelLogin(Map<String, String[]> map, JSONObject userData) {
         int appId = Integer.parseInt(map.get("GameId")[0]);
         int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
-        String loginUrl = BaoYuConfig.LOGIN_URL;
+        String loginUrl = YiZHiConfig.LOGIN_URL;
 
         StringBuilder param = new StringBuilder();
 
@@ -158,7 +158,7 @@ public class BaoYuBaseChannel extends BaseChannel {
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String productCode = configMap.get(appId).getString(BaoYuConfig.PRODUCT_CODE);
+        String productCode = configMap.get(appId).getString(YiZHiConfig.PRODUCT_CODE);
 
         String channelId = orderData.getString("channelId");
         String gameKey = orderData.getString("gameKey");
@@ -218,8 +218,8 @@ public class BaoYuBaseChannel extends BaseChannel {
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
         //quick xml 解密
-        String md5Key = configMap.get(appId).getString(BaoYuConfig.MD5_KEY);
-        String callBackKey = configMap.get(appId).getString(BaoYuConfig.PAY_KEY);
+        String md5Key = configMap.get(appId).getString(YiZHiConfig.MD5_KEY);
+        String callBackKey = configMap.get(appId).getString(YiZHiConfig.PAY_KEY);
         String nt_data = parameterMap.get("nt_data");
         String sign = parameterMap.get("sign");
         String md5Sign = parameterMap.get("md5Sign");
@@ -268,8 +268,8 @@ public class BaoYuBaseChannel extends BaseChannel {
         String channelId = data.getString("channelId");
 
         boolean res = false;
-        String loginCheckUrl = BaoYuConfig.LOGIN_CHECK_URL;
-        String productCode = configMap.get(appId).getString(BaoYuConfig.PRODUCT_CODE);
+        String loginCheckUrl = YiZHiConfig.LOGIN_CHECK_URL;
+        String productCode = configMap.get(appId).getString(YiZHiConfig.PRODUCT_CODE);
 
 
         /*

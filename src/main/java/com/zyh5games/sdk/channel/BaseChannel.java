@@ -29,13 +29,13 @@ public abstract class BaseChannel {
      */
     public Integer channelId;
     /**
-     * 是否开启
-     */
-    boolean isOpen;
-    /**
      * 渠道名称
      */
     public String channelName;
+    /**
+     * 是否开启
+     */
+    boolean isOpen;
 
     /**
      * 从数据库加载配置
@@ -135,6 +135,12 @@ public abstract class BaseChannel {
         userData.put("openid", openid);
     }
 
+    /**
+     * @param channelOrderId 渠道订单id
+     * @param cpOrderId      cp订单di
+     * @param price          金额 元
+     * @param zyUid          指悦uid
+     */
     public void setChannelOrder(JSONObject channelOrderNo, String zyUid, String cpOrderId, String channelOrderId, String price) {
         channelOrderNo.put("zy_uid", zyUid);
         channelOrderNo.put("price", price);

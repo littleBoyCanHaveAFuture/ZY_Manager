@@ -1,4 +1,4 @@
-package com.zyh5games.sdk.channel.yiniu;
+package com.zyh5games.sdk.channel.shouyoudaxia;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zyh5games.sdk.channel.BaseChannel;
@@ -19,16 +19,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author song minghua
  * @date 2020/5/21
  */
-@Component("18")
-public class YiNiuBaseChannel extends BaseChannel {
-    private static final Logger log = Logger.getLogger(YiNiuBaseChannel.class);
+@Component("33")
+public class ShouYouDaXiaBaseChannel extends BaseChannel {
+    private static final Logger log = Logger.getLogger(ShouYouDaXiaBaseChannel.class);
 
     static Map<String, String> loginExtMap;
     static Map<String, String> loginModelMap;
 
-    YiNiuBaseChannel() {
-        channelId = ChannelId.H5_YINIU;
-        channelName = "一牛";
+    ShouYouDaXiaBaseChannel() {
+        channelId = ChannelId.H5_ShouYouDaXia;
+        channelName = "手游大侠";
         configMap = new ConcurrentHashMap<>();
         loginExtMap = new ConcurrentHashMap<>();
         loginModelMap = new ConcurrentHashMap<>();
@@ -37,7 +37,7 @@ public class YiNiuBaseChannel extends BaseChannel {
     @Override
     public JSONArray commonLib() {
         JSONArray libUrl = super.commonLib();
-        libUrl.add("https://www.1n.cn/Public/static/xigusdk/xgh5sdk.js?" + System.currentTimeMillis());
+        libUrl.add("https://www.g9x.com/Public/static/xigusdk/xgh5sdk.js?" + System.currentTimeMillis());
         return libUrl;
     }
 
@@ -49,12 +49,12 @@ public class YiNiuBaseChannel extends BaseChannel {
     @Override
     public JSONObject channelLib(Integer appId) {
         JSONObject channelData = new JSONObject();
-        channelData.put("name", "YiNiuH5");
+        channelData.put("name", "ShouYouDaXiaH5");
 
         JSONObject config = configMap.get(appId);
         if (config != null && !config.isEmpty()) {
             JSONObject c = new JSONObject();
-            c.put("gameId", config.getString(YiNiuConfig.GAME_ID));
+            c.put("gameId", config.getString(ShouYouDaXiaConfig.GAME_ID));
             channelData.put("config", c.toJSONString());
         }
 
@@ -102,7 +102,7 @@ public class YiNiuBaseChannel extends BaseChannel {
         int appId = Integer.parseInt(map.get("GameId")[0]);
         int channelId = Integer.parseInt(map.get("ChannelCode")[0]);
 
-        String loginKey = configMap.get(appId).getString(YiNiuConfig.COMMON_KEY);
+        String loginKey = configMap.get(appId).getString(ShouYouDaXiaConfig.COMMON_KEY);
         Arrays.sort(mustKey);
         // 加密串
         StringBuilder param = new StringBuilder();
@@ -164,8 +164,8 @@ public class YiNiuBaseChannel extends BaseChannel {
     @Override
     public boolean channelPayInfo(JSONObject orderData, JSONObject channelOrderNo) {
         Integer appId = orderData.getInteger("appId");
-        String channelGameId = configMap.get(appId).getString(YiNiuConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(YiNiuConfig.COMMON_KEY);
+        String channelGameId = configMap.get(appId).getString(ShouYouDaXiaConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(ShouYouDaXiaConfig.COMMON_KEY);
 
         long time = System.currentTimeMillis() / 1000;
 
@@ -198,6 +198,9 @@ public class YiNiuBaseChannel extends BaseChannel {
 
         log.info("channelPayInfo serverSign = " + serverSign);
 
+        log.info("channelPayInfo serverSign = " + serverSign);
+
+
         // 渠道订单数据
         JSONObject data = new JSONObject();
         data.put("amount", money);
@@ -229,8 +232,8 @@ public class YiNiuBaseChannel extends BaseChannel {
      */
     @Override
     public boolean channelPayCallback(Integer appId, Map<String, String> parameterMap, JSONObject channelOrderNo) {
-        String channelGameId = configMap.get(appId).getString(YiNiuConfig.GAME_ID);
-        String payKey = configMap.get(appId).getString(YiNiuConfig.COMMON_KEY);
+        String channelGameId = configMap.get(appId).getString(ShouYouDaXiaConfig.GAME_ID);
+        String payKey = configMap.get(appId).getString(ShouYouDaXiaConfig.COMMON_KEY);
 
         String game_appid = parameterMap.get("game_appid");
         String channelOrderId = parameterMap.get("out_trade_no");
@@ -280,7 +283,7 @@ public class YiNiuBaseChannel extends BaseChannel {
 
         int channelId = requestInfo.getInteger("channelId");
 
-        String loginKey = configMap.get(appId).getString(YiNiuConfig.COMMON_KEY);
+        String loginKey = configMap.get(appId).getString(ShouYouDaXiaConfig.COMMON_KEY);
 
         // 加密字符串
         StringBuilder param = new StringBuilder();
@@ -301,6 +304,8 @@ public class YiNiuBaseChannel extends BaseChannel {
 
         // 签名验证
         String sign = MD5Util.md5(param.toString());
+
+        log.info("ajaxGetSignature serverSign = " + sign);
 
         log.info("ajaxGetSignature serverSign = " + sign);
 
